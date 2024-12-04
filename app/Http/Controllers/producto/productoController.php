@@ -31,6 +31,11 @@ use App\Models\shopping\shopping_enlistment_details;
 
 class productoController extends Controller
 {
+    public function getProductos()
+    {
+        $productos = Product::all(); // Asegúrate de tener el modelo correcto
+        return response()->json($productos);
+    }
 
     public function index()
     {
