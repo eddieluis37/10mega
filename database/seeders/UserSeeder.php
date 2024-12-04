@@ -43,12 +43,12 @@ class UserSeeder extends Seeder
             'password' => bcrypt('3044228481')
         ]);
         User::create([
-            'name' => 'Jair Rada Rada',
-            'phone' => '3008755514',
+            'name' => 'Jenny Contadora',
+            'phone' => '3214154625',
             'email' => 'contabilidad@carnesfriasmega.com',
-            'profile' => 'Admin',
+            'profile' => 'Comercial',
             'status' => 'Active',
-            'password' => bcrypt('3155352110')
+            'password' => bcrypt('Yc3214154625.')
         ]);
         User::create([
             'name' => 'directivo',
@@ -245,7 +245,7 @@ class UserSeeder extends Seeder
         User::find(1)->assignRole('Admin');
         User::find(2)->assignRole('Admin');
         User::find(3)->assignRole('Admin');
-        User::find(4)->assignRole('Admin');
+        User::find(4)->assignRole('Comercial');
         User::find(5)->assignRole('Admin');
         User::find(6)->assignRole('Comprador');
         User::find(7)->assignRole('Produccion');
