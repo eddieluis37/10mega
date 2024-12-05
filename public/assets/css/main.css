@@ -205,12 +205,12 @@ span.red {
   height: auto;
   border: 1px solid #bfc9d4;
   color: #000000;
-  font-size: 15.7px;
+  font-size: 14.7px;
   padding: 8px 10px;
   letter-spacing: 0.2px;
   /* height: calc(1.4em + 1.4rem + 2px); */
   height: calc(1.1em + 1.2rem + 2px);
-  padding: .75rem 1.25rem;
+  padding: .25rem 1.25rem;
   border-radius: 6px; }
   .form-control[type="range"] {
     padding: 0; }

@@ -21,7 +21,7 @@
 					<table id="tableCompensado" class="table table-striped mt-1">
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
-								<th class="table-th text-white">#</th>								
+								<th class="table-th text-white">#</th>
 								<th class="table-th text-white">CLIENT</th>
 								<th class="table-th text-white ">CE</th>
 								<th class="table-th text-white">ST</th>
@@ -41,18 +41,19 @@
 		</div>
 	</div>
 	<!-- modal -->
-	<div class="modal fade" id="modal-create-compensado" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
+	<div class="modal fade" id="modal-create-compensado" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
-			<div class="modal-content bg-default">
+			<div class="modal-content bg-dark text-white">
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
-						<div class="modal-header">
-							<h4 class="modal-title">Crear orden de pedido</h4>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span></button>
+						<div class="modal-header bg-secondary">
+							<h4 class="modal-title" style="color: white; font-weight: bold;">ORDENES DE PEDIDOS </h4>
+							<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
 						</div>
-				 		<div class="modal-body">
-								@include('order.modal_create')
+						<div class="modal-body">
+							@include('order.modal_create')
 						</div>
 						<div class="modal-footer">
 							<button type="button" id="btnModalClose" class="btn btn-default" data-dismiss="modal">Cancelar</button>
