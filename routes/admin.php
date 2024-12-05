@@ -14,15 +14,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['role:Comercial|Admin']], function () {
     Route::get('products', ProductsController::class);
+    Route::get('users', UsersController::class);
+    Route::get('reports', ReportsController::class);
+    Route::get('orders', [orderController::class, 'index'])->name('order.index');
 });
 
-Route::group(['middleware' => ['role:Admin']], function () {
-    Route::get('users', UsersController::class);
+Route::group(['middleware' => ['role:Admin']], function () {    
     Route::get('roles', RolesController::class);
     Route::get('role', RolesController::class);
     Route::get('permisos', PermisosController::class);
     Route::get('asignar', AsignarController::class);
-    Route::get('coins', CoinsController::class);
-    Route::get('reports', ReportsController::class);
-    Route::get('orders', [orderController::class, 'index'])->name('order.index');
+    Route::get('coins', CoinsController::class);    
 });
