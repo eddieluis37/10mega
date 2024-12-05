@@ -6,7 +6,7 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b>Transformación | Listado </b>
+					<b>Alistamiento | En Desarrollo </b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<li>

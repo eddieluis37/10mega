@@ -145,7 +145,7 @@
             @endcan
 
 
-            @can('Transformaciones_Menu')
+            @can('Alistamiento_Menu')
             <li class="">
                 <a href="{{url('alistamiento')}}" class="menu-toggle" data-active="false">
                     <div class="base-menu">
@@ -155,7 +155,7 @@
                                 <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
                             </svg>
                         </div>
-                        <span>Transformaciones</span>
+                        <span>Alistamiento</span>
                     </div>
                 </a>
             </li>

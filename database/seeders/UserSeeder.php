@@ -169,6 +169,7 @@ class UserSeeder extends Seeder
         // crear permisos para modulo Ordenes de pedidos
         Permission::create(['name' => 'open-order']);
 
+        Permission::create(['name' => 'Alistamiento_Menu']);
 
 
 
@@ -194,7 +195,6 @@ class UserSeeder extends Seeder
         $comercial  = Role::create(['name' => 'Comercial']);
 
 
-
         // asignar permisos al rol Admin
         $admin->givePermissionTo([
             'Admin_Menu',
@@ -217,6 +217,7 @@ class UserSeeder extends Seeder
             'Product_Update',
             'Product_Destroy',
             'Report_Create',
+            'Alistamiento_Menu',
             'open-order'
         ]);
 
