@@ -20,13 +20,13 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\Products\Meatcut;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
+use App\Models\Brand_third;
 use App\Models\Levels_products;
 use App\Models\Listaprecio;
 use App\Models\Listapreciodetalle;
 use App\Models\Products\Unitofmeasure;
 use App\Models\shopping\shopping_enlistment;
 use App\Models\shopping\shopping_enlistment_details;
-
 
 
 class productoController extends Controller
@@ -44,11 +44,13 @@ class productoController extends Controller
         $niveles = Levels_products::Where('status', 1)->get();
         $presentaciones = Unitofmeasure::Where('status', 1)->get();
         $familias = Meatcut::Where('status', 1)->get();
+      
+        $brandsThirds = Brand_third::orderBy('id')->get();
 
         $usuario = User::WhereIn('id', [9, 11, 12])->get();
 
         $centros = Centrocosto::WhereIn('id', [1])->get();
-        return view("producto.index", compact('usuario', 'categorias', 'proveedores', 'niveles', 'presentaciones', 'familias',  'centros'));
+        return view("producto.index", compact('usuario', 'brandsThirds', 'categorias', 'proveedores', 'niveles', 'presentaciones', 'familias',  'centros'));
     }
 
     public function show()

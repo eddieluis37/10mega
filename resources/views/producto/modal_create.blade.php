@@ -29,7 +29,7 @@
                                     <label>Marca</label>
                                     <select class="form-control selectMarca" name="marca" id="marca" required="">
                                         <option value="">Buscar un proveedor</option>
-                                        @foreach ($proveedores as $p)
+                                        @foreach ($brandsThirds as $p)
                                         <option value="{{$p->id}}">{{$p->name}}</option>
                                         @endforeach
                                     </select>
