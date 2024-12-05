@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Third extends Model
 {
-    use HasFactory;
+	use HasFactory;
 
-    protected $fillable = ['name', 'type_identification_id', 'identification', 'digito_verificacion', 'office_id', 'agreement_id', 'type_regimen_iva_id', 'direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9', 'province_id', 'celular', 'nombre_contacto', 'status', 'correo', 'porc_descuento', 'cliente', 'proveedor', 'vendedor', 'domiciliario', 'alistador', 'listaprecio_nichoid', 'listaprecio_genericid'];
+	protected $fillable = ['name', 'type_identification_id', 'identification', 'digito_verificacion', 'office_id', 'agreement_id', 'type_regimen_iva_id', 'direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9', 'province_id', 'celular', 'nombre_contacto', 'status', 'correo', 'porc_descuento', 'cliente', 'proveedor', 'vendedor', 'domiciliario', 'alistador', 'listaprecio_nichoid', 'listaprecio_genericid'];
 
 
 	public function type_identification()
@@ -23,7 +23,7 @@ class Third extends Model
 	public function office()
 	{
 		return $this->belongsTo(Office::class);
-	}	
+	}
 
 	public function agreement()
 	{
@@ -31,7 +31,12 @@ class Third extends Model
 	}
 
 	public function sales()
-    {
-        return $this->hasMany(Sale::class);
-    }
+	{
+		return $this->hasMany(Sale::class);
+	}
+
+	public function brands()
+	{
+		return $this->belongsToMany(Brand::class, 'brand_third');
+	}
 }

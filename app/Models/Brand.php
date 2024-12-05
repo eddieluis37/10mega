@@ -10,4 +10,9 @@ class Brand extends Model
     use HasFactory;
 
     protected $fillable = ['name'];
+
+    public function thirds()
+    {
+        return $this->belongsToMany(Third::class, 'brand_third');
+    }
 }
