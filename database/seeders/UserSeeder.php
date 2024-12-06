@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
             'name' => 'Jair Rada Rada',
             'phone' => '3008755514',
             'email' => 'gerente-operaciones@carnesfriasmega.com',
-            'profile' => 'Comercial',
+            'profile' => 'Admin',
             'status' => 'Active',
             'password' => bcrypt('Jr3016032085*')
         ]);
@@ -246,10 +246,10 @@ class UserSeeder extends Seeder
         $uAdmin->assignRole('Admin'); */
 
         User::find(1)->assignRole('Admin');
-        User::find(2)->assignRole('Comercial');
-        User::find(3)->assignRole('Admin');
+        User::find(2)->assignRole('Admin');
+        User::find(3)->assignRole('Comercial');
         User::find(4)->assignRole('Comercial');
-        User::find(5)->assignRole('Admin');
+        User::find(5)->assignRole('Comercial');
         User::find(6)->assignRole('Comprador');
         User::find(7)->assignRole('Produccion');
         User::find(8)->assignRole('Costos');
