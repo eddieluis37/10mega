@@ -78,7 +78,7 @@
                                 <line x1="18" y1="8" x2="18" y2="8"></line>
                             </svg>
                         </div>
-                        <span>Trazabilidad</span>
+                        <span>Traza</span>
                     </div>
                 </a>
             </li>
