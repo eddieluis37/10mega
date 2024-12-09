@@ -77,10 +77,10 @@
               <tr>
                 <th class="table-th text-white">CAT</th>
                 <th class="table-th text-white">ID</th>
-                <th class="table-th text-white">PRODUCTO</th>
-                <th class="table-th text-white">CANTIDAD</th>  
+                <th class="table-th text-white">PRODUCTO</th>               
                 <th class="table-th text-white">LOTE</th>
                 <th class="table-th text-white">FECHA_VENCE</th>
+                <th class="table-th text-white">CANTIDAD</th>  
               </tr>
             </thead>
             <tbody>

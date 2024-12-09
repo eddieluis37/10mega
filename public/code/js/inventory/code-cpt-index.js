@@ -25,20 +25,24 @@ $(document).ready(function () {
                     categoriaId: categoriaId,
                 },
                 dataSrc: function (response) {
-                    // Modificar los datos antes de que se procesen en la tabla
+                    // Modify the data before processing it in the table
                     var modifiedData = response.data.map(function (item) {
-                        var subtotal =  (item.fisico * item.costo);
                         return {
                             namecategoria: item.namecategoria,
                             nameproducto: item.nameproducto,
+                            productId: item.productId,
+                            lote:
+                                '<input type="text" class="edit-lote" value="' +
+                                item.lote +
+                                '" size="10" />', // New input for lote
+                            fecha_vencimiento:
+                                '<input type="date" class="edit-fecha-vencimiento" value="' +
+                                item.fecha_vencimiento +
+                                '" />',
                             fisico:
                                 '<input type="text" class="edit-fisico text-right" value="' +
                                 item.fisico +
                                 '" size="4" />',
-
-                            productId: item.productId,
-                            costo: item.costo,
-                            subtotal: subtotal,
                         };
                     });
                     return modifiedData;
@@ -48,24 +52,10 @@ $(document).ready(function () {
                 { data: "namecategoria", name: "namecategoria" },
                 { data: "productId", name: "productId" },
                 { data: "nameproducto", name: "nameproducto" },
+                { data: "lote", name: "lote" },
+                { data: "fecha_vencimiento", name: "fecha_vencimiento" },
                 { data: "fisico", name: "fisico" },
-                {
-                    data: "costo",
-                    name: "costo",
-                    render: function (data, type, row) {
-                        return "$ " + formatCantidadSinCero(data);
-                    },
-                },
-                {
-                    data: "subtotal",
-                    name: "subtotal",
-                    render: function (data, type, row) {
-                        return "$ " + formatCantidadSinCero(data);
-                    },
-                },
-                
             ],
-
             order: [[2, "ASC"]],
             language: {
                 processing: "Procesando...",
@@ -91,10 +81,18 @@ $(document).ready(function () {
         });
     }
 
-    function updateCptInventory(productId, fisico, centrocostoId) {
+    function updateCptInventory(
+        productId,
+        fisico,
+        centrocostoId,
+        lote,
+        fecha_vencimiento
+    ) {
         console.log("productId:", productId);
         console.log("fisico:", fisico);
         console.log("centrocostoId:", centrocostoId);
+        console.log("lote:", lote);
+        console.log("fecha_vencimiento:", fecha_vencimiento);
         $.ajax({
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -105,6 +103,8 @@ $(document).ready(function () {
                 productId: productId,
                 fisico: fisico,
                 centrocostoId: centrocostoId,
+                lote: lote,
+                fecha_vencimiento: fecha_vencimiento,
             },
             success: function (response) {
                 console.log("Update successful");
@@ -131,18 +131,27 @@ $(document).ready(function () {
             if (event.which === 13 || event.which === 9) {
                 event.preventDefault();
                 var fisico = $(this).val().replace(",", ".");
+                var lote = $(this).closest("tr").find(".edit-lote").val(); // Get lote value
+                var fecha_vencimiento = $(this)
+                    .closest("tr")
+                    .find(".edit-fecha-vencimiento")
+                    .val(); // Get fecha_vencimiento value
 
-                // Expresion Regular para validar que solo acepte numeros enteros y decimales
+                // Regular Expression to validate fisico
                 var regex = /^[0-9]+(\.[0-9]{1,2})?$/;
-
                 if (regex.test(fisico)) {
                     var productId = $(this)
                         .closest("tr")
                         .find("td:eq(1)")
                         .text();
                     var centrocostoId = $("#centrocosto").val();
-                    updateCptInventory(productId, fisico, centrocostoId);
-
+                    updateCptInventory(
+                        productId,
+                        fisico,
+                        centrocostoId,
+                        lote,
+                        fecha_vencimiento
+                    ); // Pass lote and fecha_vencimiento
                     $(this)
                         .closest("tr")
                         .next()

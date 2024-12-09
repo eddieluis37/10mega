@@ -120,6 +120,8 @@ class CargueProductTerminadosController extends Controller
                 'pro.id as productId',
                 'ccp.invinicial as invinicial',
                 'ccp.fisico as fisico',
+                'ccp.lote as lote',
+                'ccp.fecha_vencimiento as fecha_vencimiento',
                 'pro.cost as costo',
             )
             ->where('ccp.centrocosto_id', $centrocostoId)
@@ -133,16 +135,22 @@ class CargueProductTerminadosController extends Controller
             ->make(true);
     }
 
-    public function updateCcpInventory()
+    public function updateCptInventory()
     {
         $productId = request('productId');
         $centrocostoId = request('centrocostoId');
         $fisico = request('fisico');
+        $lote = request('lote');
+        $fecha_vencimiento = request('fecha_vencimiento');
 
         DB::table('centro_costo_products')
             ->where('products_id', $productId)
             ->where('centrocosto_id', $centrocostoId)
-            ->update(['fisico' => $fisico]);
+            ->update([
+                'fisico' => $fisico,
+                'lote' => $lote,
+                'fecha_vencimiento' => $fecha_vencimiento 
+        ]);
 
         return response()->json(['success' => 'true']);
     }
