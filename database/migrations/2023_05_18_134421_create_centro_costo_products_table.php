@@ -20,7 +20,10 @@ class CreateCentroCostoProductsTable extends Migration
             $table->foreign('centrocosto_id')->references('id')->on('centro_costo');           
 
             $table->unsignedBigInteger('products_id')->nullable();
-            $table->foreign('products_id')->references('id')->on('products');          
+            $table->foreign('products_id')->references('id')->on('products');
+            
+            $table->string('lote', 50, 0)->nullable();
+            $table->date('fecha_vencimiento')->nullable();
 
             $table->string('tipoinventario')->default(0)->nullable(); //Inventario Inicial / Final 
 
