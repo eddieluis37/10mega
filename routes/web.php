@@ -70,6 +70,7 @@ use App\Http\Controllers\pollo\beneficiopolloController;
 use App\Http\Controllers\pollo\despostepolloController;
 use App\Http\Controllers\inventory\CargarVentasController;
 use App\Http\Controllers\inventory\CentroCostoProductController;
+use App\Http\Controllers\inventory\CargueProductTerminadosController;
 use App\Http\Controllers\CentroCostoProdController;
 use App\Http\Controllers\AsignarPreciosProdController;
 use App\Http\Controllers\caja\pdfCierreCajaController;
@@ -283,6 +284,10 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('showinventory', [diaryController::class, 'show'])->name('inventory.showlist');
 
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
+
+    Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
+    Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
+    Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');
 
     Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
     Route::get('showConsolidadoInventory', [inventoryController::class, 'show'])->name('inventory.showConsol');
