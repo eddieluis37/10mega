@@ -122,7 +122,7 @@ const showForm = (data) => {
     
     producto_id.value = resp.id;
     $("#categoria").val(resp.category_id).trigger("change");
-    $("#marca").val(resp.proveedor_id).trigger("change");
+    $("#marca").val(resp.brand_third_id).trigger("change");
     $("#nivel").val(resp.level_product_id).trigger("change");
     $("#presentacion").val(resp.unitofmeasure_id).trigger("change");
     $("#familia").val(resp.meatcut_id).trigger("change");

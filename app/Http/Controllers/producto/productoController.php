@@ -412,7 +412,7 @@ class productoController extends Controller
             if ($getReg == null) {
                 $prod = new Product();
                 $prod->category_id = $request->categoria;
-                $prod->proveedor_id = $request->marca;
+                $prod->brand_third_id = $request->marca;
                 $prod->level_product_id = $request->nivel;
                 $prod->unitofmeasure_id = $request->presentacion;
                 $prod->meatcut_id = $request->familia;
@@ -434,7 +434,7 @@ class productoController extends Controller
             } else {
                 $updateProd = Product::firstWhere('id', $request->productoId);
                 $updateProd->category_id = $request->categoria;
-                $updateProd->proveedor_id = $request->marca;
+                $updateProd->brand_third_id = $request->marca;
                 $updateProd->level_product_id = $request->nivel;
                 $updateProd->unitofmeasure_id = $request->presentacion;
                 $updateProd->meatcut_id = $request->familia;
