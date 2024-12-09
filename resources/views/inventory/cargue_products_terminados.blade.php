@@ -33,8 +33,8 @@
               <label for="categoria" class="form-label">Categoria</label>
               <select class="form-control form-control-sm input" name="categoria" id="categoria" required>
                 <option value="">Seleccione la categoria</option>
-                @foreach($category as $option)
-                <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
+                @foreach($category as $c)
+                <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
                 @endforeach
               </select>
               <span class="text-danger error-message"></span>

@@ -223,7 +223,7 @@ class UserSeeder extends Seeder
 
         
         // asignar permisos al usuario comercial o cajero, activa menu ventas y caja
-        $comercial->givePermissionTo(['Admin_Menu', 'open-order', 'Parametros_Create', 'Report_Create', 'Pos_Create', 'Product_View', 'Product_Search' ]);
+        $comercial->givePermissionTo(['Admin_Menu', 'open-order', 'Parametros_Create', 'Report_Create', 'Pos_Create', 'Product_View', 'Product_Search', 'Inventory']);
 
         // asignar permisos al rol Cajero
         $cajero->givePermissionTo(['Pos_Create', 'Cashout_Create', 'Category_View', 'Category_Search', 'Product_View', 'Product_Search']);
