@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
     $this->call(MeatcutSeeder::class);
     $this->call(UnitofmeasureSeeder::class);
     $this->call(Levels_productSeeder::class);
-    $this->call(ProductSeeder::class);
+
     $this->call(UserSeeder::class);
     $this->call(Type_identificationSeeder::class);
     $this->call(Type_regimen_ivaSeeder::class);
@@ -30,6 +30,9 @@ class DatabaseSeeder extends Seeder
     $this->call(ProvinceSeeder::class);
     $this->call(AgreementSeeder::class);
     $this->call(ThirdSeeder::class);
+    $this->call(BrandSeeder::class);
+    $this->call(BrandThirdSeeder::class);
+    $this->call(ProductSeeder::class);
     $this->call(Precio_agreementSeeder::class);
     $this->call(SacrificioSeeder::class);
 
@@ -56,10 +59,8 @@ class DatabaseSeeder extends Seeder
     // $this->call(SaleFormaPagosSeederSeeder::class);
     $this->call(ListaprecioSeeder::class);
     $this->call(ListapreciodetalleSeeder::class);
-   // $this->call(NotacreditoSeeder::class);
-   //$this->call(RecibodecajaSeeder::class);
-   $this->call(Cuentas_por_cobrarSeeder::class);
-   $this->call(BrandSeeder::class);   
-   $this->call(BrandThirdSeeder::class);
+    // $this->call(NotacreditoSeeder::class);
+    //$this->call(RecibodecajaSeeder::class);
+    $this->call(Cuentas_por_cobrarSeeder::class);
   }
 }
