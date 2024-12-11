@@ -70,27 +70,32 @@ class Product extends Model
 	}
 
 	public function compensadores_details()
-    {
-        return $this->hasMany(Compensadores_detail::class, 'products_id');
-    }
+	{
+		return $this->hasMany(Compensadores_detail::class, 'products_id');
+	}
 
 	public function despostere()
-    {
-        return $this->hasOne(Despostere::class, 'products_id');
-    }
+	{
+		return $this->hasOne(Despostere::class, 'products_id');
+	}
 
 	public function despostecerdo()
-    {
-        return $this->hasOne(Despostecerdo::class, 'products_id');
-    }
+	{
+		return $this->hasOne(Despostecerdo::class, 'products_id');
+	}
 
 	public function despostepollo()
-    {
-        return $this->hasOne(Despostepollo::class, 'products_id');
-    }
+	{
+		return $this->hasOne(Despostepollo::class, 'products_id');
+	}
 
 	/* public function details()
     {
         return $this->hasMany(Compensadores_detail::class);
     } */
+
+	public function lotes()
+	{
+		return $this->belongsToMany(Lote::class, 'product_lote');
+	}
 }

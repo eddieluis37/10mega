@@ -62,5 +62,7 @@ class DatabaseSeeder extends Seeder
     // $this->call(NotacreditoSeeder::class);
     //$this->call(RecibodecajaSeeder::class);
     $this->call(Cuentas_por_cobrarSeeder::class);
+    $this->call(LoteSeeder::class);
+    $this->call(ProductLoteSeeder::class);
   }
 }
