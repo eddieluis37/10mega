@@ -6,7 +6,7 @@ const token = document
 $(document).ready(function () {
     var dataTable;
 
-    function initializeDataTable(centrocostoId = "-1", categoriaId = "-1", loteId = "1") {
+    function initializeDataTable(centrocostoId = "-1", categoriaId = "-1") {
         dataTable = $("#tableInventory").DataTable({
             paging: true,
             pageLength: 15,
@@ -23,7 +23,6 @@ $(document).ready(function () {
                 data: {
                     centrocostoId: centrocostoId,
                     categoriaId: categoriaId,
-                    loteId: loteId,
                 },
                 dataSrc: function (response) {
                     // Modify the data before processing it in the table
@@ -120,12 +119,12 @@ $(document).ready(function () {
     $(document).ready(function () {
         initializeDataTable("-1");
 
-        $("#centrocosto, #categoria, #lote").on("change", function () {
+        $("#centrocosto, #categoria").on("change", function () {
             var centrocostoId = $("#centrocosto").val();
             var categoriaId = $("#categoria").val();
-            var loteId = $("#lote").val();
+
             dataTable.destroy();
-            initializeDataTable(centrocostoId, categoriaId, loteId);
+            initializeDataTable(centrocostoId, categoriaId);
         });
 
         $(document).on("keydown", ".edit-fisico", function (event) {

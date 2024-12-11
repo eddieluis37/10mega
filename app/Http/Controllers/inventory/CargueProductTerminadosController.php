@@ -6,7 +6,7 @@ namespace App\Http\Controllers\inventory;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
-use App\Models\ProductLote;
+use App\Models\Lote;
 use App\Models\centros\Centrocosto;
 use App\Models\Centro_costo_product;
 use Illuminate\Support\Facades\DB;
@@ -28,11 +28,11 @@ class CargueProductTerminadosController extends Controller
         /*  $category = Category::orderBy('name', 'asc')->get(); */
         $centros = Centrocosto::Where('status', 1)->get();
         $centroCostoProductos = Centro_costo_product::all();
-        $product_lote = ProductLote::orderBy('id', 'asc')->get();
+        $lote = Lote::orderBy('id', 'asc')->get();
 
         $newToken = Crypt::encrypt(csrf_token());
 
-        return view("inventory.cargue_products_terminados", compact('category', 'centros', 'product_lote', 'centroCostoProductos'));
+        return view("inventory.cargue_products_terminados", compact('category', 'centros', 'lote', 'centroCostoProductos'));
 
         // return view('hola');
         //  return view('inventory.diary');
@@ -112,6 +112,7 @@ class CargueProductTerminadosController extends Controller
     {
         $centrocostoId = $request->input('centrocostoId');
         $categoriaId = $request->input('categoriaId');
+        $loteId = $request->input('loteId');
 
         $data = DB::table('centro_costo_products as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
@@ -129,6 +130,7 @@ class CargueProductTerminadosController extends Controller
             )
             ->where('ccp.centrocosto_id', $centrocostoId)
             ->where('pro.category_id', $categoriaId)
+            ->where('prolote.lote_id', $loteId)
             ->where('pro.status', 1)
             ->get();
 

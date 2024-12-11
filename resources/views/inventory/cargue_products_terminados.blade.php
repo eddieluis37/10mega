@@ -60,11 +60,11 @@
         <div class="col-md-4">
           <div class="task-header">
             <div class="form-group">
-              <label for="centrocosto" class="form-label">Producto Lote</label>
-              <select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
-                <option value="">Seleccione el centro de costo</option>
-                @foreach($product_lote as $option)
-                <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['id'] }}</option>
+              <label for="lote" class="form-label">Producto Lote</label>
+              <select class="form-control form-control-sm input" name="lote" id="lote" required>
+                <option value="">Seleccione el lote</option>
+                @foreach($lote as $option)
+                <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
                 @endforeach
               </select>
               <span class="text-danger error-message"></span>
