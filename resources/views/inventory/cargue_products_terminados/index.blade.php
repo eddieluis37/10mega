@@ -21,10 +21,15 @@
 <div class="row sales layout-top-spacing">
   <div class="col-sm-12">
     <div class="widget widget-chart-one">
-      <div class="card text-center" style="background: #3B3F5C">
-        <div class="m-2">
-          <h4 style="color:white;"><strong>Cargue de Productos</s> Terminados</strong></h3>
-        </div>
+      <div class="widget-heading">
+        <h4 class="card-title">
+          <b>Cargue Productos | Terminados </b>
+        </h4>
+        <ul class="tabs tab-pills">
+          <li>
+            <a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-producto" title="Crear nuevo lote">Crear Lote</a>
+          </li>
+        </ul>
       </div>
       <div class="row g-3 mt-3">
         <div class="col-md-4">
@@ -72,7 +77,7 @@
           </div>
         </div>
 
-       <!--  <div class="table-responsive mt-1">
+        <!--  <div class="table-responsive mt-1">
         <form method="GET" action="/descargar-reporte">
           @csrf
          
@@ -92,10 +97,10 @@
               <tr>
                 <th class="table-th text-white">CAT</th>
                 <th class="table-th text-white">ID</th>
-                <th class="table-th text-white">PRODUCTO</th>               
+                <th class="table-th text-white">PRODUCTO</th>
                 <th class="table-th text-white">LOTE</th>
                 <th class="table-th text-white">FECHA_VENCE</th>
-                <th class="table-th text-white">CANTIDAD</th>  
+                <th class="table-th text-white">CANTIDAD</th>
               </tr>
             </thead>
             <tbody>
@@ -112,6 +117,33 @@
       </div>
     </div>
   </div>
+  <!-- modal -->
+  <div class="modal fade" id="modal-create-producto" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content bg-dark text-white">
+        <fieldset id="contentDisable">
+          <form action="" id="form-producto">
+            <div class="modal-header bg-secondary">
+              <h4 class="modal-title" style="color: white; font-weight: bold;">Productos | Admin </h4>
+              <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              @include('inventory.cargue_products_terminados.modal_create')
+            </div>
+            <div class="modal-footer">
+              <button type="button" id="btnModalClose" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+              <button type="submit" id="btnAddproducto" class="btn btn-primary">Aceptar</button>
+            </div>
+          </form>
+        </fieldset>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
 </div>
 @endsection
 @section('script')

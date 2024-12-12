@@ -32,7 +32,7 @@ class CargueProductTerminadosController extends Controller
 
         $newToken = Crypt::encrypt(csrf_token());
 
-        return view("inventory.cargue_products_terminados", compact('category', 'centros', 'lote', 'centroCostoProductos'));
+        return view("inventory.cargue_products_terminados.index", compact('category', 'centros', 'lote', 'centroCostoProductos'));
 
         // return view('hola');
         //  return view('inventory.diary');
