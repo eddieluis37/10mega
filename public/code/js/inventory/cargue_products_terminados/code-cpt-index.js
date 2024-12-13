@@ -1,12 +1,18 @@
 console.log("Comenzando");
+const btnAddLote = document.querySelector("#btnAddlote");
+const formLote = document.querySelector("#form-lote");
 const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
-
+const btnClose = document.querySelector("#btnModalClose");
 $(document).ready(function () {
     var dataTable;
 
-    function initializeDataTable(centrocostoId = "-1", categoriaId = "-1", loteId = "1") {
+    function initializeDataTable(
+        centrocostoId = "-1",
+        categoriaId = "-1",
+        loteId = "1"
+    ) {
         dataTable = $("#tableInventory").DataTable({
             paging: true,
             pageLength: 15,

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 
 class CargueProductTerminadosController extends Controller
@@ -28,7 +29,7 @@ class CargueProductTerminadosController extends Controller
         /*  $category = Category::orderBy('name', 'asc')->get(); */
         $centros = Centrocosto::Where('status', 1)->get();
         $centroCostoProductos = Centro_costo_product::all();
-        $lote = Lote::orderBy('id', 'asc')->get();
+        $lote = Lote::orderBy('id', 'desc')->get();
 
         $newToken = Crypt::encrypt(csrf_token());
 
@@ -48,15 +49,67 @@ class CargueProductTerminadosController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function storelote(Request $request)
     {
-        //
+        try {
+            $rules = [
+                'loteId' => 'required',
+                'lote' => 'required',
+                'fecha_vencimiento' => 'required',
+            ];
+
+            $messages = [
+                'loteId.required' => 'El es requerido',
+                'lote.required' => 'Lote es requerido',
+                'fecha_vencimiento.required' => 'Fecha de vencimiento requerida',
+
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $getReg = Lote::firstWhere('id', $request->loteId);
+            if ($getReg == null) {
+                $Lote = new Lote();
+                $Lote->name = $request->lote;
+                $Lote->fecha_vencimiento = $request->fecha_vencimiento;
+                $Lote->save();
+
+                return response()->json([
+                    'status' => 1,
+                    'message' => "Lote: " . $Lote->name . ' ' . 'Creado con ID: ' . $Lote->id,
+                    "registroId" => $Lote->id
+                ]);
+            } else {
+                $updateLote = Lote::firstWhere('id', $request->loteId);
+                $updateLote->name = $request->lote;
+                $updateLote->fecha_vencimiento = $request->fecha_vencimiento;
+                $updateLote->save();
+
+                return response()->json([
+                    "status" => 1,
+                    "message" => "Lote: " . $updateLote->name . ' ' . 'Editado con ID: ' . $updateLote->id,
+                    "registroId" => 0
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'array' => (array) $th
+            ]);
+        }
+    }
+
+    public function getLoteData()
+    {
+        $lotes = Lote::orderBy('id', 'desc')->get();
+        return response()->json($lotes);
     }
 
     /**
@@ -69,7 +122,7 @@ class CargueProductTerminadosController extends Controller
     {
         $centrocostoId = $request->input('centrocostoId');
         $categoriaId = $request->input('categoriaId');
-        $data = DB::table('centro_costo_products as ccp')
+        $data = DB::table('centro_costo_Loteucts as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->select(
@@ -124,8 +177,8 @@ class CargueProductTerminadosController extends Controller
                 'pro.id as productId',
                 'ccp.invinicial as invinicial',
                 'ccp.fisico as fisico',
-             //   'ccp.lote as lote',
-               // 'ccp.fecha_vencimiento as fecha_vencimiento',
+                //   'ccp.lote as lote',
+                // 'ccp.fecha_vencimiento as fecha_vencimiento',
                 'pro.cost as costo',
             )
             ->where('ccp.centrocosto_id', $centrocostoId)
@@ -154,8 +207,8 @@ class CargueProductTerminadosController extends Controller
             ->update([
                 'fisico' => $fisico,
                 'lote' => $lote,
-                'fecha_vencimiento' => $fecha_vencimiento 
-        ]);
+                'fecha_vencimiento' => $fecha_vencimiento
+            ]);
 
         return response()->json(['success' => 'true']);
     }

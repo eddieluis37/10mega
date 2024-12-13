@@ -119,12 +119,12 @@
   </div>
   <!-- modal -->
   <div class="modal fade" id="modal-create-producto" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-md" role="document">
       <div class="modal-content bg-dark text-white">
         <fieldset id="contentDisable">
-          <form action="" id="form-producto">
+          <form action="" id="form-lote">
             <div class="modal-header bg-secondary">
-              <h4 class="modal-title" style="color: white; font-weight: bold;">Productos | Admin </h4>
+              <h4 class="modal-title" style="color: white; font-weight: bold;">Lote | Crear </h4>
               <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -134,7 +134,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" id="btnModalClose" class="btn btn-light" data-dismiss="modal">Cancelar</button>
-              <button type="submit" id="btnAddproducto" class="btn btn-primary">Aceptar</button>
+              <button type="submit" id="btnAddlote" class="btn btn-primary">Aceptar</button>
             </div>
           </form>
         </fieldset>
@@ -147,6 +147,6 @@
 </div>
 @endsection
 @section('script')
-<script src="{{asset('code/js/inventory/code-cpt-index.js')}}"></script>
-
+<script src="{{asset('code/js/inventory/cargue_products_terminados/code-cpt-index.js')}}"></script>
+<script src="{{asset('code/js/inventory/cargue_products_terminados/create-update.js')}}" type="module"></script>
 @endsection

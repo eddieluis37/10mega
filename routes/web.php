@@ -285,6 +285,10 @@ Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
 
+    /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
+    
+    Route::post('lotesave', [CargueProductTerminadosController::class, 'storelote'])->name('lote.save');
+    Route::get('/lote-data', [CargueProductTerminadosController::class, 'getLoteData']);
     Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
     Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
     Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');

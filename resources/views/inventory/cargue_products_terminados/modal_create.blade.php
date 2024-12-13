@@ -5,78 +5,27 @@
                 <div class="card-body">
                     <div class="btn-toolbar justify-content-between">
                         <div>
-                            <input type="hidden" value="0" name="productoId" id="productoId">
+                            <input type="hidden" value="0" name="loteId" id="loteId">
                         </div>
-                        <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-6 col-md-6">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>Categoria</label>
-                                    <div>
-                                        <select class="form-control selectCategory" name="categoria" id="categoria" required="">
-                                            <option value="">Seleccione la categoria</option>
-                                          
-                                        </select>
-                                        <span class="text-danger error-message"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label>Marca</label>
-                                    <select class="form-control selectMarca" name="marca" id="marca" required="">
-                                       
-                                    </select>
+                                    <label>Lote</label>
+                                    <input type="text" class="form-control" name="lote" id="lote" placeholder="ej: 021124T1" required>
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-6 col-md-6">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>Nivel</label>
-                                    
+                                    <label for="date1" class="form-label">Fecha vencimiento</label>
+                                    <input type="date" class="form-control" name="fecha_vencimiento" id="fecha_vencimiento" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label>Presentacion</label>
-                                    
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label>Familia</label>
-                                   
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label>Subfamilia</label>
-                                    <input type="text" class="form-control" name="subfamilia" id="subfamilia" placeholder="ej: Chorizo" required="">
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label>Código</label>
-                                    <input type="text" class="form-control" name="code" id="code" placeholder="ej: RE001" required>
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                            </div>
-                        </div>                      
+
                     </div>
                 </div>
             </div>
@@ -90,15 +39,10 @@
         // Limpiar mensajes de error al cerrar el modal
         $('#modal-create-producto').on('hidden.bs.modal', function() {
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
-            $('#productoId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
-            $('#categoria').val(''); // Opcional: limpiar la selección del campo
-            $('#selectMarca').val('');
-            $('#marca').val('');
-            $('#nivel').val('');
-            $('#familia').val('');
-            $('#subfamilia').val('');
-            $('#code').val('');
-            $('#codigobarra').val('');          
+            $('#loteId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
+        
+            $('#lote').val('');
+            $('#codigobarra').val('');
             $('#stockalerta').val('');
             $('#impuestoiva').val('');
             $('#isa').val('');
@@ -117,7 +61,7 @@
         $('#subfamilia').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
-        $('#code').change(function() {
+        $('#lote').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
         $('#codigobarra').change(function() {
