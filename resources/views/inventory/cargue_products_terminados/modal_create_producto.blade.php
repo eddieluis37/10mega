@@ -7,25 +7,44 @@
                         <div>
                             <input type="hidden" value="0" name="loteId" id="loteId">
                         </div>
-                        <div class="col-sm-6 col-md-6">
+                        <div class="col-sm-6 col-md-4">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>Lote</label>
-                                    <input type="text" class="form-control" name="lote" id="lote" placeholder="ej: 021124T1" required>
+                                    <label for="" class="form-label">Buscar producto</label>
+                                    <select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
+                                        <option value="">Seleccione el producto</option>
+                                        @foreach ($prod as $p)
+                                        <option value="{{$p->id}}">{{$p->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label for="" class="form-label">Buscar lote</label>
+                                    <select class="form-control form-control-sm select2Lote" name="lote" id="lote" required="">
+                                        <option value="">Seleccione el lote</option>
+                                        @foreach ($lote as $l)
+                                        <option value="{{$l->id}}">{{$l->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label for="" class="form-label">Cantidad</label>
+                                    <div class="input-group flex-nowrap">
+                                        <input type="text" name="quantity" id="quantity" class="form-control" aria-describedby="helpId" placeholder="0" step="0.01" required="">
+                                        <span class="input-group-text" id="addon-wrapping"></span>
+                                    </div>
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label for="date1" class="form-label">Fecha vencimiento</label>
-                                    <input type="date" class="form-control" name="fecha_vencimiento" id="fecha_vencimiento" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -40,7 +59,7 @@
         $('#modal-create-producto').on('hidden.bs.modal', function() {
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
             $('#loteId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
-        
+
             $('#lote').val('');
             $('#codigobarra').val('');
             $('#stockalerta').val('');
@@ -81,16 +100,3 @@
         });
     });
 </script>
-<!-- <script>
-    function updatePercentage() {
-        const ivaInput = document.getElementById('impuestoiva').value;
-        const percentageDisplay = document.getElementById('percentageDisplay');
-
-        // Verifica si el input no está vacío
-        if (ivaInput) {
-            percentageDisplay.textContent = ivaInput + '%'; // Muestra el valor seguido del símbolo de porcentaje
-        } else {
-            percentageDisplay.textContent = ''; // Limpia el display si no hay valor
-        }
-    }
-</script> -->

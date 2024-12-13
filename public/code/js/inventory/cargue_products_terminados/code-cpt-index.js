@@ -6,6 +6,21 @@ const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 const btnClose = document.querySelector("#btnModalClose");
+
+$(".select2Prod").select2({
+    placeholder: "Busca un producto",
+    width: "100%",
+    theme: "bootstrap-5",
+    allowClear: true,
+});
+
+$(".select2Lote").select2({
+    placeholder: "Busca un lote",
+    width: "100%",
+    theme: "bootstrap-5",
+    allowClear: true,
+});
+
 $(document).ready(function () {
     var dataTable;
 

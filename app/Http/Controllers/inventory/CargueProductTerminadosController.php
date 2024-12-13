@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Lote;
 use App\Models\centros\Centrocosto;
 use App\Models\Centro_costo_product;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Yajra\Datatables\Datatables;
@@ -30,10 +31,10 @@ class CargueProductTerminadosController extends Controller
         $centros = Centrocosto::Where('status', 1)->get();
         $centroCostoProductos = Centro_costo_product::all();
         $lote = Lote::orderBy('id', 'desc')->get();
-
+        $prod = Product::Where('status', 1)->get();
         $newToken = Crypt::encrypt(csrf_token());
 
-        return view("inventory.cargue_products_terminados.index", compact('category', 'centros', 'lote', 'centroCostoProductos'));
+        return view("inventory.cargue_products_terminados.index", compact('category', 'centros', 'lote', 'centroCostoProductos', 'prod'));
 
         // return view('hola');
         //  return view('inventory.diary');
@@ -166,6 +167,7 @@ class CargueProductTerminadosController extends Controller
         $centrocostoId = $request->input('centrocostoId');
         $categoriaId = $request->input('categoriaId');
         $loteId = $request->input('loteId');
+        
 
         $data = DB::table('centro_costo_products as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')

@@ -45,7 +45,7 @@
               <a href="javascript:void(0)" onclick="showModalcreateLote()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-lote" title="Crear nuevo lote">Crear Lote</a>
             </li>
             <li>
-              <a href="javascript:void(0)" onclick="showModalcreateProducto()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-producto" title="Agregar productos">Agregar Productos</a>
+              <a href="javascript:void(0)" onclick="showModalcreateProducto(); refreshLoteSelect();" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-producto" title="Agregar productos">Agregar Productos</a>
             </li>
           </ul>
         </div>
@@ -163,14 +163,14 @@
     <!-- /.modal-dialog -->
   </div>
   <!-- /.modal -->
-    <!-- modal -->
+  <!-- modal -->
   <div class="modal fade" id="modal-create-producto" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-    <div class="modal-dialog modal-md" role="document">
+    <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content bg-dark text-white">
         <fieldset id="contentDisable">
           <form action="" id="form-producto">
             <div class="modal-header bg-secondary">
-              <h4 class="modal-title" style="color: white; font-weight: bold;">Producto | Asociar </h4>
+              <h4 class="modal-title" style="color: white; font-weight: bold;">Producto | Asociar | Lote </h4>
               <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
