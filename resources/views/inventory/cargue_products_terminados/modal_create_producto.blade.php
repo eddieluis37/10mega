@@ -37,7 +37,7 @@
 <script>
     $(document).ready(function() {
         // Limpiar mensajes de error al cerrar el modal
-        $('#modal-create-lote').on('hidden.bs.modal', function() {
+        $('#modal-create-producto').on('hidden.bs.modal', function() {
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
             $('#loteId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
         

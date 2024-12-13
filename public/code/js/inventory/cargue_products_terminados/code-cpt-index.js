@@ -1,6 +1,7 @@
 console.log("Comenzando");
 const btnAddLote = document.querySelector("#btnAddlote");
 const formLote = document.querySelector("#form-lote");
+const formProducto = document.querySelector("#form-producto");
 const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");

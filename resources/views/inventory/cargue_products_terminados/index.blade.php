@@ -16,6 +16,20 @@
   td {
     border: 1px solid #DCDCDC;
   }
+
+  .tabs {
+    list-style-type: none;
+    /* Remove default list styles */
+    padding: 0;
+    /* Remove default padding */
+    margin: 0;
+    /* Remove default margin */
+  }
+
+  .tabs li {
+    margin: 0 10px;
+    /* Add some margin between the tabs */
+  }
 </style>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="row sales layout-top-spacing">
@@ -25,11 +39,16 @@
         <h4 class="card-title">
           <b>Cargue Productos | Terminados </b>
         </h4>
-        <ul class="tabs tab-pills">
-          <li>
-            <a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-producto" title="Crear nuevo lote">Crear Lote</a>
-          </li>
-        </ul>
+        <div class="d-flex justify-content-between">
+          <ul class="tabs tab-pills d-flex">
+            <li class="me-auto"> <!-- Use me-auto for left alignment -->
+              <a href="javascript:void(0)" onclick="showModalcreateLote()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-lote" title="Crear nuevo lote">Crear Lote</a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" onclick="showModalcreateProducto()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-producto" title="Agregar productos">Agregar Productos</a>
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="row g-3 mt-3">
         <div class="col-md-4">
@@ -118,7 +137,7 @@
     </div>
   </div>
   <!-- modal -->
-  <div class="modal fade" id="modal-create-producto" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+  <div class="modal fade" id="modal-create-lote" aria-hidden="true" data-keyboard="false" data-backdrop="static">
     <div class="modal-dialog modal-md" role="document">
       <div class="modal-content bg-dark text-white">
         <fieldset id="contentDisable">
@@ -131,6 +150,33 @@
             </div>
             <div class="modal-body">
               @include('inventory.cargue_products_terminados.modal_create')
+            </div>
+            <div class="modal-footer">
+              <button type="button" id="btnModalClose" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+              <button type="submit" id="btnAddlote" class="btn btn-primary">Aceptar</button>
+            </div>
+          </form>
+        </fieldset>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+    <!-- modal -->
+  <div class="modal fade" id="modal-create-producto" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content bg-dark text-white">
+        <fieldset id="contentDisable">
+          <form action="" id="form-producto">
+            <div class="modal-header bg-secondary">
+              <h4 class="modal-title" style="color: white; font-weight: bold;">Producto | Asociar </h4>
+              <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              @include('inventory.cargue_products_terminados.modal_create_producto')
             </div>
             <div class="modal-footer">
               <button type="button" id="btnModalClose" class="btn btn-light" data-dismiss="modal">Cancelar</button>
