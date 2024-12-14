@@ -21,6 +21,23 @@ $(".select2Lote").select2({
     allowClear: true,
 });
 
+// Función para recargar el select de lotes del modal_create_producto
+function refreshLote() {
+    fetch("/lote-data")
+        .then((response) => response.json())
+        .then((data) => {
+            const $loteSelect = $("#loteProd");
+            $loteSelect.empty(); // Limpia las opciones actuales
+            $loteSelect.append('<option value="">Seleccione el lote</option>'); // Opción por defecto
+
+            data.forEach((option) => {
+                $loteSelect.append(
+                    `<option value="${option.id}" data="${option}">${option.name}</option>`
+                );
+            });
+        });
+}
+
 $(document).ready(function () {
     var dataTable;
 
@@ -193,3 +210,8 @@ $(document).ready(function () {
         });
     });
 });
+
+
+
+
+

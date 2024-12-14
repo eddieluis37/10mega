@@ -45,7 +45,7 @@
               <a href="javascript:void(0)" onclick="showModalcreateLote()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-lote" title="Crear nuevo lote">Crear Lote</a>
             </li>
             <li>
-              <a href="javascript:void(0)" onclick="showModalcreateProducto(); refreshLoteSelect();" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-producto" title="Agregar productos">Agregar Productos</a>
+              <a href="javascript:void(0)" onclick="showModalcreateProducto(); refreshLote();" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-producto" title="Agregar productos">Agregar Productos</a>
             </li>
           </ul>
         </div>

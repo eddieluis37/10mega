@@ -19,8 +19,8 @@ btnAddLote.addEventListener("click", async (e) => {
             formLote.reset();
             btnClose.click();
             successToastMessage(resp.message);
-            refreshLoteSelect(); // Llama a la función para recargar el select de lotes
-
+            refreshLoteSelect(); // Llama a la función para recargar el select de lotes del index
+            refreshLote(); // Llama a la función para recargar el select de lotes del index
             if (resp.registroId != 0) {
                 // Puedes redirigir o hacer otras acciones aquí si es necesario
             }
@@ -40,13 +40,13 @@ btnAddLote.addEventListener("click", async (e) => {
     });
 });
 
-// Función para recargar el select de lotes
+// Función para recargar el select de lotes del index
 function refreshLoteSelect() {
-    fetch("/lote-data") // Asegúrate de que esta ruta esté definida en tus rutas
+    fetch("/lote-data")
         .then((response) => response.json())
         .then((data) => {
             const $loteSelect = $("#lote");
-            $loteSelect.empty(); // Limpia las opciones actuales
+            $loteSelect.empty();
             $loteSelect.append('<option value="">Seleccione el lote</option>'); // Opción por defecto
 
             data.forEach((option) => {

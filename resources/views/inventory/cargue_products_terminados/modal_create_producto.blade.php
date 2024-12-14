@@ -23,11 +23,11 @@
                         <div class="col-sm-6 col-md-4">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label for="" class="form-label">Buscar lote</label>
-                                    <select class="form-control form-control-sm select2Lote" name="lote" id="lote" required="">
+                                    <label for="loteProd" class="form-label">Buscar lote</label>
+                                    <select class="form-control form-control-sm select2Lote" name="loteProd" id="loteProd" required="">
                                         <option value="">Seleccione el lote</option>
-                                        @foreach ($lote as $l)
-                                        <option value="{{$l->id}}">{{$l->name}}</option>
+                                        @foreach($lote as $option)
+                                        <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
