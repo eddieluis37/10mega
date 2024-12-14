@@ -85,7 +85,7 @@
           <div class="task-header">
             <div class="form-group">
               <label for="lote" class="form-label">Producto Lote</label>
-              <select class="form-control form-control-sm input" name="lote" id="lote" required>
+              <select class="form-control form-control-sm select2Lote" name="lote" id="lote" required>
                 <option value="">Seleccione el lote</option>
                 @foreach($lote as $option)
                 <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>

@@ -1,5 +1,6 @@
 console.log("Comenzando");
 const btnAddLote = document.querySelector("#btnAddlote");
+const btnAddProducto = document.querySelector("#btnAddproducto");
 const formLote = document.querySelector("#form-lote");
 const formProducto = document.querySelector("#form-producto");
 const token = document
