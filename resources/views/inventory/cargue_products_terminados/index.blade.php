@@ -180,7 +180,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" id="btnModalClose" class="btn btn-light" data-dismiss="modal">Cancelar</button>
-              <button type="submit" id="btnAddlote" class="btn btn-primary">Aceptar</button>
+              <button type="submit" id="btnAddproducto" class="btn btn-primary">Aceptar</button>
             </div>
           </form>
         </fieldset>

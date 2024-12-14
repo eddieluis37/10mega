@@ -10,6 +10,7 @@ use App\Models\Lote;
 use App\Models\centros\Centrocosto;
 use App\Models\Centro_costo_product;
 use App\Models\Product;
+use App\Models\ProductLote;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Yajra\Datatables\Datatables;
@@ -111,6 +112,66 @@ class CargueProductTerminadosController extends Controller
     {
         $lotes = Lote::orderBy('id', 'desc')->get();
         return response()->json($lotes);
+    }
+
+    public function productlote(Request $request)
+    {
+        try {
+            $rules = [
+                'productloteId' => 'required',
+                'producto' => 'required',
+                'loteProd' => 'required',
+                'quantity' => 'required',
+            ];
+
+            $messages = [
+                'productloteId.required' => 'El id es requerido',
+                'producto.required' => 'Producto es requerido',
+                'loteProd.required' => 'Lote es requerido',
+                'quantity.required' => 'Cantidad es requerida',
+
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $getReg = ProductLote::firstWhere('id', $request->loteId);
+            if ($getReg == null) {
+                $productLote = new ProductLote();
+                $productLote->product_id = $request->producto;
+                $productLote->lote_id = $request->loteProd;
+                $productLote->quantity = $request->quantity;
+                $productLote->save();
+
+                return response()->json([
+                    'status' => 1,
+                    'message' => "productLote: " . $productLote->product_id . ' ' . 'Creado con ID: ' . $productLote->id,
+                    "registroId" => $productLote->id
+                ]);
+            } else {
+                $updateLote = ProductLote::firstWhere('id', $request->loteId);
+                $updateLote->product_id = $request->producto;
+                $updateLote->lote_id = $request->loteProd;
+                $updateLote->save();
+
+                return response()->json([
+                    "status" => 1,
+                    "message" => "ProductLote: " . $updateLote->product_id . ' ' . 'Editado con ID: ' . $updateLote->id,
+                    "registroId" => 0
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'array' => (array) $th
+            ]);
+        }
     }
 
     /**

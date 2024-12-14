@@ -5,7 +5,7 @@
                 <div class="card-body">
                     <div class="btn-toolbar justify-content-between">
                         <div>
-                            <input type="hidden" value="0" name="loteId" id="loteId">
+                            <input type="hidden" value="0" name="productloteId" id="productloteId">
                         </div>
                         <div class="col-sm-6 col-md-4">
                             <div class="task-header">
@@ -17,6 +17,7 @@
                                         <option value="{{$p->id}}">{{$p->name}}</option>
                                         @endforeach
                                     </select>
+                                    <span class="text-danger error-message"></span>
                                 </div>
                             </div>
                         </div>
@@ -30,6 +31,7 @@
                                         <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
                                         @endforeach
                                     </select>
+                                    <span class="text-danger error-message"></span>
                                 </div>
                             </div>
                         </div>
