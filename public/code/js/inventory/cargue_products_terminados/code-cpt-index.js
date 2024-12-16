@@ -72,17 +72,17 @@ $(document).ready(function () {
                             namecategoria: item.namecategoria,
                             nameproducto: item.nameproducto,
                             productId: item.productId,
-                            lote:
+                            namelote:
                                 '<input type="text" class="edit-lote" value="' +
-                                item.lote +
+                                item.namelote +
                                 '" size="10" />', // New input for lote
-                            fecha_vencimiento:
+                                fechavence:
                                 '<input type="date" class="edit-fecha-vencimiento" value="' +
-                                item.fecha_vencimiento +
+                                item.fechavence +
                                 '" />',
-                            fisico:
-                                '<input type="text" class="edit-fisico text-right" value="' +
-                                item.fisico +
+                            quantity:
+                                '<input type="text" class="edit-quantity text-right" value="' +
+                                item.quantity +
                                 '" size="4" />',
                         };
                     });
@@ -93,9 +93,9 @@ $(document).ready(function () {
                 { data: "namecategoria", name: "namecategoria" },
                 { data: "productId", name: "productId" },
                 { data: "nameproducto", name: "nameproducto" },
-                { data: "lote", name: "lote" },
-                { data: "fecha_vencimiento", name: "fecha_vencimiento" },
-                { data: "fisico", name: "fisico" },
+                { data: "namelote", name: "namelote" },
+                { data: "fechavence", name: "fechavence" },
+                { data: "quantity", name: "quantity" },
             ],
             order: [[2, "ASC"]],
             language: {

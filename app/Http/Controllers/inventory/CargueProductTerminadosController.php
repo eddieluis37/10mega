@@ -228,21 +228,23 @@ class CargueProductTerminadosController extends Controller
         $centrocostoId = $request->input('centrocostoId');
         $categoriaId = $request->input('categoriaId');
         $loteId = $request->input('loteId');
-        
+
 
         $data = DB::table('centro_costo_products as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->join('product_lote as prolote', 'prolote.product_id', '=', 'ccp.products_id')
+            ->join('lotes as l', 'l.id',  '=', 'prolote.lote_id')
+            //  ->join('product_lote as pl', 'pl.lote_id', '=', 'l.id')
+
             ->select(
+                'pro.id as productId',
                 'cat.name as namecategoria',
                 'pro.name as nameproducto',
-                'pro.id as productId',
-                'ccp.invinicial as invinicial',
-                'ccp.fisico as fisico',
+                'l.name as namelote',
+                'l.fecha_vencimiento as fechavence',
+                'prolote.quantity as quantity',
                 //   'ccp.lote as lote',
-                // 'ccp.fecha_vencimiento as fecha_vencimiento',
-                'pro.cost as costo',
             )
             ->where('ccp.centrocosto_id', $centrocostoId)
             ->where('pro.category_id', $categoriaId)
