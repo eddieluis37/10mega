@@ -61,44 +61,19 @@
         $('#modal-create-producto').on('hidden.bs.modal', function() {
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
             $('#loteId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
-
-            $('#lote').val('');
-            $('#codigobarra').val('');
-            $('#stockalerta').val('');
-            $('#impuestoiva').val('');
-            $('#isa').val('');
+          
+            $('#producto').val('').trigger('change'); // Limpiar el select2 y actualizar
+            $('#loteProd').val('').trigger('change');
+            $('#quantity').val('').trigger('change');
+       
         });
 
         // Limpiar mensajes de error al seleccionar un campo
-        $('#categoria').change(function() {
+        $('#producto').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
-        $('#familia').change(function() {
+        $('#loteProd').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#nivel').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#subfamilia').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#lote').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#codigobarra').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#marca').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#stockalerta').change(function() {
-            $(this).siblings('.error-message').text(''); // Clear error message on blur
-        });
-        $('#impuestoiva').change(function() {
-            $(this).siblings('.error-message').text(''); // Clear error message on blur
-        });
-        $('#isa').change(function() {
-            $(this).siblings('.error-message').text(''); // Clear error message on blur
-        });
+        });       
     });
 </script>

@@ -73,7 +73,7 @@
               <select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
                 <option value="">Seleccione el centro de costo</option>
                 @foreach($centros as $option)
-                <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
+                <option value="{{$option->id}}" {{ $option->id == 1 ? 'selected' : '' }}>{{$option->name}}</option>
                 @endforeach
               </select>
               <span class="text-danger error-message"></span>
@@ -128,7 +128,7 @@
               <tr>
                 <th>Totales</th>
                 <td></td>
-                <td>0.00</td>
+                <td></td>
               </tr>
             </tfoot>
           </table>

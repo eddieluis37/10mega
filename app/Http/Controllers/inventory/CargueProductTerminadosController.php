@@ -29,10 +29,10 @@ class CargueProductTerminadosController extends Controller
     {
         $category = Category::whereIn('id', [1])->orderBy('name', 'asc')->get();
         /*  $category = Category::orderBy('name', 'asc')->get(); */
-        $centros = Centrocosto::Where('status', 1)->get();
+        $centros = Centrocosto::whereIn('id', [1])->orderBy('name', 'asc')->get();
         $centroCostoProductos = Centro_costo_product::all();
         $lote = Lote::orderBy('id', 'desc')->get();
-        $prod = Product::Where('status', 1)->get();
+        $prod = Product::Where('category_id', 1)->get();
         $newToken = Crypt::encrypt(csrf_token());
 
         return view("inventory.cargue_products_terminados.index", compact('category', 'centros', 'lote', 'centroCostoProductos', 'prod'));

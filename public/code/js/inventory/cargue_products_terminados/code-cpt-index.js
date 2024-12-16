@@ -72,14 +72,8 @@ $(document).ready(function () {
                             namecategoria: item.namecategoria,
                             nameproducto: item.nameproducto,
                             productId: item.productId,
-                            namelote:
-                                '<input type="text" class="edit-lote" value="' +
-                                item.namelote +
-                                '" size="10" />', // New input for lote
-                                fechavence:
-                                '<input type="date" class="edit-fecha-vencimiento" value="' +
-                                item.fechavence +
-                                '" />',
+                            namelote: item.namelote,                              
+                            fechavence: item.fechavence,
                             quantity:
                                 '<input type="text" class="edit-quantity text-right" value="' +
                                 item.quantity +
