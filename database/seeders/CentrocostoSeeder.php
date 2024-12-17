@@ -69,5 +69,9 @@ class CentrocostoSeeder extends Seeder
             'name' => 'GRANJA',
             'prefijo' => 'GR',
         ]);
+        Centrocosto::create([
+            'name' => 'LOCAL SOACHA',
+            'prefijo' => 'LS',
+        ]);
     }
 }
