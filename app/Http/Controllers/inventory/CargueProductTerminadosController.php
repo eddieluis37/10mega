@@ -10,6 +10,7 @@ use App\Models\Lote;
 use App\Models\centros\Centrocosto;
 use App\Models\Centro_costo_product;
 use App\Models\Product;
+use App\Models\Store;
 use App\Models\ProductLote;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
@@ -29,13 +30,15 @@ class CargueProductTerminadosController extends Controller
     {
         $category = Category::whereIn('id', [1])->orderBy('name', 'asc')->get();
         /*  $category = Category::orderBy('name', 'asc')->get(); */
-        $centros = Centrocosto::whereIn('id', [1])->orderBy('name', 'asc')->get();
-        $centroCostoProductos = Centro_costo_product::all();
+        //  $centros = Centrocosto::whereIn('id', [1])->orderBy('name', 'asc')->get();
+        // $centroCostoProductos = Centro_costo_product::all();
+        $bodegas = Store::whereIn('id', [1])->orderBy('name', 'asc')->get();
         $lote = Lote::orderBy('id', 'desc')->get();
         $prod = Product::Where('category_id', 1)->get();
+
         $newToken = Crypt::encrypt(csrf_token());
 
-        return view("inventory.cargue_products_terminados.index", compact('category', 'centros', 'lote', 'centroCostoProductos', 'prod'));
+        return view("inventory.cargue_products_terminados.index", compact('category', 'bodegas', 'lote', 'prod'));
 
         // return view('hola');
         //  return view('inventory.diary');
@@ -119,21 +122,22 @@ class CargueProductTerminadosController extends Controller
         try {
             $rules = [
                 'productloteId' => 'required',
-                'producto' => 'required',
+                'producto' => 'required|exists:products,id', // Ensure the product exists
                 'loteProd' => 'required',
                 'quantity' => 'required',
+                'store_id' => 'required|exists:stores,id', // Ensure the store exists
             ];
-
             $messages = [
                 'productloteId.required' => 'El id es requerido',
                 'producto.required' => 'Producto es requerido',
+                'producto.exists' => 'El producto no existe', // Custom message for product existence
                 'loteProd.required' => 'Lote es requerido',
                 'quantity.required' => 'Cantidad es requerida',
-
+                'store_id.required' => 'El ID de la tienda es requerido',
+                'store_id.exists' => 'La tienda no existe', // Custom message for store existence
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
-
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 0,
@@ -141,13 +145,21 @@ class CargueProductTerminadosController extends Controller
                 ], 422);
             }
 
-            $getReg = ProductLote::firstWhere('id', $request->loteId);
+            // Check if ProductLote exists
+            $getReg = ProductLote::firstWhere('id', $request->productloteId);
             if ($getReg == null) {
+                // Create new ProductLote
                 $productLote = new ProductLote();
                 $productLote->product_id = $request->producto;
                 $productLote->lote_id = $request->loteProd;
                 $productLote->quantity = $request->quantity;
                 $productLote->save();
+
+                // Cargue el Producto para adjuntarlo a las tiendas
+                $product = Product::find($request->producto);
+                if ($product) {
+                    $product->stores()->attach($request->store_id);
+                }
 
                 return response()->json([
                     'status' => 1,
@@ -155,10 +167,18 @@ class CargueProductTerminadosController extends Controller
                     "registroId" => $productLote->id
                 ]);
             } else {
-                $updateLote = ProductLote::firstWhere('id', $request->loteId);
+                // Update existing ProductLote
+                $updateLote = ProductLote::firstWhere('id', $request->productloteId);
                 $updateLote->product_id = $request->producto;
                 $updateLote->lote_id = $request->loteProd;
+                $updateLote->quantity = $request->quantity;
                 $updateLote->save();
+
+                // Cargue el Producto para sincronizarlo con las tiendas
+                $product = Product::find($request->producto);
+                if ($product) {
+                    $product->stores()->sync([$request->store_id]);
+                }
 
                 return response()->json([
                     "status" => 1,
@@ -173,7 +193,6 @@ class CargueProductTerminadosController extends Controller
             ]);
         }
     }
-
     /**
      * Display the specified resource.
      *
@@ -230,10 +249,10 @@ class CargueProductTerminadosController extends Controller
         $loteId = $request->input('loteId');
 
 
-        $data = DB::table('centro_costo_products as ccp')
-            ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
+        $data = DB::table('product_store as ccp')
+            ->join('products as pro', 'pro.id', '=', 'ccp.product_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
-            ->join('product_lote as prolote', 'prolote.product_id', '=', 'ccp.products_id')
+            ->join('product_lote as prolote', 'prolote.product_id', '=', 'ccp.product_id')
             ->join('lotes as l', 'l.id',  '=', 'prolote.lote_id')
             //  ->join('product_lote as pl', 'pl.lote_id', '=', 'l.id')
 
@@ -246,7 +265,7 @@ class CargueProductTerminadosController extends Controller
                 'prolote.quantity as quantity',
                 //   'ccp.lote as lote',
             )
-            ->where('ccp.centrocosto_id', $centrocostoId)
+            ->where('ccp.store_id', $centrocostoId)
             ->where('pro.category_id', $categoriaId)
             ->where('prolote.lote_id', $loteId)
             ->where('pro.status', 1)

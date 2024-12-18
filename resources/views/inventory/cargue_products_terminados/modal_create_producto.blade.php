@@ -6,6 +6,7 @@
                     <div class="btn-toolbar justify-content-between">
                         <div>
                             <input type="hidden" value="0" name="productloteId" id="productloteId">
+                            <input type="hidden" value="1" name="store_id" id="store_id">
                         </div>
                         <div class="col-sm-6 col-md-4">
                             <div class="task-header">

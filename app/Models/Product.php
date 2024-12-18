@@ -98,4 +98,9 @@ class Product extends Model
 	{
 		return $this->belongsToMany(Lote::class, 'product_lote');
 	}
+
+	public function stores()
+	{
+		return $this->belongsToMany(Store::class, 'product_store');
+	}
 }

@@ -15,7 +15,7 @@ class ProductLoteSeeder extends Seeder
      */
     public function run(): void
     {
-        ProductLote::create([
+        /* ProductLote::create([
             'product_id' => 1, 'lote_id' => 1, 'quantity' => 1        	
         ]); 
         
@@ -25,6 +25,6 @@ class ProductLoteSeeder extends Seeder
 
         ProductLote::create([
             'product_id' => 1, 'lote_id' => 3, 'quantity' => 3
-        ]); 
+        ]);  */
     }
 }
