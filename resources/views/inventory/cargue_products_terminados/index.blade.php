@@ -179,7 +179,7 @@
               @include('inventory.cargue_products_terminados.modal_create_producto')
             </div>
             <div class="modal-footer">
-              <button type="button" id="btnModalClose" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+              <button type="button" id="btnModalClose2" class="btn btn-light" data-dismiss="modal">Cancelar</button>
               <button type="submit" id="btnAddproducto" class="btn btn-primary">Aceptar</button>
             </div>
           </form>

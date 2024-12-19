@@ -5,7 +5,7 @@ import {
 } from "../../exportModule/message/rogercode-message.js";
 
 const refresh_table = () => {
-    let table = $("#tableProducto").dataTable();
+    let table = $("#tableInventory").dataTable();
     table.fnDraw(false);
 };
 
@@ -65,7 +65,7 @@ btnAddProducto.addEventListener("click", async (e) => {
         console.log(resp);
         if (resp.status == 1) {
             formProducto.reset();
-            btnClose.click();
+            btnClose2.click();
             successToastMessage(resp.message);
             refresh_table();
             if (resp.registroId != 0) {

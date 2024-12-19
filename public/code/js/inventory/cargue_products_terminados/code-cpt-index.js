@@ -7,6 +7,7 @@ const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 const btnClose = document.querySelector("#btnModalClose");
+const btnClose2 = document.querySelector("#btnModalClose2");
 
 $(".select2Prod").select2({
     placeholder: "Busca un producto",
