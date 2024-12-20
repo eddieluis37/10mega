@@ -244,31 +244,33 @@ class CargueProductTerminadosController extends Controller
      */
     public function show(Request $request)
     {
-        $centrocostoId = $request->input('centrocostoId');
+        $storeId = $request->input('storeId');
         $categoriaId = $request->input('categoriaId');
         $loteId = $request->input('loteId');
 
 
-        $data = DB::table('product_store as ccp')
-            ->join('products as pro', 'pro.id', '=', 'ccp.product_id')
+        $data = DB::table('product_lote as pl')
+            ->join('products as pro', 'pro.id', '=', 'pl.product_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
-            ->join('product_lote as prolote', 'prolote.product_id', '=', 'ccp.product_id')
-            ->join('lotes as l', 'l.id',  '=', 'prolote.lote_id')
+            //    ->join('product_store as ps', 'ps.product_id', '=', 'pl.product_id')
+            ->join('lotes as l', 'l.id',  '=', 'pl.lote_id')
             //  ->join('product_lote as pl', 'pl.lote_id', '=', 'l.id')
 
             ->select(
+                'pl.id as productoLoteId',
                 'pro.id as productId',
                 'cat.name as namecategoria',
                 'pro.name as nameproducto',
                 'l.name as namelote',
                 'l.fecha_vencimiento as fechavence',
-                'prolote.quantity as quantity',
-                //   'ccp.lote as lote',
+                'pl.quantity as quantity',
+                //   'pl.lote as lote',
             )
-            ->where('ccp.store_id', $centrocostoId)
             ->where('pro.category_id', $categoriaId)
-            ->where('prolote.lote_id', $loteId)
+            ->where('pl.lote_id', $loteId)
+            //    ->where('ps.store_id', $storeId)
             ->where('pro.status', 1)
+            ->orderBy('pl.id', 'desc')
             ->get();
 
         // return response()->json(['data' => $data]);
@@ -277,21 +279,19 @@ class CargueProductTerminadosController extends Controller
             ->make(true);
     }
 
-    public function updateCptInventory()
+    public function updateCptInventory(Request $request)
     {
+        $productoLoteId = request('productoLoteId');
         $productId = request('productId');
-        $centrocostoId = request('centrocostoId');
-        $fisico = request('fisico');
-        $lote = request('lote');
-        $fecha_vencimiento = request('fecha_vencimiento');
+        $loteId = request('loteId'); // Get loteId from the dropdown
+        $quantity = request('quantity');
 
-        DB::table('centro_costo_products')
-            ->where('products_id', $productId)
-            ->where('centrocosto_id', $centrocostoId)
+        DB::table('product_lote')
+            ->where('id', $productoLoteId)
+            ->where('product_id', $productId)
+            ->where('lote_id', $loteId)
             ->update([
-                'fisico' => $fisico,
-                'lote' => $lote,
-                'fecha_vencimiento' => $fecha_vencimiento
+                'quantity' => $quantity
             ]);
 
         return response()->json(['success' => 'true']);

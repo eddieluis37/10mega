@@ -69,8 +69,8 @@
         <div class="col-md-4">
           <div class="task-header">
             <div class="form-group">
-              <label for="centrocosto" class="form-label">Bodega</label>
-              <select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
+              <label for="store" class="form-label">Bodega</label>
+              <select class="form-control form-control-sm input" name="store" id="store" required>
                 <option value="">Seleccione la Bodega</option>
                 @foreach($bodegas as $option)
                 <option value="{{$option->id}}" {{ $option->id == 1 ? 'selected' : '' }}>{{$option->name}}</option>
@@ -109,11 +109,12 @@
 
       </div>
       <div class="table-responsive mt-3">
-        <form method="POST" action="/updateCcpInventory">
+        <form method="POST" action="/updateCptInventory">
           @csrf
           <table id="tableInventory" class="table table-striped mt-1">
             <thead class="text-white" style="background: #3B3F5C">
               <tr>
+                <th class="table-th text-white">ID</th>
                 <th class="table-th text-white">CAT</th>
                 <th class="table-th text-white">ID</th>
                 <th class="table-th text-white">PRODUCTO</th>
