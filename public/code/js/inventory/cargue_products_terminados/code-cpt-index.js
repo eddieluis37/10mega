@@ -43,7 +43,11 @@ function refreshLote() {
 $(document).ready(function () {
     var dataTable;
 
-    function initializeDataTable(storeId = "-1", categoriaId = "-1", loteId = "1") {
+    function initializeDataTable(
+        storeId = "-1",
+        categoriaId = "-1",
+        loteId = "1"
+    ) {
         dataTable = $("#tableInventory").DataTable({
             paging: true,
             pageLength: 15,
@@ -69,7 +73,7 @@ $(document).ready(function () {
                             namecategoria: item.namecategoria,
                             nameproducto: item.nameproducto,
                             productId: item.productId,
-                            namelote: item.namelote,                              
+                            namelote: item.namelote,
                             fechavence: item.fechavence,
                             quantity:
                                 '<input type="text" class="edit-quantity text-right" value="' +
@@ -88,6 +92,12 @@ $(document).ready(function () {
                 { data: "namelote", name: "namelote" },
                 { data: "fechavence", name: "fechavence" },
                 { data: "quantity", name: "quantity" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return `<button class="btn btn-danger delete-btn" data-id="${row.productoLoteId}">Delete</button>`;
+                    },
+                },
             ],
             order: [[2, "ASC"]],
             language: {
@@ -96,7 +106,8 @@ $(document).ready(function () {
                 zeroRecords: "No se encontraron resultados",
                 emptyTable: "Ningún dato disponible en esta tabla",
                 sInfo: "Mostrando del _START_ al _END_ de total _TOTAL_ registros",
-                infoEmpty: "Mostrando registros del 0 al 0 de un total de 0 registros",
+                infoEmpty:
+                    "Mostrando registros del 0 al 0 de un total de 0 registros",
                 infoFiltered: "(filtrado de un total de _MAX_ registros)",
                 search: "Buscar:",
                 infoThousands: ",",
@@ -109,38 +120,38 @@ $(document).ready(function () {
                 },
             },
         });
-    }
+        // Function to delete a record
+        function deleteProductLote(id) {
+            $.ajax({
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                        "content"
+                    ),
+                },
+                url: `/product-lote/${id}`,
+                type: "DELETE",
+                success: function (response) {
+                    if (response.success) {
+                        console.log("Delete successful");
+                       // dataTable.ajax.reload(); // Refresh the DataTable
+                    } else {
+                        console.error("Delete failed");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error deleting record:", error);
+                },
+            });
+        }
 
-    function updateCptInventory(productId, quantity, storeId, loteId, fecha_vencimiento, productoLoteId) {
-        console.log("productId:", productId);
-        console.log("quantity:", quantity);
-        console.log("storeId:", storeId);
-        console.log("loteId:", loteId);
-        console.log("fecha_vencimiento:", fecha_vencimiento);
-        console.log("productoLoteId:", productoLoteId);
-        
-        $.ajax({
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
-            url: "/updateCptInventory",
-            type: "POST",
-            data: {
-                productId: productId,
-                quantity: quantity,
-                storeId: storeId,
-                loteId: loteId,
-                fecha_vencimiento: fecha_vencimiento,
-                productoLoteId: productoLoteId // Include productoLoteId in the data
-            },
-            success: function (response) {
-                console.log("Update successful");
-                dataTable.ajax.reload();
-            },
-            error: function (xhr, status, error) {
-                console.error("Error updating");
-            },
+        // Event listener for delete button
+        $(document).on("click", ".delete-btn", function () {
+            const id = $(this).data("id");
+            if (confirm("Are you sure you want to delete this record?")) {
+                deleteProductLote(id);
+            }
         });
+        
     }
 
     initializeDataTable("-1");
@@ -158,8 +169,11 @@ $(document).ready(function () {
             event.preventDefault();
             var quantity = $(this).val().replace(",", "."); // Replace comma with dot for decimal
             var loteId = $("#lote").val(); // Get loteId from the dropdown
-            var fecha_vencimiento = $(this).closest("tr").find(".edit-fecha-vencimiento").val(); // Get fecha_vencimiento value
-            
+            var fecha_vencimiento = $(this)
+                .closest("tr")
+                .find(".edit-fecha-vencimiento")
+                .val(); // Get fecha_vencimiento value
+
             // Get productoLoteId from the current row
             var productoLoteId = $(this).closest("tr").find("td:eq(0)").text(); // Assuming productoLoteId is in the first column
 
@@ -168,8 +182,20 @@ $(document).ready(function () {
             if (regex.test(quantity)) {
                 var productId = $(this).closest("tr").find("td:eq(2)").text(); // Get productId from the third column
                 var storeId = $("#store").val();
-                updateCptInventory(productId, quantity, storeId, loteId, fecha_vencimiento, productoLoteId); // Pass productoLoteId
-                $(this).closest("tr").next().find(".edit-quantity").focus().select(); // Focus on the next input
+                updateCptInventory(
+                    productId,
+                    quantity,
+                    storeId,
+                    loteId,
+                    fecha_vencimiento,
+                    productoLoteId
+                ); // Pass productoLoteId
+                $(this)
+                    .closest("tr")
+                    .next()
+                    .find(".edit-quantity")
+                    .focus()
+                    .select(); // Focus on the next input
             } else {
                 Swal.fire({
                     icon: "error",
@@ -178,10 +204,47 @@ $(document).ready(function () {
                 });
                 console.error("Solo acepta numero enteros y decimales");
             }
+
+            function updateCptInventory(
+                productId,
+                quantity,
+                storeId,
+                loteId,
+                fecha_vencimiento,
+                productoLoteId
+            ) {
+                console.log("productId:", productId);
+                console.log("quantity:", quantity);
+                console.log("storeId:", storeId);
+                console.log("loteId:", loteId);
+                console.log("fecha_vencimiento:", fecha_vencimiento);
+                console.log("productoLoteId:", productoLoteId);
+
+                $.ajax({
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                            "content"
+                        ),
+                    },
+                    url: "/updateCptInventory",
+                    type: "POST",
+                    data: {
+                        productId: productId,
+                        quantity: quantity,
+                        storeId: storeId,
+                        loteId: loteId,
+                        fecha_vencimiento: fecha_vencimiento,
+                        productoLoteId: productoLoteId, // Include productoLoteId in the data
+                    },
+                    success: function (response) {
+                        console.log("Update successful");
+                        dataTable.ajax.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error updating");
+                    },
+                });
+            }
         }
     });
 });
-
-
-
-

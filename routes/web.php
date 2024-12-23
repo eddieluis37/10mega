@@ -111,7 +111,7 @@ use App\Http\Controllers\reportes\reporteventaprodclientController;
 use App\Http\Controllers\reportes\reporteventaprodController;
 use App\Http\Controllers\reportes\reportecomprarequeridaController;
 use App\Http\Controllers\reportes\reporteasignarpreciosController;
-
+use App\Http\Controllers\ProductLoteController;
 
 
 /************************************************* */
@@ -292,7 +292,10 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('/lote-data', [CargueProductTerminadosController::class, 'getLoteData']);
     Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
     Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
+  //  Route::delete('productlote/{id}', [CargueProductTerminadosController::class, 'destroy'])->name('productlote.destroy');    
+    Route::delete('/product-lote/{id}', [ProductLoteController::class, 'destroy']);
     Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');
+    
 
     Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
     Route::get('showConsolidadoInventory', [inventoryController::class, 'show'])->name('inventory.showConsol');

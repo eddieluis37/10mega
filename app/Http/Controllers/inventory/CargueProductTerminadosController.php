@@ -296,4 +296,16 @@ class CargueProductTerminadosController extends Controller
 
         return response()->json(['success' => 'true']);
     }
+
+    public function destroy($id)
+    {
+        // Delete the record from the product_lote table
+        $deleted = DB::table('product_lote')->where('id', $id)->delete();
+
+        if ($deleted) {
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
 }
