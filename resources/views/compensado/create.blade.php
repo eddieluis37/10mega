@@ -11,7 +11,7 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b> Compensado | Res </b>
+					<b> Compra | Productos</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<li>						
