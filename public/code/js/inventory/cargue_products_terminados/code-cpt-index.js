@@ -95,7 +95,7 @@ $(document).ready(function () {
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return `<button class="btn btn-danger delete-btn" data-id="${row.productoLoteId}">Delete</button>`;
+                        return `<button class="btn btn-danger delete-btn" data-id="${row.productoLoteId}">Eliminar</button>`;
                     },
                 },
             ],
@@ -147,7 +147,7 @@ $(document).ready(function () {
         // Event listener for delete button
         $(document).on("click", ".delete-btn", function () {
             const id = $(this).data("id");
-            if (confirm("Are you sure you want to delete this record?")) {
+            if (confirm("Esta seguro de eliminar registro?")) {
                 deleteProductLote(id);
             }
         });

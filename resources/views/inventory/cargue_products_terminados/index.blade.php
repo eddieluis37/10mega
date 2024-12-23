@@ -121,6 +121,7 @@
                 <th class="table-th text-white">LOTE</th>
                 <th class="table-th text-white">FECHA_VENCE</th>
                 <th class="table-th text-white">CANTIDAD</th>
+                <th class="table-th text-white">ACTION</th>
               </tr>
             </thead>
             <tbody>
