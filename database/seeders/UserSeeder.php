@@ -152,6 +152,7 @@ class UserSeeder extends Seeder
 
         // crear permisos para modulo Inventario
         Permission::create(['name' => 'Inventory']);
+        Permission::create(['name' => 'Cerrar_Inventario']);
 
         // crear permisos para modulo alistamiento
         Permission::create(['name' => 'Produccion']);
@@ -204,6 +205,7 @@ class UserSeeder extends Seeder
             'Workshop',
             'Pos_Create',
             'Inventory',
+            'Cerrar_Inventario',
             'Cashout_Create',
             'Parametros_Create',
             'Category_View',

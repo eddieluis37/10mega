@@ -65,5 +65,6 @@ class DatabaseSeeder extends Seeder
     $this->call(LoteSeeder::class);
     $this->call(ProductLoteSeeder::class);
     $this->call(StoreSeeder::class);
+    $this->call(ProductStoreSeeder::class);
   }
 }
