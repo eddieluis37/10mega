@@ -13,6 +13,7 @@ use App\Models\Third;
 use App\Models\Sacrificio;
 use App\Models\Beneficiore;
 use App\Models\centros\Centrocosto;
+use App\Models\Lote;
 use NumberFormatter;
 use DateTime;
 
@@ -28,7 +29,8 @@ class beneficioresController extends Controller
 		$thirds = Third::orderBy('name', 'asc')->get();
 		$sacrificios = Sacrificio::orderBy('name', 'asc')->get();
 		$centros = Centrocosto::Where('status', 1)->get();
-		return view('categorias.res.beneficiores.index', compact('thirds', 'sacrificios', 'centros'));
+		$lotes = Lote::orderBy('name', 'asc')->get();
+		return view('categorias.res.beneficiores.index', compact('thirds', 'lotes', 'sacrificios', 'centros'));
 	}
 
 	/**
@@ -109,7 +111,7 @@ class beneficioresController extends Controller
 				$newBeneficiore->clientpieles_id = $request->clientpieles_id;
 				$newBeneficiore->clientvisceras_id = $request->clientvisceras_id;
 				/* $newBeneficiore->products_id = 304; */
-				$newBeneficiore->lote = $newLote; //$request->lote;
+				$newBeneficiore->lotes_id = $request->lotes_id; //$request->lote;
 				$newBeneficiore->finca = $request->finca;
 				$newBeneficiore->sacrificio = $this->MoneyToNumber($request->sacrificio);
 				$newBeneficiore->fomento = $this->MoneyToNumber($request->fomento);
@@ -175,7 +177,7 @@ class beneficioresController extends Controller
 				$updateBeneficiore->factura = $request->factura;
 				$updateBeneficiore->clientpieles_id = $request->clientpieles_id;
 				$updateBeneficiore->clientvisceras_id = $request->clientvisceras_id;
-				//$updateBeneficiore->lote = $request->lote;
+				$updateBeneficiore->lotes_id = $request->lotes_id;
 				$updateBeneficiore->finca = $request->finca;
 				$updateBeneficiore->sacrificio = $this->MoneyToNumber($request->sacrificio);
 				$updateBeneficiore->fomento = $this->MoneyToNumber($request->fomento);
@@ -243,8 +245,9 @@ class beneficioresController extends Controller
 	{
 		$data = DB::table('beneficiores as be')
 			->join('thirds as tird', 'be.thirds_id', '=', 'tird.id')
+			->join('lotes as lote', 'be.lotes_id', '=', 'lote.id')
 			->join('centro_costo as cc', 'be.centrocosto_id', '=', 'cc.id')
-			->select('be.*', 'cc.name as namecentrocosto', 'tird.name as namethird')
+			->select('be.*', 'cc.name as namecentrocosto', 'tird.name as namethird', 'lote.name as namelote')
 			->where('be.status', '=', true)
 			->orderBy('be.id', 'desc')
 			->get();

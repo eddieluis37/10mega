@@ -36,7 +36,7 @@ class BeneficioreSeeder extends Seeder
             'clientpieles_id' => 3,
             'clientvisceras_id' => 3,
 
-            'lote' => 'PC029',
+            'lotes_id' => 1,
             'finca' => 'finca 1',
             'status' => true,
 
@@ -79,7 +79,7 @@ class BeneficioreSeeder extends Seeder
             'clientpieles_id' => 3,
             'clientvisceras_id' => 3,
 
-            'lote' => 'PC029',
+            'lotes_id' => 2,
             'finca' => 'finca 1',
             'status' => true,
 

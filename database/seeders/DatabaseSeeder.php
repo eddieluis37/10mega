@@ -41,6 +41,7 @@ class DatabaseSeeder extends Seeder
     // $this->call(BeneficiocerdoSeeder::class);          
     // $this->call(DespostereSeeder::class);
     $this->call(CentrocostoSeeder::class);
+    $this->call(LoteSeeder::class);
     $this->call(BeneficioreSeeder::class);
     $this->call(Centro_costo_productSeeder::class);
 
@@ -62,7 +63,7 @@ class DatabaseSeeder extends Seeder
     // $this->call(NotacreditoSeeder::class);
     //$this->call(RecibodecajaSeeder::class);
     $this->call(Cuentas_por_cobrarSeeder::class);
-    $this->call(LoteSeeder::class);
+   
     $this->call(ProductLoteSeeder::class);
     $this->call(StoreSeeder::class);
     $this->call(ProductStoreSeeder::class);

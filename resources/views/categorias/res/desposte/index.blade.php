@@ -73,7 +73,7 @@
 								<div class="task-header">
 									<div class="form-group">
 										<label>Lote</label>
-										<p>{{$beneficior[0]->lote}}</p>
+										<p>{{$beneficior[0]->namelote}}</p>
 									</div>
 								</div>
 							</div>

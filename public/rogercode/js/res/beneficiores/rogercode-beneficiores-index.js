@@ -18,7 +18,7 @@ $(document).ready(function () {
                 { data: "namethird", name: "namethird" },
                 { data: "date", name: "date" },
                 { data: "factura", name: "factura" },
-                { data: "lote", name: "lote" },
+                { data: "namelote", name: "namelote" },
                 { data: "action", name: "action" },
             ],
             order: [[0, 'DESC']],
@@ -65,6 +65,14 @@ $(document).ready(function () {
         allowClear: true,
         dropdownParent: $("#modal-create-beneficiore"),
     });
+    $(".selectLote").select2({
+        placeholder: "Busca un lote",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+        dropdownParent: $("#modal-create-beneficiore"),
+        //https://select2.org/troubleshooting/common-problems
+    });
 });
 /*****************************************************************************************/
 const token = document
@@ -89,6 +97,7 @@ inputcantidadmacho = document.querySelector("#cantidadMacho");
 //inputfecha_beneficio = document.querySelector("#fecha_beneficio");
 inputfactura = document.querySelector("#factura");
 inputclientpieles_id = document.querySelector("#clientpieles_id");
+inputlotes_id = document.querySelector("#lotes_id");
 inputclientvisceras_id = document.querySelector("#clientvisceras_id");
 inputfinca = document.querySelector("#finca");
 //inputlote = document.querySelector("#lote");
@@ -161,6 +170,7 @@ const showForm = (data) => {
     console.log(resp);
     idBeneficio.value = resp.id;
     $("#thirds_id").val(resp.thirds_id).trigger("change");
+    $("#lotes_id").val(resp.lotes_id).trigger("change");
     $("#clientpieles_id").val(resp.clientpieles_id).trigger("change");
     $("#clientvisceras_id").val(resp.clientvisceras_id).trigger("change");
     $("#plantasacrificio_id").val(resp.plantasacrificio_id);
@@ -177,10 +187,11 @@ const showForm = (data) => {
 
     //inputfecha_beneficio.value = resp.fecha_beneficio;
     inputfactura.value = resp.factura;
+    inputlotes_id.value = resp.lotes_id;
     inputclientpieles_id.value = resp.clientpieles_id;
     inputclientvisceras_id.value = resp.clientvisceras_id;
     inputfinca.value = resp.finca;
-    //inputlote.value = resp.lote;
+
     inputsacrificio.value = formatCantidadSinCero(resp.sacrificio);
     inputfomento.value = formatCantidadSinCero(resp.fomento);
     inputdeguello.value = formatCantidadSinCero(resp.deguello);
@@ -237,6 +248,7 @@ const showModalcreate = () => {
     if (contentform.hasAttribute("disabled")) {
         contentform.removeAttribute("disabled");
         $("#thirds_id").prop("disabled", false);
+        $("#lotes_id").prop("disabled", false);
         $("#clientpieles_id").prop("disabled", false);
         $("#clientvisceras_id").prop("disabled", false);
     }
@@ -290,6 +302,7 @@ const showDataForm = async (id) => {
   console.log(data);
   showForm(data);
   $('#thirds_id').prop('disabled', true);
+  $('#lotes_id').prop('disabled', true);
   $('#clientpieles_id').prop('disabled', true);
   $('#clientvisceras_id').prop('disabled', true);
   contentform.setAttribute('disabled','disabled');
