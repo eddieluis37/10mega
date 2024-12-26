@@ -46,10 +46,10 @@
           <input type="date" class="form-control" value="{{$endDate}}" placeholder="Last name">
         </div>
         <div class="col-md-3">
-          <label for="" class="form-label">Centro de costo</label>
+          <label for="" class="form-label">Bodega</label>
           <select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
             <option value="">Seleccione el centro de costo</option>
-            @foreach($centros as $option)
+            @foreach($stores as $option)
             <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
             @endforeach
           </select>

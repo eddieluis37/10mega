@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\centros\Centrocosto;
+use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 
 
@@ -27,13 +28,14 @@ class inventoryController extends Controller
  */
         $category = Category::orderBy('name', 'asc')->get();
         $centros = Centrocosto::Where('status', 1)->get();
+        $stores = Store::orderBy('id', 'asc')->get();
 
         // llama al metodo para calcular el stock
         //   $this->totales(request());
         $response = $this->totales(request()); // Call the totales method
         $totalStock = $response->getData()->totalStock; // Retrieve the totalStock value from the response
 
-        return view('inventory.consolidado', compact('category', 'centros', 'startDate', 'endDate', 'totalStock'));
+        return view('inventory.consolidado', compact('category', 'centros', 'stores', 'startDate', 'endDate', 'totalStock'));
     }
     public function show(Request $request)
     {
@@ -42,6 +44,7 @@ class inventoryController extends Controller
 
         $data = DB::table('centro_costo_products as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
+            ->join('centro_costo_store as ccs', 'ccs.centro_costo_id', '=', 'ccp.centrocosto_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->select(
                 'cat.name as namecategoria',
@@ -60,7 +63,7 @@ class inventoryController extends Controller
                 'ccp.fisico as fisico',
                 'ccp.products_id as products_id'
             )
-            ->where('ccp.centrocosto_id', $centrocostoId)
+            ->where('ccs.store_id', $centrocostoId)
             ->where(function ($query) {
                 $query->where('ccp.tipoinventario', 'cerrado')
                     ->orWhere('ccp.tipoinventario', 'inicial');
@@ -71,7 +74,7 @@ class inventoryController extends Controller
 
         // Calculo de la stock ideal y venta_real
         foreach ($data as $item) {
-            
+
             $venta_real = (($item->venta - $item->notacredito) + $item->notadebito);
             $item->venta_real = round($venta_real, 2);
 
@@ -98,6 +101,7 @@ class inventoryController extends Controller
 
         $data = DB::table('centro_costo_products as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
+            ->join('centro_costo_store as ccs', 'ccs.centro_costo_id', '=', 'ccp.centrocosto_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->select(
                 'cat.name as namecategoria',
@@ -115,7 +119,7 @@ class inventoryController extends Controller
                 'ccp.stock as stock',
                 'ccp.fisico as fisico'
             )
-            ->where('ccp.centrocosto_id', $centrocostoId)
+            ->where('ccs.store_id', $centrocostoId)
             ->where(function ($query) {
                 $query->where('ccp.tipoinventario', 'cerrado')
                     ->orWhere('ccp.tipoinventario', 'inicial');
@@ -306,10 +310,10 @@ class inventoryController extends Controller
           c.utilidad,
           c.precioventa_min
         FROM centro_costo_products c 
+        RIGHT JOIN centro_costo_store cs ON cs.centro_costo_id = c.centrocosto_id
         INNER JOIN products p ON p.id = c.products_id
-        WHERE c.centrocosto_id = :centrocostoId        
-        AND c.tipoinventario = 'cerrado' 
-        OR c.tipoinventario = 'inicial' ",
+      
+        WHERE cs.store_id = :centrocostoId   ",
             [
                 'centrocostoId' => $v_centrocostoId,
             ]
@@ -320,9 +324,10 @@ class inventoryController extends Controller
         DB::update(
             "
          UPDATE centro_costo_products c INNER JOIN products p ON p.id = c.products_id
+                                        INNER JOIN centro_costo_store cs ON cs.centro_costo_id = c.centrocosto_id
          SET c.invinicial = c.fisico,
              c.cto_invinicial_total = c.cto_invfinal_total  
-         WHERE c.centrocosto_id = :centrocostoId       
+         WHERE cs.store_id = :centrocostoId       
          AND c.tipoinventario = 'cerrado'
          OR c.tipoinventario = 'inicial' ",
             [
@@ -336,6 +341,7 @@ class inventoryController extends Controller
         DB::update(
             "
         UPDATE centro_costo_products c INNER JOIN products p ON p.id = c.products_id
+                                       INNER JOIN centro_costo_store cs ON cs.centro_costo_id = c.centrocosto_id     
         SET
           c.tipoinventario = 'inicial'
          ,c.compralote = 0
@@ -370,7 +376,7 @@ class inventoryController extends Controller
          ,c.total_venta = 0
          ,c.utilidad = 0
          ,c.precioventa_min = 0       
-         WHERE c.centrocosto_id = :centrocostoId        
+         WHERE cs.store_id = :centrocostoId        
          AND tipoinventario = 'cerrado'
          OR tipoinventario = 'inicial' ",
             [
