@@ -44,7 +44,7 @@ class productoController extends Controller
         $niveles = Levels_products::Where('status', 1)->get();
         $presentaciones = Unitofmeasure::Where('status', 1)->get();
         $familias = Meatcut::Where('status', 1)->get();
-      
+
         $brandsThirds = Brand_third::orderBy('id')->get();
 
         $usuario = User::WhereIn('id', [9, 11, 12])->get();
@@ -469,15 +469,20 @@ class productoController extends Controller
 
     public function CrearProductoEnCentroCosto()
     {
+        // Obtener el último ID del producto
         $ultimoId = Product::latest('id')->first()->id;
 
-        $centrocostoproduct = Centro_costo_product::create([
-            'centrocosto_id' => 1,
-            'products_id' => $ultimoId,
-            'tipoinventario' => 'inicial',
-        ]);
+        // Obtener todos los centros de costo Centrocosto::all(); 
+        $centrosCosto = Centrocosto::whereIn('id', [1, 2])->orderBy('id', 'asc')->get();
 
-        $centrocostoproduct->save();
+        // Iterar sobre cada centro de costo y crear un producto
+        foreach ($centrosCosto as $centroCosto) {
+            Centro_costo_product::create([
+                'centrocosto_id' => $centroCosto->id,
+                'products_id' => $ultimoId,
+                'tipoinventario' => 'inicial',
+            ]);
+        }
     }
 
     public function CrearProductoEnListapreciodetalle()
