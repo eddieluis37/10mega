@@ -30,6 +30,6 @@ class CreateTemporaryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('temporary_accumulatedWeights');
+        Schema::dropIfExists('temporary_accumulatedweights');
     }
 }
