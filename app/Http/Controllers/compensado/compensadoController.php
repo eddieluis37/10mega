@@ -456,65 +456,79 @@ class compensadoController extends Controller
         $currentDateTime = Carbon::now();
         $formattedDate = $currentDateTime->format('Y-m-d');
         $compensadoId = $request->input('compensadoId');
-        $compensadores = Compensadores::find($compensadoId);
+
+        // Actualizar el registro de compensadores
+        $compensadores = Compensadores::findOrFail($compensadoId);
         $compensadores->fecha_cierre = $formattedDate;
         $compensadores->status = true;
         $compensadores->save();
-        $compensadores = Compensadores::where('id', $compensadoId)->get();
-        $centrocosto_id = $compensadores->first()->centrocosto_id;
 
+        $centrocosto_id = $compensadores->centrocosto_id;
+
+        //  Actualizar los productos en centro_costo_products
         DB::update(
             "
             UPDATE centro_costo_products c
             JOIN compensadores_details d ON c.products_id = d.products_id
             JOIN compensadores b ON b.id = d.compensadores_id
-            JOIN products p ON p.id = d.products_id
-            SET c.cto_compensados =  c.cto_compensados + d.pcompra,
-                c.cto_compensados_total  = c.cto_compensados_total + (d.pcompra * d.peso),
+            JOIN products p ON p.id = c.products_id
+            SET c.cto_compensados = c.cto_compensados + d.pcompra,
+                c.cto_compensados_total = c.cto_compensados_total + (d.pcompra * d.peso),
                 c.tipoinventario = 'cerrado',
                 p.cost = d.pcompra
             WHERE d.compensadores_id = :compensadoresid
             AND b.centrocosto_id = :cencosid 
             AND c.centrocosto_id = :cencosid2
-            AND d.status = 1 ",
+            AND d.status = 1",
             [
                 'compensadoresid' => $compensadoId,
                 'cencosid' => $centrocosto_id,
                 'cencosid2' => $centrocosto_id
             ]
         );
-        // Calcular el peso acumulado del producto 
-        $centroCostoProducts = Centro_costo_product::where('tipoinventario', 'cerrado')
-            ->where('centrocosto_id', $centrocosto_id)
-            ->get();
+
+        // Calcular el peso acumulado del producto
+        $centroCostoProducts = Centro_costo_product::where('centrocosto_id', $centrocosto_id)->get();
 
         foreach ($centroCostoProducts as $centroCostoProduct) {
             $accumulatedWeight = Compensadores_detail::where('compensadores_id', '=', $compensadoId)
                 ->where('products_id', $centroCostoProduct->products_id)
-                ->where('compensadores_details.status', '1')
+                ->where('status', '1')
                 ->sum('peso');
 
-            // Almacenar el peso acomulado en la tabla temporal
-            DB::table('temporary_accumulatedweights')->insert([
-                'product_id' => $centroCostoProduct->products_id,
-                'accumulated_weight' => $accumulatedWeight
-            ]);
+            // Guarda el accumulated weight en la tabla temporal
+            DB::table('temporary_accumulatedweights')->updateOrInsert(
+                [
+                    'centrocosto_id' => $centroCostoProduct->centrocosto_id,
+                    'product_id' => $centroCostoProduct->products_id,
+                ],
+                [
+                    'accumulated_weight' => $accumulatedWeight
+                ]
+            );
         }
 
-        // Recuperar los registros de la tabla temporary_accumulatedweights
+        // Recuperar los registros de la tabla temporary_accumulatedweights 
         $accumulatedWeights = DB::table('temporary_accumulatedweights')->get();
 
         foreach ($accumulatedWeights as $accumulatedWeight) {
-            $centroCostoProduct = Centro_costo_product::find($accumulatedWeight->product_id);
+            // Busca el Centro_costo_product por el product_id y centrocosto_id correspondiente
+            $centroCostoProduct = Centro_costo_product::where('products_id', $accumulatedWeight->product_id)
+                ->where('centrocosto_id', $accumulatedWeight->centrocosto_id)
+                ->first();
 
-            // Sumar el valor de accumulatedWeight al campo compensados
-            $centroCostoProduct->compensados += $accumulatedWeight->accumulated_weight;
-            $centroCostoProduct->save();
-
-            // Limpiar la tabla temporary_accumulatedweights
-            DB::table('temporary_accumulatedweights')->truncate();
+            // Suma el valor de accumulatedWeight al campo compensados de centroCostoProduct
+            if ($centroCostoProduct) {
+                $centroCostoProduct->compensados += $accumulatedWeight->accumulated_weight;
+                $centroCostoProduct->save();
+            }
         }
+
+        // limpia tabla temporary_accumulatedweights table
+        DB::table('temporary_accumulatedweights')->truncate();
+
         session()->regenerate();
+
         return response()->json([
             'status' => 1,
             'message' => 'Cargado al inventario exitosamente',

@@ -16,6 +16,7 @@ class CreateTemporaryTable extends Migration
         // Se crea la tabla si no existe, para almacenar el peso acumulado de las compras compensadas
         Schema::create('temporary_accumulatedWeights', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('centrocosto_id');
             $table->integer('product_id');
             $table->decimal('accumulated_weight', 8, 2);
             $table->timestamps();
