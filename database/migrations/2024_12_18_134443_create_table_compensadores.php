@@ -19,6 +19,12 @@ class CreateTableCompensadores extends Migration
             $table->unsignedBigInteger('users_id')->nullable();
             $table->foreign('users_id')->references('id')->on('users');
 
+            $table->unsignedBigInteger('store_id')->nullable();
+            $table->foreign('store_id')->references('id')->on('stores');
+
+            $table->unsignedBigInteger('lote_id')->nullable();
+            $table->foreign('lote_id')->references('id')->on('lotes');
+
             $table->unsignedBigInteger('thirds_id')->nullable();
             $table->foreign('thirds_id')->references('id')->on('thirds');
 

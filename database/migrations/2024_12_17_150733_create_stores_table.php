@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
+            // Specify the foreign key for centro_costo_id to reference the centro_costo table
+            $table->foreignId('centrocosto_id')->nullable()
+                ->constrained('centro_costo') // Specify the table name here
+                ->onDelete('cascade');
             $table->string('name');
-            $table->string('description', 50, 0)->nullable();  
+            $table->string('description', 50, 0)->nullable();
             $table->boolean('status')->parent_select()->default(true)->nullable();
             $table->timestamps();
         });

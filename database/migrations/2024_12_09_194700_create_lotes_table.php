@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lotes', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50, 0)->nullable();
+            $table->decimal('costo', 18, 2)->default(0)->nullable();
             $table->date('fecha_vencimiento')->nullable();
             $table->timestamps();
         });
