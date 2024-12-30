@@ -12,18 +12,18 @@ class LoteSeeder extends Seeder
     public function run(): void
     {
         Lote::create([
-        	'name' => 'ABC1234',
-            "fecha_vencimiento" => "2024-01-21"        	
+        	'codigo' => 'Lote001',
+            "fecha_vencimiento" => "2025-01-21"        	
         ]); 
         
         Lote::create([
-        	'name' => 'DRF5678',
-            "fecha_vencimiento" => "2024-01-22"        	
+        	'codigo' => 'Lote002',
+            "fecha_vencimiento" => "2025-01-22"        	
         ]); 
 
         Lote::create([
-        	'name' => 'HIJ9875',
-            "fecha_vencimiento" => "2024-01-23"        	
+        	'codigo' => 'Lote003',
+            "fecha_vencimiento" => "2025-01-23"        	
         ]); 
     }
 }

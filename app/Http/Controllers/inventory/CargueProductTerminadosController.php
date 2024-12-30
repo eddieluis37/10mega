@@ -82,24 +82,24 @@ class CargueProductTerminadosController extends Controller
             $getReg = Lote::firstWhere('id', $request->loteId);
             if ($getReg == null) {
                 $Lote = new Lote();
-                $Lote->name = $request->lote;
+                $Lote->codigo = $request->lote;
                 $Lote->fecha_vencimiento = $request->fecha_vencimiento;
                 $Lote->save();
 
                 return response()->json([
                     'status' => 1,
-                    'message' => "Lote: " . $Lote->name . ' ' . 'Creado con ID: ' . $Lote->id,
+                    'message' => "Lote: " . $Lote->codigo . ' ' . 'Creado con ID: ' . $Lote->id,
                     "registroId" => $Lote->id
                 ]);
             } else {
                 $updateLote = Lote::firstWhere('id', $request->loteId);
-                $updateLote->name = $request->lote;
+                $updateLote->codigo = $request->lote;
                 $updateLote->fecha_vencimiento = $request->fecha_vencimiento;
                 $updateLote->save();
 
                 return response()->json([
                     "status" => 1,
-                    "message" => "Lote: " . $updateLote->name . ' ' . 'Editado con ID: ' . $updateLote->id,
+                    "message" => "Lote: " . $updateLote->codigo . ' ' . 'Editado con ID: ' . $updateLote->id,
                     "registroId" => 0
                 ]);
             }
@@ -261,7 +261,7 @@ class CargueProductTerminadosController extends Controller
                 'pro.id as productId',
                 'cat.name as namecategoria',
                 'pro.name as nameproducto',
-                'l.name as namelote',
+                'l.codigo as codigolote',
                 'l.fecha_vencimiento as fechavence',
                 'pl.quantity as quantity',
                 //   'pl.lote as lote',

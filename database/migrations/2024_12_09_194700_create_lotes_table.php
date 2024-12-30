@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('product_id')->nullable();
             $table->foreign('product_id')->references('id')->on('products');
-            $table->string('name', 50, 0)->nullable();
+            $table->string('codigo', 50, 0)->nullable();
             $table->decimal('costo', 18, 2)->default(0)->nullable();
             $table->date('fecha_vencimiento')->nullable();
             $table->timestamps();

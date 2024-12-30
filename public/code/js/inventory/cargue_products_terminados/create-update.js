@@ -51,7 +51,7 @@ function refreshLoteSelect() {
 
             data.forEach((option) => {
                 $loteSelect.append(
-                    `<option value="${option.id}" data="${option}">${option.name}</option>`
+                    `<option value="${option.id}" data="${option}">${option.codigo}</option>`
                 );
             });
         });

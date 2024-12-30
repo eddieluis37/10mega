@@ -34,7 +34,7 @@ function refreshLote() {
 
             data.forEach((option) => {
                 $loteSelect.append(
-                    `<option value="${option.id}" data="${option}">${option.name}</option>`
+                    `<option value="${option.id}" data="${option}">${option.codigo}</option>`
                 );
             });
         });
@@ -73,7 +73,7 @@ $(document).ready(function () {
                             namecategoria: item.namecategoria,
                             nameproducto: item.nameproducto,
                             productId: item.productId,
-                            namelote: item.namelote,
+                            codigolote: item.codigolote,
                             fechavence: item.fechavence,
                             quantity:
                                 '<input type="text" class="edit-quantity text-right" value="' +
@@ -89,7 +89,7 @@ $(document).ready(function () {
                 { data: "namecategoria", name: "namecategoria" },
                 { data: "productId", name: "productId" },
                 { data: "nameproducto", name: "nameproducto" },
-                { data: "namelote", name: "namelote" },
+                { data: "codigolote", name: "codigolote" },
                 { data: "fechavence", name: "fechavence" },
                 { data: "quantity", name: "quantity" },
                 {
