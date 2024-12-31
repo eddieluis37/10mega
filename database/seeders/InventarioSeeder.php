@@ -18,5 +18,11 @@ class InventarioSeeder extends Seeder
             'lote_id' => 1,
             'cantidad_actual' => '13',                               
         ]); 
+
+        Inventario::create([            
+            'store_id' => 2,
+            'lote_id' => 1,
+            'cantidad_actual' => '13',                               
+        ]); 
     }
 }

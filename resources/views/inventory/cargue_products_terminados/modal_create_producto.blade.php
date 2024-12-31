@@ -29,7 +29,7 @@
                                     <select class="form-control form-control-sm select2Lote" name="loteProd" id="loteProd" required="">
                                         <option value="">Seleccione el lote</option>
                                         @foreach($lote as $option)
-                                        <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
+                                        <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['codigo'] }}</option>
                                         @endforeach
                                     </select>
                                     <span class="text-danger error-message"></span>

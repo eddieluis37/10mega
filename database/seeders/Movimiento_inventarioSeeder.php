@@ -30,7 +30,7 @@ class Movimiento_inventarioSeeder extends Seeder
             'compensadores_id' => 2,
             'bodega_origen_id' => 1,
             'bodega_origen_id' => 2,
-            'lote_id' => 1,
+            'lote_id' => 2,
             'fecha' => $now,
             'cantidad' => '10',                                
         ]); 
