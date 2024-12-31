@@ -112,12 +112,7 @@ class StoreSeeder extends Seeder
             'centrocosto_id' => 9,
             'name' => 'LECHONERIA',          
             'description' => 'Para traslado entre Bodegas',         
-        ]);
-        Store::create([
-            'centrocosto_id' => 9,
-            'name' => 'LECHONERIA',          
-            'description' => 'Para traslado entre Bodegas',         
-        ]);
+        ]);       
         Store::create([
             'centrocosto_id' => 9,
             'name' => 'COCINA LECHONERIA',          

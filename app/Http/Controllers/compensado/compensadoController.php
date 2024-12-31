@@ -19,6 +19,7 @@ use App\Models\centros\Centrocosto;
 use App\Models\Compensadores;
 use App\Models\Compensadores_detail;
 use App\Models\Centro_costo_product;
+use App\Models\Store;
 
 class compensadoController extends Controller
 {
@@ -32,8 +33,9 @@ class compensadoController extends Controller
         /*   $category = Category::WhereIn('id',[1,2,3,4,5,6,7])->get(); */
         $providers = Third::Where('status', 1)->get();
         $centros = Centrocosto::Where('status', 1)->get();
+        $bodegas = Store::orderBy('id', 'asc')->get();
 
-        return view('compensado.res.index', compact('providers', 'centros'));
+        return view('compensado.res.index', compact('providers', 'bodegas', 'centros'));
     }
 
     /**

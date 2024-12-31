@@ -21,6 +21,21 @@
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
+						<label for="store" class="form-label">Bodega</label>
+						<select class="form-control form-control-sm input" name="store" id="store" required>
+							<option value="">Seleccione la Bodega</option>
+							@foreach($bodegas as $option)
+							<option value="{{$option->id}}" {{ $option->id == 1 ? 'selected' : '' }}>{{$option->name}}</option>
+							@endforeach
+						</select>
+						<span class="text-danger error-message"></span>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-4">
+				<div class="task-header">
+					<div class="form-group">
 						<label for="" class="form-label">Centro de costo</label>
 						<select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
 							<option value="">Seleccione el centro de costo</option>
@@ -32,6 +47,7 @@
 					</div>
 				</div>
 			</div>
+
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
