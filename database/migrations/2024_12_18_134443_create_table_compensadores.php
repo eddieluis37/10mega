@@ -19,6 +19,9 @@ class CreateTableCompensadores extends Migration
             $table->unsignedBigInteger('users_id')->nullable();
             $table->foreign('users_id')->references('id')->on('users');
 
+            $table->unsignedBigInteger('centrocosto_id')->nullable();
+            $table->foreign('centrocosto_id')->references('id')->on('centro_costo');
+            
             $table->unsignedBigInteger('store_id')->nullable();
             $table->foreign('store_id')->references('id')->on('stores');
 
@@ -28,12 +31,10 @@ class CreateTableCompensadores extends Migration
             $table->unsignedBigInteger('thirds_id')->nullable();
             $table->foreign('thirds_id')->references('id')->on('thirds');
 
-            $table->unsignedBigInteger('centrocosto_id')->nullable();
-            $table->foreign('centrocosto_id')->references('id')->on('centro_costo');
+          
+            $table->string('factura')->nullable();
 
-            $table->string('factura');
-
-            $table->date('fecha_compensado');
+            $table->date('fecha_compensado')->nullable();
             $table->date('fecha_cierre')->nullable();
 
             $table->boolean('status')->parent_select()->default(false)->nullable();            

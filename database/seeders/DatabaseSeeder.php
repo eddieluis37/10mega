@@ -67,5 +67,8 @@ class DatabaseSeeder extends Seeder
     $this->call(ProductLoteSeeder::class);
     $this->call(StoreSeeder::class);
     $this->call(ProductStoreSeeder::class);
+    $this->call(CompensadoresSeeder::class);
+    $this->call(InventarioSeeder::class);
+    $this->call(Movimiento_inventarioSeeder::class);
   }
 }
