@@ -20,6 +20,9 @@ use App\Models\Compensadores;
 use App\Models\Compensadores_detail;
 use App\Models\Centro_costo_product;
 use App\Models\Store;
+use App\Models\MovimientoInventario;
+use App\Models\Inventario;
+use App\Models\Lote;
 
 class compensadoController extends Controller
 {
@@ -34,8 +37,9 @@ class compensadoController extends Controller
         $providers = Third::Where('status', 1)->get();
         $centros = Centrocosto::Where('status', 1)->get();
         $bodegas = Store::orderBy('id', 'asc')->get();
+        $lotes = Lote::orderBy('id', 'desc')->get();
 
-        return view('compensado.res.index', compact('providers', 'bodegas', 'centros'));
+        return view('compensado.res.index', compact('providers', 'bodegas', 'lotes', 'centros'));
     }
 
     /**
@@ -51,8 +55,10 @@ class compensadoController extends Controller
         $datacompensado = DB::table('compensadores as comp')
             /*    ->join('categories as cat', 'comp.categoria_id', '=', 'cat.id') */
             ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
-            ->join('centro_costo as centro', 'comp.centrocosto_id', '=', 'centro.id')
-            ->select('comp.*', 'tird.name as namethird', 'centro.name as namecentrocosto',)
+            ->join('stores as s', 'comp.store_id', '=', 's.id')
+            ->join('lotes as l', 'comp.lote_id', '=', 'l.id')
+            ->join('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
+            ->select('comp.*', 'tird.name as namethird', 'l.codigo as codigolote', 's.name as namestore', 'centro.name as namecentrocosto')
             ->where('comp.id', $id)
             ->get();
 
@@ -217,13 +223,16 @@ class compensadoController extends Controller
             $rules = [
                 'compensadoId' => 'required',
                 'provider' => 'required',
-                'centrocosto' => 'required',
+                'store' => 'required',
+                'lote' => 'required',
                 'factura' => 'required',
             ];
             $messages = [
                 'compensadoId.required' => 'El compensadoId es requerido',
                 'provider.required' => 'El proveedor es requerido',
-                'centrocosto.required' => 'El centro de costo es requerido',
+                'factura.required' => 'La factura es requerida',
+                'store.required' => 'La bodega es requerido',
+                'lote.required' => 'El lote es requerido',
                 'factura.required' => 'La factura es requerida',
             ];
 
@@ -250,7 +259,8 @@ class compensadoController extends Controller
                 $comp->users_id = $id_user;
                 /*     $comp->categoria_id = $request->categoria; */
                 $comp->thirds_id = $request->provider;
-                $comp->centrocosto_id = $request->centrocosto;
+                $comp->store_id = $request->store;
+                $comp->lote_id = $request->lote;
                 /*    $comp->fecha_compensado = $currentDateFormat; */
                 $comp->fecha_compensado = $request->fecha;
                 $comp->fecha_cierre = $dateNextMonday;
@@ -264,7 +274,8 @@ class compensadoController extends Controller
             } else {
                 $getReg = Compensadores::firstWhere('id', $request->compensadoId);
                 $getReg->thirds_id = $request->provider;
-                $getReg->centrocosto_id = $request->centrocosto;
+                $getReg->store_id = $request->store;
+                $getReg->lote_id = $request->lote;
                 $getReg->factura = $request->factura;
                 $getReg->save();
 
@@ -293,8 +304,9 @@ class compensadoController extends Controller
         $data = DB::table('compensadores as comp')
             /*   ->join('categories as cat', 'comp.categoria_id', '=', 'cat.id') */
             ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
-            ->join('centro_costo as centro', 'comp.centrocosto_id', '=', 'centro.id')
-            ->select('comp.*', 'tird.name as namethird', 'centro.name as namecentrocosto')
+            ->join('lotes as l', 'comp.lote_id', '=', 'l.id')
+            ->join('stores as s', 'comp.store_id', '=', 's.id')
+            ->select('comp.*', 'tird.name as namethird', 'l.codigo as codigolote', 's.name as namestore')
             /*   ->where('comp.status', 1) */
             ->get();
         //$data = Compensadores::orderBy('id','desc');
@@ -453,7 +465,7 @@ class compensadoController extends Controller
     }
 
 
-    public function cargarInventariocr(Request $request)
+    public function cargarInventarioVersion1(Request $request)
     {
         $currentDateTime = Carbon::now();
         $formattedDate = $currentDateTime->format('Y-m-d');
@@ -537,6 +549,79 @@ class compensadoController extends Controller
             'compensadores' => $compensadores
         ]);
     }
+
+    public function cargarInventariocr(Request $request)
+    {
+        $currentDateTime = Carbon::now();
+        $formattedDate = $currentDateTime->format('Y-m-d');
+
+        // Valores estáticos para prueba
+        $staticData = [
+            'fecha' => '2024-12-28',
+            'cantidad' => 99,
+            'lote_id' => 1, // ID de un lote existente en la base de datos
+            'bodega_destino_id' => 2, // ID de una bodega existente en la base de datos
+        ];
+
+        // Simular un compensadoId (si necesitas usarlo)
+        $compensadoId = 1; // ID de un registro existente en la tabla 'compensadores'
+
+        // Recuperar el registro de compensadores
+        $compensadores = Compensadores::findOrFail($compensadoId);
+
+        $centrocosto_id = $compensadores->centrocosto_id;
+        $lote_id = $compensadores->lote_id;
+
+        // No validar, ya que estamos usando datos estáticos
+        $validated = $staticData;
+
+        DB::beginTransaction();
+
+        try {
+            // Buscar o crear el inventario
+            $inventario = Inventario::firstOrCreate(
+                [
+                    'store_id' => $validated['bodega_destino_id'],
+                    'lote_id' => $validated['lote_id'],
+                ],
+                ['cantidad_actual' => 0]
+            );
+
+            // Incrementar la cantidad
+            $inventario->increment('cantidad_actual', $validated['cantidad']);
+
+            // Crear el movimiento de inventario
+            $movimiento = MovimientoInventario::create([
+                'tipo' => 'compensadores',
+                'fecha' => $validated['fecha'],
+                'cantidad' => $validated['cantidad'],
+                'lote_id' => $validated['lote_id'],
+                'bodega_destino_id' => $validated['bodega_destino_id'],
+            ]);
+
+            DB::commit();
+
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Compra registrada exitosamente.',
+                'compensadores' => $compensadores,
+                'data' => $movimiento
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            session()->regenerate();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Error al registrar la compra.',
+                'compensadores' => $compensadores,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function cargarInventarioMasivo()
     {

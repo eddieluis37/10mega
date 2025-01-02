@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Movimiento_inventario;
+use App\Models\MovimientoInventario;
 
 class Movimiento_inventarioSeeder extends Seeder
 {
@@ -15,9 +15,9 @@ class Movimiento_inventarioSeeder extends Seeder
     {
         $now = now();
 
-        Movimiento_inventario::create([            
+        MovimientoInventario::create([            
             'tipo' => 'compensadores',
-            'compensadores_id' => 1,
+            'compensador_id' => 1,
             'bodega_origen_id' => 1,
             'bodega_origen_id' => 2,
             'lote_id' => 1,
@@ -25,9 +25,9 @@ class Movimiento_inventarioSeeder extends Seeder
             'cantidad' => '10',                                
         ]); 
 
-        Movimiento_inventario::create([            
+        MovimientoInventario::create([            
             'tipo' => 'compensadores',
-            'compensadores_id' => 2,
+            'compensador_id' => 2,
             'bodega_origen_id' => 1,
             'bodega_origen_id' => 2,
             'lote_id' => 2,

@@ -21,6 +21,20 @@
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
+						<label for="" class="form-label">Proveedor</label>
+						<select class="form-control form-control-sm select2Store " name="store" id="store" required>
+							<option value="">Seleccione la bodega</option>
+							@foreach($bodegas as $option)
+							<option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
+							@endforeach
+						</select>
+						<span class="text-danger error-message"></span>
+					</div>
+				</div>
+			</div>
+			<!-- <div class="col-md-4">
+				<div class="task-header">
+					<div class="form-group">
 						<label for="store" class="form-label">Bodega</label>
 						<select class="form-control form-control-sm input" name="store" id="store" required>
 							<option value="">Seleccione la Bodega</option>
@@ -31,9 +45,9 @@
 						<span class="text-danger error-message"></span>
 					</div>
 				</div>
-			</div>
+			</div> -->
 
-			<div class="col-md-4">
+			<!-- <div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
 						<label for="" class="form-label">Centro de costo</label>
@@ -41,6 +55,21 @@
 							<option value="">Seleccione el centro de costo</option>
 							@foreach($centros as $option)
 							<option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
+							@endforeach
+						</select>
+						<span class="text-danger error-message"></span>
+					</div>
+				</div>
+			</div> -->
+
+			<div class="col-md-4">
+				<div class="task-header">
+					<div class="form-group">
+						<label for="lote" class="form-label">Lote</label>
+						<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required>
+							<option value="">Seleccione el lote</option>
+							@foreach($lotes as $option)
+							<option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['codigo'] }}</option>
 							@endforeach
 						</select>
 						<span class="text-danger error-message"></span>
@@ -60,8 +89,17 @@
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
-						<label for="date1" class="form-label">Fecha</label>
+						<label for="date1" class="form-label">Fecha compra</label>
 						<input type="date" class="form-control" name="fecha" id="fecha" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+						<span class="text-danger error-message"></span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="task-header">
+					<div class="form-group">
+						<label for="date1" class="form-label">Fecha ingreso</label>
+						<input type="date" class="form-control" name="fecha_ingreso" id="fecha_ingreso" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
 						<span class="text-danger error-message"></span>
 					</div>
 				</div>

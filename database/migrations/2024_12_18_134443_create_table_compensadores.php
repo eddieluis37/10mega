@@ -33,6 +33,8 @@ class CreateTableCompensadores extends Migration
 
           
             $table->string('factura')->nullable();
+            
+            $table->date('fecha_ingreso')->nullable();
 
             $table->date('fecha_compensado')->nullable();
             $table->date('fecha_cierre')->nullable();

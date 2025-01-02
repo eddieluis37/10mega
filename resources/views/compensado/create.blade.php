@@ -32,11 +32,27 @@
 								</div>
 							</div> -->
 
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Proveedor</label>
 										<p>{{$datacompensado[0]->namethird}}</p>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="task-header">
+									<div class="form-group">
+										<label for="" class="form-label">Lote</label>
+										<p>{{$datacompensado[0]->codigolote}}</p>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="task-header">
+									<div class="form-group">
+										<label for="" class="form-label">Bodega</label>
+										<p>{{$datacompensado[0]->namestore}}</p>
 									</div>
 								</div>
 							</div>

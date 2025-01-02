@@ -22,7 +22,8 @@
 							<tr>
 								<th class="table-th text-white">#</th>								
 								<th class="table-th text-white">Proveedor</th>
-								<th class="table-th text-white ">Centro de costo</th>
+								<th class="table-th text-white">LOTE</th>
+								<th class="table-th text-white ">BODEGA</th>
 								<th class="table-th text-white">Factura</th>
 								<th class="table-th text-white">Fecha</th>
 								<th class="table-th text-white text-center">Acciones</th>

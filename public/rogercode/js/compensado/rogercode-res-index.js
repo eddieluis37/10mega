@@ -6,7 +6,7 @@ const btnClose = document.querySelector("#btnModalClose");
 
 const selectCategory = document.querySelector("#categoria");
 const selectProvider = document.querySelector("#provider");
-const selectCentrocosto = document.querySelector("#centrocosto");
+const selectStore = document.querySelector("#store");
 const inputFactura = document.querySelector("#factura");
 const compensado_id = document.querySelector("#compensadoId");
 const contentform = document.querySelector("#contentDisable");
@@ -28,7 +28,8 @@ $(document).ready(function () {
             columns: [
                 { data:'id', name: 'id'},                
                 { data: 'namethird', name: 'namethird'},
-                { data: 'namecentrocosto', name: 'namecentrocosto' },
+                { data: 'codigolote', name: 'codigolote' },
+                { data: 'namestore', name: 'namestore' },
                 { data:'factura', name: 'factura'},
                 { data: 'date', name: 'date' },
                 {data: 'action', name:'action'}
@@ -56,6 +57,18 @@ $(document).ready(function () {
     });
     $('.select2Provider').select2({
 	    placeholder: 'Busca un proveedor',
+	    width: '100%',
+	    theme: "bootstrap-5",
+	    allowClear: true,
+    });
+    $('.select2Store').select2({
+	    placeholder: 'Busca una bodega',
+	    width: '100%',
+	    theme: "bootstrap-5",
+	    allowClear: true,
+    });
+    $('.select2Lote').select2({
+	    placeholder: 'Busca una lote',
 	    width: '100%',
 	    theme: "bootstrap-5",
 	    allowClear: true,
@@ -123,7 +136,9 @@ const showData = (resp) => {
     compensado_id.value = register.id;
    /*  selectCategory.value = register.categoria_id; */
     $('#provider').val(register.thirds_id).trigger('change');
-    selectCentrocosto.value = register.centrocosto_id;
+    $('#store').val(register.store_id).trigger('change');
+    $('#lote').val(register.lote_id).trigger('change');
+    selectStore.value = register.store_id;
     inputFactura.value = register.factura;
     const modal = new bootstrap.Modal(document.getElementById('modal-create-compensado'));
     modal.show();
