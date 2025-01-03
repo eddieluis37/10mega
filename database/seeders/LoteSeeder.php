@@ -11,27 +11,50 @@ class LoteSeeder extends Seeder
 
     public function run(): void
     {
-        Lote::create([
-        	'product_id' => 1,
+        Lote::create([       	
+            'category_id' => 1,
             'codigo' => 'Lote001',
             "fecha_vencimiento" => "2025-01-21"        	
         ]); 
-        
         Lote::create([
-            'product_id' => 26,
-        	'codigo' => 'Lote002',
+            'category_id' => 1,
+            'codigo' => 'Lote002',
+            "fecha_vencimiento" => "2025-01-21"        	
+        ]); 
+        Lote::create([        
+            'category_id' => 2,
+            'codigo' => 'Lote003',
+            "fecha_vencimiento" => "2025-01-21"        	
+        ]); 
+        Lote::create([            
+        	'codigo' => 'Lote004',
+            "fecha_vencimiento" => "2025-01-22"        	
+        ]); 
+        Lote::create([            
+        	'codigo' => 'Lote005',
+            "fecha_vencimiento" => "2025-01-22"        	
+        ]); 
+        Lote::create([
+          
+        	'codigo' => 'Lote006',
+            "fecha_vencimiento" => "2025-01-22"        	
+        ]); 
+        Lote::create([
+            
+        	'codigo' => 'Lote007',
             "fecha_vencimiento" => "2025-01-22"        	
         ]); 
 
+
         Lote::create([
-            'product_id' => 27,
-        	'codigo' => 'Lote003',
+            
+        	'codigo' => 'Lote008',
             "fecha_vencimiento" => "2025-01-23"        	
         ]); 
 
         Lote::create([
-            'product_id' => 28,
-        	'codigo' => 'Lote004',
+          
+        	'codigo' => 'Lote009',
             "fecha_vencimiento" => "2025-01-23"        	
         ]); 
     }

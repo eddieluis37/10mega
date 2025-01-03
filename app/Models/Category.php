@@ -16,6 +16,11 @@ class Category extends Model
 		return $this->hasMany(Product::class);
 	}
 
+	public function lotes()
+    {
+        return $this->hasMany(Lote::class);
+    }
+
 	//Accessor
 	public function getImagenAttribute()
 	{

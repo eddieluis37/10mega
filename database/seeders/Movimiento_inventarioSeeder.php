@@ -18,21 +18,21 @@ class Movimiento_inventarioSeeder extends Seeder
         MovimientoInventario::create([            
             'tipo' => 'compensadores',
             'compensador_id' => 1,
-            'bodega_origen_id' => 1,
-            'bodega_origen_id' => 2,
+            'store_origen_id' => 1,
+            'store_destino_id' => 2,
             'lote_id' => 1,
             'fecha' => $now,
-            'cantidad' => '10',                                
+            'cantidad' => '0',                                
         ]); 
 
         MovimientoInventario::create([            
             'tipo' => 'compensadores',
             'compensador_id' => 2,
-            'bodega_origen_id' => 1,
-            'bodega_origen_id' => 2,
+            'store_origen_id' => 1,
+            'store_destino_id' => 2,
             'lote_id' => 2,
             'fecha' => $now,
-            'cantidad' => '10',                                
+            'cantidad' => '0',                                
         ]); 
     }
 }

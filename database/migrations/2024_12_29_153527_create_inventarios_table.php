@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreign('store_id')->references('id')->on('stores');
             $table->unsignedBigInteger('lote_id')->nullable();
             $table->foreign('lote_id')->references('id')->on('lotes');
+            $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con los productos
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->decimal('cantidad_actual', 18, 2)->default(0)->nullable();
             $table->timestamps();
         });

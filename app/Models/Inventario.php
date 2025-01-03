@@ -12,8 +12,9 @@ class Inventario extends Model
     protected $table = 'inventarios';
 
     protected $fillable = [
-        'bodega_id',
+        'store_id',
         'lote_id',
+        'product_id',
         'cantidad_actual',
     ];
 
@@ -31,5 +32,10 @@ class Inventario extends Model
     public function store()
     {
         return $this->belongsTo(Store::class, 'store_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

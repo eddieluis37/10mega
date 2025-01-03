@@ -13,12 +13,13 @@ class MovimientoInventario extends Model
 
     protected $fillable = [
         'tipo', // Compra, Venta, Traslado
-        'fecha',
-        'cantidad',
-        'lote_id',
-        'compensadores_id',
+        'compensador_id',
         'store_origen_id',
         'store_destino_id',
+        'lote_id',
+        'product_id',
+        'fecha',
+        'cantidad',
     ];
 
     /**
@@ -52,5 +53,10 @@ class MovimientoInventario extends Model
     public function compensador()
     {
         return $this->belongsTo(Compensador::class, 'compensador_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

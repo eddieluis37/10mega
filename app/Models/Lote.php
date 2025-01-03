@@ -11,19 +11,27 @@ class Lote extends Model
 
     protected $table = 'lotes';
 
+
     protected $fillable = [
+        'category_id',
         'codigo',
         'fecha_vencimiento',
         'costo',
-        'producto_id',
+
     ];
 
-    /**
-     * Relación con la tabla `Productos`.
-     */
-    public function producto()
+    // Relación muchos a muchos con productos
+    public function products()
     {
-        return $this->belongsTo(Product::class, 'producto_id');
+        return $this->belongsToMany(Product::class, 'lote_products', 'lote_id', 'product_id')
+            ->withPivot('cantidad', 'precio') // Columnas adicionales en `lote_products`
+            ->withTimestamps();
+    }
+
+    // Relación con categorías
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     /**
@@ -40,10 +48,5 @@ class Lote extends Model
     public function movimientosInventario()
     {
         return $this->hasMany(MovimientoInventario::class, 'lote_id');
-    }
-
-    public function products()
-    {
-        return $this->belongsToMany(Product::class, 'product_lote');
     }
 }

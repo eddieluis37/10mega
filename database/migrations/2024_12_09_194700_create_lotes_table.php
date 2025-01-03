@@ -13,9 +13,13 @@ return new class extends Migration
     {
         Schema::create('lotes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('product_id')->nullable();
+         /*    $table->unsignedBigInteger('product_id')->nullable();
             $table->foreign('product_id')->references('id')->on('products');
-            $table->string('codigo', 50, 0)->nullable();
+ */
+            $table->unsignedBigInteger('category_id')->nullable(); // Restricción de categoría para el lote
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
+
+            $table->string('codigo', 50, 0)->unique()->nullable();
             $table->decimal('costo', 18, 2)->default(0)->nullable();
             $table->date('fecha_vencimiento')->nullable();
             $table->timestamps();

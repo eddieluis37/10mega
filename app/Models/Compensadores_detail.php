@@ -14,7 +14,7 @@ class Compensadores_detail extends Model
 
     public function compensadore()
     {
-        return $this->belongsTo(Compensadores::class, 'compensadores_id', 'id');   
+        return $this->belongsTo(Compensadores::class, 'compensadores_id', 'id');
     }
 
     public function third()
@@ -22,9 +22,18 @@ class Compensadores_detail extends Model
         return $this->belongsTo(Third::class, 'third_id', 'id');
     }
 
+    public function lote()
+    {
+        return $this->belongsTo(Lote::class, 'lote_id');
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class, 'products_id', 'id');
     }
+
+    public function category()
+    {
+        return $this->hasOneThrough(Category::class, Lote::class, 'id', 'id', 'lote_id', 'category_id');
+    }
 }
-            

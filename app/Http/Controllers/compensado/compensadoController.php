@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Third;
@@ -550,17 +551,18 @@ class compensadoController extends Controller
         ]);
     }
 
-    public function cargarInventariocr(Request $request)
+    public function cargarInventarioVersion2(Request $request)
     {
         $currentDateTime = Carbon::now();
         $formattedDate = $currentDateTime->format('Y-m-d');
 
         // Valores estáticos para prueba
         $staticData = [
+            'compensador_id' => 3, // ID de una compra en la base de datos
             'fecha' => '2024-12-28',
             'cantidad' => 99,
-            'lote_id' => 1, // ID de un lote existente en la base de datos
-            'bodega_destino_id' => 2, // ID de una bodega existente en la base de datos
+            'lote_id' => 1, // ID de un lote existente en la base de datos            
+            'store_destino_id' => 2, // ID de una bodega existente en la base de datos
         ];
 
         // Simular un compensadoId (si necesitas usarlo)
@@ -581,7 +583,7 @@ class compensadoController extends Controller
             // Buscar o crear el inventario
             $inventario = Inventario::firstOrCreate(
                 [
-                    'store_id' => $validated['bodega_destino_id'],
+                    'store_id' => $validated['store_destino_id'],
                     'lote_id' => $validated['lote_id'],
                 ],
                 ['cantidad_actual' => 0]
@@ -592,11 +594,12 @@ class compensadoController extends Controller
 
             // Crear el movimiento de inventario
             $movimiento = MovimientoInventario::create([
+                'compensador_id' => $validated['compensador_id'],
                 'tipo' => 'compensadores',
                 'fecha' => $validated['fecha'],
                 'cantidad' => $validated['cantidad'],
                 'lote_id' => $validated['lote_id'],
-                'bodega_destino_id' => $validated['bodega_destino_id'],
+                'store_destino_id' => $validated['store_destino_id'],
             ]);
 
             DB::commit();
@@ -621,6 +624,112 @@ class compensadoController extends Controller
             ], 500);
         }
     }
+
+    public function cargarInventariocr(Request $request)
+    {
+        // Simular un compensadoId (si necesitas usarlo)
+        // $compensadorId = 1; // ID de un registro existente en la tabla 'compensadores'
+
+        // Obtener el compensador (compra compensada)
+        $compensadorId = $request->input('compensadoId');
+
+        $compensador = Compensadores::findOrFail($compensadorId);
+
+        // Validar que el compensador esté relacionado con un lote y una categoría
+        if (!$compensador->lote_id) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'El compensador no está asociado a un lote.',
+            ], 422);
+        }
+
+        // Obtener el lote asociado
+        $lote = Lote::with('products')->findOrFail($compensador->lote_id);
+        //  Log::info('Datos del Lote:', ['lote' => $lote]);
+
+        //dd($lote);
+
+        if ($lote->products->isEmpty()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'El lote no contiene productos.',
+            ], 422);
+        }
+
+        // Validar que el lote y los productos estén en la misma categoría
+        $categoryId = $lote->category_id;
+        foreach ($lote->products as $product) {
+            if ($product->category_id !== $categoryId) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => "El producto '{$product->name}' no pertenece a la categoría del lote.",
+                ], 422);
+            }
+        }
+
+        // Comenzar la transacción
+        DB::beginTransaction();
+
+        try {
+            foreach ($lote->products as $product) {
+                // Calcular la cantidad de la compra para este producto
+                $cantidad = $compensador->detalle()
+                    ->where('products_id', $product->id)
+                    ->sum('peso');
+
+                if ($cantidad > 0) {
+                    // Actualizar o crear el inventario
+                    $inventario = Inventario::firstOrCreate(
+                        [
+                            'store_id' => $compensador->store_id,
+                            'lote_id' => $lote->id,
+                            'product_id' => $product->id,
+                        ],
+                        ['cantidad_actual' => 0]
+                    );
+
+                    // Incrementar la cantidad en el inventario
+                    $inventario->increment('cantidad_actual', $cantidad);
+
+                    // Registrar el movimiento en la tabla de movimientos
+                    MovimientoInventario::create([
+                        'compensador_id' => $compensadorId,
+                        'tipo' => 'compensadores',
+                        'fecha' => Carbon::now(),
+                        'cantidad' => $cantidad,
+                        'lote_id' => $lote->id,
+                        'product_id' => $product->id,
+                        'store_destino_id' => $compensador->store_id,
+                    ]);
+                }
+            }
+
+
+            // Confirmar la transacción
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Movimiento de inventario procesado correctamente.',
+                'compensadores' => $compensador,
+            ], 201);
+        } catch (\Exception $e) {
+            // Revertir la transacción
+            DB::rollBack();
+
+            session()->regenerate();
+
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error al procesar el movimiento de inventario.',
+                'compensadores' => $compensador,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
 
 
     public function cargarInventarioMasivo()

@@ -21,11 +21,11 @@ return new class extends Migration
 
             //$table->unsignedBigInteger('entidad_referencia_id');
 
-            $table->unsignedBigInteger('bodega_origen_id')->nullable();
-            $table->foreign('bodega_origen_id')->references('id')->on('stores');
+            $table->unsignedBigInteger('store_origen_id')->nullable();
+            $table->foreign('store_origen_id')->references('id')->on('stores');
 
-            $table->unsignedBigInteger('bodega_destino_id')->nullable();
-            $table->foreign('bodega_destino_id')->references('id')->on('stores');
+            $table->unsignedBigInteger('store_destino_id')->nullable();
+            $table->foreign('store_destino_id')->references('id')->on('stores');
 
             $table->foreignId('lote_id')->constrained('lotes')->onDelete('cascade'); //Relación Lotes - Productos - Categorías
 
@@ -36,6 +36,9 @@ return new class extends Migration
 
             //  $table->unsignedBigInteger('lote_id')->nullable();
             //  $table->foreign('lote_id')->references('id')->on('lotes');
+
+            $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con un producto específico
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
 
             $table->dateTime('fecha')->nullable();
 

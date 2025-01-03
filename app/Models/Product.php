@@ -15,16 +15,29 @@ class Product extends Model
 	protected $table = 'products';
 
 
-	public function category()
+	/* public function category()
 	{
 		return $this->belongsTo(Category::class);
+	}
+ */
+	// Relación muchos a muchos con lotes
+	public function lotes()
+	{
+		return $this->belongsToMany(Lote::class, 'lote_products', 'product_id', 'lote_id')
+			->withPivot('cantidad', 'precio') // Columnas adicionales
+			->withTimestamps();
+	}
+
+	// Relación con categorías
+	public function category()
+	{
+		return $this->belongsTo(Category::class, 'category_id');
 	}
 
 	public function ventas()
 	{
 		return $this->hasMany(SaleDetail::class);
 	}
-
 
 	public function getImagenAttribute()
 	{
@@ -94,10 +107,10 @@ class Product extends Model
         return $this->hasMany(Compensadores_detail::class);
     } */
 
-	public function lotes()
+	/* public function lotes()
 	{
 		return $this->belongsToMany(Lote::class, 'product_lote');
-	}
+	} */
 
 	public function stores()
 	{
