@@ -40,9 +40,9 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con un producto específico
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
 
-            $table->dateTime('fecha')->nullable();
-
             $table->decimal('cantidad', 18, 2)->default(0)->nullable();
+
+            $table->dateTime('fecha')->nullable();
 
             $table->timestamps();
         });

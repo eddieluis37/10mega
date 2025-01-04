@@ -9,4 +9,14 @@ class LoteProduct extends Model
 {
     use HasFactory;
     protected $table = 'lote_products';
+
+    protected $fillable = [
+        'lote_id',
+        'product_id',
+        'cantidad',
+        'precio',
+        'created_at',
+        'update_at'
+    ];
+
 }

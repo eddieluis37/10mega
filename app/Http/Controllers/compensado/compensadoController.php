@@ -627,32 +627,33 @@ class compensadoController extends Controller
 
     public function cargarInventariocr(Request $request)
     {
-        // Simular un compensadoId (si necesitas usarlo)
-        // $compensadorId = 1; // ID de un registro existente en la tabla 'compensadores'
-
-        // Obtener el compensador (compra compensada)
+        // Obtener el compensador
         $compensadorId = $request->input('compensadoId');
-
         $compensador = Compensadores::findOrFail($compensadorId);
 
-        // Validar que el compensador esté relacionado con un lote y una categoría
+        // Validar que el compensador tenga un lote asociado
         if (!$compensador->lote_id) {
             return response()->json([
                 'status' => 0,
-                'message' => 'El compensador no está asociado a un lote.',
+                'message' => 'El compensador no tiene un lote asociado.',
             ], 422);
         }
 
-        // Obtener el lote asociado
-        $lote = Lote::with('products')->findOrFail($compensador->lote_id);
-        //  Log::info('Datos del Lote:', ['lote' => $lote]);
+        // Obtener el lote asociado y cargar explícitamente los productos relacionados
+        $lote = Lote::with('products')->find($compensador->lote_id);
 
-        //dd($lote);
+        if (!$lote) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'El lote asociado al compensador no existe.',
+            ], 422);
+        }
 
+        // Validar que el lote tenga productos relacionados
         if ($lote->products->isEmpty()) {
             return response()->json([
                 'status' => 0,
-                'message' => 'El lote no contiene productos.',
+                'message' => 'El lote no contiene productos relacionados.',
             ], 422);
         }
 
@@ -666,16 +667,40 @@ class compensadoController extends Controller
                 ], 422);
             }
         }
-
-        // Comenzar la transacción
+        
+        // Iniciar la transacción
         DB::beginTransaction();
 
         try {
             foreach ($lote->products as $product) {
-                // Calcular la cantidad de la compra para este producto
-                $cantidad = $compensador->detalle()
+                // Verificar si hay un detalle de compensador para este producto
+                $detalleCompensado = $compensador->detalle()
                     ->where('products_id', $product->id)
-                    ->sum('peso');
+                    ->first();
+
+                if (!$detalleCompensado) {
+                    continue; // Si no hay detalle para este producto, pasa al siguiente
+                }
+
+                // Verificar si el producto ya está asociado al lote
+                $loteProductExists = DB::table('lote_products')
+                    ->where('lote_id', $lote->id)
+                    ->where('product_id', $product->id)
+                    ->exists();
+
+                // Si no está asociado, crear la relación
+                if (!$loteProductExists) {
+                    DB::table('lote_products')->insert([
+                        'lote_id' => $lote->id,
+                        'product_id' => $product->id,
+                        'cantidad' => 0,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                // Calcular la cantidad de la compra para este producto
+                $cantidad = $detalleCompensado->sum('peso');
 
                 if ($cantidad > 0) {
                     // Actualizar o crear el inventario
@@ -703,8 +728,6 @@ class compensadoController extends Controller
                     ]);
                 }
             }
-
-
             // Confirmar la transacción
             DB::commit();
 
@@ -717,16 +740,14 @@ class compensadoController extends Controller
             // Revertir la transacción
             DB::rollBack();
 
-            session()->regenerate();
-
             return response()->json([
                 'status' => 0,
                 'message' => 'Error al procesar el movimiento de inventario.',
-                'compensadores' => $compensador,
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
+
 
 
 
