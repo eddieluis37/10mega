@@ -639,7 +639,7 @@ class compensadoController extends Controller
             ], 422);
         }
 
-        // Obtener el lote asociado y cargar explícitamente los productos relacionados
+        // Obtener el lote asociado
         $lote = Lote::with('products')->find($compensador->lote_id);
 
         if (!$lote) {
@@ -649,83 +649,61 @@ class compensadoController extends Controller
             ], 422);
         }
 
-        // Validar que el lote tenga productos relacionados
-        if ($lote->products->isEmpty()) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'El lote no contiene productos relacionados.',
-            ], 422);
-        }
-
-        // Validar que el lote y los productos estén en la misma categoría
-        $categoryId = $lote->category_id;
-        foreach ($lote->products as $product) {
-            if ($product->category_id !== $categoryId) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => "El producto '{$product->name}' no pertenece a la categoría del lote.",
-                ], 422);
-            }
-        }
-
         // Iniciar la transacción
         DB::beginTransaction();
 
         try {
-            foreach ($lote->products as $product) {
-                // Verificar si el producto de la compra compensada está asociado al lote
-                $detalleCompensado = $compensador->detalle()
-                    ->where('products_id', $product->id)
-                    ->first();
+            // Obtener todos los detalles de los productos relacionados con la compra compensada
+            $productosCompensados = $compensador->detalle()
+                ->select('products_id', 'peso')
+                ->get();
 
-                if ($detalleCompensado) {
-                    // Buscar si ya existe la relación entre el lote y el producto
-                    $loteProductExists = DB::table('lote_products')
-                        ->where('lote_id', $lote->id)
-                        ->where('product_id', $product->id)
-                        ->exists(); // Verifica si la relación existe
+            foreach ($productosCompensados as $detalle) {
+                $productId = $detalle->products_id;
+                $peso = $detalle->peso;
 
-                    if (!$loteProductExists) {
-                        // Si no existe, asociar el producto al lote
-                        DB::table('lote_products')->insert([
+                // Verificar si el producto ya está asociado al lote
+                $loteProductExists = DB::table('lote_products')
+                    ->where('lote_id', $lote->id)
+                    ->where('product_id', $productId)
+                    ->exists();
+
+                if (!$loteProductExists) {
+                    // Asociar el producto al lote si no está relacionado
+                    DB::table('lote_products')->insert([
+                        'lote_id' => $lote->id,
+                        'product_id' => $productId,
+                        'cantidad' => 0, // Inicializa la cantidad
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                // Calcular la cantidad de la compra
+                if ($peso > 0) {
+                    // Actualizar o crear el inventario
+                    $inventario = Inventario::firstOrCreate(
+                        [
+                            'store_id' => $compensador->store_id,
                             'lote_id' => $lote->id,
-                            'product_id' => $product->id,
-                            'cantidad' => 0, // Inicializa en 0 o según la lógica del sistema
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    }
+                            'product_id' => $productId,
+                        ],
+                        ['cantidad_actual' => 0]
+                    );
 
-                    // Calcular la cantidad de la compra para este producto
-                    $cantidad = $compensador->detalle()
-                        ->where('products_id', $product->id)
-                        ->sum('peso');
+                    // Incrementar la cantidad en el inventario
+                    $inventario->increment('cantidad_actual', $peso);
 
-                    if ($cantidad > 0) {
-                        // Actualizar o crear el inventario
-                        $inventario = Inventario::firstOrCreate(
-                            [
-                                'store_id' => $compensador->store_id,
-                                'lote_id' => $lote->id,
-                                'product_id' => $product->id,
-                            ],
-                            ['cantidad_actual' => 0]
-                        );
-
-                        // Incrementar la cantidad en el inventario
-                        $inventario->increment('cantidad_actual', $cantidad);
-
-                        // Registrar el movimiento en la tabla de movimientos
-                        MovimientoInventario::create([
-                            'compensador_id' => $compensadorId,
-                            'tipo' => 'compensadores',
-                            'fecha' => Carbon::now(),
-                            'cantidad' => $cantidad,
-                            'lote_id' => $lote->id,
-                            'product_id' => $product->id,
-                            'store_destino_id' => $compensador->store_id,
-                        ]);
-                    }
+                    // Registrar el movimiento en la tabla de movimientos
+                    MovimientoInventario::create([
+                        'compensador_id' => $compensadorId,
+                        'tipo' => 'compensadores',
+                        'fecha' => Carbon::now(),
+                        'cantidad' => $peso,
+                        'lote_id' => $lote->id,
+                        'product_id' => $productId,
+                        'store_destino_id' => $compensador->store_id,
+                    ]);
                 }
             }
 
@@ -748,6 +726,8 @@ class compensadoController extends Controller
             ], 500);
         }
     }
+
+
 
 
 
