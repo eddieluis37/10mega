@@ -667,67 +667,68 @@ class compensadoController extends Controller
                 ], 422);
             }
         }
-        
+
         // Iniciar la transacción
         DB::beginTransaction();
 
         try {
             foreach ($lote->products as $product) {
-                // Verificar si hay un detalle de compensador para este producto
+                // Verificar si el producto de la compra compensada está asociado al lote
                 $detalleCompensado = $compensador->detalle()
                     ->where('products_id', $product->id)
                     ->first();
 
-                if (!$detalleCompensado) {
-                    continue; // Si no hay detalle para este producto, pasa al siguiente
-                }
+                if ($detalleCompensado) {
+                    // Buscar si ya existe la relación entre el lote y el producto
+                    $loteProductExists = DB::table('lote_products')
+                        ->where('lote_id', $lote->id)
+                        ->where('product_id', $product->id)
+                        ->exists(); // Verifica si la relación existe
 
-                // Verificar si el producto ya está asociado al lote
-                $loteProductExists = DB::table('lote_products')
-                    ->where('lote_id', $lote->id)
-                    ->where('product_id', $product->id)
-                    ->exists();
-
-                // Si no está asociado, crear la relación
-                if (!$loteProductExists) {
-                    DB::table('lote_products')->insert([
-                        'lote_id' => $lote->id,
-                        'product_id' => $product->id,
-                        'cantidad' => 0,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-
-                // Calcular la cantidad de la compra para este producto
-                $cantidad = $detalleCompensado->sum('peso');
-
-                if ($cantidad > 0) {
-                    // Actualizar o crear el inventario
-                    $inventario = Inventario::firstOrCreate(
-                        [
-                            'store_id' => $compensador->store_id,
+                    if (!$loteProductExists) {
+                        // Si no existe, asociar el producto al lote
+                        DB::table('lote_products')->insert([
                             'lote_id' => $lote->id,
                             'product_id' => $product->id,
-                        ],
-                        ['cantidad_actual' => 0]
-                    );
+                            'cantidad' => 0, // Inicializa en 0 o según la lógica del sistema
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
 
-                    // Incrementar la cantidad en el inventario
-                    $inventario->increment('cantidad_actual', $cantidad);
+                    // Calcular la cantidad de la compra para este producto
+                    $cantidad = $compensador->detalle()
+                        ->where('products_id', $product->id)
+                        ->sum('peso');
 
-                    // Registrar el movimiento en la tabla de movimientos
-                    MovimientoInventario::create([
-                        'compensador_id' => $compensadorId,
-                        'tipo' => 'compensadores',
-                        'fecha' => Carbon::now(),
-                        'cantidad' => $cantidad,
-                        'lote_id' => $lote->id,
-                        'product_id' => $product->id,
-                        'store_destino_id' => $compensador->store_id,
-                    ]);
+                    if ($cantidad > 0) {
+                        // Actualizar o crear el inventario
+                        $inventario = Inventario::firstOrCreate(
+                            [
+                                'store_id' => $compensador->store_id,
+                                'lote_id' => $lote->id,
+                                'product_id' => $product->id,
+                            ],
+                            ['cantidad_actual' => 0]
+                        );
+
+                        // Incrementar la cantidad en el inventario
+                        $inventario->increment('cantidad_actual', $cantidad);
+
+                        // Registrar el movimiento en la tabla de movimientos
+                        MovimientoInventario::create([
+                            'compensador_id' => $compensadorId,
+                            'tipo' => 'compensadores',
+                            'fecha' => Carbon::now(),
+                            'cantidad' => $cantidad,
+                            'lote_id' => $lote->id,
+                            'product_id' => $product->id,
+                            'store_destino_id' => $compensador->store_id,
+                        ]);
+                    }
                 }
             }
+
             // Confirmar la transacción
             DB::commit();
 
