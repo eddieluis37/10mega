@@ -57,19 +57,23 @@ class CargueProductTerminadosController extends Controller
     public function storelote(Request $request)
     {
         try {
+            // Reglas de validación
             $rules = [
-                'loteId' => 'required',
-                'lote' => 'required',
-                'fecha_vencimiento' => 'required',
+             
+                'lote' => 'required|unique:lotes,codigo,' . $request->loteId . ',id', // Verifica unicidad, excluyendo el lote actual al editar
+                'fecha_vencimiento' => 'required|date', // Aseguramos que sea una fecha válida
             ];
 
+            // Mensajes personalizados
             $messages = [
-                'loteId.required' => 'El es requerido',
-                'lote.required' => 'Lote es requerido',
-                'fecha_vencimiento.required' => 'Fecha de vencimiento requerida',
-
+                'lote.required' => 'El código del lote es requerido.',
+                'lote.unique' => 'El código del lote ya existe. Por favor, use un código diferente.',
+                'fecha_vencimiento.required' => 'La fecha de vencimiento es requerida.',
+                'fecha_vencimiento.date' => 'La fecha de vencimiento debe ser válida.',
+                
             ];
 
+            // Validación de entrada
             $validator = Validator::make($request->all(), $rules, $messages);
 
             if ($validator->fails()) {
@@ -79,8 +83,11 @@ class CargueProductTerminadosController extends Controller
                 ], 422);
             }
 
-            $getReg = Lote::firstWhere('id', $request->loteId);
+            // Buscar lote existente o crear uno nuevo
+            $getReg = Lote::find($request->loteId);
+
             if ($getReg == null) {
+                // Crear un nuevo lote
                 $Lote = new Lote();
                 $Lote->codigo = $request->lote;
                 $Lote->fecha_vencimiento = $request->fecha_vencimiento;
@@ -88,28 +95,30 @@ class CargueProductTerminadosController extends Controller
 
                 return response()->json([
                     'status' => 1,
-                    'message' => "Lote: " . $Lote->codigo . ' ' . 'Creado con ID: ' . $Lote->id,
+                    'message' => "Lote: " . $Lote->codigo . ' creado con ID: ' . $Lote->id,
                     "registroId" => $Lote->id
                 ]);
             } else {
-                $updateLote = Lote::firstWhere('id', $request->loteId);
-                $updateLote->codigo = $request->lote;
-                $updateLote->fecha_vencimiento = $request->fecha_vencimiento;
-                $updateLote->save();
+                // Editar lote existente
+                $getReg->codigo = $request->lote;
+                $getReg->fecha_vencimiento = $request->fecha_vencimiento;
+                $getReg->save();
 
                 return response()->json([
                     "status" => 1,
-                    "message" => "Lote: " . $updateLote->codigo . ' ' . 'Editado con ID: ' . $updateLote->id,
+                    "message" => "Lote: " . $getReg->codigo . ' editado con ID: ' . $getReg->id,
                     "registroId" => 0
                 ]);
             }
         } catch (\Throwable $th) {
+            // Manejo de excepciones
             return response()->json([
                 'status' => 0,
-                'array' => (array) $th
-            ]);
+                'error' => $th->getMessage()
+            ], 500);
         }
     }
+
 
     public function getLoteData()
     {
