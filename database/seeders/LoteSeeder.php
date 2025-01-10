@@ -13,48 +13,48 @@ class LoteSeeder extends Seeder
     {
         Lote::create([       	
             'category_id' => 1,
-            'codigo' => 'Lote001',
+            'codigo' => '010125T1',
             "fecha_vencimiento" => "2025-01-21"        	
         ]); 
         Lote::create([
             'category_id' => 1,
-            'codigo' => 'Lote002',
+            'codigo' => '020125T2',
             "fecha_vencimiento" => "2025-01-21"        	
         ]); 
         Lote::create([        
             'category_id' => 2,
-            'codigo' => 'Lote003',
+            'codigo' => '030125T3',
             "fecha_vencimiento" => "2025-01-21"        	
         ]); 
         Lote::create([            
-        	'codigo' => 'Lote004',
+        	'codigo' => '040125T4',
             "fecha_vencimiento" => "2025-01-22"        	
         ]); 
         Lote::create([            
-        	'codigo' => 'Lote005',
+        	'codigo' => '050125T5',
             "fecha_vencimiento" => "2025-01-22"        	
         ]); 
         Lote::create([
           
-        	'codigo' => 'Lote006',
+        	'codigo' => '060125T6',
             "fecha_vencimiento" => "2025-01-22"        	
         ]); 
         Lote::create([
             
-        	'codigo' => 'Lote007',
+        	'codigo' => '070125T7',
             "fecha_vencimiento" => "2025-01-22"        	
         ]); 
 
 
         Lote::create([
             
-        	'codigo' => 'Lote008',
+        	'codigo' => '080125T8',
             "fecha_vencimiento" => "2025-01-23"        	
         ]); 
 
         Lote::create([
           
-        	'codigo' => 'Lote009',
+        	'codigo' => '090125T9',
             "fecha_vencimiento" => "2025-01-23"        	
         ]); 
     }

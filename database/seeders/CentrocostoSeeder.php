@@ -47,8 +47,8 @@ class CentrocostoSeeder extends Seeder
             'prefijo' => '',
         ]);
         Centrocosto::create([
-            'name' => 'CENTRAL',
-            'prefijo' => 'CE',
+            'name' => 'CERDO CENTRAL',
+            'prefijo' => 'CC',
         ]);
         Centrocosto::create([
             'name' => 'LECHONERIA',

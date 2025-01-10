@@ -49,23 +49,33 @@ class StoreSeeder extends Seeder
             'description' => 'CLIENTE ESPECIALES',         
         ]);
         Store::create([
+            'centrocosto_id' => 1,
+            'name' => 'RES PLANTA',          
+            'description' => 'COMPRAS PRODUCTOS',         
+        ]);
+        Store::create([
+            'centrocosto_id' => 1,
+            'name' => 'POLLO PLANTA',          
+            'description' => 'COMPRAS PRODUCTOS',         
+        ]);
+        Store::create([
             'centrocosto_id' => 2,
-            'name' => 'CARVAJAL',          
+            'name' => 'CARVAJAL AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([
             'centrocosto_id' => 3,
-            'name' => 'GUADALUPE CALLE',          
+            'name' => 'GUADALUPE CALLE AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([
             'centrocosto_id' => 4,
-            'name' => 'CENTRAL GUADALUPE',          
+            'name' => 'CENTRAL GUADALUPE AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([
             'centrocosto_id' => 5,
-            'name' => 'GALAN',          
+            'name' => 'GALAN AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([
@@ -80,12 +90,12 @@ class StoreSeeder extends Seeder
         ]);
         Store::create([
             'centrocosto_id' => 6,
-            'name' => 'PALOQUEMADO',          
+            'name' => 'PALOQUEMADO AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([
            'centrocosto_id' => 7,
-            'name' => 'SUBAZAR',          
+            'name' => 'SUBAZAR AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([
@@ -110,7 +120,7 @@ class StoreSeeder extends Seeder
         ]);
         Store::create([
             'centrocosto_id' => 9,
-            'name' => 'LECHONERIA',          
+            'name' => 'LECHONERIA AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);       
         Store::create([
@@ -125,7 +135,7 @@ class StoreSeeder extends Seeder
         ]);
         Store::create([
             'centrocosto_id' => 10,
-            'name' => 'SOACHA',          
+            'name' => 'SOACHA AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([
