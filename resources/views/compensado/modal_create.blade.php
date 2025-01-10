@@ -21,7 +21,7 @@
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
-						<label for="" class="form-label">Proveedor</label>
+						<label for="" class="form-label">Bodega</label>
 						<select class="form-control form-control-sm select2Store " name="store" id="store" required>
 							<option value="">Seleccione la bodega</option>
 							@foreach($bodegas as $option)

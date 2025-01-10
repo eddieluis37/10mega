@@ -43,7 +43,7 @@
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
 						<div class="modal-header">
-							<h4 class="modal-title">Crear Compra</h4>
+							<h4 class="modal-title">Crear compra de productos</h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span></button>
 						</div>

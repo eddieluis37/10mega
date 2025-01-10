@@ -362,7 +362,7 @@ class compensadoController extends Controller
                 } else {
                     $btn = '
                         <div class="text-center">
-                        <a href="" class="btn btn-dark" title="DesposteCerrado" target="_blank">
+                        <a href="" class="btn btn-dark" title="CompraCerrado" target="_blank">
                             <i class="fas fa-check-circle"></i>
                         </a>
 					    <button class="btn btn-dark" title="Compensado" disabled>
@@ -627,9 +627,17 @@ class compensadoController extends Controller
 
     public function cargarInventariocr(Request $request)
     {
+        $currentDateTime = Carbon::now();
+        $formattedDate = $currentDateTime->format('Y-m-d');
+
         // Obtener el compensador
         $compensadorId = $request->input('compensadoId');
+
+        // Actualizar el registro de compensadores       
         $compensador = Compensadores::findOrFail($compensadorId);
+        $compensador->fecha_cierre = $formattedDate;
+        $compensador->status = true;
+        $compensador->save();
 
         // Validar que el compensador tenga un lote asociado
         if (!$compensador->lote_id) {

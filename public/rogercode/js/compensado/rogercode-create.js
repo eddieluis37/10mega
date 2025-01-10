@@ -116,7 +116,7 @@ const showData = (data) => {
                 <td>${element.code}</td>
                 <td>${element.nameprod}</td>
                 <td>$ ${formatCantidadSinCero(element.pcompra)}</td>
-                <td>${formatCantidad(element.peso)} KG</td>
+                <td>${formatCantidad(element.peso)}</td>
                 <td>$ ${formatCantidadSinCero(element.subtotal)}</td>
                 <td>${element.iva}</td>
                 <td class="text-center">
@@ -138,7 +138,7 @@ const showData = (data) => {
             <th>Totales</th>
             <td></td>
             <td></td>           
-            <th>${formatCantidad(arrayTotales.pesoTotalGlobal)} KG</td>
+            <th>${formatCantidad(arrayTotales.pesoTotalGlobal)}</td>
             <th>$ ${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
             <td></td>
             <td class="text-center">

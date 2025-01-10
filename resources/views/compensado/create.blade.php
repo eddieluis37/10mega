@@ -94,10 +94,10 @@
 								</div>
 								
 								<div class="col-md-3">
-									<label for="" class="form-label">Peso KG</label>
+									<label for="" class="form-label">Cantidad</label>
 									<div class="input-group flex-nowrap">
 										<input type="text" id="pesokg" name="pesokg" class="form-control input" placeholder="EJ: 10,00">
-										<span class="input-group-text" id="addon-wrapping">KG</span>
+										<span class="input-group-text" id="addon-wrapping">QT</span>
 									</div>
 								</div>
 								<div class="col-md-3">
@@ -140,7 +140,7 @@
 										<th class="table-th text-white">Codigo</th>
 										<th class="table-th text-white">Productos</th>
 										<th class="table-th text-white">Precio compra</th>
-										<th class="table-th text-white">Peso KG</th>
+										<th class="table-th text-white">Cantidad</th>
 										<th class="table-th text-white">Sub Total</th>
 										<th class="table-th text-white">IVA $</th>
 										<th class="table-th text-white text-center">Acciones</th>
@@ -154,7 +154,7 @@
 										<td>{{$proddetail->code}}</td>
 										<td>{{$proddetail->nameprod}}</td>
 										<td>$ {{ number_format($proddetail->pcompra, 0, ',', '.')}}</td>
-										<td>{{ number_format($proddetail->peso, 2, ',', '.')}} KG</td>
+										<td>{{ number_format($proddetail->peso, 2, ',', '.')}} </td>
 										<td>$ {{ number_format($proddetail->subtotal, 0, ',', '.')}}</td>
 										<td>{{$proddetail->iva}}</td>
 										<td class="text-center">
