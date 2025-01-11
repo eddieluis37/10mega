@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('movimiento_inventarios', function (Blueprint $table) {
             $table->id();
-            $table->enum('tipo', ['compensadores', 'Venta', 'Traslado'])->default('compensadores');
+            $table->enum('tipo', ['compensadores', 'Venta', 'Traslado'])->default('compensadores'); //Tipo de movimiento (compra, traslado, alistamiento, etc.).
 
             $table->foreignId('compensador_id')->nullable()->constrained('compensadores')->onDelete('set null');
 
@@ -40,7 +40,9 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con un producto específico
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
 
-            $table->decimal('cantidad', 18, 2)->default(0)->nullable();
+            $table->decimal('cantidad', 18, 2)->default(0)->nullable(); // Cantidad afectada.
+            $table->decimal('costo_unitario', 18, 2)->default(0)->nullable(); // Costo unitario promedio.
+            $table->decimal('total', 18, 2)->default(0)->nullable(); // Valor total del movimiento..
 
             $table->dateTime('fecha')->nullable();
 

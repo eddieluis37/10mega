@@ -19,7 +19,13 @@ return new class extends Migration
             $table->foreign('lote_id')->references('id')->on('lotes');
             $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con los productos
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->decimal('cantidad_actual', 18, 2)->default(0)->nullable();
+            
+            $table->decimal('cantidad_inicial', 18, 2)->default(0)->nullable(); // Cantidad inicial al inicio del período.
+            $table->decimal('cantidad_final', 18, 2)->default(0)->nullable(); // Cantidad al cierre del período.
+
+            $table->decimal('costo_unitario', 18, 2)->default(0)->nullable(); // Costo unitario promedio.
+            $table->decimal('costo_total', 18, 2)->default(0)->nullable(); // Costo total del inventario final.
+
             $table->timestamps();
         });
     }
