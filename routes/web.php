@@ -112,9 +112,14 @@ use App\Http\Controllers\reportes\reporteventaprodController;
 use App\Http\Controllers\reportes\reportecomprarequeridaController;
 use App\Http\Controllers\reportes\reporteasignarpreciosController;
 use App\Http\Controllers\ProductLoteController;
+use App\Http\Controllers\InventarioController;
 
 
 /************************************************* */
+
+
+Route::post('/inventario/inicial', [InventarioController::class, 'registrarInicial'])->name('inventario.inicial');
+Route::get('/inventario/inicial', [InventarioController::class, 'showInventarioInicialForm'])->name('inventario.inicial.form');
 
 Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
@@ -284,6 +289,9 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('showinventory', [diaryController::class, 'show'])->name('inventory.showlist');
 
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
+
+
+    
 
     /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
     
