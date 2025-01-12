@@ -37,10 +37,11 @@ class compensadoController extends Controller
         /*   $category = Category::WhereIn('id',[1,2,3,4,5,6,7])->get(); */
         $providers = Third::Where('status', 1)->get();
         $centros = Centrocosto::Where('status', 1)->get();
-        $bodegas = Store::orderBy('id', 'asc')->get();
-        $lotes = Lote::orderBy('id', 'desc')->get();
+        $bodegas = Store::whereNotIn('id', [1, 2, 3, 4, 5, 6, 7])
+            ->orderBy('id', 'asc')
+            ->get();
 
-        return view('compensado.res.index', compact('providers', 'bodegas', 'lotes', 'centros'));
+        return view('compensado.res.index', compact('providers', 'bodegas', 'centros'));
     }
 
     /**
@@ -57,11 +58,13 @@ class compensadoController extends Controller
             /*    ->join('categories as cat', 'comp.categoria_id', '=', 'cat.id') */
             ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
             ->join('stores as s', 'comp.store_id', '=', 's.id')
-            ->join('lotes as l', 'comp.lote_id', '=', 'l.id')
+            //    ->join('lotes as l', 'comp.lote_id', '=', 'l.id')
             ->join('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
-            ->select('comp.*', 'tird.name as namethird', 'l.codigo as codigolote', 's.name as namestore', 'centro.name as namecentrocosto')
+            ->select('comp.*', 'tird.name as namethird', 's.name as namestore', 'centro.name as namecentrocosto')
             ->where('comp.id', $id)
             ->get();
+
+        $lotes = Lote::orderBy('id', 'desc')->get();
 
         $prod = Product::Where([
             /*  ['category_id',$datacompensado[0]->categoria_id], */
@@ -92,15 +95,16 @@ class compensadoController extends Controller
 
         $arrayTotales = $this->sumTotales($id);
         //dd($arrayTotales);
-        return view('compensado.create', compact('datacompensado', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
+        return view('compensado.create', compact('datacompensado', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
     }
 
     public function getcompensadoresdetail($compensadoId)
     {
 
         $detail = DB::table('compensadores_details as de')
+            ->join('lotes as l', 'de.lote_id', '=', 'l.id')
             ->join('products as pro', 'de.products_id', '=', 'pro.id')
-            ->select('de.*', 'pro.name as nameprod', 'pro.code')
+            ->select('de.*', 'l.codigo as codigo', 'pro.name as nameprod', 'pro.code')
             ->where([
                 ['de.compensadores_id', $compensadoId],
                 ['de.status', 1]
@@ -124,12 +128,14 @@ class compensadoController extends Controller
         try {
             $rules = [
                 'compensadoId' => 'required',
+                'lote' => 'required',
                 'producto' => 'required',
                 'pcompra' => 'required',
                 'pesokg' => 'required',
             ];
             $messages = [
                 'compensadoId.required' => 'El compensado es requerido',
+                'lote.required' => 'El lote es requerido',
                 'producto.required' => 'El producto es requerido',
                 'pcompra.required' => 'El precio de compra es requerido',
                 'pesokg.required' => 'El peso es requerido',
@@ -155,6 +161,7 @@ class compensadoController extends Controller
                 //$subtotal = $request->pcompra * $request->pesokg;
                 $detail = new Compensadores_detail();
                 $detail->compensadores_id = $request->compensadoId;
+                $detail->lote_id = $request->lote;
                 $detail->products_id = $request->producto;
                 $detail->pcompra = $formatPcompra;
                 $detail->peso = $formatPesoKg;
@@ -164,6 +171,7 @@ class compensadoController extends Controller
             } else {
                 $updateReg = Compensadores_detail::firstWhere('id', $request->regdetailId);
                 //$subtotal = $request->pcompra * $request->pesokg;
+                $updateReg->lote_id = $request->lote;
                 $updateReg->products_id = $request->producto;
                 $updateReg->pcompra = $formatPcompra;
                 $updateReg->peso = $formatPesoKg;
@@ -225,7 +233,6 @@ class compensadoController extends Controller
                 'compensadoId' => 'required',
                 'provider' => 'required',
                 'store' => 'required',
-                'lote' => 'required',
                 'factura' => 'required',
             ];
             $messages = [
@@ -233,7 +240,6 @@ class compensadoController extends Controller
                 'provider.required' => 'El proveedor es requerido',
                 'factura.required' => 'La factura es requerida',
                 'store.required' => 'La bodega es requerido',
-                'lote.required' => 'El lote es requerido',
                 'factura.required' => 'La factura es requerida',
             ];
 
@@ -261,9 +267,9 @@ class compensadoController extends Controller
                 /*     $comp->categoria_id = $request->categoria; */
                 $comp->thirds_id = $request->provider;
                 $comp->store_id = $request->store;
-                $comp->lote_id = $request->lote;
                 /*    $comp->fecha_compensado = $currentDateFormat; */
-                $comp->fecha_compensado = $request->fecha;
+                $comp->fecha_compensado = $request->fecha_compensado;
+                $comp->fecha_ingreso = $request->fecha_ingreso;
                 $comp->fecha_cierre = $dateNextMonday;
                 $comp->factura = $request->factura;
                 $comp->save();
@@ -276,7 +282,6 @@ class compensadoController extends Controller
                 $getReg = Compensadores::firstWhere('id', $request->compensadoId);
                 $getReg->thirds_id = $request->provider;
                 $getReg->store_id = $request->store;
-                $getReg->lote_id = $request->lote;
                 $getReg->factura = $request->factura;
                 $getReg->save();
 
@@ -305,9 +310,9 @@ class compensadoController extends Controller
         $data = DB::table('compensadores as comp')
             /*   ->join('categories as cat', 'comp.categoria_id', '=', 'cat.id') */
             ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
-            ->join('lotes as l', 'comp.lote_id', '=', 'l.id')
+            //->join('lotes as l', 'comp.lote_id', '=', 'l.id')
             ->join('stores as s', 'comp.store_id', '=', 's.id')
-            ->select('comp.*', 'tird.name as namethird', 'l.codigo as codigolote', 's.name as namestore')
+            ->select('comp.*', 'tird.name as namethird', 's.name as namestore')
             /*   ->where('comp.status', 1) */
             ->get();
         //$data = Compensadores::orderBy('id','desc');

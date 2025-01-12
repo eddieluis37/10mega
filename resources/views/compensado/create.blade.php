@@ -14,7 +14,7 @@
 					<b> Compra | Productos</b>
 				</h4>
 				<ul class="tabs tab-pills">
-					<li>						
+					<li>
 						<a href="javascript:void(0)" onclick="window.location.href = '../../compensado'" class="tabmenu bg-dark" data-toggle="modal" data-target="" title="Regresa al listado">Volver</a>
 					</li>
 				</ul>
@@ -39,15 +39,7 @@
 										<p>{{$datacompensado[0]->namethird}}</p>
 									</div>
 								</div>
-							</div>
-							<div class="col-md-3">
-								<div class="task-header">
-									<div class="form-group">
-										<label for="" class="form-label">Lote</label>
-										<p>{{$datacompensado[0]->codigolote}}</p>
-									</div>
-								</div>
-							</div>
+							</div>							
 							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
@@ -65,7 +57,7 @@
 								</div>
 							</div>
 							<div class="col-md-2 mt-6">
-								
+
 							</div>
 						</div>
 					</div>
@@ -79,7 +71,20 @@
 							<input type="hidden" id="compensadoId" name="compensadoId" value="{{$id}}">
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
 							<div class="row g-3">
-								<div class="col-md-4">
+								<div class="col-md-3">
+									<div class="task-header">
+										<div class="form-group">
+											<label for="" class="form-label">Buscar lote</label>
+											<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required="">
+												<option value="">Seleccione el producto</option>
+												@foreach ($lotes as $l)
+												<option value="{{$l->id}}">{{$l->codigo}}</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-3">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar producto</label>
@@ -92,7 +97,7 @@
 										</div>
 									</div>
 								</div>
-								
+
 								<div class="col-md-3">
 									<label for="" class="form-label">Cantidad</label>
 									<div class="input-group flex-nowrap">
@@ -115,8 +120,8 @@
 									</div>
 								</div>
 							</div>-->
-								<div class="col-md-2 text-center">
-									<div class="" style="margin-top:30px;">
+								<div class="col-md-12 text-center">
+									<div class="" style="margin-top:10px;">
 										<div class="d-grid gap-2">
 											<button id="btnAdd" class="btn btn-primary">Añadir</button>
 										</div>
@@ -126,7 +131,7 @@
 						</form>
 					</div>
 				</div>
-			</div>	
+			</div>
 
 			<div class="widget-content mt-3">
 				<div class="card">
@@ -150,7 +155,7 @@
 									@foreach($detail as $proddetail)
 									<tr>
 										<!--td>{{$proddetail->id}}</td-->
-									<!-- 	<td>{{ date('m-d-Y', strtotime($proddetail->created_at))}}</td> -->
+										<!-- 	<td>{{ date('m-d-Y', strtotime($proddetail->created_at))}}</td> -->
 										<td>{{$proddetail->code}}</td>
 										<td>{{$proddetail->nameprod}}</td>
 										<td>$ {{ number_format($proddetail->pcompra, 0, ',', '.')}}</td>

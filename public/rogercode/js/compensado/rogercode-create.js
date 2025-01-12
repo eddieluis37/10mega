@@ -20,9 +20,16 @@ const pesokg = document.querySelector("#pesokg");
 const pcompra = document.querySelector("#pcompra");
 const regDetail = document.querySelector("#regdetailId");
 const tableFoot = document.querySelector("#tabletfoot");
-const cargarInventarioBtn = document.getElementById('cargarInventarioBtn');
+const cargarInventarioBtn = document.getElementById("cargarInventarioBtn");
 
-cargarInventarioBtn.addEventListener('click', showConfirmationAlert);
+cargarInventarioBtn.addEventListener("click", showConfirmationAlert);
+
+$(".select2Lote").select2({
+    placeholder: "Busca un lote",
+    width: "100%",
+    theme: "bootstrap-5",
+    allowClear: true,
+});
 
 $(".select2Prod").select2({
     placeholder: "Busca un producto",
@@ -104,7 +111,7 @@ btnAdd.addEventListener("click", (e) => {
         }
     });
 });
-   //<td>${formatDate(element.created_at)}</td>
+//<td>${formatDate(element.created_at)}</td>
 
 const showData = (data) => {
     let dataAll = data.array;
@@ -113,6 +120,7 @@ const showData = (data) => {
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
             <tr>             
+                <td>${element.codigo}</td>    
                 <td>${element.code}</td>
                 <td>${element.nameprod}</td>
                 <td>$ ${formatCantidadSinCero(element.pcompra)}</td>

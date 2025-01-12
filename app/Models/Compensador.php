@@ -13,9 +13,13 @@ class Compensador extends Model
 
     protected $fillable = [
         'factura', // Número de factura
-        'proveedor', // Nombre o ID del proveedor
-        'monto_total', // Monto total de la compra compensada
-        'fecha', // Fecha de la compensación
+        'users_id',     
+        'store_id',        
+        'thirds_id',
+        'fecha_compensado',
+        'fecha_ingreso',        
+        'fecha_cierre',
+        'status',       
     ];
 
     /**

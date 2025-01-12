@@ -46,37 +46,6 @@
 					</div>
 				</div>
 			</div> -->
-
-			<!-- <div class="col-md-4">
-				<div class="task-header">
-					<div class="form-group">
-						<label for="" class="form-label">Centro de costo</label>
-						<select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
-							<option value="">Seleccione el centro de costo</option>
-							@foreach($centros as $option)
-							<option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
-							@endforeach
-						</select>
-						<span class="text-danger error-message"></span>
-					</div>
-				</div>
-			</div> -->
-
-			<div class="col-md-4">
-				<div class="task-header">
-					<div class="form-group">
-						<label for="lote" class="form-label">Lote</label>
-						<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required>
-							<option value="">Seleccione el lote</option>
-							@foreach($lotes as $option)
-							<option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['codigo'] }}</option>
-							@endforeach
-						</select>
-						<span class="text-danger error-message"></span>
-					</div>
-				</div>
-			</div>
-
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
@@ -90,7 +59,7 @@
 				<div class="task-header">
 					<div class="form-group">
 						<label for="date1" class="form-label">Fecha compra</label>
-						<input type="date" class="form-control" name="fecha" id="fecha" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+						<input type="date" class="form-control" name="fecha_compensado" id="fecha_compensado" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
 						<span class="text-danger error-message"></span>
 					</div>
 				</div>

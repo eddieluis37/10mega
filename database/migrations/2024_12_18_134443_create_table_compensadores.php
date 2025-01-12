@@ -17,29 +17,19 @@ class CreateTableCompensadores extends Migration
             $table->id();
 
             $table->unsignedBigInteger('users_id')->nullable();
-            $table->foreign('users_id')->references('id')->on('users');
-
-            $table->unsignedBigInteger('centrocosto_id')->nullable();
-            $table->foreign('centrocosto_id')->references('id')->on('centro_costo');
+            $table->foreign('users_id')->references('id')->on('users');           
             
             $table->unsignedBigInteger('store_id')->nullable();
-            $table->foreign('store_id')->references('id')->on('stores');
-
-            $table->unsignedBigInteger('lote_id')->nullable();
-            $table->foreign('lote_id')->references('id')->on('lotes');
+            $table->foreign('store_id')->references('id')->on('stores');        
 
             $table->unsignedBigInteger('thirds_id')->nullable();
             $table->foreign('thirds_id')->references('id')->on('thirds');
-
           
-            $table->string('factura')->nullable();
-            
-            $table->date('fecha_ingreso')->nullable();
-
+            $table->string('factura')->nullable();           
             $table->date('fecha_compensado')->nullable();
+            $table->date('fecha_ingreso')->nullable();          
             $table->date('fecha_cierre')->nullable();
-
-            $table->boolean('status')->parent_select()->default(false)->nullable();            
+            $table->boolean('status')->default(false)->nullable();
             $table->timestamps();
         });
     }
