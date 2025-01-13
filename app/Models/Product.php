@@ -20,13 +20,23 @@ class Product extends Model
 		return $this->belongsTo(Category::class);
 	}
  */
-	// Relación muchos a muchos con lotes
+	/* // Relación muchos a muchos con lotes
 	public function lotes()
 	{
 		return $this->belongsToMany(Lote::class, 'lote_products', 'product_id', 'lote_id')
 			->withPivot('cantidad', 'precio') // Columnas adicionales
 			->withTimestamps();
+	} */
+
+
+	// Relación muchos a muchos con lotes
+	public function lotes()
+	{
+		return $this->belongsToMany(Lote::class, 'lote_products')
+			->withPivot('cantidad')
+			->withTimestamps();
 	}
+
 
 	// Relación con categorías
 	public function category()

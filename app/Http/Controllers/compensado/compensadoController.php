@@ -20,6 +20,7 @@ use App\Models\centros\Centrocosto;
 use App\Models\Compensadores;
 use App\Models\Compensadores_detail;
 use App\Models\Centro_costo_product;
+use App\Models\Compensador;
 use App\Models\Store;
 use App\Models\MovimientoInventario;
 use App\Models\Inventario;
@@ -630,7 +631,7 @@ class compensadoController extends Controller
         }
     }
 
-    public function cargarInventariocr(Request $request)
+    public function cargarInventarioUnSoloLoteporCompra(Request $request)
     {
         $currentDateTime = Carbon::now();
         $formattedDate = $currentDateTime->format('Y-m-d');
@@ -739,6 +740,109 @@ class compensadoController extends Controller
             ], 500);
         }
     }
+
+    public function cargarInventariocr(Request $request)
+    {
+        $currentDateTime = Carbon::now();
+        $formattedDate = $currentDateTime->format('Y-m-d');
+
+        // Obtener el compensador
+        $compensadorId = $request->input('compensadoId');
+        $compensador = Compensador::findOrFail($compensadorId);
+
+        // Actualizar el registro de compensadores
+       /*  $compensador->fecha_cierre = $formattedDate;
+        $compensador->status = true;
+        $compensador->save();
+ */
+        // Validar que el compensador tenga detalles asociados
+        if ($compensador->detalles->isEmpty()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'El compensador no tiene detalles asociados.',
+            ], 422);
+        }
+
+        // Iniciar la transacción
+        DB::beginTransaction();
+
+        try {
+            // Iterar sobre los detalles del compensador
+            foreach ($compensador->detalles as $detalle) {
+                $loteId = $detalle->lote_id;
+                $productId = $detalle->product_id;
+                $peso = $detalle->peso;
+
+                // Verificar si el lote existe
+                $lote = Lote::with('productos')->find($loteId);
+
+                
+                if (!$lote) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => "El lote con ID {$loteId} no existe.",
+                    ], 422);
+                }
+
+                // Verificar si el producto ya está asociado al lote
+                $loteProductExists = $lote->productos()->where('id', $productId)->exists();
+
+                if (!$loteProductExists) {
+                    // Asociar el producto al lote
+                    $lote->productos()->attach($productId, [
+                        'cantidad' => 0, // Inicializar la cantidad
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                // Actualizar o crear el inventario
+                $inventario = Inventario::firstOrCreate(
+                    [
+                        'store_id' => $compensador->store_id,
+                        'lote_id' => $loteId,
+                        'product_id' => $productId,
+                    ],
+                    ['cantidad_inicial' => 0]
+                );
+
+                // Incrementar la cantidad en el inventario
+                $inventario->increment('cantidad_inicial', $peso);
+ /*
+                // Registrar el movimiento en la tabla de movimientos
+                MovimientoInventario::create([
+                    'compensador_id' => $compensadorId,
+                    'tipo' => 'compensadores',
+                    'fecha' => Carbon::now(),
+                    'cantidad' => $peso,
+                    'lote_id' => $loteId,
+                    'product_id' => $productId,
+                    'store_destino_id' => $compensador->store_id,
+                ]); */
+            }
+
+            // Confirmar la transacción
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Movimiento de inventario procesado correctamente.',
+                'compensador' => $compensador,
+            ], 201);
+        } catch (\Exception $e) {
+            // Revertir la transacción
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error al procesar el movimiento de inventario.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
 
 
 

@@ -31,14 +31,7 @@ class Compensadores_detail extends Model
         return $this->belongsTo(Product::class, 'products_id', 'id');
     } */
 
-    /**
-     * Relación: Un detalle pertenece a un compensador.
-     */
-    public function compensador()
-    {
-        return $this->belongsTo(Compensador::class, 'compensadores_id');
-    }
-
+    
     /**
      * Relación: Un detalle pertenece a un lote.
      */

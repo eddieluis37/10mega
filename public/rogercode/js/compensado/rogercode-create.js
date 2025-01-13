@@ -92,6 +92,7 @@ tbodyTable.addEventListener("click", (e) => {
             pcompra.value = formatCantidadSinCero(editReg.pcompra);
             pesokg.value = formatCantidad(editReg.peso);
             $(".select2Prod").val(editReg.products_id).trigger("change");
+            $(".select2Lote").val(editReg.lote_id).trigger("change");
         });
     }
 });
@@ -103,6 +104,7 @@ btnAdd.addEventListener("click", (e) => {
         console.log(result);
         if (result.status === 1) {
             $("#producto").val("").trigger("change");
+            $("#lote").val("").trigger("change");
             formDetail.reset();
             showData(result);
         }
@@ -120,8 +122,7 @@ const showData = (data) => {
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
             <tr>             
-                <td>${element.codigo}</td>    
-                <td>${element.code}</td>
+                <td>${element.codigo}</td>                    
                 <td>${element.nameprod}</td>
                 <td>$ ${formatCantidadSinCero(element.pcompra)}</td>
                 <td>${formatCantidad(element.peso)}</td>

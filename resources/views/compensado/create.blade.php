@@ -39,7 +39,7 @@
 										<p>{{$datacompensado[0]->namethird}}</p>
 									</div>
 								</div>
-							</div>							
+							</div>
 							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
@@ -97,19 +97,18 @@
 										</div>
 									</div>
 								</div>
-
-								<div class="col-md-3">
-									<label for="" class="form-label">Cantidad</label>
-									<div class="input-group flex-nowrap">
-										<input type="text" id="pesokg" name="pesokg" class="form-control input" placeholder="EJ: 10,00">
-										<span class="input-group-text" id="addon-wrapping">QT</span>
-									</div>
-								</div>
 								<div class="col-md-3">
 									<label for="" class="form-label">Precio de compra</label>
 									<div class="input-group flex-nowrap">
 										<span class="input-group-text" id="addon-wrapping">$</span>
 										<input type="text" id="pcompra" name="pcompra" class="form-control input" placeholder="EJ: 20.500">
+									</div>
+								</div>
+								<div class="col-md-3">
+									<label for="" class="form-label">Cantidad</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="pesokg" name="pesokg" class="form-control input" placeholder="EJ: 10,00">
+										<span class="input-group-text" id="addon-wrapping">QT</span>
 									</div>
 								</div>
 								<!--div class="col-md-2">
@@ -142,7 +141,7 @@
 									<tr>
 										<!--th class="table-th text-white">Item</th>-->
 										<!-- <th class="table-th text-white">Fecha compra</th> -->
-										<th class="table-th text-white">Codigo</th>
+										<th class="table-th text-white">Lote</th>
 										<th class="table-th text-white">Productos</th>
 										<th class="table-th text-white">Precio compra</th>
 										<th class="table-th text-white">Cantidad</th>
@@ -156,7 +155,7 @@
 									<tr>
 										<!--td>{{$proddetail->id}}</td-->
 										<!-- 	<td>{{ date('m-d-Y', strtotime($proddetail->created_at))}}</td> -->
-										<td>{{$proddetail->code}}</td>
+										<td>{{$proddetail->codigo}}</td>
 										<td>{{$proddetail->nameprod}}</td>
 										<td>$ {{ number_format($proddetail->pcompra, 0, ',', '.')}}</td>
 										<td>{{ number_format($proddetail->peso, 2, ',', '.')}} </td>
@@ -183,8 +182,7 @@
 										<th>Totales</th>
 										<td></td>
 										<td></td>
-										<td></td>
-										<th>{{number_format($arrayTotales['pesoTotalGlobal'], 2, ',', '.')}} KG</td>
+										<th>{{number_format($arrayTotales['pesoTotalGlobal'], 2, ',', '.')}}</td>
 										<th>$ {{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
 										<td></td>
 										<td class="text-center">
