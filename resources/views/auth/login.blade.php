@@ -86,7 +86,7 @@
     </script>
 </head>
 
-<body class="hold-transition login-page" style="background-image: url('{{ url('assets/img/pantalla_login.svg') }}');
+<body class="hold-transition login-page" style="background-image: url('{{ url('assets/img/fondomega.png') }}');
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
