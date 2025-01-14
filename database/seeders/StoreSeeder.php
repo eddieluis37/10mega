@@ -26,12 +26,12 @@ class StoreSeeder extends Seeder
         Store::create([
             'centrocosto_id' => 1,
             'name' => 'MATERIA PRIMA PLANTA',
-            'description' => 'NO TIENE',            
+            'description' => 'OTROS PRODUCTOS CARNICOS - PROTEINA CARNICA',            
         ]);
         Store::create([
             'centrocosto_id' => 1,
             'name' => 'AVERIAS PLANTA',
-            'description' => 'PRODUCTO QUE YA NO SE PUEDEN COMERCIALIZAR',         
+            'description' => 'PRODUCTO QUE YA NO SE PUEDEN COMERCIALIZAR O TOMA DECISIÓN DE CALIDAD',         
         ]);
         Store::create([
             'centrocosto_id' => 1,
@@ -51,11 +51,16 @@ class StoreSeeder extends Seeder
         Store::create([
             'centrocosto_id' => 1,
             'name' => 'RES PLANTA',          
-            'description' => 'COMPRAS PRODUCTOS',         
+            'description' => 'Compra lote Res - Compras productos',         
         ]);
         Store::create([
             'centrocosto_id' => 1,
             'name' => 'POLLO PLANTA',          
+            'description' => 'Compras lote pollo - Compra productos',         
+        ]);
+        Store::create([
+            'centrocosto_id' => 1,
+            'name' => 'CERDO PLANTA',          
             'description' => 'COMPRAS PRODUCTOS',         
         ]);
         Store::create([
@@ -116,6 +121,11 @@ class StoreSeeder extends Seeder
         Store::create([
             'centrocosto_id' => 8,
             'name' => 'CERDO CENTRAL',          
+            'description' => 'Compra Lotes Credo - Para traslado entre Bodegas',         
+        ]);
+        Store::create([
+            'centrocosto_id' => 8,
+            'name' => 'CERDO CENTRAL AUTOSERVICIO',          
             'description' => 'Para traslado entre Bodegas',         
         ]);
         Store::create([

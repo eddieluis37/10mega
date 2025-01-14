@@ -18,7 +18,7 @@ return new class extends Migration
                 ->constrained('centro_costo') // Specify the table name here
                 ->onDelete('cascade');
             $table->string('name');
-            $table->string('description', 50, 0)->nullable();
+            $table->string('description', 150, 0)->nullable(); // podria cambiar a tipo text
             $table->boolean('status')->parent_select()->default(true)->nullable();
             $table->timestamps();
         });
