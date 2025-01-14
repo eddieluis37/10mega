@@ -755,10 +755,10 @@ class compensadoController extends Controller
         Log::info('Detalle Compensado:', ['detalle' => $compensador->detalles]);
 
         // Actualizar el registro de compensadores
-        /*  $compensador->fecha_cierre = $formattedDate;
+        $compensador->fecha_cierre = $formattedDate;
         $compensador->status = true;
         $compensador->save();
- */
+
         // Validar que el compensador tenga detalles asociados
         if ($compensador->detalles->isEmpty()) {
             return response()->json([
