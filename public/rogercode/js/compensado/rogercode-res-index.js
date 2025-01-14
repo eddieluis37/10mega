@@ -27,11 +27,11 @@ $(document).ready(function () {
             },
             columns: [
                 { data:'id', name: 'id'},                
-                { data: 'namethird', name: 'namethird'},
-                { data: 'codigolote', name: 'codigolote' },
+                { data: 'namethird', name: 'namethird'},              
                 { data: 'namestore', name: 'namestore' },
                 { data:'factura', name: 'factura'},
-                { data: 'date', name: 'date' },
+                { data: 'fecha_compensado', name: 'fecha_compensado' },
+                { data: 'fecha_ingreso', name: 'fecha_ingreso' },
                 {data: 'action', name:'action'}
             ],
             order: [[0, 'DESC']],

@@ -283,6 +283,8 @@ class compensadoController extends Controller
                 $getReg = Compensadores::firstWhere('id', $request->compensadoId);
                 $getReg->thirds_id = $request->provider;
                 $getReg->store_id = $request->store;
+                $getReg->fecha_compensado = $request->fecha_compensado;
+                $getReg->fecha_ingreso = $request->fecha_ingreso;
                 $getReg->factura = $request->factura;
                 $getReg->save();
 
@@ -750,8 +752,10 @@ class compensadoController extends Controller
         $compensadorId = $request->input('compensadoId');
         $compensador = Compensador::findOrFail($compensadorId);
 
+        Log::info('Detalle Compensado:', ['detalle' => $compensador->detalles]);
+
         // Actualizar el registro de compensadores
-       /*  $compensador->fecha_cierre = $formattedDate;
+        /*  $compensador->fecha_cierre = $formattedDate;
         $compensador->status = true;
         $compensador->save();
  */
@@ -770,13 +774,13 @@ class compensadoController extends Controller
             // Iterar sobre los detalles del compensador
             foreach ($compensador->detalles as $detalle) {
                 $loteId = $detalle->lote_id;
-                $productId = $detalle->product_id;
+                $productId = $detalle->products_id;
                 $peso = $detalle->peso;
 
                 // Verificar si el lote existe
                 $lote = Lote::with('productos')->find($loteId);
+                Log::info('Lotes productos:', ['lote_productos' => $lote->productos]); // larvel.log
 
-                
                 if (!$lote) {
                     return response()->json([
                         'status' => 0,
@@ -785,7 +789,7 @@ class compensadoController extends Controller
                 }
 
                 // Verificar si el producto ya está asociado al lote
-                $loteProductExists = $lote->productos()->where('id', $productId)->exists();
+                $loteProductExists = $lote->productos()->where('product_id', $productId)->exists();
 
                 if (!$loteProductExists) {
                     // Asociar el producto al lote
@@ -808,7 +812,7 @@ class compensadoController extends Controller
 
                 // Incrementar la cantidad en el inventario
                 $inventario->increment('cantidad_inicial', $peso);
- /*
+
                 // Registrar el movimiento en la tabla de movimientos
                 MovimientoInventario::create([
                     'compensador_id' => $compensadorId,
@@ -818,7 +822,7 @@ class compensadoController extends Controller
                     'lote_id' => $loteId,
                     'product_id' => $productId,
                     'store_destino_id' => $compensador->store_id,
-                ]); */
+                ]);
             }
 
             // Confirmar la transacción
@@ -827,7 +831,7 @@ class compensadoController extends Controller
             return response()->json([
                 'status' => 1,
                 'message' => 'Movimiento de inventario procesado correctamente.',
-                'compensador' => $compensador,
+                'compensadores' => $compensador,
             ], 201);
         } catch (\Exception $e) {
             // Revertir la transacción

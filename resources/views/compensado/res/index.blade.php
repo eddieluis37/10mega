@@ -14,18 +14,17 @@
 					</li>
 				</ul>
 			</div>
-
 			<div class="widget-content">
 				<div class="table-responsive">
 					<table id="tableCompensado" class="table table-striped mt-1">
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
 								<th class="table-th text-white">#</th>								
-								<th class="table-th text-white">Proveedor</th>
-								<th class="table-th text-white">LOTE</th>
+								<th class="table-th text-white">Proveedor</th>								
 								<th class="table-th text-white ">BODEGA</th>
 								<th class="table-th text-white">Factura</th>
-								<th class="table-th text-white">Fecha</th>
+								<th class="table-th text-white">FechaCP</th>
+								<th class="table-th text-white">FechaIN</th>
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
 						</thead>

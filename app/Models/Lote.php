@@ -20,16 +20,7 @@ class Lote extends Model
 
     ];
 
-    /**
-     * Relación: Un producto pertenece a un lote.
-     */
-    public function lote()
-    {
-        return $this->belongsTo(Lote::class, 'lote_id');
-    }
-
-
-    // un lote tenga muchos productos
+     // un lote tenga muchos productos
     public function productos()
     {
         return $this->belongsToMany(Product::class, 'lote_products')
