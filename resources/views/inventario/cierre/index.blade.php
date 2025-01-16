@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="row g-3 mt-3">
-      <div class="col-md-3">
+        <div class="col-md-3">
           <label for="" class="form-label">Bodega</label>
           <select class="form-control form-control-sm input" name="inputstore" id="inputstore" required>
             <option value="">Todas las bodegas</option>
@@ -40,6 +40,7 @@
         <div class="col-md-3">
           <label for="" class="form-label">Lote</label>
           <select class="form-control form-control-sm input" name="inputlote" id="inputlote" required>
+            <option value="-1">Seleccione lote</option>
             <option value="">Todos los lotes</option>
             @foreach($lotes as $option)
             <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['codigo'] }}</option>
@@ -54,8 +55,8 @@
         <div class="col-md-3" style="display:none">
           <label for="date1" class="form-label">Fecha de Cierre</label>
           <input type="date" class="form-control" value="{{$endDate}}" placeholder="Last name">
-        </div>      
-      
+        </div>
+
 
         @can('Cerrar_Inventario')
         <!-- <div class="col-md-3 text-right ml-auto">
