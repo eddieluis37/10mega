@@ -24,7 +24,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
         processing: true,
         serverSide: true,
         ajax: {
-            url: "/showInventorioCierre",
+            url: "/showInventarioCierre",
             type: "GET",
             data: {
                 storeId: storeId,
@@ -261,6 +261,19 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
     });
 }
 
+$(document).ready(function () {
+    initializeDataTable("-1");
+
+    $("#inputstore, #inputlote").on("change", function () {
+        var storeId = $("#inputstore").val();
+        var loteId = $("#inputlote").val();
+
+        dataTable.destroy();
+        initializeDataTable(storeId, loteId);
+        cargarTotales(storeId, loteId);
+    });
+});
+
 function cargarTotales(storeId = "-1", loteId = "-1") {
     $.ajax({
         type: "GET",
@@ -297,18 +310,7 @@ function cargarTotales(storeId = "-1", loteId = "-1") {
     });
 }
 
-$(document).ready(function () {
-    initializeDataTable("-1");
 
-    $("#input_store, #input_lote").on("change", function () {
-        var storeId = $("#input_store").val();
-        var loteId = $("#input_lote").val();
-
-        dataTable.destroy();
-        initializeDataTable(storeId, loteId);
-        cargarTotales(storeId, loteId);
-    });
-});
 
 document
     .getElementById("cargarInventarioBtn")
@@ -322,9 +324,9 @@ document
                     const dataform = new FormData();
 
                     const var_storeId =
-                        document.querySelector("#input_store");
+                        document.querySelector("#inputstore");
                     const var_loteId =
-                        document.querySelector("#input_lote");
+                        document.querySelector("#inputlote");
 
                     dataform.append(
                         "storeId",

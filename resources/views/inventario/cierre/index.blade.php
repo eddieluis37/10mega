@@ -29,8 +29,8 @@
       <div class="row g-3 mt-3">
       <div class="col-md-3">
           <label for="" class="form-label">Bodega</label>
-          <select class="form-control form-control-sm input" name="input_store" id="input_store" required>
-            <option value="">Seleccione la bodega</option>
+          <select class="form-control form-control-sm input" name="inputstore" id="inputstore" required>
+            <option value="">Todas las bodegas</option>
             @foreach($stores as $option)
             <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
             @endforeach
@@ -39,8 +39,8 @@
         </div>
         <div class="col-md-3">
           <label for="" class="form-label">Lote</label>
-          <select class="form-control form-control-sm input" name="input_lote" id="input_lote" required>
-            <option value="">Seleccione el lote</option>
+          <select class="form-control form-control-sm input" name="inputlote" id="inputlote" required>
+            <option value="">Todos los lotes</option>
             @foreach($lotes as $option)
             <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['codigo'] }}</option>
             @endforeach
@@ -58,11 +58,11 @@
       
 
         @can('Cerrar_Inventario')
-        <div class="col-md-3 text-right ml-auto">
+        <!-- <div class="col-md-3 text-right ml-auto">
           <div style="margin-top:28px;" clas="">
             <button class="btn btn-success btn-lg" type="button" id="cargarInventarioBtn">Cerrar Inventario</button>
           </div>
-        </div>
+        </div> -->
       </div>
       @endcan
       <div class="card border-0">

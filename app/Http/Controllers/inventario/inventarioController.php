@@ -169,14 +169,17 @@ class inventarioController extends Controller
 
     public function showInvcierre(Request $request)
     {
-     
+
+        $storeId = $request->input('storeId', -1); // Valor por defecto -1 si no está definido
+        $loteId = $request->input('loteId', -1);  // Valor por defecto -1 si no está definido
+
+        // Log::info('storeId:', ['storeId' => $storeId]); // larvel.log
+        // Log::info('loteId:', ['loteId' => $loteId]); // larvel.log
 
         DB::beginTransaction();
 
         try {
 
-            $storeId = intval($request->input('input_store')); // Convertir a número
-            $loteId = intval($request->input('input_lote'));  // Convertir a número
             // Obtener todos los inventarios activos con filtros de store y lote
             $inventarios = Inventario::with(['lote', 'product', 'store', 'store.centroCosto'])
                 ->when($storeId, function ($query, $storeId) {
@@ -211,30 +214,31 @@ class inventarioController extends Controller
                 $stockIdeal = $compensadores + $inventario->inventario_inicial;
 
                 // Actualizar los campos del inventario
-                $inventario->update([
+                /*   $inventario->update([
                     'cantidad_final' => $cantidadFinal,
                     'stock_ideal' => $stockIdeal,
                     'inventario_inicial' => $inventario->cantidad_inicial, // Actualizar inventario inicial si aplica
                 ]);
-
+ */
                 // Guardar los resultados para visualización
                 $resultados[] = [
                     'CategoriaNombre' => $inventario->product->category->name,
                     'ProductoNombre' => $inventario->product->name,
                     'CantidadInicial' => $inventario->inventario_inicial,
+                    'compraLote' => $inventario->lote->id,
+                    'alistamiento' => $inventario->lote->id,
+                    //    'alistamiento' => $inventario->lote->codigo,
                     'compensados' => $compensadores,
+                    'trasladoing' => $inventario->lote->id,
+                    'trasladosal' => $inventario->product->id,
 
-                    // 'LoteID' => $inventario->lote->id,
-                    //      'CodigoLote' => $inventario->lote->codigo,
-                    //    'ProductoID' => $inventario->product->id,
+                    'venta' => $inventario->store->id,
+                    'notacredito' => $inventario->store->name,
+                    'notadebito' => $inventario->lote->id,
+                    'venta_real' => $inventario->lote->id,
 
-                    //   'StoreID' => $inventario->store->id,
-                    //  'StoreNombre' => $inventario->store->name,
-                    //     'CentroCostoID' => $inventario->store->centroCosto->id,
-                    //     'CentroCostoNombre' => $inventario->store->centroCosto->name,
-                    // 'compensados' => $compensadores,
-                    //   'TrasladoIngreso' => $trasladoIngreso,
-                    // 'TrasladoSalida' => $trasladoSalida,
+                    'stock' => $inventario->lote->id,
+                    'fisico' => $inventario->lote->id,
                     //  'Venta' => $venta,
                     //  'Ajuste' => $ajuste,
                     // 'CantidadFinal' => $cantidadFinal,
@@ -242,7 +246,7 @@ class inventarioController extends Controller
                 ];
             }
 
-            Log::info('Inventarios:', ['inventarios' => $resultados]); // larvel.log
+            //  Log::info('Inventarios:', ['inventarios' => $resultados]); // larvel.log
 
 
             DB::commit();

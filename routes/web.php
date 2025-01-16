@@ -294,7 +294,7 @@ Route::group(['middleware' => [('auth')]], function () {
  /*****************************INVENTORIO NUEVO****************************************** */
     Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');
    // Route::get('showConsolidadoInventory', [inventarioController::class, 'show'])->name('inventory.showConsol');
-    Route::get('showInventorioCierre', [inventarioController::class, 'showInvcierre'])->name('inventory.showConsol');
+    Route::get('showInventarioCierre', [inventarioController::class, 'showInvcierre'])->name('inventario.showInventarioCierre');
 
     /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
     
