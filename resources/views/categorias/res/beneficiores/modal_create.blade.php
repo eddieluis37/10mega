@@ -73,7 +73,7 @@
 									<select class="form-control selectLote" name="lotes_id" id="lotes_id" required="">
 										<option value="">Buscar un lote</option>
 										@foreach ($lotes as $l)
-										<option value="{{$l->id}}">{{$l->name}}</option>
+										<option value="{{$l->id}}">{{$l->codigo}}</option>
 										@endforeach
 									</select>
 									@error('lotes_id') <span class="text-danger er">{{ $message}}</span>@enderror

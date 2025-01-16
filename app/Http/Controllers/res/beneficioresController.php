@@ -29,7 +29,7 @@ class beneficioresController extends Controller
 		$thirds = Third::orderBy('name', 'asc')->get();
 		$sacrificios = Sacrificio::orderBy('name', 'asc')->get();
 		$centros = Centrocosto::Where('status', 1)->get();
-		$lotes = Lote::orderBy('name', 'asc')->get();
+		$lotes = Lote::orderBy('codigo', 'asc')->get();
 		return view('categorias.res.beneficiores.index', compact('thirds', 'lotes', 'sacrificios', 'centros'));
 	}
 
@@ -247,7 +247,7 @@ class beneficioresController extends Controller
 			->join('thirds as tird', 'be.thirds_id', '=', 'tird.id')
 			->join('lotes as lote', 'be.lotes_id', '=', 'lote.id')
 			->join('centro_costo as cc', 'be.centrocosto_id', '=', 'cc.id')
-			->select('be.*', 'cc.name as namecentrocosto', 'tird.name as namethird', 'lote.name as namelote')
+			->select('be.*', 'cc.name as namecentrocosto', 'tird.name as namethird', 'lote.codigo as namelote')
 			->where('be.status', '=', true)
 			->orderBy('be.id', 'desc')
 			->get();

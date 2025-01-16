@@ -42,7 +42,7 @@ class desposteresController extends Controller
         $beneficior = DB::table('beneficiores as b')
             ->join('thirds as t', 'b.thirds_id', '=', 't.id')
             ->join('lotes as l', 'b.lotes_id', '=', 'l.id')
-            ->select('t.name', 'b.id', 'l.name as namelote', 'b.factura', 'b.canalplanta', 'b.cantidad', 'b.costokilo', 'b.fecha_cierre')
+            ->select('t.name', 'b.id', 'l.codigo as namelote', 'b.factura', 'b.canalplanta', 'b.cantidad', 'b.costokilo', 'b.fecha_cierre')
             ->where('b.id', $id)
             ->get();
         /******************/
