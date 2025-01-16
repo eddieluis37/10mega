@@ -85,7 +85,9 @@ use App\Http\Controllers\DragDropController;
 use App\Http\Controllers\excelAnalisisKGController;
 use App\Http\Controllers\excelAnalisisUtilidadController;
 use App\Http\Controllers\ExcelConsolidadoVentasController;
+use App\Http\Controllers\inventario\inventarioController;
 use App\Http\Controllers\inventory\inventoryController;
+
 use App\Http\Controllers\inventory\diaryController;
 use App\Http\Controllers\inventory\mensualController;
 use App\Http\Controllers\listaprecio\listaPrecioController;
@@ -112,7 +114,7 @@ use App\Http\Controllers\reportes\reporteventaprodController;
 use App\Http\Controllers\reportes\reportecomprarequeridaController;
 use App\Http\Controllers\reportes\reporteasignarpreciosController;
 use App\Http\Controllers\ProductLoteController;
-use App\Http\Controllers\InventarioController;
+//use App\Http\Controllers\InventarioController;
 
 
 /************************************************* */
@@ -287,11 +289,12 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('inventory/diary', [diaryController::class, 'index'])->name('inventory.diary');
     Route::get('inventory/consolidado', [inventoryController::class, 'index'])->name('inventory.consolidado');
     Route::get('showinventory', [diaryController::class, 'show'])->name('inventory.showlist');
-
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
 
-
-    
+ /*****************************INVENTORIO NUEVO****************************************** */
+    Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');
+   // Route::get('showConsolidadoInventory', [inventarioController::class, 'show'])->name('inventory.showConsol');
+    Route::get('showInventorioCierre', [inventarioController::class, 'showInvcierre'])->name('inventory.showConsol');
 
     /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
     
@@ -306,7 +309,7 @@ Route::group(['middleware' => [('auth')]], function () {
     
 
     Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
-    Route::get('showConsolidadoInventory', [inventoryController::class, 'show'])->name('inventory.showConsol');
+   // Route::get('showConsolidadoInventory', [inventoryController::class, 'show'])->name('inventory.showConsol');
 
     Route::get('totales', [inventoryController::class, 'totales'])->name('inventory.totales');
 

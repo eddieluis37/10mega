@@ -29,14 +29,6 @@ return new class extends Migration
 
             $table->foreignId('lote_id')->constrained('lotes')->onDelete('cascade'); //Relación Lotes - Productos - Categorías
 
-            /*   Cada lote está relacionado con un producto, y ese producto está vinculado a una categoría.
-             Esto asegura que cada lote esté indirectamente asociado a una categoría.
-           Integridad referencial: Uso de onDelete('cascade') para que las eliminaciones en categorías o 
-           productos afecten a lotes relacionados. */
-
-            //  $table->unsignedBigInteger('lote_id')->nullable();
-            //  $table->foreign('lote_id')->references('id')->on('lotes');
-
             $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con un producto específico
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
 

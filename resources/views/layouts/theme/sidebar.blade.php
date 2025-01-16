@@ -524,12 +524,19 @@
                         </svg> Diario</a>
                 </li> -->
                 <li>
-                    <a href="{{ url('inventory/consolidado') }}" style="display: flex; align-items: center">
+                    <a href="{{ url('inventario/cierre') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square ">
                             <polyline points="9 11 12 14 22 4"></polyline>
                             <path d="M22 4v16H6"></path>
                         </svg> Cierre de Inv KG</a>
                 </li>
+                <!-- <li>
+                    <a href="{{ url('inventory/consolidado') }}" style="display: flex; align-items: center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square ">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M22 4v16H6"></path>
+                        </svg> V1 Ci Inv KG</a>
+                </li> -->
                 <li>
                     <a href="{{ url('inventory/utilidad') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square">

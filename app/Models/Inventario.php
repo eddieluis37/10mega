@@ -15,8 +15,9 @@ class Inventario extends Model
         'lote_id',
         'store_id',
         'product_id',
+        'inventario_inicial',
         'cantidad_inicial',
-        'cantidad_actual',
+        'cantidad_final',
     ];
 
     /**
