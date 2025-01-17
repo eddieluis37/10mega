@@ -38,11 +38,13 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 name: "ProductoNombre",
                 render: function (data) {
                     let subStringData = data.substring(0, 25).toLowerCase();
-                    let capitalizedSubString = subStringData.charAt(0).toUpperCase() + subStringData.slice(1);
+                    let capitalizedSubString =
+                        subStringData.charAt(0).toUpperCase() +
+                        subStringData.slice(1);
                     if (data.length > 25) {
                         return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
                     } else {
-                      /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
+                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
                         return `<span style="font-size: smaller;">${capitalizedSubString}</span>`;
                     }
                 },
@@ -53,7 +55,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
             { data: "compensados", name: "compensados" },
             { data: "trasladoing", name: "trasladoing" },
             { data: "trasladosal", name: "trasladosal" },
-            { data: "venta", name: "venta" },         
+            { data: "venta", name: "venta" },
             { data: "notacredito", name: "notacredito" },
             { data: "notadebito", name: "notadebito" },
             { data: "venta_real", name: "venta_real" },
@@ -247,7 +249,9 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 .toFixed(2);
 
             // Agregar los valores totales en el footer
-            $(api.column("CantidadInicial:name").footer()).html(totalInvinicial);
+            $(api.column("CantidadInicial:name").footer()).html(
+                totalInvinicial
+            );
             $(api.column("compraLote:name").footer()).html(totalCompraLote);
             $(api.column("alistamiento:name").footer()).html(totalAlistamiento);
             $(api.column("compensados:name").footer()).html(totalCompensados);
@@ -262,12 +266,49 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
 }
 
 $(document).ready(function () {
+    // Inicializa Select2
+    $(".select2").select2({
+        theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
+        width: "100%",        
+        allowClear: true,
+    });
+
+    // Inicializa DataTable
     initializeDataTable("-1");
 
-    $("#inputstore, #inputlote").on("change", function () {
-        var storeId = $("#inputstore").val();
-        var loteId = $("#inputlote").val();
+    $("#inputstore").on("change", function () {
+        var storeId = $(this).val();
+        // Limpiar el select de lotes
+        $("#inputlote")
+            .empty()
+            .append('<option value="">Seleccione Lote</option>')
+            .trigger("change");
 
+        if (storeId) {
+            // Realiza una llamada AJAX para obtener los lotes asociados
+            $.ajax({
+                url: "/getLotes", 
+                method: "GET",
+                data: { storeId: storeId },
+                success: function (data) {
+                    // Suponiendo que 'data' es un array de objetos con 'id' y 'codigo'
+                    $.each(data, function (index, lote) {
+                        $("#inputlote").append(
+                            new Option(lote.codigo, lote.id)
+                        );
+                    });
+                    $("#inputlote").trigger("change"); // Actualiza Select2
+                },
+                error: function (error) {
+                    console.error("Error fetching lots:", error);
+                },
+            });
+        }
+    });
+
+    $("#inputlote").on("change", function () {
+        var storeId = $("#inputstore").val();
+        var loteId = $(this).val();
         dataTable.destroy();
         initializeDataTable(storeId, loteId);
         cargarTotales(storeId, loteId);
@@ -310,8 +351,6 @@ function cargarTotales(storeId = "-1", loteId = "-1") {
     });
 }
 
-
-
 document
     .getElementById("cargarInventarioBtn")
     .addEventListener("click", (e) => {
@@ -323,19 +362,11 @@ document
                     loadingStart(element);
                     const dataform = new FormData();
 
-                    const var_storeId =
-                        document.querySelector("#inputstore");
-                    const var_loteId =
-                        document.querySelector("#inputlote");
+                    const var_storeId = document.querySelector("#inputstore");
+                    const var_loteId = document.querySelector("#inputlote");
 
-                    dataform.append(
-                        "storeId",
-                        Number(var_storeId.value)
-                    );
-                    dataform.append(
-                        "loteId",
-                        Number(var_loteId.value)
-                    );
+                    dataform.append("storeId", Number(var_storeId.value));
+                    dataform.append("loteId", Number(var_loteId.value));
 
                     return sendData("/cargarInventariohist", dataform, token);
                 }

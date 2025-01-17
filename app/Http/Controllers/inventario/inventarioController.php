@@ -43,6 +43,124 @@ class inventarioController extends Controller
         return view('inventario.cierre.index', compact('centros', 'stores', 'lotes', 'startDate', 'endDate', 'totalStock'));
     }
 
+    public function showInvcierre(Request $request)
+    {
+
+        $storeId = $request->input('storeId', -1); // Valor por defecto -1 si no está definido
+        $loteId = $request->input('loteId', -1);  // Valor por defecto -1 si no está definido
+
+        // Log::info('storeId:', ['storeId' => $storeId]); // larvel.log
+        // Log::info('loteId:', ['loteId' => $loteId]); // larvel.log
+
+        DB::beginTransaction();
+
+        try {
+
+            // Obtener todos los inventarios activos con filtros de store y lote
+            $inventarios = Inventario::with(['lote', 'product', 'store', 'store.centroCosto'])
+                ->when($storeId, function ($query, $storeId) {
+                    return $query->where('store_id', $storeId);
+                })
+                ->when($loteId, function ($query, $loteId) {
+                    return $query->where('lote_id', $loteId);
+                })
+                ->get();
+
+            $resultados = [];
+
+            foreach ($inventarios as $inventario) {
+                // Obtener los movimientos de inventario relacionados
+                $movimientos = MovimientoInventario::where('lote_id', $inventario->lote_id)
+                    ->where('product_id', $inventario->product_id)
+                    ->select('tipo', DB::raw('SUM(cantidad) AS cantidad_total'))
+                    ->groupBy('tipo')
+                    ->get();
+
+                // Calcular cantidades por tipo de movimiento
+                $compensadores = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
+                /*  $trasladoIngreso = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
+                $trasladoSalida = $movimientos->where('tipo', 'traslado_salida')->sum('cantidad_total');
+                $venta = $movimientos->where('tipo', 'venta')->sum('cantidad_total');
+                $ajuste = $movimientos->where('tipo', 'ajuste')->sum('cantidad_total');
+ */
+                // Calcular inventario final
+                $cantidadFinal = $inventario->cantidad_inicial;
+
+                // Calcular stock ideal
+                $stockIdeal = $compensadores + $inventario->inventario_inicial;
+
+                // Actualizar los campos del inventario
+                /*   $inventario->update([
+                    'cantidad_final' => $cantidadFinal,
+                    'stock_ideal' => $stockIdeal,
+                    'inventario_inicial' => $inventario->cantidad_inicial, // Actualizar inventario inicial si aplica
+                ]);
+ */
+                // Guardar los resultados para visualización
+                $resultados[] = [
+                    'CategoriaNombre' => $inventario->product->category->name,
+                    'ProductoNombre' => $inventario->product->name,
+                    'CantidadInicial' => $inventario->inventario_inicial,
+                    'compraLote' => $inventario->lote->id,
+                    'alistamiento' => $inventario->lote->id,
+                    //    'alistamiento' => $inventario->lote->codigo,
+                    'compensados' => $compensadores,
+                    'trasladoing' => $inventario->lote->id,
+                    'trasladosal' => $inventario->product->id,
+
+                    'venta' => $inventario->store->id,
+                    'notacredito' => $inventario->store->name,
+                    'notadebito' => $inventario->lote->id,
+                    'venta_real' => $inventario->lote->id,
+
+                    'stock' => $inventario->lote->id,
+                    'fisico' => $inventario->lote->id,
+                    //  'Venta' => $venta,
+                    //  'Ajuste' => $ajuste,
+                    // 'CantidadFinal' => $cantidadFinal,
+                    // 'StockIdeal' => $stockIdeal,
+                ];
+            }
+
+            //  Log::info('Inventarios:', ['inventarios' => $resultados]); // larvel.log
+
+
+            DB::commit();
+            // Devolver $resultados en formato Datatables
+            return datatables()->of(collect($resultados))
+                ->addIndexColumn() // Agregar un índice
+                ->make(true);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error al realizar el cierre de inventario.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getLotes(Request $request)
+    {
+        // Validar la solicitud entrante
+        $request->validate([
+            'storeId' => 'required|exists:inventarios,store_id', // Verifica que el store_id exista en la tabla inventarios
+        ]);
+
+        // Recuperar el storeId de la solicitud
+        $storeId = $request->input('storeId');
+
+        // Obtener los lote_ids asociados a la tienda a través de la tabla inventarios
+        $loteIds = Inventario::where('store_id', $storeId)->pluck('lote_id');
+
+        // Obtener los lotes asociados a los lote_ids
+        $lotes = Lote::whereIn('id', $loteIds)->get(['id', 'codigo']); // Ajusta los nombres de los campos según tu base de datos
+
+        // Retornar los lotes como una respuesta JSON
+        return response()->json($lotes);
+    }
+
     public function totales(Request $request)
     {
         $centrocostoId = $request->input('centrocostoId');
@@ -165,103 +283,5 @@ class inventarioController extends Controller
 
             ]
         );
-    }
-
-    public function showInvcierre(Request $request)
-    {
-
-        $storeId = $request->input('storeId', -1); // Valor por defecto -1 si no está definido
-        $loteId = $request->input('loteId', -1);  // Valor por defecto -1 si no está definido
-
-        // Log::info('storeId:', ['storeId' => $storeId]); // larvel.log
-        // Log::info('loteId:', ['loteId' => $loteId]); // larvel.log
-
-        DB::beginTransaction();
-
-        try {
-
-            // Obtener todos los inventarios activos con filtros de store y lote
-            $inventarios = Inventario::with(['lote', 'product', 'store', 'store.centroCosto'])
-                ->when($storeId, function ($query, $storeId) {
-                    return $query->where('store_id', $storeId);
-                })
-                ->when($loteId, function ($query, $loteId) {
-                    return $query->where('lote_id', $loteId);
-                })
-                ->get();
-
-            $resultados = [];
-
-            foreach ($inventarios as $inventario) {
-                // Obtener los movimientos de inventario relacionados
-                $movimientos = MovimientoInventario::where('lote_id', $inventario->lote_id)
-                    ->where('product_id', $inventario->product_id)
-                    ->select('tipo', DB::raw('SUM(cantidad) AS cantidad_total'))
-                    ->groupBy('tipo')
-                    ->get();
-
-                // Calcular cantidades por tipo de movimiento
-                $compensadores = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
-                /*  $trasladoIngreso = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
-                $trasladoSalida = $movimientos->where('tipo', 'traslado_salida')->sum('cantidad_total');
-                $venta = $movimientos->where('tipo', 'venta')->sum('cantidad_total');
-                $ajuste = $movimientos->where('tipo', 'ajuste')->sum('cantidad_total');
- */
-                // Calcular inventario final
-                $cantidadFinal = $inventario->cantidad_inicial;
-
-                // Calcular stock ideal
-                $stockIdeal = $compensadores + $inventario->inventario_inicial;
-
-                // Actualizar los campos del inventario
-                /*   $inventario->update([
-                    'cantidad_final' => $cantidadFinal,
-                    'stock_ideal' => $stockIdeal,
-                    'inventario_inicial' => $inventario->cantidad_inicial, // Actualizar inventario inicial si aplica
-                ]);
- */
-                // Guardar los resultados para visualización
-                $resultados[] = [
-                    'CategoriaNombre' => $inventario->product->category->name,
-                    'ProductoNombre' => $inventario->product->name,
-                    'CantidadInicial' => $inventario->inventario_inicial,
-                    'compraLote' => $inventario->lote->id,
-                    'alistamiento' => $inventario->lote->id,
-                    //    'alistamiento' => $inventario->lote->codigo,
-                    'compensados' => $compensadores,
-                    'trasladoing' => $inventario->lote->id,
-                    'trasladosal' => $inventario->product->id,
-
-                    'venta' => $inventario->store->id,
-                    'notacredito' => $inventario->store->name,
-                    'notadebito' => $inventario->lote->id,
-                    'venta_real' => $inventario->lote->id,
-
-                    'stock' => $inventario->lote->id,
-                    'fisico' => $inventario->lote->id,
-                    //  'Venta' => $venta,
-                    //  'Ajuste' => $ajuste,
-                    // 'CantidadFinal' => $cantidadFinal,
-                    // 'StockIdeal' => $stockIdeal,
-                ];
-            }
-
-            //  Log::info('Inventarios:', ['inventarios' => $resultados]); // larvel.log
-
-
-            DB::commit();
-            // Devolver $resultados en formato Datatables
-            return datatables()->of(collect($resultados))
-                ->addIndexColumn() // Agregar un índice
-                ->make(true);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'status' => 0,
-                'message' => 'Error al realizar el cierre de inventario.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
     }
 }
