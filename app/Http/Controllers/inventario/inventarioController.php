@@ -141,6 +141,15 @@ class inventarioController extends Controller
         }
     }
 
+    public function getAllLotes()
+    {
+        // Obtener todos los lotes
+        $lotes = Lote::all(['id', 'codigo']);
+
+        // Retornar los lotes como una respuesta JSON
+        return response()->json($lotes);
+    }
+
     public function getLotes(Request $request)
     {
         // Validar la solicitud entrante

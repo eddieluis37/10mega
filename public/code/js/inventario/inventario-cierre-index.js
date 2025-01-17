@@ -281,13 +281,13 @@ $(document).ready(function () {
         // Limpiar el select de lotes
         $("#inputlote")
             .empty()
-            .append('<option value="">Seleccione Lote</option>')
+            .append('<option value="">Selecciona Lote</option>')
             .trigger("change");
 
         if (storeId) {
-            // Realiza una llamada AJAX para obtener los lotes asociados
+            // Realiza una llamada AJAX para obtener los lotes asociados a la tienda seleccionada
             $.ajax({
-                url: "/getLotes", 
+                url: "/getLotes",
                 method: "GET",
                 data: { storeId: storeId },
                 success: function (data) {
@@ -301,6 +301,24 @@ $(document).ready(function () {
                 },
                 error: function (error) {
                     console.error("Error fetching lots:", error);
+                },
+            });
+        } else {
+            // Si no hay tienda seleccionada, obtener todos los lotes
+            $.ajax({
+                url: "/getAllLotes",
+                method: "GET",
+                success: function (data) {
+                    // Suponiendo que 'data' es un array de objetos con 'id' y 'codigo'
+                    $.each(data, function (index, lote) {
+                        $("#inputlote").append(
+                            new Option(lote.codigo, lote.id)
+                        );
+                    });
+                    $("#inputlote").trigger("change"); // Actualiza Select2
+                },
+                error: function (error) {
+                    console.error("Error fetching all lots:", error);
                 },
             });
         }
