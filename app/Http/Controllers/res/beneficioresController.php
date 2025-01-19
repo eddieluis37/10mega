@@ -14,6 +14,7 @@ use App\Models\Sacrificio;
 use App\Models\Beneficiore;
 use App\Models\centros\Centrocosto;
 use App\Models\Lote;
+use App\Models\Store;
 use NumberFormatter;
 use DateTime;
 
@@ -28,9 +29,13 @@ class beneficioresController extends Controller
 	{
 		$thirds = Third::orderBy('name', 'asc')->get();
 		$sacrificios = Sacrificio::orderBy('name', 'asc')->get();
-		$centros = Centrocosto::Where('status', 1)->get();
+		//$centros = Centrocosto::Where('status', 1)->get();
+		$bodegas = Store::whereIn('id', [8])
+		->orderBy('id', 'asc')
+		->get();
+
 		$lotes = Lote::orderBy('codigo', 'asc')->get();
-		return view('categorias.res.beneficiores.index', compact('thirds', 'lotes', 'sacrificios', 'centros'));
+		return view('categorias.res.beneficiores.index', compact('thirds', 'lotes', 'sacrificios', 'bodegas'));
 	}
 
 	/**
@@ -88,7 +93,7 @@ class beneficioresController extends Controller
 				$current_date->modify('next monday'); // Move to the next Monday
 				$dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
 				$newBeneficiore = new Beneficiore();
-				$newBeneficiore->centrocosto_id = $request->centrocosto_id;
+				$newBeneficiore->store_id = $request->store_id;
 				$newBeneficiore->thirds_id = $request->thirds_id;
 				$newBeneficiore->plantasacrificio_id  = $request->plantasacrificio_id;
 				$newBeneficiore->cantidadmacho = $this->MoneyToNumber($request->cantidadMacho);
@@ -163,7 +168,7 @@ class beneficioresController extends Controller
 			} else {
 
 				$updateBeneficiore = Beneficiore::firstWhere('id', $request->idbeneficio);
-				$updateBeneficiore->centrocosto_id = $request->centrocosto_id;
+				$updateBeneficiore->store_id = $request->store_id;
 				$updateBeneficiore->thirds_id = $request->thirds_id;
 				$updateBeneficiore->plantasacrificio_id  = $request->plantasacrificio_id;
 				$updateBeneficiore->cantidadmacho = $this->MoneyToNumber($request->cantidadMacho);
@@ -246,8 +251,8 @@ class beneficioresController extends Controller
 		$data = DB::table('beneficiores as be')
 			->join('thirds as tird', 'be.thirds_id', '=', 'tird.id')
 			->join('lotes as lote', 'be.lotes_id', '=', 'lote.id')
-			->join('centro_costo as cc', 'be.centrocosto_id', '=', 'cc.id')
-			->select('be.*', 'cc.name as namecentrocosto', 'tird.name as namethird', 'lote.codigo as namelote')
+			->join('stores as s', 'be.store_id', '=', 's.id')
+			->select('be.*', 's.name as namebodega', 'tird.name as namethird', 'lote.codigo as namelote')
 			->where('be.status', '=', true)
 			->orderBy('be.id', 'desc')
 			->get();

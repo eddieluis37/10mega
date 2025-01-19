@@ -10,12 +10,12 @@
 						<div class="col-sm-12 col-md-3">
 							<div class="task-header">
 								<div class="form-group">
-									<label>Centro de costo</label>
+									<label>Bodega</label>
 									<div>
-										<select class="form-control form-control-sm" name="centrocosto_id" id="centrocosto_id" required="">
-											<option value="">Seleccione centro de costo</option>
-											@foreach ($centros as $c)
-											<option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
+										<select class="form-control form-control-sm" name="store_id" id="store_id" required="">
+											<option value="">Seleccione bodega</option>
+											@foreach ($bodegas as $c)
+											<option value="{{$c->id}}" {{ $c->id == 8 ? 'selected' : '' }}>{{$c->name}}</option>
 											@endforeach
 										</select>
 										@error('centrocostoid') <span class="text-danger er">{{ $message}}</span>@enderror

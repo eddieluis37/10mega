@@ -14,7 +14,7 @@ $(document).ready(function () {
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "namecentrocosto", name: "namecentrocosto" },
+                { data: "namebodega", name: "namebodega" },
                 { data: "namethird", name: "namethird" },
                 { data: "date", name: "date" },
                 { data: "factura", name: "factura" },
