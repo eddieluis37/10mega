@@ -202,20 +202,22 @@ class compensadoController extends Controller
     public function sumTotales($id)
     {
 
-        //$TotalDesposte = (float)Compensadores_detail::Where([['compensadores_id',$id],['status',1]])->sum('porcdesposte');
-        //$TotalVenta = (float)Compensadores_detail::Where([['compensadores_id',$id],['status',1]])->sum('totalventa');
-        //$porcVentaTotal = (float)Compensadores_detail::Where([['compensadores_id',$id],['status',1]])->sum('porcventa');
+        // Calcular los totales
         $pesoTotalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('peso');
         $totalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('subtotal');
         //$costoKiloTotal = number_format($costoTotalGlobal / $pesoTotalGlobal, 2, ',', '.');
 
+        // Actualizar el campo valor_total_factura en el modelo Compensadores
+        $compensador = Compensadores::find($id);
+        if ($compensador) {
+            $compensador->valor_total_factura = $totalGlobal; // Asignar el total calculado
+            $compensador->save(); // Guardar los cambios en la base de datos
+        }
+
+        // Preparar el array de resultados
         $array = [
-            //'TotalDesposte' => $TotalDesposte,
-            //'TotalVenta' => $TotalVenta,
-            //'porcVentaTotal' => $porcVentaTotal,
             'pesoTotalGlobal' => $pesoTotalGlobal,
             'totalGlobal' => $totalGlobal,
-            //'costoKiloTotal' => $costoKiloTotal,
         ];
 
         return $array;

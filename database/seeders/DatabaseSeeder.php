@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
     // $this->call(DespostereSeeder::class);
     $this->call(CentrocostoSeeder::class);
     $this->call(LoteSeeder::class);
-    $this->call(BeneficioreSeeder::class);
+
     $this->call(Centro_costo_productSeeder::class);
 
     $this->call(Nicho_mercadoSeeder::class);
@@ -63,13 +63,14 @@ class DatabaseSeeder extends Seeder
     // $this->call(NotacreditoSeeder::class);
     //$this->call(RecibodecajaSeeder::class);
     $this->call(Cuentas_por_cobrarSeeder::class);
-   
+
     $this->call(ProductLoteSeeder::class);
     $this->call(StoreSeeder::class);
     $this->call(ProductStoreSeeder::class);
-  //  $this->call(CompensadoresSeeder::class);
-  //  $this->call(InventarioSeeder::class);
-  //  $this->call(Movimiento_inventarioSeeder::class);
+    //  $this->call(CompensadoresSeeder::class);
+    $this->call(BeneficioreSeeder::class);
+    //  $this->call(InventarioSeeder::class);
+    //  $this->call(Movimiento_inventarioSeeder::class);
     $this->call(LoteProductSeeder::class);
   }
 }

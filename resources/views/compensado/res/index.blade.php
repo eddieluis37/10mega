@@ -23,6 +23,7 @@
 								<th class="table-th text-white">Proveedor</th>								
 								<th class="table-th text-white ">BODEGA</th>
 								<th class="table-th text-white">Factura</th>
+								<th class="table-th text-white">VALOR</th>
 								<th class="table-th text-white">FechaCP</th>
 								<th class="table-th text-white">FechaIN</th>
 								<th class="table-th text-white text-center">Acciones</th>

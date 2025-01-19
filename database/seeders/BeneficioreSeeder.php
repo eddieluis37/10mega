@@ -20,7 +20,7 @@ class BeneficioreSeeder extends Seeder
 		$current_date->modify('next monday'); // Move to the next Monday
 		$dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
         Beneficiore::create([
-            'centrocosto_id' => 1,
+            'store_id' => 1,
             'thirds_id' => 1,
             'plantasacrificio_id' => 1,
             'cantidadmacho' => 15,
@@ -63,7 +63,7 @@ class BeneficioreSeeder extends Seeder
         ]);
         
         Beneficiore::create([
-            'centrocosto_id' => 2,
+            'store_id' => 2,
             'thirds_id' => 2,
             'plantasacrificio_id' => 1,
             'cantidadmacho' => 15,

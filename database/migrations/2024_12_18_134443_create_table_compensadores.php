@@ -25,7 +25,8 @@ class CreateTableCompensadores extends Migration
             $table->unsignedBigInteger('thirds_id')->nullable();
             $table->foreign('thirds_id')->references('id')->on('thirds');
           
-            $table->string('factura')->nullable();           
+            $table->string('factura')->nullable(); 
+            $table->decimal('valor_total_factura', 18, 0)->nullable();          
             $table->date('fecha_compensado')->nullable();
             $table->date('fecha_ingreso')->nullable();          
             $table->date('fecha_cierre')->nullable();

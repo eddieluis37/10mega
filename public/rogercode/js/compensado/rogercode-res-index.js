@@ -29,8 +29,20 @@ $(document).ready(function () {
                 { data:'id', name: 'id'},                
                 { data: 'namethird', name: 'namethird'},              
                 { data: 'namestore', name: 'namestore' },
-                { data:'factura', name: 'factura'},
-                { data: 'fecha_compensado', name: 'fecha_compensado' },
+                { data:'factura', name: 'factura'},               
+                {
+                    data: "valor_total_factura",
+                    name: "valor_total_factura",
+                    render: function (data) {
+                        return (
+                            "$" +
+                            parseFloat(data).toLocaleString(undefined, {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                            })
+                        );
+                    },
+                },
                 { data: 'fecha_ingreso', name: 'fecha_ingreso' },
                 {data: 'action', name:'action'}
             ],
