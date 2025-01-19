@@ -35,7 +35,7 @@ $(document).ready(function () {
                     name: "valor_total_factura",
                     render: function (data) {
                         return (
-                            "$" +
+                            "$ " +
                             parseFloat(data).toLocaleString(undefined, {
                                 minimumFractionDigits: 0,
                                 maximumFractionDigits: 0,
@@ -43,6 +43,7 @@ $(document).ready(function () {
                         );
                     },
                 },
+                { data: 'fecha_compensado', name: 'fecha_compensado' },
                 { data: 'fecha_ingreso', name: 'fecha_ingreso' },
                 {data: 'action', name:'action'}
             ],
