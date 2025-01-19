@@ -132,6 +132,7 @@ $(document).ready(function () {
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,
+        dropdownParent: $("#modal-create-compensado"),
     });
 });
 
