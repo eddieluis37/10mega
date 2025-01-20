@@ -25,7 +25,7 @@ class beneficioresController extends Controller
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function index()
+	public function index(Request $request)
 	{
 		$thirds = Third::orderBy('name', 'asc')->get();
 		$sacrificios = Sacrificio::orderBy('name', 'asc')->get();
@@ -34,8 +34,10 @@ class beneficioresController extends Controller
 			->orderBy('id', 'asc')
 			->get();
 
-		$lotes = Lote::orderBy('codigo', 'asc')->get();
-		return view('categorias.res.beneficiores.index', compact('thirds', 'lotes', 'sacrificios', 'bodegas'));
+		//$lotes = Lote::orderBy('codigo', 'asc')->get();
+
+		
+		return view('categorias.res.beneficiores.index', compact('thirds',  'sacrificios', 'bodegas'));
 	}
 
 	/**
@@ -254,9 +256,9 @@ class beneficioresController extends Controller
 	{
 		$data = DB::table('beneficiores as be')
 			->join('thirds as tird', 'be.thirds_id', '=', 'tird.id')
-			->join('lotes as lote', 'be.lotes_id', '=', 'lote.id')
+		//	->join('lotes as lote', 'be.lotes_id', '=', 'lote.id')
 			->join('stores as s', 'be.store_id', '=', 's.id')
-			->select('be.*', 's.name as namebodega', 'tird.name as namethird', 'lote.codigo as namelote')
+			->select('be.*', 's.name as namebodega', 'tird.name as namethird', 'be.codigo_lote as namelote')
 			->where('be.status', '=', true)
 			->orderBy('be.id', 'desc')
 			->get();

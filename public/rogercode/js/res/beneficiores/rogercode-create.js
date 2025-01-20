@@ -10,8 +10,7 @@ formBeneficio.addEventListener('submit', (e) => {
         if (result.status === 1) {
             const mySelectProvider = $("#thirds_id");
             mySelectProvider.val("").trigger("change");
-            const mySelectLote = $("#lotes_id");
-            mySelectLote.val("").trigger("change");
+            
             const mySelectPieles = $("#clientpieles_id");
             mySelectPieles.val("").trigger("change");
             const mySelectVisceras = $("#clientvisceras_id");

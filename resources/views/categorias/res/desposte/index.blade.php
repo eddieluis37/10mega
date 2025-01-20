@@ -52,7 +52,7 @@
 				<div class="card">
 					<div class="card-body">
 						<div class="row g-3">
-							<div class="col-md-2">
+							<!-- <div class="col-md-1">
 								<div class="task-header">
 									<div class="form-group">
 										<label>ID Beneficio</label>
@@ -60,12 +60,13 @@
 										<input type="hidden" id="beneficioId" value="{{$beneficior[0]->id}}">
 									</div>
 								</div>
-							</div>
-							<div class="col-md-4">
+							</div> -->
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label>Proveedor</label>
-										<p>{{$beneficior[0]->name}} </p>
+										<label>Bodega</label>
+										<p>{{$beneficior[0]->name_store}}</p>
+										<input type="hidden" id="beneficioId" value="{{$beneficior[0]->id}}">
 									</div>
 								</div>
 							</div>
@@ -74,6 +75,14 @@
 									<div class="form-group">
 										<label>Lote</label>
 										<p>{{$beneficior[0]->namelote}}</p>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="task-header">
+									<div class="form-group">
+										<label>Proveedor</label>
+										<p>{{$beneficior[0]->name}} </p>
 									</div>
 								</div>
 							</div>
