@@ -62,5 +62,13 @@ class CategorySeeder extends Seeder
             'name' => 'GRAVADOS',
             'image' => 'https://dummyimage.com/200x150/5c5756/fff'
         ]);
+        Category::create([
+            'name' => 'RES',
+            'image' => 'https://dummyimage.com/200x150/5c5756/fff'
+        ]);
+        Category::create([
+            'name' => 'CERDO',
+            'image' => 'https://dummyimage.com/200x150/5c5756/fff'
+        ]);
     }
 }

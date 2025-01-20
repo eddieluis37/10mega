@@ -31,8 +31,8 @@ class beneficioresController extends Controller
 		$sacrificios = Sacrificio::orderBy('name', 'asc')->get();
 		//$centros = Centrocosto::Where('status', 1)->get();
 		$bodegas = Store::whereIn('id', [8])
-		->orderBy('id', 'asc')
-		->get();
+			->orderBy('id', 'asc')
+			->get();
 
 		$lotes = Lote::orderBy('codigo', 'asc')->get();
 		return view('categorias.res.beneficiores.index', compact('thirds', 'lotes', 'sacrificios', 'bodegas'));
@@ -67,17 +67,19 @@ class beneficioresController extends Controller
 
 			$dateNow = Carbon::now();
 			// Get the year, month, and day
-			$year = $dateNow->year;
-			$month = $dateNow->month;
-			$day = $dateNow->day;
+			//$year = $dateNow->year;
+			$year = substr($dateNow->year, -2); // Obtiene los dos ultimos digitos del año
+			$month = str_pad($dateNow->month, 2, '0', STR_PAD_LEFT); // Asegura que el mes tenga 2 dígitos
+			$day = str_pad($dateNow->day, 2, '0', STR_PAD_LEFT); // Asegura que el día tenga 2 dígitos
 			$newLote = "";
 			$reg = Beneficiore::select()->first();
+
 			if ($reg === null) {
-				$newLote = "RES" . $year . $month . $day . "1";
+				$newLote = $day . $month . $year . "RES" . "_" . "1";
 			} else {
 				$regUltimo = Beneficiore::select()->latest()->first()->toArray();
 				$consecutivo = $regUltimo['id'] + 1;
-				$newLote = "RES" . $year . $month . $day . $consecutivo;
+				$newLote = $day . $month . $year . "RES" . "_" . $consecutivo;
 			}
 
 			/******************************************************** */
@@ -94,6 +96,7 @@ class beneficioresController extends Controller
 				$dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
 				$newBeneficiore = new Beneficiore();
 				$newBeneficiore->store_id = $request->store_id;
+				$newBeneficiore->codigo_lote = $newLote;
 				$newBeneficiore->thirds_id = $request->thirds_id;
 				$newBeneficiore->plantasacrificio_id  = $request->plantasacrificio_id;
 				$newBeneficiore->cantidadmacho = $this->MoneyToNumber($request->cantidadMacho);
@@ -169,6 +172,7 @@ class beneficioresController extends Controller
 
 				$updateBeneficiore = Beneficiore::firstWhere('id', $request->idbeneficio);
 				$updateBeneficiore->store_id = $request->store_id;
+				//	$updateBeneficiore->codigo_lote = $newLote;
 				$updateBeneficiore->thirds_id = $request->thirds_id;
 				$updateBeneficiore->plantasacrificio_id  = $request->plantasacrificio_id;
 				$updateBeneficiore->cantidadmacho = $this->MoneyToNumber($request->cantidadMacho);

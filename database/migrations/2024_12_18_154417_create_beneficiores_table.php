@@ -34,6 +34,8 @@ class CreateBeneficioresTable extends Migration
             $table->unsignedBigInteger('products_id')->nullable();
             $table->foreign('products_id')->references('id')->on('products');
 
+            // el lote_id se crea en el archivo lotes_to_beneficiores
+            $table->string('codigo_lote', 60, 0)->nullable();
             $table->bigInteger('cantidadmacho')->nullable(); 
             $table->bigInteger('valorunitariomacho')->nullable(); 
             $table->bigInteger('valortotalmacho')->nullable(); 
@@ -46,8 +48,7 @@ class CreateBeneficioresTable extends Migration
             $table->date('fecha_cierre')->nullable();
 
             $table->string('factura');
-
-            //$table->string('lote');
+          
             $table->string('finca');
          
             $table->decimal('sacrificio', 18, 0)->nullable();
@@ -58,7 +59,7 @@ class CreateBeneficioresTable extends Migration
 
             $table->decimal('bascula', 18, 0)->nullable();
 
-            $table->decimal('transporte', 18, 0)->nullable();        
+            $table->decimal('transporte', 18, 0)->nullable();     
                                         
                              
 

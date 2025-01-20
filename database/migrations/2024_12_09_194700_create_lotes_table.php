@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('codigo', 50, 0)->unique()->nullable();
             $table->decimal('costo', 18, 2)->default(0)->nullable();
             $table->date('fecha_vencimiento')->nullable();
+            $table->enum('status',['0','1','2','3','4','5'])->default('1'); 
             $table->timestamps();
         });
     }
