@@ -9,7 +9,7 @@ class Despostere extends Model
 {
     use HasFactory;
 
-       protected $fillable = [  
+    protected $fillable = [
         'user_id',
         'beneficior_id',
         'desposteftr_id',
@@ -24,15 +24,17 @@ class Despostere extends Model
         'porcventa',
         'porcutilidad',
         'peso_acomulado',
-        'status'        
+        'status'
     ];
 
 
-    public function beneficiores(){
+    public function beneficiores()
+    {
         return $this->belongsTo(Beneficiore::class);
     }
 
-    public function products(){
+    public function products()
+    {
         return $this->belongsTo(Product::class);
-    }  
+    }
 }

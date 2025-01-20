@@ -1101,11 +1101,7 @@ class ProductSeeder extends Seeder
         $product = new Product(["name" => "SEBO TM", "code" => "RE0126", "barcode" => "1299123581", "cost" => "14500", "iva" => "0", "otro_impuesto" => "0", "price_fama" => "1300", "category_id" => "13", "unitofmeasure_id" => "1", "brand_third_id" => "1", "fisico" => "0", "level_product_id" => "2", "meatcut_id" => "26", "alerts" => "10", "image" => "noimage.png", "status" => "1"]);
         $product->save();
         $product = new Product(["name" => "VIRIL", "code" => "RE0127", "barcode" => "1299123582", "cost" => "0", "iva" => "0", "otro_impuesto" => "0", "price_fama" => "15000", "category_id" => "13", "unitofmeasure_id" => "1", "brand_third_id" => "1", "fisico" => "0", "level_product_id" => "1", "meatcut_id" => "27", "alerts" => "10", "image" => "noimage.png", "status" => "1"]);
-        $product->save();
-        $product = new Product(["name" => "RESERVADO 1", "code" => "RE0128", "barcode" => "1299123583", "cost" => "13500", "iva" => "0", "otro_impuesto" => "0", "price_fama" => "99999", "category_id" => "13", "unitofmeasure_id" => "1", "brand_third_id" => "1", "fisico" => "0", "level_product_id" => "1", "meatcut_id" => "28", "alerts" => "10", "image" => "noimage.png", "status" => "1"]);
-        $product->save();
-        $product = new Product(["name" => "RESERVADO 2", "code" => "RE0129", "barcode" => "1299123584", "cost" => "13500", "iva" => "0", "otro_impuesto" => "0", "price_fama" => "99", "category_id" => "13", "unitofmeasure_id" => "1", "brand_third_id" => "1", "fisico" => "0", "level_product_id" => "1", "meatcut_id" => "29", "alerts" => "10", "image" => "noimage.png", "status" => "1"]);
-        $product->save();
+        $product->save();       
         $product = new Product(["name" => "HUESO DE COLA", "code" => "RE200", "barcode" => "1299123764", "cost" => "10500", "iva" => "0", "otro_impuesto" => "0", "price_fama" => "6000", "category_id" => "13", "unitofmeasure_id" => "1", "brand_third_id" => "1", "fisico" => "0", "level_product_id" => "2", "meatcut_id" => "9", "alerts" => "10", "image" => "noimage.png", "status" => "1"]);
         $product->save();
         $product = new Product(["name" => "PALOMILLA BRA", "code" => "RE0130", "barcode" => "1299123768", "cost" => "18133.38", "iva" => "0", "otro_impuesto" => "0", "price_fama" => "23000", "category_id" => "13", "unitofmeasure_id" => "1", "brand_third_id" => "1", "fisico" => "0", "level_product_id" => "2", "meatcut_id" => "2", "alerts" => "10", "image" => "noimage.png", "status" => "1"]);

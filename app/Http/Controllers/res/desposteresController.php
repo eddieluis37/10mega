@@ -271,7 +271,7 @@ class desposteresController extends Controller
         }
     }
 
-    public function cargarInventario(Request $request)
+    public function cargarInventarioVersionOriginal(Request $request)
     {
         $beneficioId = $request->input('beneficioId');
 
@@ -328,6 +328,11 @@ class desposteresController extends Controller
 
 
         // return view('categorias.res.desposte.index', ['beneficio' => $beneficio]);
+    }
+
+    public function cargarInventario(Request $request)
+    {
+        
     }
 
 
