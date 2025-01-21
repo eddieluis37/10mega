@@ -19,8 +19,8 @@ class pdfLoteController extends Controller
         $lote = DB::table('beneficiores as be')
             ->join('thirds as third', 'be.thirds_id', '=', 'third.id')
             ->join('sacrificios as s', 'be.plantasacrificio_id', '=', 's.id')
-            ->join('centro_costo as centro', 'be.centrocosto_id', '=', 'centro.id')
-            ->select('be.*', 'third.name as namethird', 's.name as nameplanta', 'third.identification', 'third.direccion', 'centro.name as namecentrocosto')
+            ->join('stores as st', 'be.store_id', '=', 'st.id')
+            ->select('be.*', 'third.name as namethird', 's.name as nameplanta', 'third.identification', 'third.direccion', 'st.name as namecentrocosto')
             ->where([
                 ['be.id', $id],
                 /*  ['sale_details.status', 1]  */

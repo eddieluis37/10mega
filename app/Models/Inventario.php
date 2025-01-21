@@ -11,13 +11,16 @@ class Inventario extends Model
 
     protected $table = 'inventarios';
 
-    protected $fillable = [       
-        'lote_id',
+    protected $fillable = [
         'store_id',
+        'lote_id',
         'product_id',
         'inventario_inicial',
         'cantidad_inicial',
         'cantidad_final',
+        'stock_ideal',
+        'costo_unitario',
+        'costo_total'
     ];
 
     /**

@@ -41,7 +41,7 @@
       <tr>
         <td colspan=" 2" class="text-center">
           <span style="font-size: 9px; font-weight: bold; display: block; margin-top: 10;">COMPRA LOTE {{$lote[0]->namecentrocosto}}</span>
-          <span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">COD Lote {{$lote[0]->lote}}-{{$lote[0]->id}}</span>
+          <span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">COD Lote {{$lote[0]->codigo_lote}}</span>
         </td>
       </tr>
       <tr>

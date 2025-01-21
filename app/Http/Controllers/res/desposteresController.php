@@ -413,7 +413,7 @@ class desposteresController extends Controller
                 ]);
             }
 
-            // **Cierra BeneficioRes si todo esta bien**
+            // 7. **Cierra BeneficioRes si todo esta bien**
             $currentDateTime = Carbon::now();
             $formattedDate = $currentDateTime->format('Y-m-d');
 

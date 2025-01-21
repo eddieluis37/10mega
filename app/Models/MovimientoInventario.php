@@ -14,12 +14,15 @@ class MovimientoInventario extends Model
     protected $fillable = [
         'tipo', // Compra, Venta, Traslado
         'compensador_id',
+        'desposteres_id',
         'store_origen_id',
         'store_destino_id',
         'lote_id',
         'product_id',
-        'fecha',
         'cantidad',
+        'costo_unitario',
+        'total',
+        'fecha'
     ];
 
     /**
