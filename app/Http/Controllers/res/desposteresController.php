@@ -413,6 +413,14 @@ class desposteresController extends Controller
                 ]);
             }
 
+            // **Cierra BeneficioRes si todo esta bien**
+            $currentDateTime = Carbon::now();
+            $formattedDate = $currentDateTime->format('Y-m-d');
+
+            $beneficio = Beneficiore::find($beneficioId);
+            $beneficio->fecha_cierre = $formattedDate;
+            $beneficio->save();
+
             DB::commit();
 
             return response()->json([
