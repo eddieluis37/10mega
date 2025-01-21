@@ -10,20 +10,20 @@ class Compensadores extends Model
     use HasFactory;
 
     protected $table = 'compensadores';
-	protected $fillable = ['users_id','categoria_id','thirds_id', 'centrocosto_id','factura','fecha_compensado','fecha_cierre','status'];
+    protected $fillable = ['users_id', 'categoria_id', 'thirds_id', 'centrocosto_id', 'factura', 'fecha_compensado', 'fecha_cierre', 'status'];
 
     public function detalle()
-{
-    return $this->hasMany(Compensadores_detail::class, 'compensadores_id');
-}
+    {
+        return $this->hasMany(Compensadores_detail::class, 'compensadores_id');
+    }
 
 
-   /*  public function compensadores_detail()
+    /*  public function compensadores_detail()
     {
         return $this->hasMany(Compensadores_detail::class);
     } */
 
- /*    public function details()
+    /*    public function details()
     {
         return $this->hasMany(Compensadores_detail::class);
     } */

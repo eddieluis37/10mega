@@ -27,7 +27,6 @@ class Despostere extends Model
         'status'
     ];
 
-
     public function beneficiores()
     {
         return $this->belongsTo(Beneficiore::class);

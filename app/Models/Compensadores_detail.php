@@ -20,16 +20,7 @@ class Compensadores_detail extends Model
         'iva',
         'subtotal',
         'status',
-    ];
-
-    /* public function compensadore()
-    {
-        return $this->belongsTo(Compensadores::class, 'compensadores_id', 'id');
-    } */
-   /*   public function product()
-    {
-        return $this->belongsTo(Product::class, 'products_id', 'id');
-    } */
+    ];  
 
     
     /**

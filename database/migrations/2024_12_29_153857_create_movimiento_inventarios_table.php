@@ -16,6 +16,7 @@ return new class extends Migration
             $table->enum('tipo', ['compensadores', 'desposteres', 'venta', 'traslado'])->default('compensadores'); //Tipo de movimiento (compra, traslado, alistamiento, etc.).
 
             $table->foreignId('compensador_id')->nullable()->constrained('compensadores')->onDelete('set null');
+            $table->foreignId('desposteres_id')->nullable()->constrained('desposteres')->onDelete('set null');
 
             //La relación entre movimiento_inventarios y compensadores permite rastrear información específica como facturas.
 

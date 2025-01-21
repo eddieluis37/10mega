@@ -15,11 +15,16 @@ class Product extends Model
 	protected $table = 'products';
 
 
-	/* public function category()
+	/**
+	 * Relación muchos a muchos con el modelo Lote.
+	 */
+	public function lotes()
 	{
-		return $this->belongsTo(Category::class);
+		return $this->belongsToMany(Lote::class, 'lote_products')
+			->withPivot('cantidad', 'costo') // Campos adicionales en la tabla pivote
+			->withTimestamps();
 	}
- */
+
 	/* // Relación muchos a muchos con lotes
 	public function lotes()
 	{
@@ -29,13 +34,13 @@ class Product extends Model
 	} */
 
 
-	// Relación muchos a muchos con lotes
+	/* // Relación muchos a muchos con lotes
 	public function lotes()
 	{
 		return $this->belongsToMany(Lote::class, 'lote_products')
 			->withPivot('cantidad')
 			->withTimestamps();
-	}
+	} */
 
 
 	// Relación con categorías

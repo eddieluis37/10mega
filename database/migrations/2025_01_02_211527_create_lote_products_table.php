@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('lote_id');
             $table->unsignedBigInteger('product_id');
             
-            $table->decimal('cantidad', 18, 2)->default(0); 
+            $table->decimal('cantidad', 18, 2)->default(0);
+            $table->decimal('costo', 18, 2)->default(0);  
             $table->decimal('precio', 18, 2)->nullable(); 
             
             $table->timestamps();

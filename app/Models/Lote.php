@@ -17,14 +17,23 @@ class Lote extends Model
         'codigo',
         'fecha_vencimiento',
         'costo',
-
     ];
 
-     // un lote tenga muchos productos
+    // un lote tenga muchos productos
     public function productos()
     {
         return $this->belongsToMany(Product::class, 'lote_products')
             ->withPivot('cantidad')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relación muchos a muchos con el modelo Product.
+     */
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'lote_products')
+            ->withPivot('cantidad', 'costo') // Campos adicionales en la tabla pivote
             ->withTimestamps();
     }
 

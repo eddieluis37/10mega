@@ -4,13 +4,20 @@ namespace App\Http\Controllers\res;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Log;
+
 use App\Models\Product;
 use App\Models\Beneficiore;
 use App\Models\Centro_costo_product;
 use App\Models\Despostere;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Lote;
+use App\Models\Inventario;
+use App\Models\MovimientoInventario;
 use Yajra\Datatables\Datatables;
+
 use DateTime;
 use Carbon\Carbon;
 
@@ -42,7 +49,7 @@ class desposteresController extends Controller
         $beneficior = DB::table('beneficiores as b')
             ->join('thirds as t', 'b.thirds_id', '=', 't.id')
             ->join('stores as s', 'b.store_id', '=', 's.id')
-            ->select('t.name', 'b.id','s.name as name_store', 'b.codigo_lote as namelote', 'b.factura', 'b.canalplanta', 'b.cantidad', 'b.costokilo', 'b.fecha_cierre')
+            ->select('t.name', 'b.id', 's.name as name_store', 'b.codigo_lote as namelote', 'b.factura', 'b.canalplanta', 'b.cantidad', 'b.costokilo', 'b.fecha_cierre')
             ->where('b.id', $id)
             ->get();
         /******************/
@@ -332,7 +339,88 @@ class desposteresController extends Controller
 
     public function cargarInventario(Request $request)
     {
-        
+        $beneficioId = $request->input('beneficioId');
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Obtener el modelo Beneficiore
+            $beneficiore = Beneficiore::findOrFail($beneficioId);
+
+            Log::info('Beneficio:', ['Beneficio' => $beneficiore]);
+
+            // Crear un nuevo lote
+            $lote = Lote::create([
+                'category_id' => 13,
+                'codigo' => $beneficiore->codigo_lote, // Campo codigo_lote en Beneficiore
+                'fecha_vencimiento' => Carbon::now()->addDays(35),
+            ]);
+
+            // 2. Obtener los detalles de desposteres
+            $detallesDesposte = Despostere::where('beneficiores_id', $beneficioId)->get();
+            Log::info('DetalleDesposte:', ['detalle' => $detallesDesposte]);
+
+            // 3. Asociar productos al lote en la tabla lote_products
+            foreach ($detallesDesposte as $detalle) {
+                $lote->products()->attach($detalle->products_id, [
+                    'cantidad' => $detalle->peso, // Usamos peso como cantidad
+                    'costo' => $detalle->costo,
+                ]);
+            }
+
+            // 4 y 5. Actualizar o crear inventario con la cantidad calculada
+            foreach ($detallesDesposte as $detalle) {
+                $inventario = Inventario::firstOrCreate(
+                    [
+                        'product_id' => $detalle->products_id,
+                        'lote_id' => $lote->id,
+                        'store_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                    ],
+                    [
+                        'cantidad_inicial' => 0,
+                        'cantidad_final' => 0,
+                        'costo_unitario' => $detalle->costo_kilo,
+                        'costo_total' => 0,
+                    ]
+                );
+
+                // Incrementar cantidad y actualizar inventario
+                $inventario->cantidad_final += $detalle->peso;
+                $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
+                $inventario->save();
+            }
+
+            // 6. Registrar movimientos en la tabla de movimientos
+            foreach ($detallesDesposte as $detalle) {
+                MovimientoInventario::create([
+                    'tipo' => 'desposteres', // Tipo de movimiento
+                    'despoteres_id' => $beneficioId,
+                    'store_origen_id' => null,
+                    'store_destino_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                    'lote_id' => $lote->id,
+                    'product_id' => $detalle->products_id,
+                    'cantidad' => $detalle->peso,
+                    'costo_unitario' => $detalle->costo_kilo,
+                    'total' => $detalle->peso * $detalle->costo_kilo,
+                    'fecha' => Carbon::now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Movimiento de inventario registrado con éxito.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error al registrar el movimiento de inventario.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 
