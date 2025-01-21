@@ -40,11 +40,10 @@ class CentroCostoProdController extends Controller
    
     public function show(Request $request)
     {
-        $centrocostoId = $request->input('centrocostoId');
+        $centrocostoId = 1; // $request->input('centrocostoId');
         $categoriaId = $request->input('categoriaId');
 
-        $data = DB::table('centro_costo_products as ccp')
-            ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
+        $data = DB::table('products as pro')         
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->select(
                 'cat.name as namecategoria',
@@ -54,8 +53,7 @@ class CentroCostoProdController extends Controller
                 'pro.cost as costo',
                 'pro.price_fama as price_fama',
                 'pro.status as status'
-            )
-            ->where('ccp.centrocosto_id', $centrocostoId)
+            )          
             ->where('pro.category_id', $categoriaId)
       /*       ->where('pro.status', 1) */
          /*    ->where('pro.level_product_id', 1) */

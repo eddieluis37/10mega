@@ -20,11 +20,11 @@ class SacrificioSeeder extends Seeder
             'address' => 'CALLE 124B #17A-37SUR BOGOTA',
             'phone' => 3132623896,
             'email' => 'Frigorificoguada@gmail.com',
-            'sacrificio' => 131000,
-            'fomento' => 29000,           
-            'deguello' => 30000,
-            'bascula' => 12400,
-            'transporte' => 11300
+            'sacrificio' => 145500,
+            'fomento' => 32500,           
+            'deguello' => 33000,
+            'bascula' => 13800,
+            'transporte' => 12700
         ]);
 
          Sacrificio::create([
