@@ -44,7 +44,7 @@
           </div>
         </div>
 
-        <div class="col-md-4">
+       <!--  <div class="col-md-4">
           <div class="task-header">
             <div class="form-group">
               <label for="centrocosto" class="form-label">Centro de costo</label>
@@ -57,7 +57,7 @@
               <span class="text-danger error-message"></span>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="table-responsive mt-3">
         <form method="POST" action="/updateCcpSwitch">

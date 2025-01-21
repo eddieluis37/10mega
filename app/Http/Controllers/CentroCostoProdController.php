@@ -23,8 +23,8 @@ class CentroCostoProdController extends Controller
      */
     public function index()
     {
-     /*    $category = Category::whereIn('id', [1, 2, 3, 4])->orderBy('id', 'asc')->get(); */
-        $category = Category::orderBy('name', 'asc')->get();
+        $category = Category::whereIn('id', [13, 14])->orderBy('id', 'asc')->get();
+        //  $category = Category::orderBy('name', 'asc')->get();
         $centros = Centrocosto::Where('status', 1)->get();
         $centroCostoProductos = Centro_costo_product::all();
 
@@ -36,53 +36,53 @@ class CentroCostoProdController extends Controller
         //  return view('inventory.diary');
     }
 
-    
-   
+
+
     public function show(Request $request)
     {
         $centrocostoId = 1; // $request->input('centrocostoId');
         $categoriaId = $request->input('categoriaId');
 
-        $data = DB::table('products as pro')         
+        $data = DB::table('products as pro')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->select(
                 'cat.name as namecategoria',
                 'pro.name as nameproducto',
                 'pro.id as productId',
-                'pro.level_product_id as level_product_id',           
+                'pro.level_product_id as level_product_id',
                 'pro.cost as costo',
                 'pro.price_fama as price_fama',
                 'pro.status as status'
-            )          
+            )
             ->where('pro.category_id', $categoriaId)
-      /*       ->where('pro.status', 1) */
-         /*    ->where('pro.level_product_id', 1) */
+            /*       ->where('pro.status', 1) */
+            /*    ->where('pro.level_product_id', 1) */
             ->get();
 
-       // return response()->json(['data' => $data]);
-       return datatables()->of($data)
+        // return response()->json(['data' => $data]);
+        return datatables()->of($data)
             ->addIndexColumn()
             ->make(true);
     }
 
     public function updateCcpSwitch()
     {
-        $productId = request('productId');      
+        $productId = request('productId');
         $price_fama = request('price_fama');
         $status = request('status');
-    
+
         if (!is_null($price_fama)) {
             DB::table('products')
-                ->where('id', $productId)                   
+                ->where('id', $productId)
                 ->update(['price_fama' => $price_fama]);
         }
-    
+
         if (!is_null($status)) {
             DB::table('products')
-                ->where('id', $productId)                   
+                ->where('id', $productId)
                 ->update(['status' => $status]);
         }
-    
+
         return response()->json(['success' => true]);
     }
 }
