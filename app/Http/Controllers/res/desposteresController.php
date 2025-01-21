@@ -388,6 +388,13 @@ class desposteresController extends Controller
                 $inventario->cantidad_final += $detalle->peso;
                 $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
                 $inventario->save();
+
+                // **Actualizar el campo cost en la tabla products**
+                $product = Product::find($detalle->products_id);
+                if ($product) {
+                    $product->cost = $detalle->costo_kilo;
+                    $product->save();
+                }
             }
 
             // 6. Registrar movimientos en la tabla de movimientos
