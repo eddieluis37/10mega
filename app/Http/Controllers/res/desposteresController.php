@@ -406,7 +406,7 @@ class desposteresController extends Controller
                 if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
                     MovimientoInventario::create([
                         'tipo' => 'desposteres', // Tipo de movimiento
-                        'despoteres_id' => $beneficioId,
+                        'desposteres_id' => $detalle->beneficiores_id,
                         'store_origen_id' => null,
                         'store_destino_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
                         'lote_id' => $lote->id,
