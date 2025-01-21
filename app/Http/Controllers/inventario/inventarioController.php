@@ -78,6 +78,7 @@ class inventarioController extends Controller
 
                 // Calcular cantidades por tipo de movimiento
                 $compensadores = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
+                $desposteres = $movimientos->where('tipo', 'desposteres')->sum('cantidad_total');
                 /*  $trasladoIngreso = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
                 $trasladoSalida = $movimientos->where('tipo', 'traslado_salida')->sum('cantidad_total');
                 $venta = $movimientos->where('tipo', 'venta')->sum('cantidad_total');
@@ -101,7 +102,7 @@ class inventarioController extends Controller
                     'CategoriaNombre' => $inventario->product->category->name,
                     'ProductoNombre' => $inventario->product->name,
                     'CantidadInicial' => $inventario->inventario_inicial,
-                    'compraLote' => $inventario->lote->id,
+                    'compraLote' => $desposteres,
                     'alistamiento' => $inventario->lote->id,
                     //    'alistamiento' => $inventario->lote->codigo,
                     'compensados' => $compensadores,
