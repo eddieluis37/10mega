@@ -362,58 +362,64 @@ class desposteresController extends Controller
 
             // 3. Asociar productos al lote en la tabla lote_products
             foreach ($detallesDesposte as $detalle) {
-                $lote->products()->attach($detalle->products_id, [
-                    'cantidad' => $detalle->peso, // Usamos peso como cantidad
-                    'costo' => $detalle->costo,
-                ]);
+                if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
+                    $lote->products()->attach($detalle->products_id, [
+                        'cantidad' => $detalle->peso, // Usamos peso como cantidad
+                        'costo' => $detalle->costo,
+                    ]);
+                }
             }
 
             // 4 y 5. Actualizar o crear inventario con la cantidad calculada
             foreach ($detallesDesposte as $detalle) {
-                $inventario = Inventario::firstOrCreate(
-                    [
-                        'product_id' => $detalle->products_id,
-                        'lote_id' => $lote->id,
-                        'store_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
-                    ],
-                    [
-                        'cantidad_inicial' => 0,
-                        'cantidad_final' => 0,
-                        'costo_unitario' => $detalle->costo_kilo,
-                        'costo_total' => 0,
-                    ]
-                );
+                if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
+                    $inventario = Inventario::firstOrCreate(
+                        [
+                            'product_id' => $detalle->products_id,
+                            'lote_id' => $lote->id,
+                            'store_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                        ],
+                        [
+                            'cantidad_inicial' => 0,
+                            'cantidad_final' => 0,
+                            'costo_unitario' => $detalle->costo_kilo,
+                            'costo_total' => 0,
+                        ]
+                    );
 
-                // Incrementar cantidad y actualizar inventario
-                $inventario->cantidad_final += $detalle->peso;
-                $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
-                $inventario->save();
+                    // Incrementar cantidad y actualizar inventario
+                    $inventario->cantidad_final += $detalle->peso;
+                    $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
+                    $inventario->save();
 
-                // **Actualizar el campo cost en la tabla products**
-                $product = Product::find($detalle->products_id);
-                if ($product) {
-                    $product->cost = $detalle->costo_kilo;
-                    $product->save();
+                    // **Actualizar el campo cost en la tabla products**
+                    $product = Product::find($detalle->products_id);
+                    if ($product) {
+                        $product->cost = $detalle->costo_kilo;
+                        $product->save();
+                    }
                 }
             }
 
             // 6. Registrar movimientos en la tabla de movimientos
             foreach ($detallesDesposte as $detalle) {
-                MovimientoInventario::create([
-                    'tipo' => 'desposteres', // Tipo de movimiento
-                    'despoteres_id' => $beneficioId,
-                    'store_origen_id' => null,
-                    'store_destino_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
-                    'lote_id' => $lote->id,
-                    'product_id' => $detalle->products_id,
-                    'cantidad' => $detalle->peso,
-                    'costo_unitario' => $detalle->costo_kilo,
-                    'total' => $detalle->peso * $detalle->costo_kilo,
-                    'fecha' => Carbon::now(),
-                ]);
+                if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
+                    MovimientoInventario::create([
+                        'tipo' => 'desposteres', // Tipo de movimiento
+                        'despoteres_id' => $beneficioId,
+                        'store_origen_id' => null,
+                        'store_destino_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                        'lote_id' => $lote->id,
+                        'product_id' => $detalle->products_id,
+                        'cantidad' => $detalle->peso,
+                        'costo_unitario' => $detalle->costo_kilo,
+                        'total' => $detalle->peso * $detalle->costo_kilo,
+                        'fecha' => Carbon::now(),
+                    ]);
+                }
             }
 
-            // 7. **Cierra BeneficioRes si todo esta bien**
+            // **Cierra BeneficioRes si todo está bien**
             $currentDateTime = Carbon::now();
             $formattedDate = $currentDateTime->format('Y-m-d');
 
@@ -437,6 +443,7 @@ class desposteresController extends Controller
             ], 500);
         }
     }
+
 
 
     public function destroy(Request $request)
