@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Third;
 use App\Models\Sacrificio;
 use App\Models\Sacrificiocerdo;
+use App\Models\Store;
 use App\Models\centros\Centrocosto;
 use NumberFormatter;
 use DateTime;
@@ -28,9 +29,13 @@ class beneficiocerdoController extends Controller
 	{
 		$thirds = Third::orderBy('name', 'asc')->get();
 		$sacrificios = Sacrificiocerdo::orderBy('name', 'asc')->get();
-		$centros = Centrocosto::Where('status', 1)->get();
+		// $centros = Centrocosto::Where('status', 1)->get();
 		//dd($sacrificios);
-		return view('categorias.cerdo.beneficiocerdo.index', compact('thirds', 'sacrificios', 'centros'));
+		$bodegas = Store::whereIn('id', [10])
+			->orderBy('id', 'asc')
+			->get();
+
+		return view('categorias.cerdo.beneficiocerdo.index', compact('thirds', 'sacrificios', 'bodegas'));
 	}
 
 	/**
@@ -61,18 +66,18 @@ class beneficiocerdoController extends Controller
 		try {
 
 			$dateNow = Carbon::now();
-			// Get the year, month, and day
-			$year = $dateNow->year;
-			$month = $dateNow->month;
-			$day = $dateNow->day;
+			$year = substr($dateNow->year, -2); // Obtiene los dos ultimos digitos del año
+			$month = str_pad($dateNow->month, 2, '0', STR_PAD_LEFT); // Asegura que el mes tenga 2 dígitos
+			$day = str_pad($dateNow->day, 2, '0', STR_PAD_LEFT); // Asegura que el día tenga 2 dígitos
 			$newLote = "";
 			$reg = Beneficiocerdo::select()->first();
+
 			if ($reg === null) {
-				$newLote = "CE" . $year . $month . $day . "1";
+				$newLote = $day . $month . $year . "CERDO" . "_" . "1";
 			} else {
 				$regUltimo = Beneficiocerdo::select()->latest()->first()->toArray();
 				$consecutivo = $regUltimo['id'] + 1;
-				$newLote = "CE" . $year . $month . $day . $consecutivo;
+				$newLote = $day . $month . $year . "CERDO" . "_" . $consecutivo;
 			}
 
 			/******************************************************** */
@@ -88,7 +93,8 @@ class beneficiocerdoController extends Controller
 				$current_date->modify('next monday'); // Move to the next Monday
 				$dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
 				$newBeneficiocerdo = new Beneficiocerdo();
-				$newBeneficiocerdo->centrocosto_id = $request->centrocosto_id;
+				$newBeneficiocerdo->store_id = $request->store_id;
+				$newBeneficiocerdo->codigo_lote = $newLote;
 				$newBeneficiocerdo->thirds_id = $request->thirds_id;
 				$newBeneficiocerdo->plantasacrificiocerdo_id  = $request->plantasacrificiocerdo_id;
 				$newBeneficiocerdo->cantidadmacho = $this->MoneyToNumber($request->cantidadMacho);
@@ -103,13 +109,13 @@ class beneficiocerdoController extends Controller
 				} else {
 					$newBeneficiocerdo->valorunitariohembra = $this->MoneyToNumber($request->valorUnitarioHembra);
 					$newBeneficiocerdo->valortotalhembra = $this->MoneyToNumber($request->valorTotalHembra);
-				}				
-			
+				}
+
 				$newBeneficiocerdo->fecha_beneficio = $currentDateFormat;
 				$newBeneficiocerdo->fecha_cierre = $dateNextMonday;
 				$newBeneficiocerdo->factura = $request->factura;
 				$newBeneficiocerdo->clientvisceras_id = $request->clientvisceras_id;
-				$newBeneficiocerdo->lote = $newLote; //$request->lote;
+				$newBeneficiocerdo->lotes_id = $request->lotes_id; //$request->lote;
 				$newBeneficiocerdo->finca = $request->finca;
 				$newBeneficiocerdo->sacrificio = $this->MoneyToNumber($request->sacrificio);
 				$newBeneficiocerdo->fomento = $this->MoneyToNumber($request->fomento);
@@ -161,7 +167,7 @@ class beneficiocerdoController extends Controller
 			} else {
 
 				$updateBeneficiocerdo = Beneficiocerdo::firstWhere('id', $request->idbeneficio);
-				$updateBeneficiocerdo->centrocosto_id = $request->centrocosto_id;
+				$updateBeneficiocerdo->store_id = $request->store_id;
 				$updateBeneficiocerdo->thirds_id = $request->thirds_id;
 				$updateBeneficiocerdo->plantasacrificiocerdo_id  = $request->plantasacrificiocerdo_id;
 				$updateBeneficiocerdo->cantidadmacho = $this->MoneyToNumber($request->cantidadMacho);
@@ -174,7 +180,7 @@ class beneficiocerdoController extends Controller
 				//$updateBeneficiocerdo->fecha_beneficio = $request->fecha_beneficio;
 				$updateBeneficiocerdo->factura = $request->factura;
 				$updateBeneficiocerdo->clientvisceras_id = $request->clientvisceras_id;
-				//$updateBeneficiocerdo->lote = $request->lote;
+				$updateBeneficiocerdo->lotes_id = $request->lotes_id;
 				$updateBeneficiocerdo->finca = $request->finca;
 				$updateBeneficiocerdo->sacrificio = $this->MoneyToNumber($request->sacrificio);
 				$updateBeneficiocerdo->fomento = $this->MoneyToNumber($request->fomento);

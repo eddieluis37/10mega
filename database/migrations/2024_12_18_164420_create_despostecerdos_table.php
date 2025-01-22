@@ -25,6 +25,8 @@ class CreateDespostecerdosTable extends Migration
             $table->unsignedBigInteger('products_id')->nullable();
             $table->foreign('products_id')->references('id')->on('products');
 
+            $table->foreignId('lotes_id')->constrained('lotes')->onDelete('cascade'); 
+
             $table->decimal('peso', 18, 2)->nullable();
             $table->decimal('porcdesposte', 18, 2)->nullable();
             $table->decimal('costo', 18, 2)->nullable();                     

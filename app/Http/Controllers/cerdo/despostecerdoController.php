@@ -4,6 +4,8 @@ namespace App\Http\Controllers\cerdo;
 
 use App\Http\Controllers\Controller;
 
+use Illuminate\Support\Facades\Log;
+
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Centro_costo_product;
@@ -11,7 +13,11 @@ use App\Models\Beneficiocerdo;
 use App\Models\Despostecerdo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Lote;
+use App\Models\Inventario;
+use App\Models\MovimientoInventario;
 use DateTime;
+
 use Carbon\Carbon;
 
 class despostecerdoController extends Controller
@@ -41,7 +47,8 @@ class despostecerdoController extends Controller
 
         $beneficioc = DB::table('beneficiocerdos as b')
             ->join('thirds as t', 'b.thirds_id', '=', 't.id')
-            ->select('t.name', 'b.id', 'b.lote', 'b.factura', 'b.canalplanta', 'b.cantidad', 'b.costokilo', 'b.fecha_cierre')
+            ->join('stores as s', 'b.store_id', '=', 's.id')
+            ->select('t.name', 'b.id', 's.name as name_store', 'b.codigo_lote as namelote', 'b.factura', 'b.canalplanta', 'b.cantidad', 'b.costokilo', 'b.fecha_cierre')
             ->where('b.id', $id)
             ->get();
         /******************/
@@ -53,7 +60,7 @@ class despostecerdoController extends Controller
         if (count($this->consulta) === 0) {
             $prod = Product::Where([
                 ['status', 1],
-                ['category_id', 2],
+                ['category_id', 14],
                 ['level_product_id', 1],
             ])->orderBy('name', 'asc')->get();
             foreach ($prod as $key) {
@@ -334,7 +341,7 @@ class despostecerdoController extends Controller
         }
     }
 
-    public function cargarInventariocerdo(Request $request)
+    public function cargarInventariocerdoVersionOriginal(Request $request)
     {
         $beneficioId = $request->input('beneficioId');
 
@@ -345,7 +352,7 @@ class despostecerdoController extends Controller
         $beneficio->fecha_cierre = $formattedDate;
         $beneficio->save();
 
-        
+
         // Afectar inventario KG y Utilidad con respectos a Visceras CERDO
         $centro = Centro_costo_product::where('products_id', 371)->first();
         $centro->compralote = $centro->compralote + $beneficio->cantidad;
@@ -381,5 +388,112 @@ class despostecerdoController extends Controller
         ]);
 
         // return view('categorias.res.desposte.index', ['beneficio' => $beneficio]);
+    }
+
+    public function cargarInventariocerdo(Request $request)
+    {
+        $beneficioId = $request->input('beneficioId');
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Obtener el modelo Beneficiore
+            $beneficiore = Beneficiocerdo::findOrFail($beneficioId);
+
+            Log::info('Beneficio:', ['Beneficio' => $beneficiore]);
+
+            // Crear un nuevo lote
+            $lote = Lote::create([
+                'category_id' => 13,
+                'codigo' => $beneficiore->codigo_lote, // Campo codigo_lote en Beneficiore
+                'fecha_vencimiento' => Carbon::now()->addDays(35),
+            ]);
+
+            // 2. Obtener los detalles de desposteres
+            $detallesDesposte = Despostecerdo::where('beneficiocerdos_id', $beneficioId)->get();
+            Log::info('DetalleDesposte:', ['detalle' => $detallesDesposte]);
+
+            // 3. Asociar productos al lote en la tabla lote_products
+            foreach ($detallesDesposte as $detalle) {
+                if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
+                    $lote->products()->attach($detalle->products_id, [
+                        'cantidad' => $detalle->peso, // Usamos peso como cantidad
+                        'costo' => $detalle->costo,
+                    ]);
+                }
+            }
+
+            // 4 y 5. Actualizar o crear inventario con la cantidad calculada
+            foreach ($detallesDesposte as $detalle) {
+                if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
+                    $inventario = Inventario::firstOrCreate(
+                        [
+                            'product_id' => $detalle->products_id,
+                            'lote_id' => $lote->id,
+                            'store_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                        ],
+                        [
+                            'cantidad_inicial' => 0,
+                            'cantidad_final' => 0,
+                            'costo_unitario' => $detalle->costo_kilo,
+                            'costo_total' => 0,
+                        ]
+                    );
+
+                    // Incrementar cantidad y actualizar inventario
+                    $inventario->cantidad_final += $detalle->peso;
+                    $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
+                    $inventario->save();
+
+                    // **Actualizar el campo cost en la tabla products**
+                    $product = Product::find($detalle->products_id);
+                    if ($product) {
+                        $product->cost = $detalle->costo_kilo;
+                        $product->save();
+                    }
+                }
+            }
+
+            // 6. Registrar movimientos en la tabla de movimientos
+            foreach ($detallesDesposte as $detalle) {
+                if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
+                    MovimientoInventario::create([
+                        'tipo' => 'desposteres', // Tipo de movimiento
+                        'desposteres_id' => $detalle->beneficiores_id,
+                        'store_origen_id' => null,
+                        'store_destino_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                        'lote_id' => $lote->id,
+                        'product_id' => $detalle->products_id,
+                        'cantidad' => $detalle->peso,
+                        'costo_unitario' => $detalle->costo_kilo,
+                        'total' => $detalle->peso * $detalle->costo_kilo,
+                        'fecha' => Carbon::now(),
+                    ]);
+                }
+            }
+
+            // **Cierra BeneficioRes si todo está bien**
+            $currentDateTime = Carbon::now();
+            $formattedDate = $currentDateTime->format('Y-m-d');
+
+            $beneficio = Beneficiocerdo::find($beneficioId);
+            $beneficio->fecha_cierre = $formattedDate;
+            $beneficio->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Movimiento de inventario registrado con éxito.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error al registrar el movimiento de inventario.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
