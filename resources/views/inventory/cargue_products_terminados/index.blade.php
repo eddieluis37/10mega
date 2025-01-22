@@ -51,7 +51,7 @@
         </div>
       </div>
       <div class="row g-3 mt-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="task-header">
             <div class="form-group">
               <label for="categoria" class="form-label">Categoria</label>
@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="task-header">
             <div class="form-group">
               <label for="store" class="form-label">Bodega</label>
@@ -81,7 +81,7 @@
           </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="task-header">
             <div class="form-group">
               <label for="lote" class="form-label">Producto Lote</label>
@@ -95,17 +95,39 @@
             </div>
           </div>
         </div>
+        <div class="col-md-3">
+          <h1 class="text-center"></h1>
 
-        <!--  <div class="table-responsive mt-1">
-        <form method="GET" action="/descargar-reporte">
-          @csrf
-         
-          <!-- Botón de descarga de reporte en Excel --
-          <div class="text-center mt-3">
-            <button type="submit" class="btn btn-primary">Descargar Reporte en Excel</button>
+          <!-- Botón para sincronizar -->
+          <form action="{{ route('sincronizar.product.lote') }}" method="GET">
+            @csrf
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-success btn-lg">Sincronizar Inventario</button>
+            </div>
+          </form>
+
+          <!-- Mensajes de éxito o error -->
+          @if(session('success'))
+          <div class="alert alert-success mt-4">
+            {{ session('success') }}
           </div>
-        </form>
-      </div> -->
+          @elseif(session('error'))
+          <div class="alert alert-danger mt-4">
+            {{ session('error') }}
+          </div>
+          @endif
+        </div>
+
+        <!-- <div class="table-responsive mt-1">
+          <form method="GET" action="/descargar-reporte">
+            @csrf
+
+            <!-- Botón de descarga de reporte en Excel --
+            <div class="text-center mt-3">
+              <button type="submit" class="btn btn-primary">Descargar Reporte en Excel</button>
+            </div>
+          </form>
+        </div> -->
 
       </div>
       <div class="table-responsive mt-3">

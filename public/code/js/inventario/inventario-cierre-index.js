@@ -50,9 +50,10 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 },
             },
             { data: "CantidadInicial", name: "CantidadInicial" },
-            { data: "compraLote", name: "compraLote" },
+            { data: "compraLote", name: "compraLote" },           
             { data: "alistamiento", name: "alistamiento" },
             { data: "compensados", name: "compensados" },
+            { data: "ProductoTerminado", name: "ProductoTerminado" },
             { data: "trasladoing", name: "trasladoing" },
             { data: "trasladosal", name: "trasladosal" },
             { data: "venta", name: "venta" },
@@ -269,7 +270,7 @@ $(document).ready(function () {
     // Inicializa Select2
     $(".select2").select2({
         theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
-        width: "100%",        
+        width: "100%",
         allowClear: true,
     });
 

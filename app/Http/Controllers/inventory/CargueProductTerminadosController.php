@@ -12,6 +12,8 @@ use App\Models\Centro_costo_product;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\ProductLote;
+use App\Models\Inventario;
+use App\Models\MovimientoInventario;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Yajra\Datatables\Datatables;
@@ -59,7 +61,7 @@ class CargueProductTerminadosController extends Controller
         try {
             // Reglas de validación
             $rules = [
-             
+
                 'lote' => 'required|unique:lotes,codigo,' . $request->loteId . ',id', // Verifica unicidad, excluyendo el lote actual al editar
                 'fecha_vencimiento' => 'required|date', // Aseguramos que sea una fecha válida
             ];
@@ -70,7 +72,7 @@ class CargueProductTerminadosController extends Controller
                 'lote.unique' => 'El código del lote ya existe. Por favor, use un código diferente.',
                 'fecha_vencimiento.required' => 'La fecha de vencimiento es requerida.',
                 'fecha_vencimiento.date' => 'La fecha de vencimiento debe ser válida.',
-                
+
             ];
 
             // Validación de entrada
@@ -316,5 +318,77 @@ class CargueProductTerminadosController extends Controller
         }
 
         return response()->json(['success' => false], 404);
+    }
+
+    public function sincronizarProductLote()
+    {
+        DB::beginTransaction();
+
+        try {
+            // Obtener todos los lotes
+            $lotes = Lote::all();
+
+            foreach ($lotes as $lote) {
+                // Obtener los detalles de los productos asociados al lote
+                $detalles = $lote->productLotes;
+
+                foreach ($detalles as $detalle) {
+                    // Sincronizar únicamente si el peso (quantity) es mayor a 0
+                    if ($detalle->quantity > 0) {
+                        // 1. Actualizar o crear en product_lote (sobrescribir cantidad)
+                        ProductLote::updateOrCreate(
+                            [
+                                'product_id' => $detalle->product_id,
+                                'lote_id' => $lote->id,
+                            ],
+                            [
+                                'quantity' => $detalle->quantity,
+                            ]
+                        );
+
+                        // 2. Crear o actualizar inventario
+                        $inventario = Inventario::firstOrCreate(
+                            [
+                                'product_id' => $detalle->product_id,
+                                'lote_id' => $lote->id,
+                                'store_id' => 1,
+                            ],
+                            [
+                                'cantidad_inicial' => 0,
+                                'cantidad_final' => 0,
+                                'costo_unitario' => $detalle->product->cost,
+                                'costo_total' => 0,
+                            ]
+                        );
+
+                        // Actualizar inventario (sobrescribir cantidad final y costo total)
+                        $inventario->cantidad_final = $detalle->quantity;
+                        $inventario->costo_total = $inventario->cantidad_final * $detalle->product->cost;
+                        $inventario->save();
+
+                        // 3. Registrar movimiento de inventario
+                        MovimientoInventario::create([
+                            'tipo' => 'products_terminados',
+                            'store_origen_id' => null,
+                            'store_destino_id' => 1,
+                            'lote_id' => $lote->id,
+                            'product_id' => $detalle->product_id,
+                            'cantidad' => $detalle->quantity,
+                            'costo_unitario' => $detalle->product->cost,
+                            'total' => $detalle->quantity * $detalle->product->cost,
+                            'fecha' => Carbon::now(),
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Sincronización completada con éxito.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Error al sincronizar: ' . $e->getMessage());
+        }
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('movimiento_inventarios', function (Blueprint $table) {
             $table->id();
-            $table->enum('tipo', ['compensadores', 'desposteres', 'despostecerdos', 'venta', 'traslado'])->default('compensadores'); //Tipo de movimiento (compra, traslado, alistamiento, etc.).
+            $table->enum('tipo', ['compensadores', 'desposteres', 'despostecerdos', 'products_terminados','venta', 'traslado'])->default('compensadores'); //Tipo de movimiento (compra, traslado, alistamiento, etc.).
 
             $table->foreignId('compensador_id')->nullable()->constrained('compensadores')->onDelete('set null');
             $table->foreignId('desposteres_id')->nullable()->constrained('desposteres')->onDelete('set null');

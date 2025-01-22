@@ -37,14 +37,23 @@ class Lote extends Model
             ->withTimestamps();
     }
 
-    /* // Relación muchos a muchos con productos
-    public function products()
+    /**
+     * Relación uno a muchos con el modelo ProductLote.
+     */
+    public function productLotes()
     {
-        return $this->belongsToMany(Product::class, 'lote_products', 'lote_id', 'product_id')
-            ->withPivot('cantidad', 'precio') // Columnas adicionales en `lote_products`
-            ->withTimestamps();
-    } */
+        return $this->hasMany(ProductLote::class);
+    }
 
+    /**
+     * Relación muchos a muchos con el modelo Product a través de la tabla `product_lote`.
+     */
+    public function productsThroughProductLote()
+    {
+        return $this->belongsToMany(Product::class, 'product_lote')
+            ->withPivot('quantity') // Campo adicional en esta tabla pivote
+            ->withTimestamps();
+    }
 
     // Relación con categorías
     public function category()

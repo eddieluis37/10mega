@@ -238,9 +238,9 @@ Route::group(['middleware' => [('auth')]], function () {
 
     //reportes Compras x productos
     //Route::get('report_compras_x_prod/excel/', [reportecompraprodController::class, 'reporteExcel']);
-    
-    
-    
+
+
+
     Route::get('report_compras_x_prod/excel/{f1}/{f2}', [reportecompraprodController::class, 'reporteExcel']);
     //Route::get('report_compras_x_prod', [reportecompraprodController::class, 'reporteExcel']);
     //Route::get('export-to-excel', 'TuControlador@exportToExcel')->name('exportToExcel');
@@ -291,42 +291,44 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('showinventory', [diaryController::class, 'show'])->name('inventory.showlist');
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
 
- /*****************************INVENTORIO NUEVO****************************************** */
+    /*****************************INVENTORIO NUEVO****************************************** */
     Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');
-   // Route::get('showConsolidadoInventory', [inventarioController::class, 'show'])->name('inventory.showConsol');
+    // Route::get('showConsolidadoInventory', [inventarioController::class, 'show'])->name('inventory.showConsol');
     Route::get('showInventarioCierre', [inventarioController::class, 'showInvcierre'])->name('inventario.showInventarioCierre');
     Route::get('getLotes', [inventarioController::class, 'getLotes'])->name('inventario.getLotes');
     Route::get('getAllLotes', [inventarioController::class, 'getAllLotes'])->name('inventario.getAllLotes');
 
     /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
-    
+
     Route::post('lotesave', [CargueProductTerminadosController::class, 'storelote'])->name('lote.save');
     Route::post('productlotesave', [CargueProductTerminadosController::class, 'productlote'])->name('productlote.save');
     Route::get('/lote-data', [CargueProductTerminadosController::class, 'getLoteData']);
     Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
     Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
-  //  Route::delete('productlote/{id}', [CargueProductTerminadosController::class, 'destroy'])->name('productlote.destroy');    
+    //  Route::delete('productlote/{id}', [CargueProductTerminadosController::class, 'destroy'])->name('productlote.destroy');    
     Route::delete('/product-lote/{id}', [ProductLoteController::class, 'destroy']);
     Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');
-    
+
+    Route::get('/sincronizar-product-lote', [CargueProductTerminadosController::class, 'sincronizarProductLote'])->name('sincronizar.product.lote');
+
 
     Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
-   // Route::get('showConsolidadoInventory', [inventoryController::class, 'show'])->name('inventory.showConsol');
+    // Route::get('showConsolidadoInventory', [inventoryController::class, 'show'])->name('inventory.showConsol');
 
     Route::get('totales', [inventoryController::class, 'totales'])->name('inventory.totales');
 
     Route::post('cargarInventariohist', [inventoryController::class, 'cargarInventariohist'])->name('cargarInventariohist');
     Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
- 
+
     /*****************************INVENTORY-HISTORICO-KG****************************************** */
     Route::get('inventory/showhistorico', [inventoryController::class, 'showhistorico'])->name('inventory.showhistorico');
     Route::get('inventory/consolidado_historico', [inventoryController::class, 'indexhistorico'])->name('inventory.consolidadohistorico');
-    Route::get('totaleshist', [inventoryController::class, 'totaleshist'])->name('inventory.totaleshist');    
+    Route::get('totaleshist', [inventoryController::class, 'totaleshist'])->name('inventory.totaleshist');
 
-    /*****************************INVENTORY-HISTORICO-UTILIDAD*******************************************/   
+    /*****************************INVENTORY-HISTORICO-UTILIDAD*******************************************/
     Route::get('inventory/showhistutilidad', [inventoryUtilidadHistoricoController::class, 'showhistutilidad'])->name('inventory.showhistutilidad');
     Route::get('inventory/consolidado_histutilidad', [inventoryUtilidadHistoricoController::class, 'indexhistutilidad'])->name('inventory.consolidadohistutilidad');
-    Route::get('totaleshistutilidad', [inventoryUtilidadHistoricoController::class, 'totaleshistutilidad'])->name('inventory.totaleshistutilidad'); 
+    Route::get('totaleshistutilidad', [inventoryUtilidadHistoricoController::class, 'totaleshistutilidad'])->name('inventory.totaleshistutilidad');
 
     /*****************************CARGAR-VENTAS*******************************************/
     Route::get('inventory/cargar_ventas', [CargarVentasController::class, 'index'])->name('inventory.showcvc');
@@ -423,7 +425,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('caja/showReciboCaja/{id}', [cajaController::class, 'showReciboCaja'])->name('caja.showReciboCaja');
 
     Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
-    
+
     /**PRODUCTOS SIN LIVEWIRE**/
     Route::get('producto', [productoController::class, 'index'])->name('producto.index');
     Route::post('productosave', [productoController::class, 'store'])->name('producto.save');
@@ -433,7 +435,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('producto/showReciboCaja/{id}', [productoController::class, 'showReciboCaja'])->name('producto.showReciboProducto');
     Route::get('/producto-edit/{id}', [productoController::class, 'edit'])->name('producto.edit');
 
-    
+
 
     /** TALLER ***/
     Route::get('workshop', [workshopController::class, 'index'])->name('workshop.index');
@@ -562,7 +564,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::post('ordersave', [orderController::class, 'store'])->name('order.save');
     Route::get('/getDireccionesByCliente/{cliente_id}', [orderController::class, 'getDireccionesByCliente'])->name('order.getDireccionesByCliente');
     Route::get('order/create/{id}', [orderController::class, 'create'])->name('order.create');
-   // Route::get('order/reopen/{id}', [orderController::class, 'reopen'])->name('order.reopen');
+    // Route::get('order/reopen/{id}', [orderController::class, 'reopen'])->name('order.reopen');
     Route::get('abrirOrden/{id}', [orderController::class, 'reopen'])->name('order.reopen');
     Route::get('delivered/{id}', [orderController::class, 'delivered'])->name('order.delivered');
     Route::post('ordersavedetail', [orderController::class, 'savedetail'])->name('order.savedetail');
@@ -662,4 +664,3 @@ Route::view('/examples/customization', 'examples.customization');
 Route::view('/examples/drag-drop', 'examples.drag-drop');
 Route::view('/examples/drag-drop-nested', 'examples.drag-drop-nested');
 Route::view('/examples/disable-drop-sort', 'examples.disable-drop-sort');
-

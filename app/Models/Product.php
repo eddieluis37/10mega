@@ -25,23 +25,23 @@ class Product extends Model
 			->withTimestamps();
 	}
 
-	/* // Relación muchos a muchos con lotes
-	public function lotes()
+	/**
+	 * Relación uno a muchos con el modelo ProductLote.
+	 */
+	public function productLotes()
 	{
-		return $this->belongsToMany(Lote::class, 'lote_products', 'product_id', 'lote_id')
-			->withPivot('cantidad', 'precio') // Columnas adicionales
-			->withTimestamps();
-	} */
+		return $this->hasMany(ProductLote::class);
+	}
 
-
-	/* // Relación muchos a muchos con lotes
-	public function lotes()
+	/**
+	 * Relación muchos a muchos con el modelo Lote a través de la tabla `product_lote`.
+	 */
+	public function lotesThroughProductLote()
 	{
-		return $this->belongsToMany(Lote::class, 'lote_products')
-			->withPivot('cantidad')
+		return $this->belongsToMany(Lote::class, 'product_lote')
+			->withPivot('quantity') // Campo adicional en esta tabla pivote
 			->withTimestamps();
-	} */
-
+	}
 
 	// Relación con categorías
 	public function category()
@@ -116,16 +116,6 @@ class Product extends Model
 	{
 		return $this->hasOne(Despostepollo::class, 'products_id');
 	}
-
-	/* public function details()
-    {
-        return $this->hasMany(Compensadores_detail::class);
-    } */
-
-	/* public function lotes()
-	{
-		return $this->belongsToMany(Lote::class, 'product_lote');
-	} */
 
 	public function stores()
 	{

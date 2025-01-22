@@ -177,6 +177,7 @@
               <th class="table-th text-white" title="Compras Lotes">CL</th>
               <th class="table-th text-white" title="Alistamiento">AL</th>
               <th class="table-th text-white" title="Compra de productos">CP</th>
+              <th class="table-th text-white" title="Cargue de productos terminados">PT</th>
               <th class="table-th text-white" title="Translados Ingresos">TI</th>
               <th class="table-th text-white" title="Translados Salidas">TS</th>
               <th class="table-th text-white" title="Ventas">VE</th>
