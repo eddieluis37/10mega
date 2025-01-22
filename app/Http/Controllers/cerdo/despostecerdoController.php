@@ -398,14 +398,14 @@ class despostecerdoController extends Controller
 
         try {
             // 1. Obtener el modelo Beneficiore
-            $beneficiore = Beneficiocerdo::findOrFail($beneficioId);
+            $beneficiocerdo = Beneficiocerdo::findOrFail($beneficioId);
 
-            Log::info('Beneficio:', ['Beneficio' => $beneficiore]);
+            Log::info('Beneficio:', ['Beneficio' => $beneficiocerdo]);
 
             // Crear un nuevo lote
             $lote = Lote::create([
                 'category_id' => 13,
-                'codigo' => $beneficiore->codigo_lote, // Campo codigo_lote en Beneficiore
+                'codigo' => $beneficiocerdo->codigo_lote, // Campo codigo_lote en Beneficiore
                 'fecha_vencimiento' => Carbon::now()->addDays(35),
             ]);
 
@@ -430,7 +430,7 @@ class despostecerdoController extends Controller
                         [
                             'product_id' => $detalle->products_id,
                             'lote_id' => $lote->id,
-                            'store_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                            'store_id' => $beneficiocerdo->store_id, // Utilizamos el store_id del modelo Beneficiore
                         ],
                         [
                             'cantidad_inicial' => 0,
@@ -458,10 +458,10 @@ class despostecerdoController extends Controller
             foreach ($detallesDesposte as $detalle) {
                 if ($detalle->peso > 0) { // Procesar solo si el peso es mayor a 0
                     MovimientoInventario::create([
-                        'tipo' => 'desposteres', // Tipo de movimiento
-                        'desposteres_id' => $detalle->beneficiores_id,
+                        'tipo' => 'despostecerdos', // Tipo de movimiento
+                        'despostecerdos_id' => $detalle->beneficiocerdos_id,
                         'store_origen_id' => null,
-                        'store_destino_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
+                        'store_destino_id' => $beneficiocerdo->store_id, // Utilizamos el store_id del modelo Beneficiore
                         'lote_id' => $lote->id,
                         'product_id' => $detalle->products_id,
                         'cantidad' => $detalle->peso,

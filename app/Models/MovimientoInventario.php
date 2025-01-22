@@ -15,6 +15,7 @@ class MovimientoInventario extends Model
         'tipo', // Compra, Venta, Traslado
         'compensador_id',
         'desposteres_id',
+        'despostecerdos_id',
         'store_origen_id',
         'store_destino_id',
         'lote_id',
