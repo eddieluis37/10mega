@@ -56,8 +56,8 @@
 						<div class="col-md-2">
 							<div class="task-header">
 								<div class="form-group">
-									<label>ID Beneficio</label>
-									<p>{{$beneficioc[0]->id}} </p>
+									<label>Bodega</label>
+									<p>{{$beneficioc[0]->name_store}} </p>
 									<input type="hidden" id="beneficioId" value="{{$beneficioc[0]->id}}">
 								</div>
 							</div>
@@ -74,7 +74,7 @@
 							<div class="task-header">
 								<div class="form-group">
 									<label>Lote</label>
-									<p>{{$beneficioc[0]->lote}}</p>
+									<p>{{$beneficioc[0]->namelote}}</p>
 								</div>
 							</div>
 						</div>

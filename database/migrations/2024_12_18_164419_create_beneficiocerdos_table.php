@@ -19,6 +19,12 @@ class CreateBeneficiocerdosTable extends Migration
             $table->unsignedBigInteger('store_id')->nullable();
             $table->foreign('store_id')->references('id')->on('stores'); // remplaza a centrocosto_id de centro_costo
 
+            $table->unsignedBigInteger('lotes_id')->nullable();
+            $table->foreign('lotes_id')->references('id')->on('lotes')->onDelete('cascade');
+
+            // el lote_id se crea en el archivo lotes_to_beneficiores
+            $table->string('codigo_lote', 60, 0)->nullable();
+
             $table->unsignedBigInteger('thirds_id')->nullable();
             $table->foreign('thirds_id')->references('id')->on('thirds');
 
@@ -42,9 +48,6 @@ class CreateBeneficiocerdosTable extends Migration
 
             $table->string('factura');
 
-            // el lote_id se crea en el archivo lotes_to_beneficiores
-            $table->string('codigo_lote', 60, 0)->nullable();
-            
             $table->string('finca');
 
             $table->decimal('sacrificio', 18, 0)->nullable();

@@ -15,10 +15,10 @@ $(document).ready(function () {
             columns: [
                 { data: "id", name: "id" },
                 { data: "namebodega", name: "namebodega" },
+                { data: "namelote", name: "namelote" },
                 { data: "namethird", name: "namethird" },
                 { data: "date", name: "date" },
-                { data: "factura", name: "factura" },
-                { data: "namelote", name: "namelote" },
+                { data: "factura", name: "factura" },              
                 { data: "action", name: "action" },
             ],
             order: [[0, 'DESC']],

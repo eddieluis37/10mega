@@ -248,8 +248,8 @@ class beneficiocerdoController extends Controller
 	{
 		$data = DB::table('beneficiocerdos as be')
 			->join('thirds as tird', 'be.thirds_id', '=', 'tird.id')
-			->join('centro_costo as cc', 'be.centrocosto_id', '=', 'cc.id')
-			->select('be.*', 'cc.name as namecentrocosto', 'tird.name as namethird')
+			->join('stores as s', 'be.store_id', '=', 's.id')
+			->select('be.*', 's.name as namebodega', 'tird.name as namethird' ,'be.codigo_lote as namelote')
 			->where('be.status', '=', true)
 			->orderBy('be.id', 'desc')
 			->get();

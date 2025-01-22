@@ -21,11 +21,11 @@
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
 								<th class="table-th text-white">#</th>
-								<th class="table-th text-white">CentroCosto</th>
+								<th class="table-th text-white">Bodega</th>
+								<th class="table-th text-white">Lote</th>
 								<th class="table-th text-white">Proveedor</th>
 								<th class="table-th text-white">Fecha</th>
-								<th class="table-th text-white">Factura</th>
-								<th class="table-th text-white">Lote</th>
+								<th class="table-th text-white">Factura</th>								
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
 						</thead>

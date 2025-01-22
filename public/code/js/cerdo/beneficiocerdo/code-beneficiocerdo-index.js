@@ -14,11 +14,11 @@ $(document).ready(function () {
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "namecentrocosto", name: "namecentrocosto" },
+                { data: "namebodega", name: "namebodega" },
+                { data: "namelote", name: "namelote" },
                 { data: "namethird", name: "namethird" },
                 { data: "date", name: "date" },
-                { data: "factura", name: "factura" },
-                { data: "lote", name: "lote" },
+                { data: "factura", name: "factura" },               
                 { data: "action", name: "action" },
             ],
             order: [[0, 'DESC']],
@@ -92,7 +92,7 @@ inputfactura = document.querySelector("#factura");
 inputclientpieles_id = document.querySelector("#clientpieles_id");
 inputclientvisceras_id = document.querySelector("#clientvisceras_id");
 inputfinca = document.querySelector("#finca");
-//inputlote = document.querySelector("#lote");
+//inputlote = document.querySelector("#namelote");
 inputsacrificio = document.querySelector("#sacrificio");
 inputfomento = document.querySelector("#fomento");
 inputdeguello = document.querySelector("#deguello");
@@ -181,7 +181,7 @@ const showForm = (data) => {
     inputplantasacrificiocerdo_id.value = resp.plantasacrificiocerdo_id;
     inputclientvisceras_id.value = resp.clientvisceras_id;
     inputfinca.value = resp.finca;
-    //inputlote.value = resp.lote;
+    //inputlote.value = resp.namelote;
     inputsacrificio.value = formatCantidadSinCero(resp.sacrificio);
     inputfomento.value = formatCantidadSinCero(resp.fomento);
     inputdeguello.value = formatCantidadSinCero(resp.deguello);
