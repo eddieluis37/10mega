@@ -20,7 +20,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
     dataTable = $("#tableInventory").DataTable({
         paging: true,
         pageLength: 500,
-        autoWidth: false,
+        autoWidth: true,
         processing: true,
         serverSide: true,
         scrollX: true,
@@ -32,10 +32,41 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 loteId: loteId,
             },
         },
-        columns: [
+        columns: [            
+            {
+                data: "StoreNombre",
+                name: "StoreNombre",
+                render: function (data) {
+                    let subStringData = data.substring(0, 25).toLowerCase();
+                    let capitalizedSubString =
+                        subStringData.charAt(0).toUpperCase() +
+                        subStringData.slice(1);
+                    if (data.length > 25) {
+                        return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
+                    } else {
+                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
+                        return `<span style="font-size: smaller;">${capitalizedSubString}</span>`;
+                    }
+                },
+            },
             { data: "codigoLote", name: "codigoLote" },
-            { data: "fechaVencimientoLote", name: "fechaVencimientoLote" },
-            { data: "CategoriaNombre", name: "CategoriaNombre" },
+            { data: "fechaVencimientoLote", name: "fechaVencimientoLote" },            
+            {
+                data: "CategoriaNombre",
+                name: "CategoriaNombre",
+                render: function (data) {
+                    let subStringData = data.substring(0, 25).toLowerCase();
+                    let capitalizedSubString =
+                        subStringData.charAt(0).toUpperCase() +
+                        subStringData.slice(1);
+                    if (data.length > 25) {
+                        return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
+                    } else {
+                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
+                        return `<span style="font-size: smaller;">${capitalizedSubString}</span>`;
+                    }
+                },
+            },
             {
                 data: "ProductoNombre",
                 name: "ProductoNombre",
@@ -185,6 +216,16 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 }, 0)
                 .toFixed(2);
 
+
+            // Totalizar la columna "stock"
+            var totalStock = api
+                .column("stock:name", { search: "applied" })
+                .data()
+                .reduce(function (a, b) {
+                    return parseFloat(a) + parseFloat(b);
+                }, 0)
+                .toFixed(2);    
+
             // Totalizar la columna "venta"
             var totalVenta = api
                 .column("venta:name", { search: "applied" })
@@ -194,14 +235,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 }, 0)
                 .toFixed(2);
 
-            // Totalizar la columna "stock"
-            var totalStock = api
-                .column("stock:name", { search: "applied" })
-                .data()
-                .reduce(function (a, b) {
-                    return parseFloat(a) + parseFloat(b);
-                }, 0)
-                .toFixed(2);
+            
 
             // Totalizar la columna "fisico"
             var totalFisico = api

@@ -101,6 +101,7 @@ class inventarioController extends Controller
  */
                 // Guardar los resultados para visualización
                 $resultados[] = [
+                    'StoreNombre' => $inventario->store->name,
                     'codigoLote' => $inventario->lote->codigo, // Código del lote                    
                     'fechaVencimientoLote' => $inventario->lote->fecha_vencimiento, // Fecha de vencimiento del lote
                     'CategoriaNombre' => $inventario->product->category->name,
@@ -115,7 +116,7 @@ class inventarioController extends Controller
                     'trasladosal' => $inventario->product->id,
 
                     'venta' => $inventario->store->id,
-                    'notacredito' => $inventario->store->name,
+                    'notacredito' => $inventario->lote->id,
                     'notadebito' => $inventario->lote->id,
                     'venta_real' => $inventario->lote->id,
 
