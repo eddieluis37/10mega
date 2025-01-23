@@ -56,6 +56,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
             { data: "alistamiento", name: "alistamiento" },
             { data: "compensados", name: "compensados" },
             { data: "ProductoTerminado", name: "ProductoTerminado" },
+            { data: "StockIdeal", name: "StockIdeal" },
             { data: "trasladoing", name: "trasladoing" },
             { data: "trasladosal", name: "trasladosal" },
             { data: "venta", name: "venta" },
@@ -102,38 +103,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 },
             },
 
-            {
-                data: null,
-                name: "pmerma",
-                render: function (data, type, row) {
-                    var merma = row.fisico - row.stock;
-                    var CantidadInicial = parseFloat(row.CantidadInicial);
-                    var compraLote = parseFloat(row.compraLote);
-                    var alistamiento = parseFloat(row.alistamiento);
-                    var compensados = parseFloat(row.compensados);
-                    var trasladoing = parseFloat(row.trasladoing);
-                    var disponible =
-                        CantidadInicial +
-                        compraLote +
-                        alistamiento +
-                        compensados +
-                        trasladoing;
-                    var pmerma = (merma / disponible) * 100;
-                    if (isNaN(pmerma) || !isFinite(pmerma)) {
-                        pmerma = 0;
-                    }
-                    var pmermaFormatted = pmerma.toFixed(2) + "%";
-                    if (pmerma < 0) {
-                        return (
-                            '<span style="color: red;">' +
-                            pmermaFormatted +
-                            "</span>"
-                        );
-                    } else {
-                        return pmermaFormatted;
-                    }
-                },
-            },
+           
         ],
         order: [[1, "ASC"]],
         language: {

@@ -90,7 +90,7 @@ class inventarioController extends Controller
                 $cantidadFinal = $inventario->cantidad_inicial;
 
                 // Calcular stock ideal
-                $stockIdeal = $compensadores + $inventario->inventario_inicial;
+                $stockIdeal = $compensadores + $inventario->inventario_inicial + $desposteres + $despostecerdos;
 
                 // Actualizar los campos del inventario
                 /*   $inventario->update([
@@ -124,7 +124,7 @@ class inventarioController extends Controller
                     //  'Venta' => $venta,
                     //  'Ajuste' => $ajuste,
                     // 'CantidadFinal' => $cantidadFinal,
-                    // 'StockIdeal' => $stockIdeal,
+                    'StockIdeal' => $stockIdeal,
                 ];
             }
 
