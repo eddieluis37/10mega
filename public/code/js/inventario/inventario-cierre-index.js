@@ -32,6 +32,8 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
             },
         },
         columns: [
+            { data: "codigoLote", name: "codigoLote" },
+            { data: "fechaVencimientoLote", name: "fechaVencimientoLote" },
             { data: "CategoriaNombre", name: "CategoriaNombre" },
             {
                 data: "ProductoNombre",
@@ -49,7 +51,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                     }
                 },
             },
-            { data: "CantidadInicial", name: "CantidadInicial" },
+            { data: "CantidadInicial", name: "CantidadInicial" },           
             { data: "compraLote", name: "compraLote" },           
             { data: "alistamiento", name: "alistamiento" },
             { data: "compensados", name: "compensados" },

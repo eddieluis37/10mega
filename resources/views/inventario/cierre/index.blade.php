@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="row g-3 mt-3">
-      <div class="col-sm-12 col-md-3">
+        <div class="col-sm-12 col-md-3">
           <label for="inputstore" class="form-label">Bodega</label>
           <select id="inputstore" class="form-select select2">
             <option value="">Todas las bodegas</option>
@@ -48,8 +48,8 @@
           </select>
           <span class="text-danger error-message"></span>
         </div>
-       
-        
+
+
 
 
         @can('Cerrar_Inventario')
@@ -171,6 +171,8 @@
         <table id="tableInventory" class="table table-success table-striped mt-1">
           <thead class="text-white" style="background: #3B3F5C">
             <tr>
+              <th class="table-th text-white" title="Lote">Lote</th>
+              <th class="table-th text-white" title="Fecha de vencimiento lote">FVENC</th>
               <th class="table-th text-white" title="Categoria">CAT</th>
               <th class="table-th text-white" title="Productos">PRODUCTO</th>
               <th class="table-th text-white" title="Inventario Inicial">INI</th>

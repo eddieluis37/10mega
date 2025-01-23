@@ -100,6 +100,8 @@ class inventarioController extends Controller
  */
                 // Guardar los resultados para visualización
                 $resultados[] = [
+                    'codigoLote' => $inventario->lote->codigo, // Código del lote                    
+                    'fechaVencimientoLote' => $inventario->lote->fecha_vencimiento, // Fecha de vencimiento del lote
                     'CategoriaNombre' => $inventario->product->category->name,
                     'ProductoNombre' => $inventario->product->name,
                     'CantidadInicial' => $inventario->inventario_inicial,

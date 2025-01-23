@@ -24,7 +24,7 @@ class Inventario extends Model
     ];
 
     /**
-     * Relación con la tabla `Lotes`.
+     * Relación con la tabla `Lotes`. codigoLote: Utiliza $inventario->lote->codigo para obtener el código del lote.
      */
     public function lote()
     {
