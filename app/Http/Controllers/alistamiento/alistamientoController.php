@@ -50,15 +50,15 @@ class alistamientoController extends Controller
             ->get();
 
         $cortes = DB::table('products as p')
-            ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-            ->select('p.*', 'ce.stock', 'ce.fisico', 'p.id as productopadreId')
-            ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
-            ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockPadre')
+            ->join('inventarios as i', 'p.id', '=', 'i.product_id')
+            ->select('p.*', 'i.stock_ideal', 'i.cantidad_inicial', 'p.id as productopadreId')
+            ->selectRaw('i.inventario_inicial + i.compraLote + i.alistamiento +
+            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre')
             ->where([
                 ['p.level_product_id', 1],
                 ['p.meatcut_id', $dataAlistamiento[0]->meatcut_id],
                 ['p.status', 1],
-                ['ce.centrocosto_id', $dataAlistamiento[0]->centrocosto_id],
+                ['i.centrocosto_id', $dataAlistamiento[0]->centrocosto_id],
             ])->get();
 
         /**************************************** */
