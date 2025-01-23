@@ -171,7 +171,7 @@
         <table id="tableInventory" class="table table-success table-striped mt-1">
           <thead class="text-white" style="background: #3B3F5C">
             <tr>
-              <th class="table-th text-white" title="Lote">Bodega</th>
+              <th class="table-th text-white" title="Nombre de la bodega">Bodega</th>
               <th class="table-th text-white" title="Lote">Lote</th>
               <th class="table-th text-white" title="Fecha de vencimiento lote">FVENC</th>
               <th class="table-th text-white" title="Categoria">CAT</th>
