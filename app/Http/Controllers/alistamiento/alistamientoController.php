@@ -52,8 +52,9 @@ class alistamientoController extends Controller
         $cortes = DB::table('products as p')
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
             ->select('p.*', 'i.stock_ideal', 'i.cantidad_inicial', 'p.id as productopadreId')
-            ->selectRaw('i.inventario_inicial + i.compraLote + i.alistamiento +
-            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre')
+            ->selectRaw('i.stock_ideal')
+           /*  ->selectRaw('i.inventario_inicial + i.compraLote + i.alistamiento +
+            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre') */
             ->where([
                 ['p.level_product_id', 1],
                 ['p.meatcut_id', $dataAlistamiento[0]->meatcut_id],

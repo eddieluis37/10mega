@@ -20,7 +20,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
     dataTable = $("#tableInventory").DataTable({
         paging: true,
         pageLength: 500,
-        autoWidth: true,
+        autoWidth: false,
         processing: true,
         serverSide: true,
         scrollX: true,
