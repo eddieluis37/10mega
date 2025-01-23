@@ -73,11 +73,11 @@ class beneficiocerdoController extends Controller
 			$reg = Beneficiocerdo::select()->first();
 
 			if ($reg === null) {
-				$newLote = $day . $month . $year . "CERDO" . "_" . "1";
+				$newLote = $day . $month . $year . "C" . "1";
 			} else {
 				$regUltimo = Beneficiocerdo::select()->latest()->first()->toArray();
 				$consecutivo = $regUltimo['id'] + 1;
-				$newLote = $day . $month . $year . "CERDO" . "_" . $consecutivo;
+				$newLote = $day . $month . $year . "C" . $consecutivo;
 			}
 
 			/******************************************************** */

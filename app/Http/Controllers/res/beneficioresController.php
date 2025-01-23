@@ -77,11 +77,11 @@ class beneficioresController extends Controller
 			$reg = Beneficiore::select()->first();
 
 			if ($reg === null) {
-				$newLote = $day . $month . $year . "RES" . "_" . "1";
+				$newLote = $day . $month . $year . "R" . "1";
 			} else {
 				$regUltimo = Beneficiore::select()->latest()->first()->toArray();
 				$consecutivo = $regUltimo['id'] + 1;
-				$newLote = $day . $month . $year . "RES" . "_" . $consecutivo;
+				$newLote = $day . $month . $year . "R" . $consecutivo;
 			}
 
 			/******************************************************** */
