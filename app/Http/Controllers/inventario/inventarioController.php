@@ -71,6 +71,7 @@ class inventarioController extends Controller
             foreach ($inventarios as $inventario) {
                 // Obtener los movimientos de inventario relacionados
                 $movimientos = MovimientoInventario::where('lote_id', $inventario->lote_id)
+                    ->where('store_destino_id', $inventario->store_id)
                     ->where('product_id', $inventario->product_id)
                     ->select('tipo', DB::raw('SUM(cantidad) AS cantidad_total'))
                     ->groupBy('tipo')
