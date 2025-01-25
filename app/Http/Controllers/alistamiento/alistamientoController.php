@@ -19,6 +19,7 @@ use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\Centro_costo_product;
 use App\Models\shopping\shopping_enlistment;
 use App\Models\shopping\shopping_enlistment_details;
+use App\Models\Store;
 
 class alistamientoController extends Controller
 {
@@ -29,8 +30,11 @@ class alistamientoController extends Controller
      */
     public function index()
     {
-        $category = Category::WhereIn('id', [1, 2, 3])->get();
-        $centros = Centrocosto::Where('status', 1)->get();
+        $category = Category::WhereIn('id', [13, 2, 3])->get();
+        //$centros = Centrocosto::Where('status', 1)->get();
+        $centros = Store::whereNotIn('id', [1, 4, 5, 6, 7])
+        ->orderBy('id', 'asc')
+        ->get();
         return view("alistamiento.index", compact('category', 'centros'));
     }
 
@@ -44,7 +48,7 @@ class alistamientoController extends Controller
         //dd($id);
         $dataAlistamiento = DB::table('enlistments as ali')
             ->join('categories as cat', 'ali.categoria_id', '=', 'cat.id')
-            ->join('centro_costo as centro', 'ali.centrocosto_id', '=', 'centro.id')
+            ->join('stores as centro', 'ali.centrocosto_id', '=', 'centro.id')
             ->select('ali.*', 'cat.name as namecategoria', 'centro.name as namecentrocosto')
             ->where('ali.id', $id)
             ->get();
@@ -52,14 +56,14 @@ class alistamientoController extends Controller
         $cortes = DB::table('products as p')
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
             ->select('p.*', 'i.stock_ideal', 'i.cantidad_inicial', 'p.id as productopadreId')
-            ->selectRaw('i.stock_ideal')
+            ->selectRaw('i.stock_ideal stockPadre')
            /*  ->selectRaw('i.inventario_inicial + i.compraLote + i.alistamiento +
             i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre') */
             ->where([
                 ['p.level_product_id', 1],
                 ['p.meatcut_id', $dataAlistamiento[0]->meatcut_id],
                 ['p.status', 1],
-                ['i.centrocosto_id', $dataAlistamiento[0]->centrocosto_id],
+                ['i.store_id', $dataAlistamiento[0]->centrocosto_id],
             ])->get();
 
         /**************************************** */

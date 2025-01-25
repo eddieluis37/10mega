@@ -70,5 +70,9 @@ class CategorySeeder extends Seeder
             'name' => 'CERDO',
             'image' => 'https://dummyimage.com/200x150/5c5756/fff'
         ]);
+        Category::create([
+            'name' => 'POLLOS',
+            'image' => 'https://dummyimage.com/200x150/5c5756/fff'
+        ]);
     }
 }
