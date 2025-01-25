@@ -355,15 +355,15 @@ class CargueProductTerminadosController extends Controller
                             ],
                             [
                                 'cantidad_inicial' => 0,
-                                'cantidad_final' => 0,
+                                'cantidad_prod_term' => 0,
                                 'costo_unitario' => $detalle->product->cost,
                                 'costo_total' => 0,
                             ]
                         );
 
                         // Actualizar inventario (sobrescribir cantidad final y costo total)
-                        $inventario->cantidad_final = $detalle->quantity;
-                        $inventario->costo_total = $inventario->cantidad_final * $detalle->product->cost;
+                        $inventario->cantidad_prod_term = $detalle->quantity;
+                        $inventario->costo_total = $inventario->cantidad_prod_term * $detalle->product->cost;
                         $inventario->save();
 
                         // 3. Registrar movimiento de inventario

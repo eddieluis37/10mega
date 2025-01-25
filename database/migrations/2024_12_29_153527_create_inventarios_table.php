@@ -26,6 +26,8 @@ return new class extends Migration
 
             $table->decimal('cantidad_inicial', 18, 2)->default(0)->nullable(); // Cantidad inicial al inicio del período.
             $table->decimal('cantidad_final', 18, 2)->default(0)->nullable(); // Cantidad al cierre del período.
+            $table->decimal('cantidad_prod_term', 18, 2)->default(0)->nullable(); // Cantidad al cierre del período.
+            
 
             $table->decimal('stock_ideal', 18, 2)->default(0)->nullable()->comment('Cálculo de la suma de la compra compensada + inventario_inicial.');
 
