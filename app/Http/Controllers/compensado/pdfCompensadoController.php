@@ -22,7 +22,7 @@ class pdfCompensadoController extends Controller
         $comp = DB::table('compensadores as co')
             ->join('thirds as third', 'co.thirds_id', '=', 'third.id')
             ->join('users as u', 'co.users_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'co.centrocosto_id', '=', 'centro.id')
+            ->join('stores as centro', 'co.store_id', '=', 'centro.id')
             ->select('co.*', 'u.name as nameuser', 'third.name as namethird', 'third.correo', 'third.identification', 'third.direccion', 'centro.name as namecentrocosto', 'third.porc_descuento')
             ->where([
                 ['co.id', $id],
