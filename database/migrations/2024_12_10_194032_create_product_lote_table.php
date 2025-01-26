@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('lote_id')->constrained()->onDelete('cascade');
             $table->decimal('quantity', 18, 2)->default(0)->nullable();
+            $table->decimal('costo', 18, 2)->default(0);  
             $table->timestamps();
         });
     }

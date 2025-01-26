@@ -81,7 +81,8 @@ class inventarioController extends Controller
                 $compensadores = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
                 $desposteres = $movimientos->where('tipo', 'desposteres')->sum('cantidad_total');
                 $despostecerdos = $movimientos->where('tipo', 'despostecerdos')->sum('cantidad_total');
-                $products_terminados = $movimientos->where('tipo', 'products_terminados')->pluck('cantidad_final');
+                
+                //$products_terminados = $movimientos->where('tipo', 'products_terminados')->pluck('cantidad_final');
                 /*  $trasladoIngreso = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
                 $trasladoSalida = $movimientos->where('tipo', 'traslado_salida')->sum('cantidad_total');
                 $venta = $movimientos->where('tipo', 'venta')->sum('cantidad_total');

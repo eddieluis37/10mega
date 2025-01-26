@@ -136,6 +136,7 @@ class CargueProductTerminadosController extends Controller
                 'producto' => 'required|exists:products,id', // Ensure the product exists
                 'loteProd' => 'required',
                 'quantity' => 'required',
+                'costo' => 'required',
                 'store_id' => 'required|exists:stores,id', // Ensure the store exists
             ];
             $messages = [
@@ -144,6 +145,7 @@ class CargueProductTerminadosController extends Controller
                 'producto.exists' => 'El producto no existe', // Custom message for product existence
                 'loteProd.required' => 'Lote es requerido',
                 'quantity.required' => 'Cantidad es requerida',
+                'costo.required' => 'Costo es requerido',
                 'store_id.required' => 'El ID de la tienda es requerido',
                 'store_id.exists' => 'La tienda no existe', // Custom message for store existence
             ];
@@ -159,11 +161,15 @@ class CargueProductTerminadosController extends Controller
             // Check if ProductLote exists
             $getReg = ProductLote::firstWhere('id', $request->productloteId);
             if ($getReg == null) {
+                // Limpia el campo "costo" (elimina puntos y otros caracteres no numéricos)
+                $cleanCosto = str_replace('.', '', $request->costo);
+
                 // Create new ProductLote
                 $productLote = new ProductLote();
                 $productLote->product_id = $request->producto;
                 $productLote->lote_id = $request->loteProd;
                 $productLote->quantity = $request->quantity;
+                $productLote->costo = $cleanCosto; // Guarda el costo limpio
                 $productLote->save();
 
                 // Cargue el Producto para adjuntarlo a las tiendas
@@ -178,11 +184,14 @@ class CargueProductTerminadosController extends Controller
                     "registroId" => $productLote->id
                 ]);
             } else {
+                // Limpia el campo "costo" (elimina puntos y otros caracteres no numéricos)
+                $cleanCosto = str_replace('.', '', $request->costo);
                 // Update existing ProductLote
                 $updateLote = ProductLote::firstWhere('id', $request->productloteId);
                 $updateLote->product_id = $request->producto;
                 $updateLote->lote_id = $request->loteProd;
                 $updateLote->quantity = $request->quantity;
+                $updateLote->costo = $cleanCosto; // Guarda el costo limpio
                 $updateLote->save();
 
                 // Cargue el Producto para sincronizarlo con las tiendas
@@ -275,6 +284,7 @@ class CargueProductTerminadosController extends Controller
                 'l.codigo as codigolote',
                 'l.fecha_vencimiento as fechavence',
                 'pl.quantity as quantity',
+                'pl.costo as costo',
                 //   'pl.lote as lote',
             )
             ->where('pro.category_id', $categoriaId)
@@ -296,13 +306,15 @@ class CargueProductTerminadosController extends Controller
         $productId = request('productId');
         $loteId = request('loteId'); // Get loteId from the dropdown
         $quantity = request('quantity');
+        $costo = request('costo');
 
         DB::table('product_lote')
             ->where('id', $productoLoteId)
             ->where('product_id', $productId)
             ->where('lote_id', $loteId)
             ->update([
-                'quantity' => $quantity
+                'quantity' => $quantity,
+                'costo' => $costo                
             ]);
 
         return response()->json(['success' => 'true']);

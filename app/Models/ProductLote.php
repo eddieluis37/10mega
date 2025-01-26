@@ -14,6 +14,7 @@ class ProductLote extends Model
         'product_id',
         'lote_id',
         'quantity',
+        'costo',
     ];
 
     // Relación con el modelo Product
