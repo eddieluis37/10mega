@@ -32,7 +32,8 @@ class alistamientoController extends Controller
     {
         $category = Category::WhereIn('id', [13, 2, 3])->get();
         //$centros = Centrocosto::Where('status', 1)->get();
-        $centros = Store::whereNotIn('id', [1, 4, 5, 6, 7])
+        //$centros = Store::whereNotIn('id', [1, 4, 5, 6, 7])
+        $centros = Store::whereIn('id', [8, 10])
         ->orderBy('id', 'asc')
         ->get();
         return view("alistamiento.index", compact('category', 'centros'));
@@ -115,12 +116,14 @@ class alistamientoController extends Controller
 
             $rules = [
                 'alistamientoId' => 'required',
+                'fecha' => 'required',
                 'categoria' => 'required',
                 'centrocosto' => 'required',
                 'selectCortePadre' => 'required',
             ];
             $messages = [
                 'alistamientoId.required' => 'El alistamiento es requerido',
+                'fecha.required' => 'La fecha es requerida',
                 'categoria.required' => 'La categoria es requerida',
                 'centrocosto.required' => 'El centro de costo es requerido',
                 'selectCortePadre.required' => 'El corte padre es requerido',

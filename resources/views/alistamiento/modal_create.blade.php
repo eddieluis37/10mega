@@ -9,6 +9,7 @@
 					<div class="form-group">
 						<label for="date1" class="form-label">Fecha</label>
 						<input type="date" class="form-control" name="fecha" id="fecha" placeholder="Last name" aria-label="Last name" >
+						<span class="text-danger error-message"></span>
 					</div>
 				</div>
 			</div>

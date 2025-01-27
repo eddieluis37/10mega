@@ -81,7 +81,7 @@ class inventarioController extends Controller
                 $compensadores = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
                 $desposteres = $movimientos->where('tipo', 'desposteres')->sum('cantidad_total');
                 $despostecerdos = $movimientos->where('tipo', 'despostecerdos')->sum('cantidad_total');
-                
+
                 //$products_terminados = $movimientos->where('tipo', 'products_terminados')->pluck('cantidad_final');
                 /*  $trasladoIngreso = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
                 $trasladoSalida = $movimientos->where('tipo', 'traslado_salida')->sum('cantidad_total');
@@ -92,7 +92,7 @@ class inventarioController extends Controller
                 $cantidadFinal = $inventario->cantidad_inicial;
 
                 // Calcular stock ideal
-                $stockIdeal = $compensadores + $inventario->inventario_inicial + $desposteres + $despostecerdos;
+                $stockIdeal = $compensadores + $inventario->inventario_inicial + $desposteres + $despostecerdos + $inventario->cantidad_prod_term;
 
                 // Actualizar los campos del inventario
                 /*   $inventario->update([
@@ -110,24 +110,24 @@ class inventarioController extends Controller
                     'ProductoNombre' => $inventario->product->name,
                     'CantidadInicial' => $inventario->inventario_inicial,
                     'compraLote' => $desposteres + $despostecerdos, // Sumar desposteres y despostecerdos
-                    'ProductoTerminado' =>$inventario->cantidad_prod_term,
-                    'alistamiento' => $inventario->lote->id,
-                    //    'alistamiento' => $inventario->lote->codigo,
+                    'alistamiento' => 0,
+                    'ProductoTerminado' => $inventario->cantidad_prod_term,
+                    
                     'compensados' => $compensadores,
-                    'trasladoing' => $inventario->lote->id,
-                    'trasladosal' => $inventario->product->id,
+                    'trasladoing' => 0,
+                    'trasladosal' => 0,
 
-                    'venta' => $inventario->store->id,
-                    'notacredito' => $inventario->lote->id,
-                    'notadebito' => $inventario->lote->id,
-                    'venta_real' => $inventario->lote->id,
-
-                    'stock' => $inventario->lote->id,
-                    'fisico' => $inventario->lote->id,
+                    'venta' => 0,
+                    'notacredito' => 0,
+                    'notadebito' => 0,
+                    'venta_real' => 0,
+                    'StockIdeal' => $stockIdeal,
+                    'stock' => 0,
+                    'fisico' => 0,
                     //  'Venta' => $venta,
                     //  'Ajuste' => $ajuste,
                     // 'CantidadFinal' => $cantidadFinal,
-                    'StockIdeal' => $stockIdeal,
+
                 ];
             }
 
