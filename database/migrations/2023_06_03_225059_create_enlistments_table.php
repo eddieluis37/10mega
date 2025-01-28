@@ -19,13 +19,10 @@ class CreateEnlistmentsTable extends Migration
             $table->unsignedBigInteger('users_id')->nullable();
             $table->foreign('users_id')->references('id')->on('users');
 
-            $table->unsignedBigInteger('categoria_id')->nullable();
-            $table->foreign('categoria_id')->references('id')->on('categories');
+            /*  la llave foranea de store_id se crea mediante otro archivo     */
+            /*  la llave foranea de lote_id se crea mediante otro archivo     */
 
-            $table->unsignedBigInteger('centrocosto_id')->nullable();
-            $table->foreign('centrocosto_id')->references('id')->on('centro_costo');
-
-            $table->unsignedBigInteger('meatcut_id')->nullable();           
+            $table->unsignedBigInteger('meatcut_id')->nullable();
             $table->foreign('meatcut_id')->references('id')->on('meatcuts')->onDelete("cascade");
 
             $table->decimal('nuevo_stock_padre', 18, 2)->default(0);
@@ -34,7 +31,7 @@ class CreateEnlistmentsTable extends Migration
             $table->date('fecha_alistamiento');
             $table->date('fecha_cierre')->nullable();
 
-            $table->boolean('status')->parent_select()->default(true)->nullable();            
+            $table->boolean('status')->parent_select()->default(true)->nullable();
             $table->timestamps();
         });
     }

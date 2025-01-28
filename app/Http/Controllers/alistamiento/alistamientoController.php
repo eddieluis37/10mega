@@ -29,10 +29,10 @@ class alistamientoController extends Controller
     public function getLotes($storeId)
     {
         $loteIds = Inventario::where('store_id', $storeId)->pluck('lote_id');
-        $lotes = Lote::whereIn('id', $loteIds)           
+        $lotes = Lote::whereIn('id', $loteIds)
             ->where('status', '1')
             ->pluck('codigo', 'id'); // Obtener lotes que cumplan con los filtros
-        return response()->json($lotes);       
+        return response()->json($lotes);
     }
 
     public function getProductos($loteId)
@@ -44,6 +44,147 @@ class alistamientoController extends Controller
             ->pluck('name', 'id'); // Obtener productos que cumplan con los filtros
         return response()->json($productos);
     }
+
+    public function store(Request $request) // alistamientosave Llenado del modal_create.blade
+    {
+        try {
+
+            $rules = [
+                'alistamientoId' => 'required',
+                'fecha' => 'required',
+                'select2' => 'required',
+                'inputlote' => 'required',
+                'select2corte' => 'required',
+            ];
+            $messages = [
+                'alistamientoId.required' => 'El alistamiento es requerido',
+                'fecha.required' => 'La fecha es requerida',
+                'select2.required' => 'La bodega es requerida',
+                'inputlote.required' => 'El lote es requerido',
+                'select2corte.required' => 'El corte padre es requerido',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $getReg = Alistamiento::firstWhere('id', $request->alistamientoId);
+
+            if ($getReg == null) {
+                $currentDateTime = Carbon::now();
+                $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
+                $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
+                $current_date->modify('next monday'); // Move to the next Monday
+                $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
+                $fechaalistamiento = $request->fecha;
+                $id_user = Auth::user()->id;
+
+                $alist = new Alistamiento();
+                $alist->users_id = $id_user;
+                $alist->store_id = $request->inputstore;
+                $alist->lote_id = $request->inputlote;               
+                $alist->meatcut_id = $request->select2corte;
+                //$alist->fecha_alistamiento = $currentDateFormat;
+                $alist->fecha_alistamiento = $fechaalistamiento;
+                $alist->fecha_cierre = $dateNextMonday;
+                $alist->save();
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Guardado correctamente',
+                    "registroId" => $alist->id
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'array' => (array) $th
+            ]);
+        }
+    }
+
+    public function show()
+    {
+        $data = DB::table('enlistments as ali')
+            ->join('stores as s', 'ali.store_id', '=', 's.id')
+            ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
+            ->join('meatcuts as cut', 'ali.meatcut_id', '=', 'cut.id')
+            ->select('ali.*', 'l.codigo as namecategoria', 's.name as namecentrocosto', 'cut.name as namecut')
+            ->where('ali.status', 1)
+            ->get();
+        //$data = Compensadores::orderBy('id','desc');
+        return Datatables::of($data)->addIndexColumn()
+            ->addColumn('fecha', function ($data) {
+                $fecha = Carbon::parse($data->fecha_alistamiento);
+                $onlyDate = $fecha->toDateString();
+                return $onlyDate;
+            })
+            ->addColumn('inventory', function ($data) {
+                if ($data->inventario == 'pending') {
+                    $statusInventory = '<span class="badge bg-warning">Pendiente</span>';
+                } else {
+                    $statusInventory = '<span class="badge bg-success">Agregado</span>';
+                }
+                return $statusInventory;
+            })
+            ->addColumn('action', function ($data) {
+                $currentDateTime = Carbon::now();
+                if (Carbon::parse($currentDateTime->format('Y-m-d'))->gt(Carbon::parse($data->fecha_cierre))) {
+                    $btn = '
+                    <div class="text-center">
+					<a href="alistamiento/create/' . $data->id . '" class="btn btn-dark" title="Transformar" >
+						<i class="fas fa-directions"></i>
+					</a>
+					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
+						<i class="fas fa-eye"></i>
+					</button>
+					<button class="btn btn-dark" title="" disabled>
+						<i class="fas fa-trash"></i>
+					</button>
+                    </div>
+                    ';
+                } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
+                    $status = '';
+                    if ($data->inventario == 'added') {
+                        $status = 'disabled';
+                    }
+                    $btn = '
+                    <div class="text-center">
+					<a href="alistamiento/create/' . $data->id . '" class="btn btn-dark" title="Transformar" >
+						<i class="fas fa-directions"></i>
+					</a>
+					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
+						<i class="fas fa-eye"></i>
+					</button>
+					<button class="btn btn-dark" title="Borrar transformación" onclick="downAlistamiento(' . $data->id . ');" ' . $status . '>
+						<i class="fas fa-trash"></i>
+					</button>
+                    </div>
+                    ';
+                } else {
+                    $btn = '
+                    <div class="text-center">
+					<a href="alistamiento/create/' . $data->id . '" class="btn btn-dark" title="Transformar" >
+						<i class="fas fa-directions"></i>
+					</a>
+					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
+						<i class="fas fa-eye"></i>
+					</button>
+					<button class="btn btn-dark" title="" disabled>
+						<i class="fas fa-trash"></i>
+					</button>
+                    </div>
+                    ';
+                }
+                return $btn;
+            })
+            ->rawColumns(['fecha', 'inventory', 'action'])
+            ->make(true);
+    }
+
 
     /**
      * Display a listing of the resource.
@@ -133,66 +274,6 @@ class alistamientoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request) // Llenado del modal_create.blade
-    {
-        try {
-
-            $rules = [
-                'alistamientoId' => 'required',
-                'fecha' => 'required',
-                'categoria' => 'required',
-                'centrocosto' => 'required',
-                'selectCortePadre' => 'required',
-            ];
-            $messages = [
-                'alistamientoId.required' => 'El alistamiento es requerido',
-                'fecha.required' => 'La fecha es requerida',
-                'categoria.required' => 'La categoria es requerida',
-                'centrocosto.required' => 'El centro de costo es requerido',
-                'selectCortePadre.required' => 'El corte padre es requerido',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 0,
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $getReg = Alistamiento::firstWhere('id', $request->alistamientoId);
-
-            if ($getReg == null) {
-                $currentDateTime = Carbon::now();
-                $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date->modify('next monday'); // Move to the next Monday
-                $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
-                $fechaalistamiento = $request->fecha;
-                $id_user = Auth::user()->id;
-
-                $alist = new Alistamiento();
-                $alist->users_id = $id_user;
-                $alist->categoria_id = $request->categoria;
-                $alist->centrocosto_id = $request->centrocosto;
-                $alist->meatcut_id = $request->selectCortePadre;
-                //$alist->fecha_alistamiento = $currentDateFormat;
-                $alist->fecha_alistamiento = $fechaalistamiento;
-                $alist->fecha_cierre = $dateNextMonday;
-                $alist->save();
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Guardado correctamente',
-                    "registroId" => $alist->id
-                ]);
-            }
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 0,
-                'array' => (array) $th
-            ]);
-        }
-    }
 
     /**
      * Display the specified resource.
@@ -200,84 +281,6 @@ class alistamientoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show()
-    {
-        $data = DB::table('enlistments as ali')
-            ->join('categories as cat', 'ali.categoria_id', '=', 'cat.id')
-            ->join('meatcuts as cut', 'ali.meatcut_id', '=', 'cut.id')
-            ->join('centro_costo as centro', 'ali.centrocosto_id', '=', 'centro.id')
-            ->select('ali.*', 'cat.name as namecategoria', 'centro.name as namecentrocosto', 'cut.name as namecut')
-            ->where('ali.status', 1)
-            ->get();
-        //$data = Compensadores::orderBy('id','desc');
-        return Datatables::of($data)->addIndexColumn()
-            ->addColumn('fecha', function ($data) {
-                $fecha = Carbon::parse($data->fecha_alistamiento);
-                $onlyDate = $fecha->toDateString();
-                return $onlyDate;
-            })
-            ->addColumn('inventory', function ($data) {
-                if ($data->inventario == 'pending') {
-                    $statusInventory = '<span class="badge bg-warning">Pendiente</span>';
-                } else {
-                    $statusInventory = '<span class="badge bg-success">Agregado</span>';
-                }
-                return $statusInventory;
-            })
-            ->addColumn('action', function ($data) {
-                $currentDateTime = Carbon::now();
-                if (Carbon::parse($currentDateTime->format('Y-m-d'))->gt(Carbon::parse($data->fecha_cierre))) {
-                    $btn = '
-                    <div class="text-center">
-					<a href="alistamiento/create/' . $data->id . '" class="btn btn-dark" title="Transformar" >
-						<i class="fas fa-directions"></i>
-					</a>
-					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
-						<i class="fas fa-eye"></i>
-					</button>
-					<button class="btn btn-dark" title="" disabled>
-						<i class="fas fa-trash"></i>
-					</button>
-                    </div>
-                    ';
-                } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
-                    $status = '';
-                    if ($data->inventario == 'added') {
-                        $status = 'disabled';
-                    }
-                    $btn = '
-                    <div class="text-center">
-					<a href="alistamiento/create/' . $data->id . '" class="btn btn-dark" title="Transformar" >
-						<i class="fas fa-directions"></i>
-					</a>
-					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
-						<i class="fas fa-eye"></i>
-					</button>
-					<button class="btn btn-dark" title="Borrar transformación" onclick="downAlistamiento(' . $data->id . ');" ' . $status . '>
-						<i class="fas fa-trash"></i>
-					</button>
-                    </div>
-                    ';
-                } else {
-                    $btn = '
-                    <div class="text-center">
-					<a href="alistamiento/create/' . $data->id . '" class="btn btn-dark" title="Transformar" >
-						<i class="fas fa-directions"></i>
-					</a>
-					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
-						<i class="fas fa-eye"></i>
-					</button>
-					<button class="btn btn-dark" title="" disabled>
-						<i class="fas fa-trash"></i>
-					</button>
-                    </div>
-                    ';
-                }
-                return $btn;
-            })
-            ->rawColumns(['fecha', 'inventory', 'action'])
-            ->make(true);
-    }
 
     public function getproducts(Request $request)
     {

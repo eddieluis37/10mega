@@ -75,73 +75,7 @@ $(document).ready(function () {
     });
 });
 
-$(document).ready(function () {
-    // Inicializa Select2
-    $(".select2").select2({
-        theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
-        width: "100%",
-        allowClear: true,
-    });
 
-    // Inicializa DataTable
-    initializeDataTable("-1");
-
-    $("#inputstore").on("change", function () {
-        var storeId = $(this).val();
-        // Limpiar el select de lotes
-        $("#inputlote")
-            .empty()
-            .append('<option value="">Selecciona Lote</option>')
-            .trigger("change");
-
-        if (storeId) {
-            // Realiza una llamada AJAX para obtener los lotes asociados a la tienda seleccionada
-            $.ajax({
-                url: "/getLotes",
-                method: "GET",
-                data: { storeId: storeId },
-                success: function (data) {
-                    // Suponiendo que 'data' es un array de objetos con 'id' y 'codigo'
-                    $.each(data, function (index, lote) {
-                        $("#inputlote").append(
-                            new Option(lote.codigo, lote.id)
-                        );
-                    });
-                    $("#inputlote").trigger("change"); // Actualiza Select2
-                },
-                error: function (error) {
-                    console.error("Error fetching lots:", error);
-                },
-            });
-        } else {
-            // Si no hay tienda seleccionada, obtener todos los lotes
-            $.ajax({
-                url: "/getAllLotes",
-                method: "GET",
-                success: function (data) {
-                    // Suponiendo que 'data' es un array de objetos con 'id' y 'codigo'
-                    $.each(data, function (index, lote) {
-                        $("#inputlote").append(
-                            new Option(lote.codigo, lote.id)
-                        );
-                    });
-                    $("#inputlote").trigger("change"); // Actualiza Select2
-                },
-                error: function (error) {
-                    console.error("Error fetching all lots:", error);
-                },
-            });
-        }
-    });
-
-    $("#inputlote").on("change", function () {
-        var storeId = $("#inputstore").val();
-        var loteId = $(this).val();
-        dataTable.destroy();
-        initializeDataTable(storeId, loteId);
-        cargarTotales(storeId, loteId);
-    });
-});
 
 $(document).ready(function () {
     $(function () {
