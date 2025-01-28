@@ -416,6 +416,9 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::post('/downmmainalistamiento', [alistamientoController::class, 'destroyAlistamiento'])->name('alistamiento.downAlistamiento');
     Route::post('alistamientoAddShoping', [alistamientoController::class, 'add_shopping'])->name('alistamiento.addShopping');
 
+    Route::get('/get-lotes/{storeId}', [alistamientoController::class, 'getLotes'])->name('get.lotes');
+    Route::get('/get-productos/{loteId}', [alistamientoController::class, 'getProductos'])->name('get.productos');
+
     /***CAJA*/
     Route::get('caja', [cajaController::class, 'index'])->name('caja.index');
     Route::post('cajasave', [cajaController::class, 'store'])->name('caja.save');

@@ -20,9 +20,31 @@ use App\Models\Centro_costo_product;
 use App\Models\shopping\shopping_enlistment;
 use App\Models\shopping\shopping_enlistment_details;
 use App\Models\Store;
+use App\Models\Lote;
+use App\Models\Inventario;
 
 class alistamientoController extends Controller
 {
+
+    public function getLotes($storeId)
+    {
+        $loteIds = Inventario::where('store_id', $storeId)->pluck('lote_id');
+        $lotes = Lote::whereIn('id', $loteIds)           
+            ->where('status', '1')
+            ->pluck('codigo', 'id'); // Obtener lotes que cumplan con los filtros
+        return response()->json($lotes);       
+    }
+
+    public function getProductos($loteId)
+    {
+        $productIds = Inventario::where('lote_id', $loteId)->pluck('product_id');
+        $productos = Product::whereIn('id', $productIds)
+            ->where('level_product_id', 1)
+            ->where('status', 1)
+            ->pluck('name', 'id'); // Obtener productos que cumplan con los filtros
+        return response()->json($productos);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -33,10 +55,11 @@ class alistamientoController extends Controller
         $category = Category::WhereIn('id', [13, 2, 3])->get();
         //$centros = Centrocosto::Where('status', 1)->get();
         //$centros = Store::whereNotIn('id', [1, 4, 5, 6, 7])
-        $centros = Store::whereIn('id', [8, 10])
-        ->orderBy('id', 'asc')
-        ->get();
-        return view("alistamiento.index", compact('category', 'centros'));
+        $stores = Store::whereIn('id', [8, 10])
+            ->orderBy('id', 'asc')
+            ->get();
+        $lotes = Lote::orderBy('id', 'asc')->get();
+        return view("alistamiento.index", compact('category', 'stores', 'lotes'));
     }
 
     /**
@@ -58,7 +81,7 @@ class alistamientoController extends Controller
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
             ->select('p.*', 'i.stock_ideal', 'i.cantidad_inicial', 'p.id as productopadreId')
             ->selectRaw('i.stock_ideal stockPadre')
-           /*  ->selectRaw('i.inventario_inicial + i.compraLote + i.alistamiento +
+            /*  ->selectRaw('i.inventario_inicial + i.compraLote + i.alistamiento +
             i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre') */
             ->where([
                 ['p.level_product_id', 1],
