@@ -115,7 +115,7 @@
 							<div class="col-md-4">
 								<label for="" class="form-label">Ultimo conteo fisico</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesokg" name="pesokg" value="{{$cortes[0]->fisico}}" class="form-control-sm form-control" placeholder="180.40 kg" readonly>
+									<input type="text" id="pesokg" name="pesokg" value="{{$cortes[0]->cantidad_inicial}}" class="form-control-sm form-control" placeholder="180.40 kg" readonly>
 									<span class="input-group-text" id="addon-wrapping">KG</span>
 								</div>
 							</div>
