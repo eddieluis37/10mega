@@ -215,11 +215,13 @@ class alistamientoController extends Controller
      */
     public function create($id)
     {
-        //dd($id);
+        //  dd($id);
         $dataAlistamiento = DB::table('enlistments as ali')
             ->join('stores as s', 'ali.store_id', '=', 's.id')
-            ->join('lotes as l', 'ali.lote_id', '=', 'l.id')          
-            ->select('ali.*', 's.name as namebodega', 'l.codigo as codigolote')
+            ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
+            ->join('products as p', 'ali.product_id', '=', 'p.id')
+            ->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
+            ->select('ali.*', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote')
             ->where('ali.id', $id)
             ->get();
 
@@ -235,7 +237,7 @@ class alistamientoController extends Controller
                 ['p.status', 1],
                 ['i.store_id', $dataAlistamiento[0]->store_id],
             ])->get();
-
+      //  dd($dataAlistamiento);
         /**************************************** */
         $status = '';
         $fechaAlistamientoCierre = Carbon::parse($dataAlistamiento[0]->fecha_cierre);

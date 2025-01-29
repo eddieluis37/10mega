@@ -63,7 +63,7 @@
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar corte padre</label>
-											<input type="hidden" id="meatcutId" name="meatcutId" value="{{$dataAlistamiento[0]->product_id}}">
+											<input type="hidden" id="meatcutId" name="meatcutId" value="{{$dataAlistamiento[0]->meatcut_id}}">
 											<input type="hidden" id="productopadreId" name="productopadreId" value="{{$cortes[0]->productopadreId}}">
 											<input type="hidden" id="centrocosto" name="centrocosto" value="{{$dataAlistamiento[0]->store_id}}">
 											<input type="text" id="productoCorte" name="productoCorte" value="{{$cortes[0]->name}}" class="form-control input" readonly>
