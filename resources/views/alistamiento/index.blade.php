@@ -21,8 +21,8 @@
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
 								<th class="table-th text-white">#</th>
-								<th class="table-th text-white">Categoria</th>
-								<th class="table-th text-white ">Centro de costo</th>
+								<th class="table-th text-white">BODEGA</th>
+								<th class="table-th text-white ">LOTE</th>
 								<th class="table-th text-white ">Corte de padre</th>
 								<th class="table-th text-white ">Nuevo stock</th>
 								<th class="table-th text-white ">Inventario</th>

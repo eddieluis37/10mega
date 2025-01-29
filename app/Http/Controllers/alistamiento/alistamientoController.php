@@ -48,61 +48,66 @@ class alistamientoController extends Controller
     public function store(Request $request) // alistamientosave Llenado del modal_create.blade
     {
         try {
-
+            // Reglas de validación
             $rules = [
-                'alistamientoId' => 'required',
-                'fecha' => 'required',
-                'select2' => 'required',
-                'inputlote' => 'required',
-                'select2corte' => 'required',
+                'alistamientoId' => 'nullable', // Puede ser null si se trata de un nuevo registro
+                'fecha' => 'required|date',
+                'inputstore' => 'required|exists:stores,id', // Verifica que la bodega existe
+                'inputlote' => 'required|exists:lotes,id',  // Verifica que el lote existe
+                'select2corte' => 'required|exists:products,id', // Verifica que el corte existe
             ];
             $messages = [
-                'alistamientoId.required' => 'El alistamiento es requerido',
-                'fecha.required' => 'La fecha es requerida',
-                'select2.required' => 'La bodega es requerida',
-                'inputlote.required' => 'El lote es requerido',
-                'select2corte.required' => 'El corte padre es requerido',
+                'fecha.required' => 'La fecha es requerida.',
+                'inputstore.required' => 'La bodega es requerida.',
+                'inputlote.required' => 'El lote es requerido.',
+                'select2corte.required' => 'El corte padre es requerido.',
+                'inputstore.exists' => 'La bodega seleccionada no existe.',
+                'inputlote.exists' => 'El lote seleccionado no existe.',
+                'select2corte.exists' => 'El corte padre seleccionado no existe.',
             ];
 
+            // Validar la solicitud
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 0,
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
-            $getReg = Alistamiento::firstWhere('id', $request->alistamientoId);
+            // Verificar si es un nuevo registro o una actualización
+            $alistamiento = Alistamiento::find($request->alistamientoId);
 
-            if ($getReg == null) {
-                $currentDateTime = Carbon::now();
-                $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date->modify('next monday'); // Move to the next Monday
-                $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
-                $fechaalistamiento = $request->fecha;
-                $id_user = Auth::user()->id;
-
-                $alist = new Alistamiento();
-                $alist->users_id = $id_user;
-                $alist->store_id = $request->inputstore;
-                $alist->lote_id = $request->inputlote;               
-                $alist->meatcut_id = $request->select2corte;
-                //$alist->fecha_alistamiento = $currentDateFormat;
-                $alist->fecha_alistamiento = $fechaalistamiento;
-                $alist->fecha_cierre = $dateNextMonday;
-                $alist->save();
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Guardado correctamente',
-                    "registroId" => $alist->id
-                ]);
+            if (!$alistamiento) {
+                // Crear un nuevo registro
+                $alistamiento = new Alistamiento();
+                $alistamiento->users_id = Auth::id(); // ID del usuario autenticado
             }
+
+            // Asignar los datos
+            $alistamiento->store_id = $request->input('inputstore');
+            $alistamiento->lote_id = $request->input('inputlote');
+            $alistamiento->product_id = $request->input('select2corte');
+            $alistamiento->fecha_alistamiento = $request->input('fecha');
+
+            // Calcular la fecha de cierre (próximo lunes)
+            $fechaCierre = Carbon::now()->next(Carbon::MONDAY);
+            $alistamiento->fecha_cierre = $fechaCierre->format('Y-m-d');
+
+            // Guardar el registro
+            $alistamiento->save();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Alistamiento guardado correctamente.',
+                'registroId' => $alistamiento->id,
+            ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 0,
-                'array' => (array) $th
-            ]);
+                'message' => 'Ocurrió un error al guardar el alistamiento.',
+                'error' => $th->getMessage(),
+            ], 500);
         }
     }
 
@@ -111,8 +116,8 @@ class alistamientoController extends Controller
         $data = DB::table('enlistments as ali')
             ->join('stores as s', 'ali.store_id', '=', 's.id')
             ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
-            ->join('meatcuts as cut', 'ali.meatcut_id', '=', 'cut.id')
-            ->select('ali.*', 'l.codigo as namecategoria', 's.name as namecentrocosto', 'cut.name as namecut')
+            ->join('products as p', 'ali.product_id', '=', 'p.id')
+            ->select('ali.*', 'l.codigo as codigolote', 's.name as namebodega', 'p.name as namecut')
             ->where('ali.status', 1)
             ->get();
         //$data = Compensadores::orderBy('id','desc');
@@ -212,9 +217,9 @@ class alistamientoController extends Controller
     {
         //dd($id);
         $dataAlistamiento = DB::table('enlistments as ali')
-            ->join('categories as cat', 'ali.categoria_id', '=', 'cat.id')
-            ->join('stores as centro', 'ali.centrocosto_id', '=', 'centro.id')
-            ->select('ali.*', 'cat.name as namecategoria', 'centro.name as namecentrocosto')
+            ->join('stores as s', 'ali.store_id', '=', 's.id')
+            ->join('lotes as l', 'ali.lote_id', '=', 'l.id')          
+            ->select('ali.*', 's.name as namebodega', 'l.codigo as codigolote')
             ->where('ali.id', $id)
             ->get();
 
@@ -226,9 +231,9 @@ class alistamientoController extends Controller
             i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre') */
             ->where([
                 ['p.level_product_id', 1],
-                ['p.meatcut_id', $dataAlistamiento[0]->meatcut_id],
+                ['p.id', $dataAlistamiento[0]->product_id],
                 ['p.status', 1],
-                ['i.store_id', $dataAlistamiento[0]->centrocosto_id],
+                ['i.store_id', $dataAlistamiento[0]->store_id],
             ])->get();
 
         /**************************************** */
@@ -261,7 +266,7 @@ class alistamientoController extends Controller
             $display = "display:none;";
         }
 
-        $enlistments = $this->getalistamientodetail($id, $dataAlistamiento[0]->centrocosto_id);
+        $enlistments = $this->getalistamientodetail($id, $dataAlistamiento[0]->store_id);
 
         $arrayTotales = $this->sumTotales($id);
 

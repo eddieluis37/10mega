@@ -6,6 +6,7 @@ const token = document
     .getAttribute("content");
 const btnClose = document.querySelector("#btnModalClose");
 
+const selectStore = document.querySelector("#inputstore");
 const selectCategory = document.querySelector("#categoria");
 const selectCentrocosto = document.querySelector("#centrocosto");
 const alistamiento_id = document.querySelector("#alistamientoId");
@@ -91,8 +92,8 @@ $(document).ready(function () {
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "namecategoria", name: "namecategoria" },
-                { data: "namecentrocosto", name: "namecentrocosto" },
+                { data: "namebodega", name: "namebodega" },
+                { data: "codigolote", name: "codigolote" },            
                 { data: "namecut", name: "namecut" },
                 { data: "nuevo_stock_padre", name: "nuevo_stock_padre" },
                 { data: "inventory", name: "inventory" },
@@ -174,9 +175,11 @@ const showDataForm = (id) => {
 const showData = (resp) => {
     let register = resp.reg;
     //alistamiento_id.value = register.id;
+   // fechaalistamiento.value = register.fecha_alistamiento;
+    selectStore.value = register.inputstore;
     selectCategory.value = register.categoria_id;
     selectCentrocosto.value = register.centrocosto_id;
-    fechaalistamiento.value = register.fecha_alistamiento;
+   
     getCortes(register.categoria_id);
 
     const modal = new bootstrap.Modal(

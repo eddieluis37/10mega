@@ -16,7 +16,7 @@
 			<div class="col-md-6">
 				<div class="task-header">
 					<label for="inputstore" class="form-label">Bodega</label>
-					<select id="inputstore" class="form-select select2">
+					<select id="inputstore" name="inputstore" class="form-select select2">
 						<option value="">Todas las bodegas</option>
 						@foreach($stores as $option)
 						<option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
@@ -29,7 +29,7 @@
 				<div class="task-header">
 					<div class="form-group">
 						<label for="inputlote" class="form-label mt-3">Lote</label>
-						<select id="inputlote" class="form-select select2">
+						<select id="inputlote" name="inputlote" class="form-select select2">
 							<option value="">Seleccione un lote</option>
 						</select>
 						<span class="text-danger error-message"></span>
@@ -40,7 +40,7 @@
 				<div class="task-header">
 					<div class="form-group">
 						<label for="select2corte" class="form-label mt-3">Seleccionar corte padre</label>
-						<select id="select2corte" class="form-select select2">
+						<select id="select2corte" name="select2corte" class="form-select select2">
 							<option value="">Seleccione un producto</option>
 						</select>
 						<span class="text-danger error-message"></span>
