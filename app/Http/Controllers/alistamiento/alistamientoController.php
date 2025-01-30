@@ -256,26 +256,33 @@ class alistamientoController extends Controller
             ->join('stores as s', 'ali.store_id', '=', 's.id')
             ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
             ->join('lotes as lh', 'ali.lote_hijos_id', '=', 'lh.id')
+            ->join('lote_products as lp', 'ali.product_id', '=', 'lp.product_id')
             ->join('products as p', 'ali.product_id', '=', 'p.id')
             ->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
-            ->select('ali.*', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
+            ->join('inventarios as i', 'p.id', '=', 'i.product_id')
+            ->select('ali.*', 'p.id as productopadreId', 'p.name as name', 'i.stock_ideal as stockPadre', 'i.cantidad_inicial',  'i.costo_unitario as costoPadre', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
             ->where('ali.id', $id)
             ->get();
 
+        /* 
         $cortes = DB::table('products as p')
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
             ->select('p.*', 'i.stock_ideal', 'i.cantidad_inicial', 'p.id as productopadreId')
             ->selectRaw('i.stock_ideal stockPadre')
             /*  ->selectRaw('i.inventario_inicial + i.compraLote + i.alistamiento +
-            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre') */
+            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre') 
             ->where([
                 ['p.level_product_id', 1],
                 ['p.id', $dataAlistamiento[0]->product_id],
                 ['p.status', 1],
                 ['i.store_id', $dataAlistamiento[0]->store_id],
-            ])->get();
+            ])->get(); */
+
+
         //  dd($dataAlistamiento);
-        /**************************************** */
+
+        /*****************************************/
+
         $status = '';
         $fechaAlistamientoCierre = Carbon::parse($dataAlistamiento[0]->fecha_cierre);
         $date = Carbon::now();
@@ -309,7 +316,7 @@ class alistamientoController extends Controller
 
         $arrayTotales = $this->sumTotales($id);
 
-        return view('alistamiento.create', compact('dataAlistamiento', 'cortes', 'enlistments', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('alistamiento.create', compact('dataAlistamiento', 'enlistments', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
 
     /**

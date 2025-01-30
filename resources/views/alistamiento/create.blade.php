@@ -72,14 +72,12 @@
 										<div class="form-group">
 											<label for="" class="form-label">Buscar corte padre</label>
 											<input type="hidden" id="meatcutId" name="meatcutId" value="{{$dataAlistamiento[0]->meatcut_id}}">
-											<input type="hidden" id="productopadreId" name="productopadreId" value="{{$cortes[0]->productopadreId}}">
+											<input type="hidden" id="productopadreId" name="productopadreId" value="{{$dataAlistamiento[0]->productopadreId}}">
 											<input type="hidden" id="storeId" name="storeId" value="{{$dataAlistamiento[0]->store_id}}">
-											<input type="text" id="productoCorte" name="productoCorte" value="{{$cortes[0]->name}}" class="form-control input" readonly>
+											<input type="text" id="productoCorte" name="productoCorte" value="{{$dataAlistamiento[0]->name}}" class="form-control input" readonly>
 											<!--select class="form-control form-control-sm select2Prod" name="productoCorte" id="productoCorte" required="">
 											<option value="">Seleccione el producto</option>
-											@foreach ($cortes as $p)
-											<option data-stock="{{$p->stock}}" value="{{$p->id}}">{{$p->name}}</option>
-											@endforeach
+											
 					                    </select>-->
 										</div>
 									</div>
@@ -94,7 +92,7 @@
 									<label for="" class="form-label">KG requeridos</label>
 									<div class="input-group flex-nowrap">
 										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10,00">
-										<span class="input-group-text" id="addon-wrapping">KG</span>										
+										<span class="input-group-text" id="addon-wrapping">KG</span>
 									</div>
 									<span class="text-danger error-message"></span>
 								</div>
@@ -115,24 +113,31 @@
 				<div class="card">
 					<div class="card-body">
 						<div class="row">
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<label for="" class="form-label">Stock actual</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockCortePadre" name="stockCortePadre" value="{{$cortes[0]->stockPadre}}" class="form-control-sm form-control" placeholder="10,00 kg" readonly>
+									<input type="text" id="stockCortePadre" name="stockCortePadre" value="{{$dataAlistamiento[0]->stockPadre}}" class="form-control" placeholder="10,00 kg" readonly>
 									<span class="input-group-text" id="addon-wrapping">KG</span>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
+								<label for="" class="form-label">CostoPadre</label>
+								<div class="input-group flex-nowrap">
+									<span class="input-group-text" id="addon-wrapping">$</span>
+									<input type="text" id="costoPadre" name="costoPadre" value="{{number_format( $dataAlistamiento[0]->costoPadre ,0, ',', '.' )}}" class="form-control" placeholder="10,00 kg" readonly>
+								</div>
+							</div>
+							<div class="col-md-3">
 								<label for="" class="form-label">Ultimo conteo fisico</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesokg" name="pesokg" value="{{$cortes[0]->cantidad_inicial}}" class="form-control-sm form-control" placeholder="180.40 kg" readonly>
+									<input type="text" id="pesokg" name="pesokg" value="{{$dataAlistamiento[0]->cantidad_inicial}}" class="form-control" placeholder="180.40 kg" readonly>
 									<span class="input-group-text" id="addon-wrapping">KG</span>
 								</div>
 							</div>
-							<div class="col-md-4">
-								<label for="" class="form-label">Nuevo stock</label>
+							<div class="col-md-3">
+								<label for="" class="form-label">Nuevo stock padre</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="newStockPadre" name="newStockPadre" value="{{$dataAlistamiento[0]->nuevo_stock_padre}}" class="form-control-sm form-control" placeholder="30,00 kg" readonly>
+									<input type="text" id="newStockPadre" name="newStockPadre" value="{{$dataAlistamiento[0]->nuevo_stock_padre}}" class="form-control" placeholder="30,00 kg" readonly>
 									<span class="input-group-text" id="addon-wrapping">KG</span>
 								</div>
 							</div>
