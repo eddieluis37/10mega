@@ -10,6 +10,8 @@ use App\Models\alistamiento\enlistment_details;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -237,7 +239,7 @@ class alistamientoController extends Controller
                 ['p.status', 1],
                 ['i.store_id', $dataAlistamiento[0]->store_id],
             ])->get();
-      //  dd($dataAlistamiento);
+       //  dd($dataAlistamiento);
         /**************************************** */
         $status = '';
         $fechaAlistamientoCierre = Carbon::parse($dataAlistamiento[0]->fecha_cierre);
@@ -326,13 +328,19 @@ class alistamientoController extends Controller
                 ->select('i.stock_ideal', 'i.cantidad_final', 'i.costo_unitario')
                 ->where([
                     ['p.id', $request->producto],
-                    ['i.store_id', $request->centrocosto],
+                    ['i.store_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();
+                
+            Log::info('producto:', ['producto' => $request->producto]);
+            Log::info('storeId:', ['storeId' => $request->storeId]);
+
+            Log::info('prod:', ['prod' => $prod]);
+
 
             $formatCantidad = new metodosrogercodeController();
-            //$prod = Product::firstWhere('id', $request->producto);
+            $prod = Product::firstWhere('id', $request->producto);
 
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
             $newStock = $prod[0]->stock + $formatkgrequeridos;
@@ -345,7 +353,7 @@ class alistamientoController extends Controller
             $details->save();
 
 
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->centrocosto);
+            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
             $arrayTotales = $this->sumTotales($request->alistamientoId);
 
             $newStockPadre = $request->stockPadre - $arrayTotales['kgTotalRequeridos'];
@@ -367,16 +375,17 @@ class alistamientoController extends Controller
         }
     }
 
-    public function getalistamientodetail($alistamientoId, $centrocostoId)
+    public function getalistamientodetail($alistamientoId, $storeId)
     {
         $detail = DB::table('enlistment_details as en')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
-            ->join('centro_costo_products as ce', 'pro.id', '=', 'ce.products_id')
-            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'ce.stock', 'ce.fisico', 'en.cost_transformation')
-            ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
-            ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo')
+            ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
+            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'i.stock_ideal', 'i.cantidad_inicial', 'en.cost_transformation')
+            ->selectRaw('i.stock_ideal stockHijo')
+            /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
+            ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo') */
             ->where([
-                ['ce.centrocosto_id', $centrocostoId],
+                ['i.store_id', $storeId],
                 ['en.enlistments_id', $alistamientoId],
                 ['en.status', 1]
             ])->get();
@@ -409,7 +418,7 @@ class alistamientoController extends Controller
                 ->select('ce.stock', 'ce.fisico', 'p.cost')
                 ->where([
                     ['p.id', $request->productoId],
-                    ['ce.centrocosto_id', $request->centrocosto],
+                    ['ce.centrocosto_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();
@@ -423,7 +432,7 @@ class alistamientoController extends Controller
             $updatedetails->newstock = $newStock;
             $updatedetails->save();
 
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->centrocosto);
+            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
             $arrayTotales = $this->sumTotales($request->alistamientoId);
 
             $newStockPadre = $request->stockPadre - $arrayTotales['kgTotalRequeridos'];
@@ -499,7 +508,7 @@ class alistamientoController extends Controller
             $enlist->status = 0;
             $enlist->save();
 
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->centrocosto);
+            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
             $arrayTotales = $this->sumTotales($request->alistamientoId);
 
             $newStockPadre = $request->stockPadre - $arrayTotales['kgTotalRequeridos'];
@@ -549,16 +558,16 @@ class alistamientoController extends Controller
             $shopp = new shopping_enlistment();
             $shopp->users_id = $id_user;
             $shopp->enlistments_id = $request->alistamientoId;
-            $shopp->category_id = $request->categoryId;
+            $shopp->store_id = $request->storeId;
             $shopp->productopadre_id = $request->productoPadre;
-            $shopp->centrocosto_id = $request->centrocosto;
+            $shopp->centrocosto_id = $request->storeId;
             $shopp->stock_actual = $request->stockPadre;
             $shopp->ultimo_conteo_fisico = $request->pesokg;
             $shopp->nuevo_stock = $request->newStockPadre;
             $shopp->fecha_shopping = $currentDateTime;
             $shopp->save();
 
-            $regProd = $this->getalistamientodetail($request->alistamientoId, $request->centrocosto);
+            $regProd = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
             $count = count($regProd);
             if ($count == 0) {
                 return response()->json([
@@ -588,13 +597,13 @@ class alistamientoController extends Controller
                     [
                         'vproducts_id' => $key->products_id,
                         'krequeridos' => $key->kgrequeridos,
-                        'vcentrocosto' => $request->centrocosto
+                        'vcentrocosto' => $request->storeId
                     ]
                 );
             }
 
             $productopadreId = $shopp->productopadre_id;
-            $centrocostoId = $shopp->centrocosto_id;
+            $storeId = $shopp->centrocosto_id;
 
             DB::update(
                 "
@@ -605,7 +614,7 @@ class alistamientoController extends Controller
                 [
                     'vproducts_id' => $productopadreId,
                     'krequeridos' => $stockalistpadre * -1,
-                    'vcentrocosto' => $centrocostoId
+                    'vcentrocosto' => $storeId
                 ]
             );
 

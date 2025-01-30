@@ -207,9 +207,9 @@ selectCategory.addEventListener("change", function () {
     getCortes(selectedValue);
 });
 
-getCortes = (categoryId) => {
+getCortes = (storeId) => {
     const dataform = new FormData();
-    dataform.append("categoriaId", Number(categoryId));
+    dataform.append("categoriaId", Number(storeId));
     send(dataform, "/getproductospadre").then((result) => {
         console.log(result);
         let prod = result.products;

@@ -35,7 +35,7 @@
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Bodega</label>
-										<input type="hidden" id="categoryId" name="categoryId" value="{{$dataAlistamiento[0]->store_id}}">
+										<input type="hidden" id="storeId" name="storeId" value="{{$dataAlistamiento[0]->store_id}}">
 										<p>{{$dataAlistamiento[0]->namebodega}}</p>
 									</div>
 								</div>
@@ -43,7 +43,7 @@
 							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Lote</label>
+										<label for="" class="form-label">LotePadre</label>
 										<p>{{$dataAlistamiento[0]->codigolote}}</p>
 									</div>
 								</div>
@@ -65,7 +65,7 @@
 											<label for="" class="form-label">Buscar corte padre</label>
 											<input type="hidden" id="meatcutId" name="meatcutId" value="{{$dataAlistamiento[0]->meatcut_id}}">
 											<input type="hidden" id="productopadreId" name="productopadreId" value="{{$cortes[0]->productopadreId}}">
-											<input type="hidden" id="centrocosto" name="centrocosto" value="{{$dataAlistamiento[0]->store_id}}">
+											<input type="hidden" id="storeId" name="storeId" value="{{$dataAlistamiento[0]->store_id}}">
 											<input type="text" id="productoCorte" name="productoCorte" value="{{$cortes[0]->name}}" class="form-control input" readonly>
 											<!--select class="form-control form-control-sm select2Prod" name="productoCorte" id="productoCorte" required="">
 											<option value="">Seleccione el producto</option>
@@ -80,13 +80,15 @@
 									<label for="" class="form-label">Seleccionar hijo </label>
 									<select class="form-control form-control-sm select2ProdHijos" name="producto" id="producto" required="">
 									</select>
+									<span class="text-danger error-message"></span>
 								</div>
 								<div class="col-md-3">
 									<label for="" class="form-label">KG requeridos</label>
 									<div class="input-group flex-nowrap">
 										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10,00">
-										<span class="input-group-text" id="addon-wrapping">KG</span>
+										<span class="input-group-text" id="addon-wrapping">KG</span>										
 									</div>
+									<span class="text-danger error-message"></span>
 								</div>
 								<div class="col-md-2 text-center">
 									<div class="" style="margin-top:30px;">
