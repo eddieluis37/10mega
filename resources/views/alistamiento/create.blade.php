@@ -23,7 +23,7 @@
 				<div class="card">
 					<div class="card-body">
 						<div class="row g-3">
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Fecha de compra</label>
@@ -31,7 +31,7 @@
 									</div>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Bodega</label>
@@ -40,11 +40,19 @@
 									</div>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">LotePadre</label>
 										<p>{{$dataAlistamiento[0]->codigolote}}</p>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="task-header">
+									<div class="form-group">
+										<label for="" class="form-label">LoteHijos</label>
+										<p>{{$dataAlistamiento[0]->codigolotehijo}}</p>
 									</div>
 								</div>
 							</div>

@@ -93,7 +93,8 @@ $(document).ready(function () {
             columns: [
                 { data: "id", name: "id" },
                 { data: "namebodega", name: "namebodega" },
-                { data: "codigolote", name: "codigolote" },            
+                { data: "codigolote", name: "codigolote" }, 
+                { data: "codigolotehijo", name: "codigolotehijo" },            
                 { data: "namecut", name: "namecut" },
                 { data: "nuevo_stock_padre", name: "nuevo_stock_padre" },
                 { data: "inventory", name: "inventory" },

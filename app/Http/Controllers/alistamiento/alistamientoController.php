@@ -52,11 +52,11 @@ class alistamientoController extends Controller
         try {
             // Reglas de validación
             $rules = [
-                'alistamientoId' => 'nullable', // Puede ser null si se trata de un nuevo registro
+                'alistamientoId' => 'nullable',
                 'fecha' => 'required|date',
-                'inputstore' => 'required|exists:stores,id', // Verifica que la bodega existe
-                'inputlote' => 'required|exists:lotes,id',  // Verifica que el lote existe
-                'select2corte' => 'required|exists:products,id', // Verifica que el corte existe
+                'inputstore' => 'required|exists:stores,id',
+                'inputlote' => 'required|exists:lotes,id',
+                'select2corte' => 'required|exists:products,id',
             ];
             $messages = [
                 'fecha.required' => 'La fecha es requerida.',
@@ -77,13 +77,43 @@ class alistamientoController extends Controller
                 ], 422);
             }
 
+            // Obtener la categoría del producto seleccionado
+            $product = Product::find($request->select2corte);
+            if (!$product) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'El producto seleccionado no existe.',
+                ], 404);
+            }
+
+            // Generar el código del nuevo lote hijos del alistamiento
+            $dateNow = Carbon::now();
+            $year = substr($dateNow->year, -2);
+            $month = str_pad($dateNow->month, 2, '0', STR_PAD_LEFT);
+            $day = str_pad($dateNow->day, 2, '0', STR_PAD_LEFT);
+            $newLote = "";
+            $reg = Alistamiento::select()->first();
+
+            if ($reg === null) {
+                $newLote = $day . $month . $year . "AL1";
+            } else {
+                $regUltimo = Alistamiento::latest()->first();
+                $consecutivo = $regUltimo ? $regUltimo->id + 1 : 1;
+                $newLote = $day . $month . $year . "AL" . $consecutivo;
+            }
+
+            // Crear el nuevo lote
+            $nuevoLote = new Lote();
+            $nuevoLote->category_id = $product->category_id;
+            $nuevoLote->codigo = $newLote;
+            $nuevoLote->fecha_vencimiento = Carbon::now()->addDays(35)->format('Y-m-d');
+            $nuevoLote->save();
+
             // Verificar si es un nuevo registro o una actualización
             $alistamiento = Alistamiento::find($request->alistamientoId);
-
             if (!$alistamiento) {
-                // Crear un nuevo registro
                 $alistamiento = new Alistamiento();
-                $alistamiento->users_id = Auth::id(); // ID del usuario autenticado
+                $alistamiento->users_id = Auth::id();
             }
 
             // Asignar los datos
@@ -91,6 +121,7 @@ class alistamientoController extends Controller
             $alistamiento->lote_id = $request->input('inputlote');
             $alistamiento->product_id = $request->input('select2corte');
             $alistamiento->fecha_alistamiento = $request->input('fecha');
+            $alistamiento->lote_hijos_id = $nuevoLote->id;
 
             // Calcular la fecha de cierre (próximo lunes)
             $fechaCierre = Carbon::now()->next(Carbon::MONDAY);
@@ -113,15 +144,18 @@ class alistamientoController extends Controller
         }
     }
 
+
     public function show()
     {
         $data = DB::table('enlistments as ali')
             ->join('stores as s', 'ali.store_id', '=', 's.id')
             ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
+            ->join('lotes as lh', 'ali.lote_hijos_id', '=', 'lh.id')
             ->join('products as p', 'ali.product_id', '=', 'p.id')
-            ->select('ali.*', 'l.codigo as codigolote', 's.name as namebodega', 'p.name as namecut')
+            ->select('ali.*', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo', 's.name as namebodega', 'p.name as namecut')
             ->where('ali.status', 1)
             ->get();
+
         //$data = Compensadores::orderBy('id','desc');
         return Datatables::of($data)->addIndexColumn()
             ->addColumn('fecha', function ($data) {
@@ -221,9 +255,10 @@ class alistamientoController extends Controller
         $dataAlistamiento = DB::table('enlistments as ali')
             ->join('stores as s', 'ali.store_id', '=', 's.id')
             ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
+            ->join('lotes as lh', 'ali.lote_hijos_id', '=', 'lh.id')
             ->join('products as p', 'ali.product_id', '=', 'p.id')
             ->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
-            ->select('ali.*', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote')
+            ->select('ali.*', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
             ->where('ali.id', $id)
             ->get();
 
@@ -239,7 +274,7 @@ class alistamientoController extends Controller
                 ['p.status', 1],
                 ['i.store_id', $dataAlistamiento[0]->store_id],
             ])->get();
-       //  dd($dataAlistamiento);
+        //  dd($dataAlistamiento);
         /**************************************** */
         $status = '';
         $fechaAlistamientoCierre = Carbon::parse($dataAlistamiento[0]->fecha_cierre);
@@ -324,15 +359,15 @@ class alistamientoController extends Controller
 
 
             $prod = DB::table('products as p')
-                ->join('inventarios as i', 'p.id', '=', 'i.product_id')
-                ->select('i.stock_ideal', 'i.cantidad_final', 'i.costo_unitario')
+                // ->join('inventarios as i', 'p.id', '=', 'i.product_id')
+                ->select('p.stock', 'p.fisico', 'p.cost')
                 ->where([
                     ['p.id', $request->producto],
-                    ['i.store_id', $request->storeId],
+                    //['i.store_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();
-                
+
             Log::info('producto:', ['producto' => $request->producto]);
             Log::info('storeId:', ['storeId' => $request->storeId]);
 
@@ -340,7 +375,7 @@ class alistamientoController extends Controller
 
 
             $formatCantidad = new metodosrogercodeController();
-            $prod = Product::firstWhere('id', $request->producto);
+            //  $prod = Product::firstWhere('id', $request->producto);
 
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
             $newStock = $prod[0]->stock + $formatkgrequeridos;
@@ -378,14 +413,15 @@ class alistamientoController extends Controller
     public function getalistamientodetail($alistamientoId, $storeId)
     {
         $detail = DB::table('enlistment_details as en')
+            ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
-            ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
-            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'i.stock_ideal', 'i.cantidad_inicial', 'en.cost_transformation')
-            ->selectRaw('i.stock_ideal stockHijo')
+            // ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
+            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
+            ->selectRaw('pro.stock stockHijo')
             /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
             ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo') */
             ->where([
-                ['i.store_id', $storeId],
+                ['e.store_id', $storeId],
                 ['en.enlistments_id', $alistamientoId],
                 ['en.status', 1]
             ])->get();
