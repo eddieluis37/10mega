@@ -10,7 +10,7 @@ btnAddAlistamiento.addEventListener("click", async (e) => {
             formAlistamiento.reset();   
             btnClose.click();
             successToastMessage(resp.message); 
-            refresh_table();
+          //  refresh_table();
             if (resp.registroId != 0) {//for new register
                 window.location.href = `alistamiento/create/${resp.registroId}`;
             }else{
