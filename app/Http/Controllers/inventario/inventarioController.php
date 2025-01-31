@@ -95,12 +95,12 @@ class inventarioController extends Controller
                 $stockIdeal = $compensadores + $inventario->inventario_inicial + $desposteres + $despostecerdos + $inventario->cantidad_prod_term;
 
                 // Actualizar los campos del inventario
-                /*   $inventario->update([
-                    'cantidad_final' => $cantidadFinal,
+                $inventario->update([
+                    //  'cantidad_final' => $cantidadFinal,
                     'stock_ideal' => $stockIdeal,
-                    'inventario_inicial' => $inventario->cantidad_inicial, // Actualizar inventario inicial si aplica
+                    //  'inventario_inicial' => $inventario->cantidad_inicial, // Actualizar inventario inicial si aplica
                 ]);
- */
+
                 // Guardar los resultados para visualización
                 $resultados[] = [
                     'StoreNombre' => $inventario->store->name,
@@ -112,7 +112,7 @@ class inventarioController extends Controller
                     'compraLote' => $desposteres + $despostecerdos, // Sumar desposteres y despostecerdos
                     'alistamiento' => 0,
                     'ProductoTerminado' => $inventario->cantidad_prod_term,
-                    
+
                     'compensados' => $compensadores,
                     'trasladoing' => 0,
                     'trasladosal' => 0,

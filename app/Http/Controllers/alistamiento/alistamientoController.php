@@ -422,7 +422,7 @@ class alistamientoController extends Controller
         $detail = DB::table('enlistment_details as en')
             ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
-            // ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
+           
             ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
             ->selectRaw('pro.stock stockHijo')
             /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
