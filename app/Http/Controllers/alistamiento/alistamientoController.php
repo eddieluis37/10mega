@@ -375,10 +375,10 @@ class alistamientoController extends Controller
 
                 ])->get();
 
-            Log::info('producto:', ['producto' => $request->producto]);
-            Log::info('storeId:', ['storeId' => $request->storeId]);
+            //  Log::info('producto:', ['producto' => $request->producto]);
+            // Log::info('storeId:', ['storeId' => $request->storeId]);
 
-            Log::info('prod:', ['prod' => $prod]);
+            // Log::info('prod:', ['prod' => $prod]);
 
 
             $formatCantidad = new metodosrogercodeController();
@@ -422,7 +422,7 @@ class alistamientoController extends Controller
         $detail = DB::table('enlistment_details as en')
             ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
-           
+
             ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
             ->selectRaw('pro.stock stockHijo')
             /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
@@ -457,11 +457,11 @@ class alistamientoController extends Controller
         try {
 
             $prod = DB::table('products as p')
-              //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
+                //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
                 ->select('p.stock', 'p.fisico', 'p.cost')
                 ->where([
                     ['p.id', $request->productoId],
-                  //  ['ce.centrocosto_id', $request->storeId],
+                    //  ['ce.centrocosto_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();
