@@ -457,11 +457,11 @@ class alistamientoController extends Controller
         try {
 
             $prod = DB::table('products as p')
-                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('ce.stock', 'ce.fisico', 'p.cost')
+              //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
+                ->select('p.stock', 'p.fisico', 'p.cost')
                 ->where([
                     ['p.id', $request->productoId],
-                    ['ce.centrocosto_id', $request->storeId],
+                  //  ['ce.centrocosto_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();
