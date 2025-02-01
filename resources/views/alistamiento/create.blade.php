@@ -158,7 +158,8 @@
 										<th class="table-th text-white">Producto hijo</th>
 										<th class="table-th text-white">Stock actual</th>
 										<th class="table-th text-white">Fisico</th>
-										<th class="table-th text-white">kg requeridos</th>
+										<th class="table-th text-white">kgREQ</th>
+										<th class="table-th text-white">PRICEMIN</th>
 										<th class="table-th text-white">Costo</th>
 										<th class="table-th text-white">New stock hijo</th>
 										<th class="table-th text-white text-center">Acciones</th>
@@ -179,6 +180,7 @@
 											<p>{{number_format($proddetail->kgrequeridos, 2, ',', '.')}}KG</p>
 											@endif
 										</td>
+										<td>${{number_format($proddetail->price_fama, 0, ',', '.')}}</td>
 										<td>${{number_format($proddetail->cost_transformation, 0, ',', '.')}}</td>
 										<td>{{number_format($proddetail->newstock, 2, ',', '.')}}KG</td>
 										<td class="text-center">

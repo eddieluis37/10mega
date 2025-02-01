@@ -122,6 +122,8 @@ class alistamientoController extends Controller
             $alistamiento->product_id = $request->input('select2corte');
             $alistamiento->fecha_alistamiento = $request->input('fecha');
             $alistamiento->lote_hijos_id = $nuevoLote->id;
+            $alistamiento->costo_unitario_padre =  $product->cost;
+
 
             // Calcular la fecha de cierre (próximo lunes)
             $fechaCierre = Carbon::now()->next(Carbon::MONDAY);
@@ -260,7 +262,7 @@ class alistamientoController extends Controller
             ->join('products as p', 'ali.product_id', '=', 'p.id')
             ->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
-            ->select('ali.*', 'p.id as productopadreId', 'p.name as name', 'i.stock_ideal as stockPadre', 'i.cantidad_inicial',  'i.costo_unitario as costoPadre', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
+            ->select('ali.*', 'p.id as productopadreId', 'p.name as name', 'i.stock_ideal as stockPadre', 'i.cantidad_inicial',  'p.cost as costoPadre', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
             ->where('ali.id', $id)
             ->get();
 
@@ -375,8 +377,8 @@ class alistamientoController extends Controller
 
                 ])->get();
 
-            //  Log::info('producto:', ['producto' => $request->producto]);
-            // Log::info('storeId:', ['storeId' => $request->storeId]);
+          //  Log::info('producto:', ['producto' => $request->producto]);
+           // Log::info('storeId:', ['storeId' => $request->storeId]);
 
             // Log::info('prod:', ['prod' => $prod]);
 
@@ -422,8 +424,8 @@ class alistamientoController extends Controller
         $detail = DB::table('enlistment_details as en')
             ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
-
-            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
+           
+            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
             ->selectRaw('pro.stock stockHijo')
             /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
             ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo') */
@@ -457,11 +459,11 @@ class alistamientoController extends Controller
         try {
 
             $prod = DB::table('products as p')
-                //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
+              //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
                 ->select('p.stock', 'p.fisico', 'p.cost')
                 ->where([
                     ['p.id', $request->productoId],
-                    //  ['ce.centrocosto_id', $request->storeId],
+                  //  ['ce.centrocosto_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();

@@ -18,10 +18,12 @@ class CreateProductsTable extends Migration
             $table->string('name',255);
             $table->string('code', 20)->default(99999)->nullable();
             $table->string('barcode',50)->nullable();
-            $table->decimal('cost',10,2)->default(0);
-            $table->decimal('iva',10)->default(1);
+            $table->decimal('cost',10,2)->default(0)->nullable();
+            $table->decimal('iva',10)->default(0);
             $table->decimal('otro_impuesto',10)->default(0)->nullable();
-            $table->decimal('price_fama',10,0)->default(1)->nullable(); // precio en la linea de las famas
+            $table->decimal('impoconsumo',10)->default(0)->nullable();
+
+            $table->decimal('price_fama',10,0)->default(1)->nullable(); // precio minimo en la linea de las famas
             $table->unsignedBigInteger('category_id'); 
             $table->unsignedBigInteger('unitofmeasure_id')->default(1);           
             // marca 
@@ -33,7 +35,7 @@ class CreateProductsTable extends Migration
             $table->decimal('price_horeca',10,0)->default(1)->nullable(); // precio en la linea de las Horeca
             $table->decimal('price_hogar',10,0)->default(1)->nullable(); // precio en la linea de las Hogar
            
-            $table->decimal('stock', 18, 2)->default(1); // valor de cantidades de unidades sea KG
+            $table->decimal('stock', 18, 2)->default(0); // valor de cantidades de unidades sea KG
           
             $table->integer('alerts');
             $table->string('image',100)->nullable();

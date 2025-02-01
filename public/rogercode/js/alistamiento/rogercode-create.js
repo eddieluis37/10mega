@@ -147,6 +147,7 @@ const showData = (data) => {
             element.kgrequeridos
         }" placeholder="Ingresar" size="10">
             </td>
+             <td>$${formatCantidadSinCero(element.price_fama)}</td>
             <td>$${formatCantidadSinCero(element.cost_transformation)}</td>
       	    <td>${formatCantidad(element.newstock)}KG</td>
 			<td class="text-center">
