@@ -508,17 +508,16 @@ class alistamientoController extends Controller
             ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
 
-            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'en.costo_kilo as costo_kilo', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
-            ->selectRaw('pro.stock stockHijo')
-            ->selectRaw('en.kgrequeridos * pro.price_fama totalVenta')
-            /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
-            ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo') */
+            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'en.costo_kilo', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
+            ->selectRaw('pro.stock as stockHijo')
+            ->selectRaw('(SUM(en.kgrequeridos) - e.cantidad_padre_a_procesar) as cantidadAprocesar') // Sumatoria de kgrequeridos
+            ->selectRaw('(SUM(en.kgrequeridos) * pro.price_fama) as totalVenta') // Sumatoria ajustada
             ->where([
                 ['e.store_id', $storeId],
                 ['en.enlistments_id', $alistamientoId],
                 ['en.status', 1]
-            ])->get();
-
+            ])->groupBy('e.id', 'pro.id', 'en.id') // Agrupar para evitar error con SUM
+            ->get();
         return $detail;
     }
 
@@ -538,6 +537,8 @@ class alistamientoController extends Controller
 
         $totalCostTranf = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('cost_transformation');
         $newTotalStock = (float)enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('newstock');
+
+
 
         $array = [
             'kgTotalRequeridos' => $kgTotalRequeridos,

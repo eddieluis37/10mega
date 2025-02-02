@@ -202,7 +202,7 @@ class desposteresController extends Controller
             //$despost->beneficiores_id = $request->beneficioId;
             //$despost->products_id = $request->producto;
             $despost->peso = $request->peso_kilo;
-            //$despost->porcdesposte = 0;
+            //$despost->porcdesposte = 0; 
             //$despost->costo = 0;
             //$despost->precio = $request->pventa;
             $despost->totalventa = $total_venta;

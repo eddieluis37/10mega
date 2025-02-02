@@ -230,8 +230,8 @@
 									</tr>
 									<tr>
 										<th></th>
-										<th>Merma</th>
-										<th>%Merma</th>
+										<th>Merma: {{$proddetail->cantidadAprocesar}}</th>
+										<th>%Merma: </th>
 									</tr>
 								</tfoot>
 							</table>
