@@ -406,6 +406,12 @@ class alistamientoController extends Controller
 
             // Si price_fama es null o vacío, asignar 0
             $priceFama = $product->price_fama ?? 0;
+            $totalVenta = 0;
+            $porcentajeVenta = 0;
+            $costoTotal = 0;
+            $costoKilo = 0;
+            $utilidad = 0;
+            $porcUtilidad = 0;
 
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
             $newStock = $prod[0]->stock + $formatkgrequeridos;
@@ -416,9 +422,25 @@ class alistamientoController extends Controller
 
             // Si kgTotalRequeridos es null, vacío o cero, inicializarlo en 0
             $kgTotalRequeridos = !empty($arrayTotales['kgTotalRequeridos']) ? $arrayTotales['kgTotalRequeridos'] : 0;
+            $totalPrecioMinimo = !empty($arrayTotales['totalPrecioMinimo']) ? $arrayTotales['totalPrecioMinimo'] : 0;
+            $totalVentaFinal = !empty($arrayTotales['totalVentaFinal']) ? $arrayTotales['totalVentaFinal'] : 0;
+            $totalPorcVenta = !empty($arrayTotales['totalPorcVenta']) ? $arrayTotales['totalPorcVenta'] : 0;
+            $totalPorcVenta = !empty($arrayTotales['totalPorcVenta']) ? $arrayTotales['totalPorcVenta'] : 0;
+            $totalCostoTotal = !empty($arrayTotales['totalCostoTotal']) ? $arrayTotales['totalCostoTotal'] : 0;
+            $totalCostoKilo = !empty($arrayTotales['totalCostoKilo']) ? $arrayTotales['totalCostoKilo'] : 0;
+            $totalUtilidad = !empty($arrayTotales['totalUtilidad']) ? $arrayTotales['totalUtilidad'] : 0;
+            $totalPorcUtilidad = !empty($arrayTotales['totalPorcUtilidad']) ? $arrayTotales['totalPorcUtilidad'] : 0;
 
             // Acumular desde el primer registro
             $kgTotalRequeridos += $formatkgrequeridos;
+            $totalPrecioMinimo += $priceFama;
+            $totalVentaFinal += $totalVenta;
+            $totalPorcVenta += $porcentajeVenta;
+            $totalCostoTotal += $costoTotal;
+            $totalCostoKilo += $costoKilo;
+            $totalUtilidad += $utilidad;
+            $totalPorcUtilidad += $porcUtilidad;
+
 
             $details->enlistments_id = $request->alistamientoId;
             $details->products_id = $request->producto;
@@ -434,11 +456,13 @@ class alistamientoController extends Controller
             $costoTotal = $porcentajeVenta * $request->costoPadre;
             $details->porc_venta = $porcentajeVenta;
             $details->costo_total = $costoTotal;
-            $details->costo_kilo = $costoTotal / $formatkgrequeridos;
+            $costoKilo = $costoTotal / $formatkgrequeridos;
+            $details->costo_kilo = $costoKilo;
 
             $utilidad = $totalVenta2 - $costoTotal;
             $details->utilidad = $utilidad;
-            $details->porc_utilidad = $totalVenta2 != 0 ? $utilidad / $totalVenta2 : 0;
+            $porcUtilidad = $totalVenta2 != 0 ? $utilidad / $totalVenta2 : 0;
+            $details->porc_utilidad = $porcUtilidad;
 
             $details->cost_transformation = $prod[0]->cost * $formatkgrequeridos;
             $details->newstock = $newStock;
@@ -475,7 +499,7 @@ class alistamientoController extends Controller
             ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
 
-            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
+            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'en.costo_kilo as costo_kilo', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
             ->selectRaw('pro.stock stockHijo')
             ->selectRaw('en.kgrequeridos * pro.price_fama totalVenta')
             /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
@@ -493,11 +517,30 @@ class alistamientoController extends Controller
     {
 
         $kgTotalRequeridos = (float)enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('kgrequeridos');
+        $totalPrecioMinimo = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('precio_minimo');
+        $totalVentaFinal = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('total_venta');
+        $totalPorcVenta = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('porc_venta');
+        $totalCostoTotal = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('costo_total');
+        $totalCostoKilo = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('costo_kilo');
+        $totalUtilidad = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('utilidad');
+        $totalPorcUtilidad = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('porc_utilidad');
+
+
+
         $totalCostTranf = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('cost_transformation');
         $newTotalStock = (float)enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('newstock');
 
         $array = [
             'kgTotalRequeridos' => $kgTotalRequeridos,
+            'totalPrecioMinimo' => $totalPrecioMinimo,
+            'totalVentaFinal' => $totalVentaFinal,
+            'totalPorcVenta' => $totalPorcVenta,
+            'totalCostoTotal' => $totalCostoTotal,
+            'totalCostoKilo' => $totalCostoKilo,
+            'totalUtilidad' => $totalUtilidad,
+            'totalPorcUtilidad' => $totalPorcUtilidad,
+
+
             'totalCostTranf' => $totalCostTranf,
             'newTotalStock' => $newTotalStock,
         ];

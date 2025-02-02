@@ -155,15 +155,18 @@
 										<!--th class="table-th text-white">Item</th>-->
 										<th class="table-th text-white">#</th>
 										<th class="table-th text-white">Codigo</th>
-										<th class="table-th text-white">Producto hijo</th>
-										<th class="table-th text-white">Stock actual</th>
+										<th class="table-th text-white">Prodhijo</th>
+										<th class="table-th text-white">Stactual</th>
 										<th class="table-th text-white">Fisico</th>
 										<th class="table-th text-white">kgREQ</th>
 										<th class="table-th text-white">PRICEMIN</th>
 										<th class="table-th text-white">TVENTA</th>
 										<th class="table-th text-white">%VENTA</th>
 										<th class="table-th text-white">CostoT</th>
-										<th class="table-th text-white">New stock hijo</th>
+										<th class="table-th text-white">CostKG</th>
+										<th class="table-th text-white">UTILID</th>
+										<th class="table-th text-white">%UTL</th>
+										<th class="table-th text-white">N_st_hj</th>
 										<th class="table-th text-white text-center">Acciones</th>
 									</tr>
 								</thead>
@@ -185,8 +188,10 @@
 										<td>${{number_format($proddetail->price_fama, 0, ',', '.')}}</td>
 										<td>${{number_format($proddetail->total_venta, 0, ',', '.')}}</td>
 										<td>{{number_format($proddetail->porc_venta, 2, ',', '.')}}%</td>
-										<td>${{number_format($proddetail->costo_total, 2, ',', '.')}}</td>
-										<td>${{number_format($proddetail->cost_transformation, 0, ',', '.')}}</td>
+										<td>${{number_format($proddetail->costo_total, 0, ',', '.')}}</td>
+										<td>${{number_format($proddetail->costo_kilo, 0, ',', '.')}}</td>										
+										<td>${{number_format($proddetail->utilidad, 0, ',', '.')}}</td>
+										<td>{{number_format($proddetail->porc_utilidad, 2, ',', '.')}}%</td>
 										<td>{{number_format($proddetail->newstock, 2, ',', '.')}}KG</td>
 										<td class="text-center">
 											@if($status == 'true' && $statusInventory == 'false')
@@ -201,23 +206,32 @@
 									@endforeach
 								</tbody>
 								<tfoot id="tabletfoot">
-									<tr>										
+									<tr>
 										<th></th>
-										<th>Totales</th>
-										<th></th>
-										<th></th>
-										<th></th>
+										<th>Total</th>
 										<th></th>
 										<th></th>
 										<th></th>
 										<th>{{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}}KG</th>
-										<th>${{number_format($arrayTotales['totalCostTranf'], 0, ',', '.')}}</th>
+										<th>${{number_format($arrayTotales['totalPrecioMinimo'], 0, ',', '.')}}</th>
+										<th>${{number_format($arrayTotales['totalVentaFinal'], 0, ',', '.')}}</th>
+										<th>{{number_format($arrayTotales['totalPorcVenta'], 2, ',', '.')}}%</th>
+										<th>${{number_format($arrayTotales['totalCostoTotal'], 0, ',', '.')}}</th>
+										<th>${{number_format($arrayTotales['totalCostoKilo'], 0, ',', '.')}}</th>										
+										<th>${{number_format($arrayTotales['totalUtilidad'], 0, ',', '.')}}</th>
+										<th>{{number_format($arrayTotales['totalPorcUtilidad'], 2, ',', '.')}}%</th>
+											
 										<th>{{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}}KG</th>
 										<th class="text-center">
 											@if($dataAlistamiento[0]->inventario == 'pending')
-											<button class="btn btn-success btn-sm" id="addShopping">Cargar al inventario</button>
+											<button class="btn btn-success btn-sm" id="addShopping">Cargar_inventario</button>
 											@endif
 										</th>
+									</tr>
+									<tr>
+										<th></th>
+										<th>Merma</th>
+										<th>%Merma</th>
 									</tr>
 								</tfoot>
 							</table>
