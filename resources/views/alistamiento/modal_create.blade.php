@@ -25,7 +25,7 @@
 					<span class="text-danger error-message"></span>
 				</div>
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
 						<label for="inputlote" class="form-label mt-3">Lote</label>
@@ -36,7 +36,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
 						<label for="select2corte" class="form-label mt-3">Seleccionar corte padre</label>
@@ -47,6 +47,17 @@
 					</div>
 				</div>
 			</div>
+			<div class="col-md-4">
+				<div class="task-header">
+					<div class="form-group">
+						<label for="sell_price" class="form-label mt-3">Kg padre a procesar</label>
+						<div class="input-group flex-nowrap">
+							<input type="text" name="cantidadprocesar" id="cantidadprocesar" class="form-control" value="0" placeholder="0" aria-describedby="helpId" step="0.01">
+							<span class="input-group-text" id="addon-wrapping">KG</span>
+						</div>
+						<span class="text-danger error-message"></span>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
-</div>

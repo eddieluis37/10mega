@@ -57,12 +57,16 @@ class alistamientoController extends Controller
                 'inputstore' => 'required|exists:stores,id',
                 'inputlote' => 'required|exists:lotes,id',
                 'select2corte' => 'required|exists:products,id',
+                'cantidadprocesar' => 'required|numeric|min:0',
             ];
             $messages = [
                 'fecha.required' => 'La fecha es requerida.',
                 'inputstore.required' => 'La bodega es requerida.',
                 'inputlote.required' => 'El lote es requerido.',
                 'select2corte.required' => 'El corte padre es requerido.',
+                'cantidadprocesar.required' => 'La cantidad a procesar es requerida.',
+                'cantidadprocesar.numeric' => 'La cantidad a procesar debe ser un número.',
+                'cantidadprocesar.min' => 'La cantidad a procesar no puede ser negativa.',
                 'inputstore.exists' => 'La bodega seleccionada no existe.',
                 'inputlote.exists' => 'El lote seleccionado no existe.',
                 'select2corte.exists' => 'El corte padre seleccionado no existe.',
@@ -133,6 +137,11 @@ class alistamientoController extends Controller
             $alistamiento->costo_unitario_padre = $costoUnitarioPadre;
 
             //   $alistamiento->costo_unitario_padre =  $product->cost;
+
+            // Convertir y asignar cantidad_padre_a_procesar
+            $cantidadProcesar = number_format((float)$request->cantidadprocesar, 2, '.', '');
+            $alistamiento->cantidad_padre_a_procesar = $cantidadProcesar; // Asignar el valor a la propiedad
+
 
             // Calcular la fecha de cierre (próximo lunes)
             $fechaCierre = Carbon::now()->next(Carbon::MONDAY);
