@@ -16,6 +16,7 @@ const tableAlistamiento = document.querySelector("#tableAlistamiento");
 const tbodyTable = document.querySelector("#tableAlistamiento tbody");
 const tfootTable = document.querySelector("#tableAlistamiento tfoot");
 const stockPadre = document.querySelector("#stockCortePadre");
+const costoPadre = document.querySelector("#costoPadre");
 const pesokg = document.querySelector("#pesokg");
 
 const newStockPadre = document.querySelector("#newStockPadre");
@@ -104,6 +105,7 @@ btnAddAlist.addEventListener("click", async (e) => {
     console.log("log");
     const dataform = new FormData(formDetail);
     dataform.append("stockPadre", stockPadre.value);
+    dataform.append("costoPadre", costoPadre.value); 
     sendData("/alistamientosavedetail", dataform, token).then((result) => {
         console.log(result);
         if (result.status == 1) {

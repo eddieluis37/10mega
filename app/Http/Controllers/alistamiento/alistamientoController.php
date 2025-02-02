@@ -116,14 +116,23 @@ class alistamientoController extends Controller
                 $alistamiento->users_id = Auth::id();
             }
 
+            // Obtener el costo unitario desde el modelo Inventario
+            $inventario = Inventario::where('store_id', $request->inputstore)
+                ->where('lote_id', $request->inputlote)
+                ->where('product_id', $request->select2corte)
+                ->first();
+
+            $costoUnitarioPadre = $inventario ? $inventario->costo_unitario : 0;
+
             // Asignar los datos
             $alistamiento->store_id = $request->input('inputstore');
             $alistamiento->lote_id = $request->input('inputlote');
             $alistamiento->product_id = $request->input('select2corte');
             $alistamiento->fecha_alistamiento = $request->input('fecha');
             $alistamiento->lote_hijos_id = $nuevoLote->id;
-            $alistamiento->costo_unitario_padre =  $product->cost;
+            $alistamiento->costo_unitario_padre = $costoUnitarioPadre;
 
+            //   $alistamiento->costo_unitario_padre =  $product->cost;
 
             // Calcular la fecha de cierre (próximo lunes)
             $fechaCierre = Carbon::now()->next(Carbon::MONDAY);
@@ -262,7 +271,7 @@ class alistamientoController extends Controller
             ->join('products as p', 'ali.product_id', '=', 'p.id')
             ->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
-            ->select('ali.*', 'p.id as productopadreId', 'p.name as name', 'i.stock_ideal as stockPadre', 'i.cantidad_inicial',  'p.cost as costoPadre', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
+            ->select('ali.*', 'p.id as productopadreId', 'p.name as name', 'i.stock_ideal as stockPadre', 'i.cantidad_inicial',  'i.costo_unitario as costoPadre', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
             ->where('ali.id', $id)
             ->get();
 
@@ -377,8 +386,8 @@ class alistamientoController extends Controller
 
                 ])->get();
 
-          //  Log::info('producto:', ['producto' => $request->producto]);
-           // Log::info('storeId:', ['storeId' => $request->storeId]);
+            //  Log::info('producto:', ['producto' => $request->producto]);
+            // Log::info('storeId:', ['storeId' => $request->storeId]);
 
             // Log::info('prod:', ['prod' => $prod]);
 
@@ -386,24 +395,65 @@ class alistamientoController extends Controller
             $formatCantidad = new metodosrogercodeController();
             //  $prod = Product::firstWhere('id', $request->producto);
 
+            // Obtener dato de producto seleccionado
+            $product = Product::find($request->producto);
+            if (!$product) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'El producto seleccionado no existe.',
+                ], 404);
+            }
+
+            // Si price_fama es null o vacío, asignar 0
+            $priceFama = $product->price_fama ?? 0;
+
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
             $newStock = $prod[0]->stock + $formatkgrequeridos;
+
             $details = new enlistment_details();
+
+            $arrayTotales = $this->sumTotales($request->alistamientoId);
+
+            // Si kgTotalRequeridos es null, vacío o cero, inicializarlo en 0
+            $kgTotalRequeridos = !empty($arrayTotales['kgTotalRequeridos']) ? $arrayTotales['kgTotalRequeridos'] : 0;
+
+            // Acumular desde el primer registro
+            $kgTotalRequeridos += $formatkgrequeridos;
+
             $details->enlistments_id = $request->alistamientoId;
             $details->products_id = $request->producto;
             $details->kgrequeridos = $formatkgrequeridos;
+            $details->precio_minimo = $priceFama;
+            $totalVenta2 = $formatkgrequeridos * $priceFama;
+
+            $totalVenta = (float)number_format($priceFama * $formatkgrequeridos, 4);
+            $details->total_venta = $totalVenta2;
+
+            // Evitar división por cero en el cálculo del porcentaje de venta
+            $porcentajeVenta = (float)number_format($kgTotalRequeridos * 100, 2) / ($totalVenta ?: 1);
+            $costoTotal = $porcentajeVenta * $request->costoPadre;
+            $details->porc_venta = $porcentajeVenta;
+            $details->costo_total = $costoTotal;
+            $details->costo_kilo = $costoTotal / $formatkgrequeridos;
+
+            $utilidad = $totalVenta2 - $costoTotal;
+            $details->utilidad = $utilidad;
+            $details->porc_utilidad = $totalVenta2 != 0 ? $utilidad / $totalVenta2 : 0;
+
             $details->cost_transformation = $prod[0]->cost * $formatkgrequeridos;
             $details->newstock = $newStock;
+            $details->merma = $kgTotalRequeridos;
             $details->save();
 
-
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
             $arrayTotales = $this->sumTotales($request->alistamientoId);
+            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
 
-            $newStockPadre = $request->stockPadre - $arrayTotales['kgTotalRequeridos'];
+            $newStockPadre = $request->stockPadre - $kgTotalRequeridos;
             $alist = Alistamiento::firstWhere('id', $request->alistamientoId);
             $alist->nuevo_stock_padre = $newStockPadre;
+
             $alist->save();
+
 
             return response()->json([
                 'status' => 1,
@@ -424,9 +474,10 @@ class alistamientoController extends Controller
         $detail = DB::table('enlistment_details as en')
             ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
-           
+
             ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
             ->selectRaw('pro.stock stockHijo')
+            ->selectRaw('en.kgrequeridos * pro.price_fama totalVenta')
             /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
             ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo') */
             ->where([
@@ -459,11 +510,11 @@ class alistamientoController extends Controller
         try {
 
             $prod = DB::table('products as p')
-              //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
+                //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
                 ->select('p.stock', 'p.fisico', 'p.cost')
                 ->where([
                     ['p.id', $request->productoId],
-                  //  ['ce.centrocosto_id', $request->storeId],
+                    //  ['ce.centrocosto_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();

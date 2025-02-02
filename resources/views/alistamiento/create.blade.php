@@ -160,7 +160,9 @@
 										<th class="table-th text-white">Fisico</th>
 										<th class="table-th text-white">kgREQ</th>
 										<th class="table-th text-white">PRICEMIN</th>
-										<th class="table-th text-white">Costo</th>
+										<th class="table-th text-white">TVENTA</th>
+										<th class="table-th text-white">%VENTA</th>
+										<th class="table-th text-white">CostoT</th>
 										<th class="table-th text-white">New stock hijo</th>
 										<th class="table-th text-white text-center">Acciones</th>
 									</tr>
@@ -175,12 +177,15 @@
 										<td>{{number_format($proddetail->fisico, 2, ',', '.')}}KG</td>
 										<td>
 											@if($status == 'true' && $statusInventory == 'false')
-											<input type="text" class="form-control-sm" data-id="{{$proddetail->products_id}}" id="{{$proddetail->id}}" value="{{$proddetail->kgrequeridos}}" placeholder="Ingresar" size="10">
+											<input type="text" class="form-control-sm" data-id="{{$proddetail->products_id}}" id="{{$proddetail->id}}" value="{{$proddetail->kgrequeridos}}" placeholder="Ingresar" size="5">
 											@else
 											<p>{{number_format($proddetail->kgrequeridos, 2, ',', '.')}}KG</p>
 											@endif
 										</td>
 										<td>${{number_format($proddetail->price_fama, 0, ',', '.')}}</td>
+										<td>${{number_format($proddetail->total_venta, 0, ',', '.')}}</td>
+										<td>{{number_format($proddetail->porc_venta, 2, ',', '.')}}%</td>
+										<td>${{number_format($proddetail->costo_total, 2, ',', '.')}}</td>
 										<td>${{number_format($proddetail->cost_transformation, 0, ',', '.')}}</td>
 										<td>{{number_format($proddetail->newstock, 2, ',', '.')}}KG</td>
 										<td class="text-center">
@@ -196,10 +201,13 @@
 									@endforeach
 								</tbody>
 								<tfoot id="tabletfoot">
-									<tr>
-										<th></th>
+									<tr>										
 										<th></th>
 										<th>Totales</th>
+										<th></th>
+										<th></th>
+										<th></th>
+										<th></th>
 										<th></th>
 										<th></th>
 										<th>{{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}}KG</th>
