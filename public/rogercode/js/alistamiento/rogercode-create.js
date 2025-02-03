@@ -105,14 +105,14 @@ btnAddAlist.addEventListener("click", async (e) => {
     console.log("log");
     const dataform = new FormData(formDetail);
     dataform.append("stockPadre", stockPadre.value);
-    dataform.append("costoPadre", costoPadre.value); 
+    dataform.append("costoPadre", costoPadre.value);
     sendData("/alistamientosavedetail", dataform, token).then((result) => {
         console.log(result);
         if (result.status == 1) {
             $("#producto").val("").trigger("change");
             formDetail.reset();
             showData(result);
-            successToastMessage(result.message);          
+            successToastMessage(result.message);
         }
         if (result.status == 0) {
             let errors = result.errors;
@@ -147,10 +147,15 @@ const showData = (data) => {
                 element.products_id
             }" id="${element.id}" value="${
             element.kgrequeridos
-        }" placeholder="Ingresar" size="10">
+        }" placeholder="Ingresar" size="5">
             </td>
              <td>$${formatCantidadSinCero(element.price_fama)}</td>
-            <td>$${formatCantidadSinCero(element.cost_transformation)}</td>
+             <td>$${formatCantidadSinCero(element.total_venta)}</td>
+             <td>${formatCantidad(element.porc_venta)}%</td>
+             <td>$${formatCantidadSinCero(element.costo_total)}</td>
+             <td>$${formatCantidadSinCero(element.costo_kilo)}</td>
+             <td>$${formatCantidadSinCero(element.utilidad)}</td>
+             <td>${formatCantidad(element.porc_utilidad)}%</td>                         
       	    <td>${formatCantidad(element.newstock)}KG</td>
 			<td class="text-center">
 				<button class="btn btn-dark fas fa-trash" name="btnDownReg" data-id="${
@@ -167,18 +172,30 @@ const showData = (data) => {
     tableFoot.innerHTML = "";
     tableFoot.innerHTML += `
 	    <tr>
+		    <td></td>		   
+		    <th>Total</th>
 		    <td></td>
 		    <td></td>
-		    <th>Totales</th>
-		    <td></td>
-		    <td></td>
+            <td></td>
 		    <th>${formatCantidad(arrayTotales.kgTotalRequeridos)}KG</td>
-            <th>$${formatCantidadSinCero(arrayTotales.totalCostTranf)}</td>
-		    <th>${formatCantidad(arrayTotales.newTotalStock)}KG</th>
+            <th>$${formatCantidadSinCero(arrayTotales.totalPrecioMinimo)}</td>
+		    <th>$${formatCantidadSinCero(arrayTotales.totalVentaFinal)}</td>
+            <th>${formatCantidad(arrayTotales.totalPorcVenta)}%</th>
+            <th>$${formatCantidadSinCero(arrayTotales.totalCostoTotal)}</td>
+            <th>$${formatCantidadSinCero(arrayTotales.totalCostoKilo)}</td>
+            <th>$${formatCantidadSinCero(arrayTotales.totalUtilidad)}</td>
+            <th>${formatCantidad(arrayTotales.totalPorcUtilidad)}%</th>                                  
+            <th>${formatCantidad(arrayTotales.newTotalStock)}KG</th>
 		    <td class="text-center">
-                <button class="btn btn-success btn-sm" id="addShopping">Cargar al inventario</button>
+                <button class="btn btn-success btn-sm" id="addShopping">Cargar_Inventario</button>
             </td>
 	    </tr>
+        <tr>		   
+            <th></th>
+            <th></th>
+            <th>%Merma: </th>
+        </tr>
+
     `;
     let newTotalStockPadre = stockPadre.value - arrayTotales.kgTotalRequeridos;
     newStockPadre.value = newTotalStockPadre;

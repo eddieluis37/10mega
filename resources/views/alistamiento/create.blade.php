@@ -219,18 +219,17 @@
 										<th>${{number_format($arrayTotales['totalCostoTotal'], 0, ',', '.')}}</th>
 										<th>${{number_format($arrayTotales['totalCostoKilo'], 0, ',', '.')}}</th>										
 										<th>${{number_format($arrayTotales['totalUtilidad'], 0, ',', '.')}}</th>
-										<th>{{number_format($arrayTotales['totalPorcUtilidad'], 2, ',', '.')}}%</th>
-											
+										<th>{{number_format($arrayTotales['totalPorcUtilidad'], 2, ',', '.')}}%</th>											
 										<th>{{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}}KG</th>
 										<th class="text-center">
 											@if($dataAlistamiento[0]->inventario == 'pending')
-											<button class="btn btn-success btn-sm" id="addShopping">Cargar_inventario</button>
+											<button class="btn btn-success btn-sm" id="addShopping">Cargar_Inventario</button>
 											@endif
 										</th>
 									</tr>
 									<tr>
 										<th></th>
-										<th>Merma: {{$proddetail->cantidadAprocesar}}</th>
+										<th>Merma:{{$proddetail->cantidadAprocesar}}</th>
 										<th>%Merma: </th>
 									</tr>
 								</tfoot>
