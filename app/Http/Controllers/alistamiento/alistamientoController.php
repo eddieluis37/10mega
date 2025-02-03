@@ -363,6 +363,11 @@ class alistamientoController extends Controller
         return response()->json(['products' => $prod]);
     }
 
+    //  Log::info('producto:', ['producto' => $request->producto]);
+    // Log::info('storeId:', ['storeId' => $request->storeId]);
+
+    // Log::info('prod:', ['prod' => $prod]);
+
     public function savedetail(Request $request)
     {
         try {
@@ -384,25 +389,15 @@ class alistamientoController extends Controller
                 ], 422);
             }
 
-
             $prod = DB::table('products as p')
-                // ->join('inventarios as i', 'p.id', '=', 'i.product_id')
                 ->select('p.stock', 'p.fisico', 'p.cost')
                 ->where([
                     ['p.id', $request->producto],
-                    //['i.store_id', $request->storeId],
                     ['p.status', 1],
 
                 ])->get();
 
-            //  Log::info('producto:', ['producto' => $request->producto]);
-            // Log::info('storeId:', ['storeId' => $request->storeId]);
-
-            // Log::info('prod:', ['prod' => $prod]);
-
-
             $formatCantidad = new metodosrogercodeController();
-            //  $prod = Product::firstWhere('id', $request->producto);
 
             // Obtener dato de producto seleccionado
             $product = Product::find($request->producto);
@@ -421,18 +416,22 @@ class alistamientoController extends Controller
             $costoKilo = 0;
             $utilidad = 0;
             $porcUtilidad = 0;
-        
 
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
-            $newStock = $prod[0]->stock + $formatkgrequeridos;
+            $newStock = $prod[0]->stock + $formatkgrequeridos;           
 
-            $TotalCosto = Alistamiento::where([['id', $request->alistamientoId], ['status', 1]])->value('total_costo');
-            $CantidadPadreProcesar = Alistamiento::where([['id', $request->alistamientoId], ['status', 1]])->value('cantidad_padre_a_procesar');
+            $alistamiento = Alistamiento::where('id', $request->alistamientoId)->where('status', 1)->first(['total_costo', 'cantidad_padre_a_procesar']);
+            if (!$alistamiento) {
+                return response()->json(['status' => 0, 'message' => 'Alistamiento no encontrado.'], 404);
+            }
+
+            $CantidadPadreProcesar = $alistamiento->cantidad_padre_a_procesar;
+            $TotalCosto = $alistamiento->total_costo;
 
             $details = new enlistment_details();
 
             $arrayTotales = $this->sumTotales($request->alistamientoId);
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);            
+            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
 
             // Si kgTotalRequeridos es null, vacío o cero, inicializarlo en 0
             $kgTotalRequeridos = !empty($arrayTotales['kgTotalRequeridos']) ? $arrayTotales['kgTotalRequeridos'] : 0;
@@ -459,7 +458,7 @@ class alistamientoController extends Controller
             $details->kgrequeridos = $formatkgrequeridos;
             $details->precio_minimo = $priceFama;
             $totalVenta = $formatkgrequeridos * $priceFama;
-           
+
             $details->total_venta = $totalVenta;
 
             // Evitar división por cero en el cálculo del porcentaje de venta           
@@ -467,7 +466,7 @@ class alistamientoController extends Controller
 
             $totalPorcVenta += $porcentajeVenta;
 
-            $details->porc_venta = $porcentajeVenta;            
+            $details->porc_venta = $porcentajeVenta;
 
             $costoTotal = (($porcentajeVenta) / 100) * $TotalCosto;
             $details->costo_total = $costoTotal;
@@ -493,9 +492,7 @@ class alistamientoController extends Controller
             $newStockPadre = $request->stockPadre - $kgTotalRequeridos;
             $alist = Alistamiento::firstWhere('id', $request->alistamientoId);
             $alist->nuevo_stock_padre = $newStockPadre;
-
             $alist->save();
-
 
             return response()->json([
                 'status' => 1,
