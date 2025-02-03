@@ -421,26 +421,18 @@ class alistamientoController extends Controller
             $costoKilo = 0;
             $utilidad = 0;
             $porcUtilidad = 0;
-
-            $costoPadre = $request->costoPadre;
-            // Limpiar costoPadre de ',' y '.'
-            $costoPadreLimpio = str_replace([',', '.'], '', $costoPadre);
-            $costoPadreLimpio = (float) str_replace([',', '.'], '', $costoPadre);
+        
 
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
             $newStock = $prod[0]->stock + $formatkgrequeridos;
 
             $TotalCosto = Alistamiento::where([['id', $request->alistamientoId], ['status', 1]])->value('total_costo');
+            $CantidadPadreProcesar = Alistamiento::where([['id', $request->alistamientoId], ['status', 1]])->value('cantidad_padre_a_procesar');
 
             $details = new enlistment_details();
 
             $arrayTotales = $this->sumTotales($request->alistamientoId);
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
-
-
-
-            // $totalCosto = $arraydetail->total_costo;
-            // Log::info('Total Costo:', ['total_costo' => $totalCosto]);
+            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);            
 
             // Si kgTotalRequeridos es null, vacío o cero, inicializarlo en 0
             $kgTotalRequeridos = !empty($arrayTotales['kgTotalRequeridos']) ? $arrayTotales['kgTotalRequeridos'] : 0;
@@ -467,12 +459,10 @@ class alistamientoController extends Controller
             $details->kgrequeridos = $formatkgrequeridos;
             $details->precio_minimo = $priceFama;
             $totalVenta = $formatkgrequeridos * $priceFama;
-
-            //  $totalVenta = (float)number_format($priceFama * $formatkgrequeridos, 4);
+           
             $details->total_venta = $totalVenta;
 
-            // Evitar división por cero en el cálculo del porcentaje de venta
-            //$porcentajeVenta = (float)number_format($totalVenta2 * 100, 2) / ($totalVentaFinal ?: 1);
+            // Evitar división por cero en el cálculo del porcentaje de venta           
             $porcentajeVenta = ($totalVenta  / ($totalVenta ?: 1)) * 100;
 
             $totalPorcVenta += $porcentajeVenta;
@@ -492,10 +482,9 @@ class alistamientoController extends Controller
             $porcUtilidad = ($totalVenta != 0 ? $utilidad / $totalVenta : 0) * 100;
             $details->porc_utilidad = $porcUtilidad;
 
-
             $details->cost_transformation = $prod[0]->cost * $formatkgrequeridos;
             $details->newstock = $newStock;
-            $details->merma = $kgTotalRequeridos;
+            $details->merma = $CantidadPadreProcesar - $kgTotalRequeridos;
             $details->save();
 
             $arrayTotales = $this->sumTotales($request->alistamientoId);
@@ -561,7 +550,7 @@ class alistamientoController extends Controller
         $cantidadPadreAProcesar = Alistamiento::where([['id', $id], ['status', 1]])->value('cantidad_padre_a_procesar');
 
         // Calcular cantidad a procesar
-        $merma = ($cantidadPadreAProcesar !== null) ? ($cantidadPadreAProcesar - $kgTotalRequeridos) : 0;
+        $merma = ($cantidadPadreAProcesar !== null) ? ($kgTotalRequeridos - $cantidadPadreAProcesar) : 0;
         $porcMerma = $merma - $cantidadPadreAProcesar;
         // Retornar el array con los valores calculados
         return [
