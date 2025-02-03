@@ -45,7 +45,7 @@
 				<fieldset id="contentDisable">
 					<form action="" id="form-alistamiento">
 						<div class="modal-header">
-							<h4 class="modal-title">Crear transformación</h4>
+							<h4 class="modal-title">Crear alistamiento</h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span></button>
 						</div>

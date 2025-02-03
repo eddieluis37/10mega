@@ -190,12 +190,11 @@ const showData = (data) => {
                 <button class="btn btn-success btn-sm" id="addShopping">Cargar_Inventario</button>
             </td>
 	    </tr>
-        <tr>		   
+        <tr>	   
             <th></th>
-            <th></th>
-            <th>%Merma:${formatCantidad(arrayTotales.cantidadProcesar)}</th>
+            <th>Merma:${formatCantidad(arrayTotales.merma)}</th>
+            <th>%Merma:${formatCantidad(arrayTotales.porcMerma)}%</th>
         </tr>
-
     `;
     let newTotalStockPadre = stockPadre.value - arrayTotales.kgTotalRequeridos;
     newStockPadre.value = newTotalStockPadre;

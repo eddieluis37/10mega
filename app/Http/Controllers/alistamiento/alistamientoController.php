@@ -511,7 +511,7 @@ class alistamientoController extends Controller
             ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'en.costo_kilo as costo_kilo', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
             ->selectRaw('pro.stock stockHijo')
             ->selectRaw('en.kgrequeridos * pro.price_fama totalVenta')
-            ->selectRaw('e.cantidad_padre_a_procesar - en.kgrequeridos')
+            // ->selectRaw('e.cantidad_padre_a_procesar - en.kgrequeridos')
             /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
             ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo') */
             ->where([
@@ -541,8 +541,8 @@ class alistamientoController extends Controller
         $cantidadPadreAProcesar = Alistamiento::where([['id', $id], ['status', 1]])->value('cantidad_padre_a_procesar');
 
         // Calcular cantidad a procesar
-        $cantidadProcesar = ($cantidadPadreAProcesar !== null) ? ($cantidadPadreAProcesar - $kgTotalRequeridos) : 0;
-
+        $merma = ($cantidadPadreAProcesar !== null) ? ($cantidadPadreAProcesar - $kgTotalRequeridos) : 0;
+        $porcMerma = $merma - $cantidadPadreAProcesar;
         // Retornar el array con los valores calculados
         return [
             'kgTotalRequeridos' => $kgTotalRequeridos,
@@ -555,7 +555,8 @@ class alistamientoController extends Controller
             'totalPorcUtilidad' => $totalPorcUtilidad,
             'totalCostTranf' => $totalCostTranf,
             'newTotalStock' => $newTotalStock,
-            'cantidadProcesar' => $cantidadProcesar,
+            'merma' => $merma,
+            'porcMerma' => $porcMerma,
         ];
     }
 
