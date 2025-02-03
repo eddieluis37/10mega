@@ -229,7 +229,7 @@
 									</tr>
 									<tr>
 										<th></th>
-										<th>Merma:{{$proddetail->cantidadAprocesar}}</th>
+										<th>Merma:{{number_format($arrayTotales['cantidadProcesar'], 2, ',', '.')}}</th>
 										<th>%Merma: </th>
 									</tr>
 								</tfoot>

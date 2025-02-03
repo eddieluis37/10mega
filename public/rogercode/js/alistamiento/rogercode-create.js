@@ -193,7 +193,7 @@ const showData = (data) => {
         <tr>		   
             <th></th>
             <th></th>
-            <th>%Merma: </th>
+            <th>%Merma:${formatCantidad(arrayTotales.cantidadProcesar)}</th>
         </tr>
 
     `;

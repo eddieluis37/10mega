@@ -508,22 +508,24 @@ class alistamientoController extends Controller
             ->join('enlistments as e', 'e.id', '=', 'en.enlistments_id')
             ->join('products as pro', 'en.products_id', '=', 'pro.id')
 
-            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'en.costo_kilo', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
-            ->selectRaw('pro.stock as stockHijo')
-            ->selectRaw('(SUM(en.kgrequeridos) - e.cantidad_padre_a_procesar) as cantidadAprocesar') // Sumatoria de kgrequeridos
-            ->selectRaw('(SUM(en.kgrequeridos) * pro.price_fama) as totalVenta') // Sumatoria ajustada
+            ->select('en.*', 'pro.name as nameprod', 'pro.code', 'pro.price_fama', 'en.costo_kilo as costo_kilo', 'pro.stock', 'pro.fisico', 'en.cost_transformation')
+            ->selectRaw('pro.stock stockHijo')
+            ->selectRaw('en.kgrequeridos * pro.price_fama totalVenta')
+            ->selectRaw('e.cantidad_padre_a_procesar - en.kgrequeridos')
+            /*  ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
+            ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stockHijo') */
             ->where([
                 ['e.store_id', $storeId],
                 ['en.enlistments_id', $alistamientoId],
                 ['en.status', 1]
-            ])->groupBy('e.id', 'pro.id', 'en.id') // Agrupar para evitar error con SUM
-            ->get();
+            ])->get();
+
         return $detail;
     }
 
     public function sumTotales($id)
     {
-
+        // Sumar valores de enlistment_details
         $kgTotalRequeridos = (float)enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('kgrequeridos');
         $totalPrecioMinimo = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('precio_minimo');
         $totalVentaFinal = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('total_venta');
@@ -532,15 +534,17 @@ class alistamientoController extends Controller
         $totalCostoKilo = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('costo_kilo');
         $totalUtilidad = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('utilidad');
         $totalPorcUtilidad = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('porc_utilidad');
-
-
-
         $totalCostTranf = enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('cost_transformation');
         $newTotalStock = (float)enlistment_details::Where([['enlistments_id', $id], ['status', 1]])->sum('newstock');
 
+        // Obtener cantidad_padre_a_procesar desde enlistments
+        $cantidadPadreAProcesar = Alistamiento::where([['id', $id], ['status', 1]])->value('cantidad_padre_a_procesar');
 
+        // Calcular cantidad a procesar
+        $cantidadProcesar = ($cantidadPadreAProcesar !== null) ? ($cantidadPadreAProcesar - $kgTotalRequeridos) : 0;
 
-        $array = [
+        // Retornar el array con los valores calculados
+        return [
             'kgTotalRequeridos' => $kgTotalRequeridos,
             'totalPrecioMinimo' => $totalPrecioMinimo,
             'totalVentaFinal' => $totalVentaFinal,
@@ -549,13 +553,10 @@ class alistamientoController extends Controller
             'totalCostoKilo' => $totalCostoKilo,
             'totalUtilidad' => $totalUtilidad,
             'totalPorcUtilidad' => $totalPorcUtilidad,
-
-
             'totalCostTranf' => $totalCostTranf,
             'newTotalStock' => $newTotalStock,
+            'cantidadProcesar' => $cantidadProcesar,
         ];
-
-        return $array;
     }
 
     public function updatedetail(Request $request)
