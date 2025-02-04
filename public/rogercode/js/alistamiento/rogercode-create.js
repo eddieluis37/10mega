@@ -139,9 +139,7 @@ const showData = (data) => {
     	    <tr>
       	    <td>${element.id}</td>
       	    <td>${element.code}</td>
-      	    <td>${element.nameprod}</td>
-      	    <td>${formatCantidad(element.stock)}KG</td>
-      	    <td>${formatCantidad(element.fisico)}KG</td>
+      	    <td>${element.nameprod}</td>      
       	    <td>
             <input type="text" class="form-control-sm" data-id="${
                 element.products_id
@@ -173,9 +171,7 @@ const showData = (data) => {
     tableFoot.innerHTML += `
 	    <tr>
 		    <td></td>		   
-		    <th>Total</th>
-		    <td></td>
-		    <td></td>
+		    <th>Total</th>		 
             <td></td>
 		    <th>${formatCantidad(arrayTotales.kgTotalRequeridos)}KG</td>
             <th>$${formatCantidadSinCero(arrayTotales.totalPrecioMinimo)}</td>

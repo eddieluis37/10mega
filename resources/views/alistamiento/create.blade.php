@@ -156,8 +156,8 @@
 										<th class="table-th text-white">#</th>
 										<th class="table-th text-white">Codigo</th>
 										<th class="table-th text-white">Prodhijo</th>
-										<th class="table-th text-white">Stactual</th>
-										<th class="table-th text-white">Fisico</th>
+									<!-- 	<th class="table-th text-white">Stactual</th>
+										<th class="table-th text-white">Fisico</th> -->
 										<th class="table-th text-white">kgREQ</th>
 										<th class="table-th text-white">PRICEMIN</th>
 										<th class="table-th text-white">TVENTA</th>
@@ -176,8 +176,8 @@
 										<td>{{$proddetail->id}}</td>
 										<td>{{$proddetail->code}}</td>
 										<td>{{$proddetail->nameprod}}</td>
-										<td>{{number_format($proddetail->stockHijo, 2, ',', '.')}}KG</td>
-										<td>{{number_format($proddetail->fisico, 2, ',', '.')}}KG</td>
+								<!-- 		<td>{{number_format($proddetail->stockHijo, 2, ',', '.')}}KG</td>
+										<td>{{number_format($proddetail->fisico, 2, ',', '.')}}KG</td> -->
 										<td>
 											@if($status == 'true' && $statusInventory == 'false')
 											<input type="text" class="form-control-sm" data-id="{{$proddetail->products_id}}" id="{{$proddetail->id}}" value="{{$proddetail->kgrequeridos}}" placeholder="Ingresar" size="5">
@@ -209,8 +209,8 @@
 									<tr>
 										<th></th>
 										<th>Total</th>
-										<th></th>
-										<th></th>
+										<!-- <th></th>
+										<th></th> -->
 										<th></th>
 										<th>{{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}}KG</th>
 										<th>${{number_format($arrayTotales['totalPrecioMinimo'], 0, ',', '.')}}</th>

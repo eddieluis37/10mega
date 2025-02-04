@@ -437,7 +437,7 @@ class alistamientoController extends Controller
             $kgTotalRequeridos = !empty($arrayTotales['kgTotalRequeridos']) ? $arrayTotales['kgTotalRequeridos'] : 0;
             $totalPrecioMinimo = !empty($arrayTotales['totalPrecioMinimo']) ? $arrayTotales['totalPrecioMinimo'] : 0;
             $totalVentaFinal = !empty($arrayTotales['totalVentaFinal']) ? $arrayTotales['totalVentaFinal'] : 0;
-            $totalPorcVenta = !empty($arrayTotales['totalPorcVenta']) ? $arrayTotales['totalPorcVenta'] : 0;
+       //     $totalPorcVenta = !empty($arrayTotales['totalPorcVenta']) ? $arrayTotales['totalPorcVenta'] : 0;
             $totalCostoTotal = !empty($arrayTotales['totalCostoTotal']) ? $arrayTotales['totalCostoTotal'] : 0;
             $totalCostoKilo = !empty($arrayTotales['totalCostoKilo']) ? $arrayTotales['totalCostoKilo'] : 0;
             $totalUtilidad = !empty($arrayTotales['totalUtilidad']) ? $arrayTotales['totalUtilidad'] : 0;
@@ -464,7 +464,7 @@ class alistamientoController extends Controller
             // Evitar división por cero en el cálculo del porcentaje de venta           
             $porcentajeVenta = ($totalVenta  / ($totalVenta ?: 1)) * 100;
 
-            $totalPorcVenta += $porcentajeVenta;
+          //  $totalPorcVenta += $porcentajeVenta;
 
             $details->porc_venta = $porcentajeVenta;
 
