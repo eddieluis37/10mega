@@ -577,48 +577,77 @@ class alistamientoController extends Controller
 
     public function updatedetail(Request $request)
     {
+        //rogercode-create.jselias 205
         try {
+            $rules = [
+                'id' => 'required|exists:enlistment_details,id',
+                'newkgrequeridos' => 'required|numeric|min:0',
+            ];
+            $messages = [
+                'id.required' => 'El detalle es requerido.',
+                'id.exists' => 'El detalle no existe.',
+                'newkgrequeridos.required' => 'Los kg requeridos son necesarios.',
+                'newkgrequeridos.numeric' => 'Los kg requeridos deben ser un número.',
+                'newkgrequeridos.min' => 'Los kg requeridos deben ser mayores o iguales a 0.',
+            ];
 
-            $prod = DB::table('products as p')
-                //  ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('p.stock', 'p.fisico', 'p.cost')
-                ->where([
-                    ['p.id', $request->productoId],
-                    //  ['ce.centrocosto_id', $request->storeId],
-                    ['p.status', 1],
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-                ])->get();
-            //$prod = Product::firstWhere('id', $request->productoId);
-            //$newStock = $prod->stock + $request->newkgrequeridos;
-            $newStock = $prod[0]->stock + $request->newkgrequeridos;
+            $detail = enlistment_details::find($request->id);
+            $formatCantidad = new metodosrogercodeController();
+            $newkgrequeridos = $request->newkgrequeridos ?? '0'; // Asigna '0' si es null
+            $newkgrequeridos = $formatCantidad->MoneyToNumber((string) $newkgrequeridos);
 
-            $updatedetails = enlistment_details::firstWhere('id', $request->id);
-            $updatedetails->kgrequeridos = $request->newkgrequeridos;
-            $updatedetails->cost_transformation = $prod[0]->cost * $request->newkgrequeridos;
-            $updatedetails->newstock = $newStock;
-            $updatedetails->save();
+            // Obtener el alistamiento
+            $alistamiento = Alistamiento::find($detail->enlistments_id);
+            if (!$alistamiento) {
+                return response()->json(['status' => 0, 'message' => 'Alistamiento no encontrado.'], 404);
+            }
 
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
-            $arrayTotales = $this->sumTotales($request->alistamientoId);
+            $total_costo = $alistamiento->total_costo;
 
-            $newStockPadre = $request->stockPadre - $arrayTotales['kgTotalRequeridos'];
-            $alist = Alistamiento::firstWhere('id', $request->alistamientoId);
-            $alist->nuevo_stock_padre = $newStockPadre;
-            $alist->save();
+            // Actualizar el campo newkgrequeridos
+            $detail->kgrequeridos = $newkgrequeridos;
+            $totalVenta = $detail->precio_minimo * $newkgrequeridos;
+            $detail->total_venta = $totalVenta;
+            $detail->save();
+
+            // Recalcular los valores de todos los detalles
+            $enlistments = enlistment_details::where('enlistments_id', $detail->enlistments_id)->get();
+            $totalVentaGlobal = $enlistments->sum('total_venta');
+
+            foreach ($enlistments as $enlistment) {
+                $enlistment->porc_venta = ($enlistment->total_venta / ($totalVentaGlobal ?: 1)) * 100;
+                $enlistment->costo_total = ($enlistment->porc_venta / 100) * $total_costo;
+                $enlistment->costo_kilo = $enlistment->costo_total / ($enlistment->kgrequeridos ?: 1);
+                $enlistment->utilidad = $enlistment->total_venta - $enlistment->costo_total;
+                $enlistment->porc_utilidad = ($enlistment->utilidad / ($enlistment->total_venta ?: 1)) * 100;
+                $enlistment->save();
+            }
+
+            $arrayTotales = $this->sumTotales($detail->enlistments_id);
+            $arraydetail = $this->getalistamientodetail($detail->enlistments_id, $request->storeId);
 
             return response()->json([
                 'status' => 1,
-                'message' => 'Guardado correctamente',
+                'message' => "Actualizado correctamente",
                 'array' => $arraydetail,
-                'arrayTotales' => $arrayTotales
+                'arrayTotales' => $arrayTotales,
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 0,
-                'array' => (array) $th
+                'error' => $th->getMessage(),
             ]);
         }
     }
+
 
     public function editAlistamiento(Request $request)
     {
@@ -638,35 +667,6 @@ class alistamientoController extends Controller
         return response()->json(['products' => $cortes]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Request $request)
     {
         try {
