@@ -229,8 +229,8 @@
 									</tr>
 									<tr>
 										<th></th>
-										<th>Merma:{{number_format($arrayTotales['merma'], 2, ',', '.')}}</th>
-										<th>%Merma:{{number_format($arrayTotales['porcMerma'], 2, ',', '.')}}%</th>
+										<th>Merma={{number_format($arrayTotales['merma'], 0, ',', '.')}}</th>
+										<th>%Merma={{number_format($arrayTotales['porcMerma'], 2, ',', '.')}}%</th>
 									</tr>
 								</tfoot>
 							</table>

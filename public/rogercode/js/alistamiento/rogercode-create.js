@@ -188,7 +188,7 @@ const showData = (data) => {
 	    </tr>
         <tr>	   
             <th></th>
-            <th>Merma:${formatCantidad(arrayTotales.merma)}</th>
+            <th>Merma:${formatCantidadSinCero(arrayTotales.merma)}</th>
             <th>%Merma:${formatCantidad(arrayTotales.porcMerma)}%</th>
         </tr>
     `;

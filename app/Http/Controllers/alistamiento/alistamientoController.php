@@ -436,8 +436,6 @@ class alistamientoController extends Controller
             // Si kgTotalRequeridos es null, vacío o cero, inicializarlo en 0
             $kgTotalRequeridos = !empty($arrayTotales['kgTotalRequeridos']) ? $arrayTotales['kgTotalRequeridos'] : 0;
             $totalPrecioMinimo = !empty($arrayTotales['totalPrecioMinimo']) ? $arrayTotales['totalPrecioMinimo'] : 0;
-            $totalVentaFinal = !empty($arrayTotales['totalVentaFinal']) ? $arrayTotales['totalVentaFinal'] : 0;
-       //     $totalPorcVenta = !empty($arrayTotales['totalPorcVenta']) ? $arrayTotales['totalPorcVenta'] : 0;
             $totalCostoTotal = !empty($arrayTotales['totalCostoTotal']) ? $arrayTotales['totalCostoTotal'] : 0;
             $totalCostoKilo = !empty($arrayTotales['totalCostoKilo']) ? $arrayTotales['totalCostoKilo'] : 0;
             $totalUtilidad = !empty($arrayTotales['totalUtilidad']) ? $arrayTotales['totalUtilidad'] : 0;
@@ -446,7 +444,6 @@ class alistamientoController extends Controller
             // Acumular desde el primer registro
             $kgTotalRequeridos += $formatkgrequeridos;
             $totalPrecioMinimo += $priceFama;
-            //     $totalVentaFinal += $totalVenta;
 
             $totalCostoTotal += $costoTotal;
             $totalCostoKilo += $costoKilo;
@@ -463,8 +460,6 @@ class alistamientoController extends Controller
 
             // Evitar división por cero en el cálculo del porcentaje de venta           
             $porcentajeVenta = ($totalVenta  / ($totalVenta ?: 1)) * 100;
-
-          //  $totalPorcVenta += $porcentajeVenta;
 
             $details->porc_venta = $porcentajeVenta;
 
@@ -486,9 +481,6 @@ class alistamientoController extends Controller
             $details->merma = $CantidadPadreProcesar - $kgTotalRequeridos;
             $details->save();
 
-            $arrayTotales = $this->sumTotales($request->alistamientoId);
-            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
-
             $newStockPadre = $request->stockPadre - $kgTotalRequeridos;
             $alist = Alistamiento::firstWhere('id', $request->alistamientoId);
             $alist->nuevo_stock_padre = $newStockPadre;
@@ -502,11 +494,15 @@ class alistamientoController extends Controller
             foreach ($enlistments as $enlistment) {
                 $enlistment->porc_venta = ($enlistment->total_venta / ($totalVenta ?: 1)) * 100;
                 $enlistment->costo_total = ($enlistment->porc_venta / 100) * $alistamiento->total_costo;
-                $enlistment->costo_kilo = $enlistment->costo_total / $kgTotalRequeridos;
+                $enlistment->costo_kilo = $enlistment->costo_total / $enlistment->kgrequeridos;
                 $enlistment->utilidad = $enlistment->total_venta - $enlistment->costo_total;
+                $enlistment->porc_utilidad = ($enlistment->utilidad / $enlistment->total_venta) * 100;
                 $enlistment->save();
             }
+
+            $arrayTotales = $this->sumTotales($request->alistamientoId);
             $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
+
             return response()->json([
                 'status' => 1,
                 'message' => "Agregado correctamente",
@@ -561,7 +557,7 @@ class alistamientoController extends Controller
 
         // Calcular cantidad a procesar
         $merma = ($cantidadPadreAProcesar !== null) ? ($kgTotalRequeridos - $cantidadPadreAProcesar) : 0;
-        $porcMerma = $merma - $cantidadPadreAProcesar;
+        $porcMerma = ($merma / $cantidadPadreAProcesar) * 100;
         // Retornar el array con los valores calculados
         return [
             'kgTotalRequeridos' => $kgTotalRequeridos,
