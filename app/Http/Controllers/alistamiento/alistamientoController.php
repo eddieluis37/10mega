@@ -616,6 +616,7 @@ class alistamientoController extends Controller
             $detail->kgrequeridos = $newkgrequeridos;
             $totalVenta = $detail->precio_minimo * $newkgrequeridos;
             $detail->total_venta = $totalVenta;
+            $detail->newstock = $newkgrequeridos;
             $detail->save();
 
             // Recalcular los valores de todos los detalles
