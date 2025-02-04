@@ -397,7 +397,7 @@ class alistamientoController extends Controller
 
                 ])->get();
 
-            $formatCantidad = new metodosrogercodeController();
+            
 
             // Obtener dato de producto seleccionado
             $product = Product::find($request->producto);
@@ -417,7 +417,9 @@ class alistamientoController extends Controller
             $utilidad = 0;
             $porcUtilidad = 0;
 
+            $formatCantidad = new metodosrogercodeController();
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
+            //$formatkgrequeridos = $request->kgrequeridos;
             $newStock = $prod[0]->stock + $formatkgrequeridos;
 
             $alistamiento = Alistamiento::where('id', $request->alistamientoId)->where('status', 1)->first(['total_costo', 'cantidad_padre_a_procesar']);

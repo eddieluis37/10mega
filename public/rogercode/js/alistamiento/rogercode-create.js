@@ -197,7 +197,7 @@ const showData = (data) => {
 };
 
 kgrequeridos.addEventListener("change", function () {
-    const enteredValue = formatkg(kgrequeridos.value);
+    const enteredValue = formatCantidad(kgrequeridos.value);
     console.log("Entered value: " + enteredValue);
     kgrequeridos.value = enteredValue;
 });

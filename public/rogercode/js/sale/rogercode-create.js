@@ -223,8 +223,8 @@ price.addEventListener("change", function () {
 });
 
 quantity.addEventListener("change", function () {
-    const enteredValue = formatkg(quantity.value);
-    console.log("Entered value: " + enteredValue);
+    const enteredValue = formatPeso(quantity.value);
+    console.log("Valor ingresado: " + enteredValue);
     quantity.value = enteredValue;
 });
 
