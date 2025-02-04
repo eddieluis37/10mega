@@ -418,7 +418,7 @@ class alistamientoController extends Controller
             $porcUtilidad = 0;
 
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
-            $newStock = $prod[0]->stock + $formatkgrequeridos;           
+            $newStock = $prod[0]->stock + $formatkgrequeridos;
 
             $alistamiento = Alistamiento::where('id', $request->alistamientoId)->where('status', 1)->first(['total_costo', 'cantidad_padre_a_procesar']);
             if (!$alistamiento) {
@@ -446,7 +446,7 @@ class alistamientoController extends Controller
             // Acumular desde el primer registro
             $kgTotalRequeridos += $formatkgrequeridos;
             $totalPrecioMinimo += $priceFama;
-            $totalVentaFinal += $totalVenta;
+            //     $totalVentaFinal += $totalVenta;
 
             $totalCostoTotal += $costoTotal;
             $totalCostoKilo += $costoKilo;
@@ -494,6 +494,19 @@ class alistamientoController extends Controller
             $alist->nuevo_stock_padre = $newStockPadre;
             $alist->save();
 
+            // Recalcular y actualizar valores en enlistment_details para todos los registros con el mismo enlistments_id
+            $enlistments = enlistment_details::where('enlistments_id', $request->alistamientoId)->get();
+            // Calcular la sumatoria del total_venta
+            $totalVenta = $enlistments->sum('total_venta');
+
+            foreach ($enlistments as $enlistment) {
+                $enlistment->porc_venta = ($enlistment->total_venta / ($totalVenta ?: 1)) * 100;
+                $enlistment->costo_total = ($enlistment->porc_venta / 100) * $alistamiento->total_costo;
+                $enlistment->costo_kilo = $enlistment->costo_total / $kgTotalRequeridos;
+                $enlistment->utilidad = $enlistment->total_venta - $enlistment->costo_total;
+                $enlistment->save();
+            }
+            $arraydetail = $this->getalistamientodetail($request->alistamientoId, $request->storeId);
             return response()->json([
                 'status' => 1,
                 'message' => "Agregado correctamente",
