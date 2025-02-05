@@ -16,6 +16,7 @@ class MovimientoInventario extends Model
         'compensador_id',
         'desposteres_id',
         'despostecerdos_id',
+        'enlistments_id',
         'store_origen_id',
         'store_destino_id',
         'lote_id',
