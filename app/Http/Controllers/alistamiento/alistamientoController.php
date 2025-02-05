@@ -271,7 +271,6 @@ class alistamientoController extends Controller
      */
     public function create($id)
     {
-        //  dd($id);
         $dataAlistamiento = DB::table('enlistments as ali')
             ->join('stores as s', 'ali.store_id', '=', 's.id')
             ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
@@ -280,7 +279,19 @@ class alistamientoController extends Controller
             ->join('products as p', 'ali.product_id', '=', 'p.id')
             ->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
-            ->select('ali.*', 'p.id as productopadreId', 'p.name as name', 'i.stock_ideal as stockPadre', 'i.cantidad_inicial',  'i.costo_unitario as costoPadre', 'p.meatcut_id as meatcut_id', 's.name as namebodega', 'l.codigo as codigolote', 'lh.codigo as codigolotehijo')
+            ->select(
+                'ali.*',
+                'p.id as productopadreId',
+                'p.name as name',
+                'i.stock_ideal as stockPadre',
+                'i.cantidad_inicial',
+                'i.costo_unitario as costoPadre',
+                'p.meatcut_id as meatcut_id',
+                's.name as namebodega',
+                'l.codigo as codigolote',
+                'lh.codigo as codigolotehijo',
+                DB::raw('(ali.cantidad_padre_a_procesar * ali.costo_unitario_padre) as totalCostoPadreFrom')
+            )
             ->where('ali.id', $id)
             ->get();
 
@@ -397,7 +408,7 @@ class alistamientoController extends Controller
 
                 ])->get();
 
-            
+
 
             // Obtener dato de producto seleccionado
             $product = Product::find($request->producto);
@@ -583,17 +594,25 @@ class alistamientoController extends Controller
         try {
             $rules = [
                 'id' => 'required|exists:enlistment_details,id',
-                'newkgrequeridos' => 'required|numeric|min:0',
+                'newkgrequeridos' => [
+                    'required',
+                    'numeric',
+                    'regex:/^\d+(\.\d{1,2})?$/',
+                    'min:0.1',
+                ],
             ];
+
             $messages = [
                 'id.required' => 'El detalle es requerido.',
                 'id.exists' => 'El detalle no existe.',
                 'newkgrequeridos.required' => 'Los kg requeridos son necesarios.',
                 'newkgrequeridos.numeric' => 'Los kg requeridos deben ser un número.',
-                'newkgrequeridos.min' => 'Los kg requeridos deben ser mayores o iguales a 0.',
+                'newkgrequeridos.regex' => 'Los kg requeridos deben tener como máximo dos decimales.',
+                'newkgrequeridos.min' => 'Los kg requeridos deben ser mayores o iguales a 0.1.',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
+
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 0,
@@ -602,9 +621,18 @@ class alistamientoController extends Controller
             }
 
             $detail = enlistment_details::find($request->id);
-            $formatCantidad = new metodosrogercodeController();
+
             $newkgrequeridos = $request->newkgrequeridos ?? '0'; // Asigna '0' si es null
-            $newkgrequeridos = $formatCantidad->MoneyToNumber((string) $newkgrequeridos);
+
+
+            /*  $formatCantidad = new metodosrogercodeController();
+           
+
+            $formatCantidad = new metodosrogercodeController();
+            $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos); */
+
+
+            // $newkgrequeridos = $formatCantidad->MoneyToNumber((string) $newkgrequeridos);
 
             // Obtener el alistamiento
             $alistamiento = Alistamiento::find($detail->enlistments_id);

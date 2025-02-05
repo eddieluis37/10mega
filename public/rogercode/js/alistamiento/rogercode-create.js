@@ -149,12 +149,12 @@ const showData = (data) => {
             </td>
              <td>$${formatCantidadSinCero(element.price_fama)}</td>
              <td>$${formatCantidadSinCero(element.total_venta)}</td>
-             <td>${formatCantidad(element.porc_venta)}%</td>
+             <td>${(element.porc_venta)}%</td>
              <td>$${formatCantidadSinCero(element.costo_total)}</td>
              <td>$${formatCantidadSinCero(element.costo_kilo)}</td>
              <td>$${formatCantidadSinCero(element.utilidad)}</td>
-             <td>${formatCantidad(element.porc_utilidad)}%</td>                         
-      	    <td>${formatCantidad(element.newstock)}KG</td>
+             <td>${(element.porc_utilidad)}%</td>                         
+      	    <td>${(element.newstock)}KG</td>
 			<td class="text-center">
 				<button class="btn btn-dark fas fa-trash" name="btnDownReg" data-id="${
                     element.id
@@ -173,23 +173,23 @@ const showData = (data) => {
 		    <td></td>		   
 		    <th>Total</th>		 
             <td></td>
-		    <th>${formatCantidad(arrayTotales.kgTotalRequeridos)}KG</td>
+		    <th>${(arrayTotales.kgTotalRequeridos)}KG</td>
             <th>$${formatCantidadSinCero(arrayTotales.totalPrecioMinimo)}</td>
 		    <th>$${formatCantidadSinCero(arrayTotales.totalVentaFinal)}</td>
-            <th>${formatCantidad(arrayTotales.totalPorcVenta)}%</th>
+            <th>${(arrayTotales.totalPorcVenta)}%</th>
             <th>$${formatCantidadSinCero(arrayTotales.totalCostoTotal)}</td>
             <th>$${formatCantidadSinCero(arrayTotales.totalCostoKilo)}</td>
             <th>$${formatCantidadSinCero(arrayTotales.totalUtilidad)}</td>
-            <th>${formatCantidad(arrayTotales.totalPorcUtilidad)}%</th>                                  
-            <th>${formatCantidad(arrayTotales.newTotalStock)}KG</th>
+            <th>${(arrayTotales.totalPorcUtilidad)}%</th>                                  
+            <th>${(arrayTotales.newTotalStock)}KG</th>
 		    <td class="text-center">
                 <button class="btn btn-success btn-sm" id="addShopping">Cargar_Inventario</button>
             </td>
 	    </tr>
         <tr>	   
             <th></th>
-            <th>Merma:${formatCantidadSinCero(arrayTotales.merma)}</th>
-            <th>%Merma:${formatCantidad(arrayTotales.porcMerma)}%</th>
+            <th>Merma:${(arrayTotales.merma)}</th>
+            <th>%Merma:${(arrayTotales.porcMerma)}%</th>
         </tr>
     `;
     let newTotalStockPadre = stockPadre.value - arrayTotales.kgTotalRequeridos;

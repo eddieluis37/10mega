@@ -91,7 +91,7 @@
 								<div class="col-md-3">
 									<label for="" class="form-label">KG requeridos</label>
 									<div class="input-group flex-nowrap">
-										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10,00">
+										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10.00">
 										<span class="input-group-text" id="addon-wrapping">KG</span>
 									</div>
 									<span class="text-danger error-message"></span>
@@ -114,33 +114,41 @@
 					<div class="card-body">
 						<div class="row">
 							<div class="col-md-3">
-								<label for="" class="form-label">Stock actual</label>
+								<label for="" class="form-label">StockActual</label>
 								<div class="input-group flex-nowrap">
 									<input type="text" id="stockCortePadre" name="stockCortePadre" value="{{$dataAlistamiento[0]->stockPadre}}" class="form-control" placeholder="10,00 kg" readonly>
 									<span class="input-group-text" id="addon-wrapping">KG</span>
 								</div>
 							</div>
 							<div class="col-md-3">
-								<label for="" class="form-label">CostoPadre</label>
+								<label for="" class="form-label">NuevoStockPadre</label>
+								<div class="input-group flex-nowrap">
+									<input type="text" id="newStockPadre" name="newStockPadre" value="{{$dataAlistamiento[0]->nuevo_stock_padre}}" class="form-control" placeholder="30,00 kg" readonly>
+									<span class="input-group-text" id="addon-wrapping">KG</span>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<label for="" class="form-label">CostoUnitPadre</label>
 								<div class="input-group flex-nowrap">
 									<span class="input-group-text" id="addon-wrapping">$</span>
 									<input type="text" id="costoPadre" name="costoPadre" value="{{number_format( $dataAlistamiento[0]->costoPadre ,0, ',', '.' )}}" class="form-control" placeholder="10,00 kg" readonly>
 								</div>
 							</div>
 							<div class="col-md-3">
+								<label for="" class="form-label">TotalCostoPadre</label>
+								<div class="input-group flex-nowrap">
+									<span class="input-group-text" id="addon-wrapping">$</span>
+									<input type="text" id="totalCostoPadreFrom" name="totalCostoPadreFrom" value="{{number_format( $dataAlistamiento[0]->totalCostoPadreFrom ,0, ',', '.' )}}" class="form-control" placeholder="10,00 kg" readonly>
+								</div>
+							</div>
+							<!-- <div class="col-md-3">
 								<label for="" class="form-label">Ultimo conteo fisico</label>
 								<div class="input-group flex-nowrap">
 									<input type="text" id="pesokg" name="pesokg" value="{{$dataAlistamiento[0]->cantidad_inicial}}" class="form-control" placeholder="180.40 kg" readonly>
 									<span class="input-group-text" id="addon-wrapping">KG</span>
 								</div>
-							</div>
-							<div class="col-md-3">
-								<label for="" class="form-label">Nuevo stock padre</label>
-								<div class="input-group flex-nowrap">
-									<input type="text" id="newStockPadre" name="newStockPadre" value="{{$dataAlistamiento[0]->nuevo_stock_padre}}" class="form-control" placeholder="30,00 kg" readonly>
-									<span class="input-group-text" id="addon-wrapping">KG</span>
-								</div>
-							</div>
+							</div> -->
+							
 						</div>
 					</div>
 				</div>
@@ -187,12 +195,12 @@
 										</td>
 										<td>${{number_format($proddetail->price_fama, 0, ',', '.')}}</td>
 										<td>${{number_format($proddetail->total_venta, 0, ',', '.')}}</td>
-										<td>{{number_format($proddetail->porc_venta, 2, ',', '.')}}%</td>
+										<td>{{($proddetail->porc_venta)}}%</td>
 										<td>${{number_format($proddetail->costo_total, 0, ',', '.')}}</td>
 										<td>${{number_format($proddetail->costo_kilo, 0, ',', '.')}}</td>										
 										<td>${{number_format($proddetail->utilidad, 0, ',', '.')}}</td>
-										<td>{{number_format($proddetail->porc_utilidad, 2, ',', '.')}}%</td>
-										<td>{{number_format($proddetail->newstock, 2, ',', '.')}}KG</td>
+										<td>{{($proddetail->porc_utilidad)}}%</td>
+										<td>{{($proddetail->newstock)}}KG</td>
 										<td class="text-center">
 											@if($status == 'true' && $statusInventory == 'false')
 											<button type="button" name="btnDownReg" data-id="{{$proddetail->id}}" class="btn btn-dark btn-sm fas fa-trash" title="Cancelar">
@@ -212,15 +220,15 @@
 										<!-- <th></th>
 										<th></th> -->
 										<th></th>
-										<th>{{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}}KG</th>
+										<th>{{($arrayTotales['kgTotalRequeridos'])}}KG</th>
 										<th>${{number_format($arrayTotales['totalPrecioMinimo'], 0, ',', '.')}}</th>
 										<th>${{number_format($arrayTotales['totalVentaFinal'], 0, ',', '.')}}</th>
-										<th>{{number_format($arrayTotales['totalPorcVenta'], 2, ',', '.')}}%</th>
+										<th>{{($arrayTotales['totalPorcVenta'])}}%</th>
 										<th>${{number_format($arrayTotales['totalCostoTotal'], 0, ',', '.')}}</th>
 										<th>${{number_format($arrayTotales['totalCostoKilo'], 0, ',', '.')}}</th>										
 										<th>${{number_format($arrayTotales['totalUtilidad'], 0, ',', '.')}}</th>
-										<th>{{number_format($arrayTotales['totalPorcUtilidad'], 2, ',', '.')}}%</th>											
-										<th>{{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}}KG</th>
+										<th>{{($arrayTotales['totalPorcUtilidad'])}}%</th>										
+										<th>{{($arrayTotales['newTotalStock'])}}KG</th>
 										<th class="text-center">
 											@if($dataAlistamiento[0]->inventario == 'pending')
 											<button class="btn btn-success btn-sm" id="addShopping">Cargar_Inventario</button>
@@ -229,8 +237,8 @@
 									</tr>
 									<tr>
 										<th></th>
-										<th>Merma={{number_format($arrayTotales['merma'], 0, ',', '.')}}</th>
-										<th>%Merma={{number_format($arrayTotales['porcMerma'], 2, ',', '.')}}%</th>
+										<th>Merma={{($arrayTotales['merma'])}}</th>
+										<th>%Merma={{($arrayTotales['porcMerma'])}}%</th>
 									</tr>
 								</tfoot>
 							</table>
