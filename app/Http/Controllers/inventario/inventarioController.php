@@ -81,6 +81,7 @@ class inventarioController extends Controller
                 $compensadores = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
                 $desposteres = $movimientos->where('tipo', 'desposteres')->sum('cantidad_total');
                 $despostecerdos = $movimientos->where('tipo', 'despostecerdos')->sum('cantidad_total');
+                $enlistments = $movimientos->where('tipo', 'enlistments')->sum('cantidad_total');
 
                 //$products_terminados = $movimientos->where('tipo', 'products_terminados')->pluck('cantidad_final');
                 /*  $trasladoIngreso = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
@@ -92,7 +93,7 @@ class inventarioController extends Controller
                 $cantidadFinal = $inventario->cantidad_inicial;
 
                 // Calcular stock ideal
-                $stockIdeal = $compensadores + $inventario->inventario_inicial + $desposteres + $despostecerdos + $inventario->cantidad_prod_term;
+                $stockIdeal = $compensadores + $inventario->inventario_inicial + $desposteres + $despostecerdos + $inventario->cantidad_prod_term + $enlistments;
 
                 // Actualizar los campos del inventario
                 $inventario->update([
@@ -110,7 +111,7 @@ class inventarioController extends Controller
                     'ProductoNombre' => $inventario->product->name,
                     'CantidadInicial' => $inventario->inventario_inicial,
                     'compraLote' => $desposteres + $despostecerdos, // Sumar desposteres y despostecerdos
-                    'alistamiento' => 0,
+                    'alistamiento' => $enlistments,
                     'ProductoTerminado' => $inventario->cantidad_prod_term,
 
                     'compensados' => $compensadores,

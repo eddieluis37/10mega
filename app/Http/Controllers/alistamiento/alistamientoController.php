@@ -24,6 +24,7 @@ use App\Models\shopping\shopping_enlistment_details;
 use App\Models\Store;
 use App\Models\Lote;
 use App\Models\Inventario;
+use App\Models\MovimientoInventario;
 
 class alistamientoController extends Controller
 {
@@ -746,6 +747,113 @@ class alistamientoController extends Controller
     }
 
     public function add_shopping(Request $request)
+    {
+        $alistamientoId = $request->input('alistamientoId');
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Obtener el modelo Alistamiento
+            $alistamiento = Alistamiento::findOrFail($alistamientoId);
+
+            //  Log::info('Alistamiento:', ['Alistamiento' => $alistamiento]);
+            // Log::info('LoteId:', ['LoteId' => $alistamiento->lote_id]);
+
+            // 2. Obtiene el id del lote padre y el id del lote hijo
+            $lote = Lote::findOrFail($alistamiento->lote_hijos_id);
+          //  $loteHijos = $alistamiento->lote_hijos_id;
+
+            // 2. Obtener los detalles de alistamiento
+            $detallesAlistamiento = enlistment_details::where('enlistments_id', $alistamientoId)->get();
+            Log::info('DetalleAlistamiento:', ['detalle' => $detallesAlistamiento]);
+
+            // 3. Asociar productos al lote en la tabla lote_products
+            foreach ($detallesAlistamiento as $detalle) {
+                if ($detalle->kgrequeridos > 0) { // Procesar solo si el kgrequeridos es mayor a 0
+                    $lote->products()->attach($detalle->products_id, [
+                        'cantidad' => $detalle->kgrequeridos, // Usamos kgrequeridos como cantidad
+                        'costo' => $detalle->costo_Kilo,
+                    ]);
+                }
+            }
+
+            // 4 y 5. Actualizar o crear inventario con la cantidad calculada
+            foreach ($detallesAlistamiento as $detalle) {
+                if ($detalle->kgrequeridos > 0) { // Procesar solo si el kgrequeridos es mayor a 0
+                    $inventario = Inventario::firstOrCreate(
+                        [
+                            'product_id' => $detalle->products_id,
+                            'lote_id' => $lote->id,
+                            'store_id' => $alistamiento->store_id, // Utilizamos el store_id del modelo Alistamiento
+                        ],
+                        [
+                            'cantidad_inicial' => 0,
+                            'cantidad_final' => 0,
+                            'costo_unitario' => $detalle->costo_kilo,
+                            'costo_total' => 0,
+                        ]
+                    );
+
+                    // Incrementar cantidad y actualizar inventario
+                    $inventario->cantidad_final += $detalle->kgrequeridos;
+                    $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
+                    $inventario->save();
+
+                    // **Actualizar el campo cost en la tabla products**
+                    $product = Product::find($detalle->products_id);
+                    if ($product) {
+                        $product->cost = $detalle->costo_kilo;
+                        $product->save();
+                    }
+                }
+            }
+
+            // 6. Registrar movimientos en la tabla de movimientos
+            foreach ($detallesAlistamiento as $detalle) {
+                if ($detalle->kgrequeridos > 0) { // Procesar solo si el kgrequeridos es mayor a 0
+                    MovimientoInventario::create([
+                        'tipo' => 'enlistments', // Tipo de movimiento
+                        'enlistments_id' => $detalle->enlistments_id,
+                        'store_origen_id' => null,
+                        'store_destino_id' => $alistamiento->store_id, // Utilizamos el store_id del modelo Alistamiento
+                        'lote_id' => $lote->id,
+                        'product_id' => $detalle->products_id,
+                        'cantidad' => $detalle->kgrequeridos,
+                        'costo_unitario' => $detalle->costo_kilo,
+                        'total' => $detalle->kgrequeridos * $detalle->costo_kilo,
+                        'fecha' => Carbon::now(),
+                    ]);
+                }
+            }
+
+            /*  // **Cierra BeneficioRes si todo está bien**
+            $currentDateTime = Carbon::now();
+            $formattedDate = $currentDateTime->format('Y-m-d');
+
+            $beneficio = Alistamiento::find($alistamientoId);
+            $beneficio->fecha_cierre = $formattedDate;
+            $beneficio->save(); */
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'alistamiento' => $detallesAlistamiento,
+                'count' => 1,
+                'message' => 'Se guardo co exito'
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return response()->json([
+                'status' => 0,
+                'array' => (array) $th
+            ]);
+        }
+    }
+
+
+
+    public function add_shoppingOriginal(Request $request)
     {
         try {
             $id_user = Auth::user()->id;

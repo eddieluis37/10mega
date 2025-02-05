@@ -283,7 +283,7 @@ tfootTable.addEventListener("click", (e) => {
         const dataform = new FormData();
         dataform.append("alistamientoId", Number(alistamientoId.value));
         dataform.append("newStockPadre", Number(newStockPadre.value));
-        dataform.append("pesokg", Number(pesokg.value));
+     
         dataform.append("stockPadre", Number(stockPadre.value));
         dataform.append("productoPadre", Number(productoPadre.value));
         dataform.append("storeId", Number(storeId.value));

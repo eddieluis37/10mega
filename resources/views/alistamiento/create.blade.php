@@ -75,9 +75,9 @@
 											<input type="hidden" id="productopadreId" name="productopadreId" value="{{$dataAlistamiento[0]->productopadreId}}">
 											<input type="hidden" id="storeId" name="storeId" value="{{$dataAlistamiento[0]->store_id}}">
 											<input type="text" id="productoCorte" name="productoCorte" value="{{$dataAlistamiento[0]->name}}" class="form-control input" readonly>
+											<input type="hidden" id="pesokg" name="pesokg" value="{{$dataAlistamiento[0]->cantidad_inicial}}" class="form-control" placeholder="180.40 kg" readonly>
 											<!--select class="form-control form-control-sm select2Prod" name="productoCorte" id="productoCorte" required="">
-											<option value="">Seleccione el producto</option>
-											
+											<option value="">Seleccione el producto</option>											
 					                    </select>-->
 										</div>
 									</div>
@@ -142,13 +142,12 @@
 								</div>
 							</div>
 							<!-- <div class="col-md-3">
-								<label for="" class="form-label">Ultimo conteo fisico</label>
+								<label for="" class="form-label">Ultimo conteo fisico = cantidad_inicial</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesokg" name="pesokg" value="{{$dataAlistamiento[0]->cantidad_inicial}}" class="form-control" placeholder="180.40 kg" readonly>
+								
 									<span class="input-group-text" id="addon-wrapping">KG</span>
 								</div>
-							</div> -->
-							
+							</div> -->							
 						</div>
 					</div>
 				</div>
