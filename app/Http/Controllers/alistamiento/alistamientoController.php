@@ -286,7 +286,7 @@ class alistamientoController extends Controller
                 'p.name as name',
                 'i.stock_ideal as stockPadre',
                 'i.cantidad_inicial',
-                'i.costo_unitario as costoPadre',
+                'ali.costo_unitario_padre as costoPadre',
                 'p.meatcut_id as meatcut_id',
                 's.name as namebodega',
                 'l.codigo as codigolote',
