@@ -60,7 +60,7 @@ class StoreSeeder extends Seeder
         ]);
         Store::create([
             'centrocosto_id' => 1,
-            'name' => 'CERDO PLANTA',          
+            'name' => 'CERDO CENTRAL',          
             'description' => 'COMPRAS PRODUCTOS',         
         ]);
         Store::create([

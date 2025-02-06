@@ -765,7 +765,9 @@ class alistamientoController extends Controller
 
 
             // 3. Obtener los detalles de alistamiento
-            $detallesAlistamiento = enlistment_details::where('enlistments_id', $alistamientoId)->get();
+            $detallesAlistamiento = enlistment_details::where('enlistments_id', $alistamientoId)
+            ->where('status', '1')
+            ->get();
             Log::info('DetalleAlistamiento:', ['detalle' => $detallesAlistamiento]);
 
             // 4. Asociar productos al lote hijo en la tabla lote_products
