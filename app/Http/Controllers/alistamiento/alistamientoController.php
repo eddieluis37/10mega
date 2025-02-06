@@ -760,14 +760,15 @@ class alistamientoController extends Controller
             // Log::info('LoteId:', ['LoteId' => $alistamiento->lote_id]);
 
             // 2. Obtiene el id del lote padre y el id del lote hijo
+            $lotePadre = Lote::findOrFail($alistamiento->lote_id);
             $lote = Lote::findOrFail($alistamiento->lote_hijos_id);
-          //  $loteHijos = $alistamiento->lote_hijos_id;
 
-            // 2. Obtener los detalles de alistamiento
+
+            // 3. Obtener los detalles de alistamiento
             $detallesAlistamiento = enlistment_details::where('enlistments_id', $alistamientoId)->get();
             Log::info('DetalleAlistamiento:', ['detalle' => $detallesAlistamiento]);
 
-            // 3. Asociar productos al lote en la tabla lote_products
+            // 4. Asociar productos al lote hijo en la tabla lote_products
             foreach ($detallesAlistamiento as $detalle) {
                 if ($detalle->kgrequeridos > 0) { // Procesar solo si el kgrequeridos es mayor a 0
                     $lote->products()->attach($detalle->products_id, [
@@ -777,14 +778,15 @@ class alistamientoController extends Controller
                 }
             }
 
-            // 4 y 5. Actualizar o crear inventario con la cantidad calculada
+            // 5. Actualizar o crear inventario con la cantidad calculada y restar del lote padre
             foreach ($detallesAlistamiento as $detalle) {
-                if ($detalle->kgrequeridos > 0) { // Procesar solo si el kgrequeridos es mayor a 0
+                if ($detalle->kgrequeridos > 0) {
+                    // **Actualizar inventario del lote hijo**
                     $inventario = Inventario::firstOrCreate(
                         [
                             'product_id' => $detalle->products_id,
                             'lote_id' => $lote->id,
-                            'store_id' => $alistamiento->store_id, // Utilizamos el store_id del modelo Alistamiento
+                            'store_id' => $alistamiento->store_id,
                         ],
                         [
                             'cantidad_inicial' => 0,
@@ -794,7 +796,6 @@ class alistamientoController extends Controller
                         ]
                     );
 
-                    // Incrementar cantidad y actualizar inventario
                     $inventario->cantidad_final += $detalle->kgrequeridos;
                     $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
                     $inventario->save();
@@ -808,14 +809,43 @@ class alistamientoController extends Controller
                 }
             }
 
+            // **Restar del inventario del lote padre**
+            $inventarioPadre = Inventario::where('product_id', $alistamiento->product_id)
+                ->where('lote_id', $lotePadre->id)
+                ->where('store_id', $alistamiento->store_id)
+                ->first();
+            if ($inventarioPadre) {
+                $cantidadARestar = abs($alistamiento->cantidad_padre_a_procesar); // Asegurar que siempre sea negativa
+                $inventarioPadre->cantidad_final -= $cantidadARestar;
+                if ($inventarioPadre->cantidad_final < 0) {
+                    $inventarioPadre->cantidad_final = 0; // Evitar valores negativos
+                }
+                $inventarioPadre->costo_total = $inventarioPadre->cantidad_final * $inventarioPadre->costo_unitario;
+                $inventarioPadre->save();
+
+                // **Registrar movimiento en la tabla de movimientos para el lote padre**
+                MovimientoInventario::create([
+                    'tipo' => 'enlistments',
+                    'enlistments_id' => $alistamientoId,
+                    'store_origen_id' => null,
+                    'store_destino_id' => $alistamiento->store_id,
+                    'lote_id' => $lotePadre->id,
+                    'product_id' => $alistamiento->product_id,
+                    'cantidad' => -$cantidadARestar, // Registrar como negativo
+                    'costo_unitario' => $inventarioPadre->costo_unitario,
+                    'total' => - ($cantidadARestar * $inventarioPadre->costo_unitario),
+                    'fecha' => Carbon::now(),
+                ]);
+            }
+
             // 6. Registrar movimientos en la tabla de movimientos
             foreach ($detallesAlistamiento as $detalle) {
-                if ($detalle->kgrequeridos > 0) { // Procesar solo si el kgrequeridos es mayor a 0
+                if ($detalle->kgrequeridos > 0) {
                     MovimientoInventario::create([
-                        'tipo' => 'enlistments', // Tipo de movimiento
+                        'tipo' => 'enlistments',
                         'enlistments_id' => $detalle->enlistments_id,
                         'store_origen_id' => null,
-                        'store_destino_id' => $alistamiento->store_id, // Utilizamos el store_id del modelo Alistamiento
+                        'store_destino_id' => $alistamiento->store_id,
                         'lote_id' => $lote->id,
                         'product_id' => $detalle->products_id,
                         'cantidad' => $detalle->kgrequeridos,
@@ -826,13 +856,13 @@ class alistamientoController extends Controller
                 }
             }
 
-            /*  // **Cierra BeneficioRes si todo está bien**
+            // **Cierra BeneficioRes si todo está bien**
             $currentDateTime = Carbon::now();
             $formattedDate = $currentDateTime->format('Y-m-d');
 
             $beneficio = Alistamiento::find($alistamientoId);
             $beneficio->fecha_cierre = $formattedDate;
-            $beneficio->save(); */
+            $beneficio->save();
 
             DB::commit();
 
