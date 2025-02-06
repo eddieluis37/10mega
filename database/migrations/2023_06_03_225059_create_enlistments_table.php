@@ -29,9 +29,12 @@ class CreateEnlistmentsTable extends Migration
             $table->foreign('meatcut_id')->references('id')->on('meatcuts')->onDelete("cascade");
 
             $table->decimal('cantidad_padre_a_procesar', 18, 2)->default(0);
+
+            $table->decimal('stock_actual_padre', 18, 2)->default(0);
+            $table->decimal('nuevo_stock_padre', 18, 2)->default(0);
             $table->decimal('costo_unitario_padre', 18, 2)->default(0);
             $table->decimal('total_costo', 18, 2)->default(0);
-            $table->decimal('nuevo_stock_padre', 18, 2)->default(0);
+            
             $table->decimal('total_cost_transformation', 18, 2)->nullable();
             $table->enum('inventario', ['pending', 'added'])->default('pending');
             $table->date('fecha_alistamiento');

@@ -128,6 +128,7 @@ class alistamientoController extends Controller
                 ->first();
 
             $costoUnitarioPadre = $inventario ? $inventario->costo_unitario : 0;
+            $StockActualPadre = $inventario ? $inventario->stock_ideal : 0;
 
             // Asignar los datos
             $alistamiento->store_id = $request->input('inputstore');
@@ -136,6 +137,7 @@ class alistamientoController extends Controller
             $alistamiento->fecha_alistamiento = $request->input('fecha');
             $alistamiento->lote_hijos_id = $nuevoLote->id;
             $alistamiento->costo_unitario_padre = $costoUnitarioPadre;
+            $alistamiento->stock_actual_padre = $StockActualPadre;
 
             //   $alistamiento->costo_unitario_padre =  $product->cost;
 
@@ -284,7 +286,7 @@ class alistamientoController extends Controller
                 'ali.*',
                 'p.id as productopadreId',
                 'p.name as name',
-                'i.stock_ideal as stockPadre',
+                'ali.stock_actual_padre as stockPadre',
                 'i.cantidad_inicial',
                 'ali.costo_unitario_padre as costoPadre',
                 'p.meatcut_id as meatcut_id',
@@ -864,6 +866,7 @@ class alistamientoController extends Controller
 
             $beneficio = Alistamiento::find($alistamientoId);
             $beneficio->fecha_cierre = $formattedDate;
+            $beneficio->inventario = "added";
             $beneficio->save();
 
             DB::commit();
