@@ -124,9 +124,9 @@ const showData = (data) => {
             <tr>             
                 <td>${element.codigo}</td>                    
                 <td>${element.nameprod}</td>
-                <td>$ ${formatCantidadSinCero(element.pcompra)}</td>
-                <td>${formatCantidad(element.peso)}</td>
-                <td>$ ${formatCantidadSinCero(element.subtotal)}</td>
+                <td>$${formatCantidadSinCero(element.pcompra)}</td>
+                <td>${(element.peso)}</td>
+                <td>$${formatCantidadSinCero(element.subtotal)}</td>
                 <td>${element.iva}</td>
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${
@@ -148,7 +148,7 @@ const showData = (data) => {
             <td></td>
             <td></td>           
             <th>${formatCantidad(arrayTotales.pesoTotalGlobal)}</td>
-            <th>$ ${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
+            <th>$${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
             <td></td>
             <td class="text-center">
             <button id="cargarInventarioBtn" class="btn btn-success btn-sm">Cargar al inventario</button>
@@ -214,7 +214,7 @@ pcompra.addEventListener("change", function () {
 });
 
 pesokg.addEventListener("change", function () {
-    const enteredValue = formatkg(pesokg.value);
+    const enteredValue = formatCantidad(pesokg.value);
     console.log("Entered value: " + enteredValue);
     pesokg.value = enteredValue;
 });
