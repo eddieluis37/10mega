@@ -9,6 +9,11 @@ const token = document
 const btnClose = document.querySelector("#btnModalClose");
 const btnClose2 = document.querySelector("#btnModalClose2");
 
+function showModalcreateLote() {
+    // Lógica para mostrar el modal
+    $('#modal-create-lote').modal('show');
+}
+
 $(".select2Prod").select2({
     placeholder: "Busca un producto",
     width: "100%",
