@@ -76,6 +76,10 @@ class UsersController extends Component
 
     public function edit(User $user)
     {
+        if (!auth()->user()->can('editar_usuarios')) {
+            abort(403, 'No tienes permiso para editar usuarios.');
+        }
+               
         $this->selected_id = $user->id;
         $this->name = $user->name;
         $this->phone = $user->phone;
