@@ -43,7 +43,7 @@
             </li>
             @endcan
 
-            @can('Compras_Menu')
+            @can('ver_compra_productos')
             <li class="menu">
                 <a href="#more" data-active="false" class="menu-toggle">
                     <div class="base-menu">

@@ -35,12 +35,12 @@ class UserSeeder extends Seeder
             'password' => bcrypt('Jr3016032085*')
         ]);
         User::create([
-            'name' => 'Milagros Peña',
-            'phone' => '3008755514',
-            'email' => 'gerencia.general@carnesfriasmega.com',
-            'profile' => 'Admin',
+            'name' => 'Recibido Planta',
+            'phone' => '3108955514',
+            'email' => 'recibidomega@carnesfriasmega.com',
+            'profile' => 'RecibidoPlanta',
             'status' => 'Active',
-            'password' => bcrypt('3044228481')
+            'password' => bcrypt('RecibidoPlanta03.')
         ]);
         User::create([
             'name' => 'Jenny Contadora',
@@ -114,6 +114,94 @@ class UserSeeder extends Seeder
             'profile' => 'Comercial',
             'status' => 'Active',
             'password' => bcrypt('cajaauxiliarpcguadalupe@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ANALISTA DE COSTOS',
+            'phone' => '3008755514',
+            'email' => 'analistacostosmega@carnesfriasmega.com',
+            'profile' => 'AnalistaCostos',
+            'status' => 'Active',
+            'password' => bcrypt('analistacostosmega@carnesfriasmega.com')
+        ]);    
+        User::create([
+            'name' => 'ADMINISTRADOR CENTRAL GUADALUPE',
+            'phone' => '3008755514',
+            'email' => 'centralguadalupemega@carnesfriasmega.com',
+            'profile' => 'AdminCentralGuad',
+            'status' => 'Active',
+            'password' => bcrypt('centralguadalupemega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ADMINISTRADOR CERDO GUADALUPE',
+            'phone' => '3008755514',
+            'email' => 'centralcerdomega@carnesfriasmega.com',
+            'profile' => 'AdminCerdoGuad',
+            'status' => 'Active',
+            'password' => bcrypt('centralcerdomega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ADMINISTRADOR GUADALUPE CALLE',
+            'phone' => '3008755514',
+            'email' => 'guadalupecallemega@carnesfriasmega.com',
+            'profile' => 'AdminGuadCalle',
+            'status' => 'Active',
+            'password' => bcrypt('guadalupecallemega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ADMINISTRADOR PALOQUEMADO',
+            'phone' => '3008755514',
+            'email' => 'paloquemadomega@carnesfriasmega.com',
+            'profile' => 'AdminPaloquemao',
+            'status' => 'Active',
+            'password' => bcrypt('paloquemadomega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ADMINISTRADOR GALAN',
+            'phone' => '3008755514',
+            'email' => 'galanmega@carnesfriasmega.com',
+            'profile' => 'AdminGalan',
+            'status' => 'Active',
+            'password' => bcrypt('galanmega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ADMINISTRADOR SUBA',
+            'phone' => '3008755514',
+            'email' => 'subamega@carnesfriasmega.com',
+            'profile' => 'AdminSuba',
+            'status' => 'Active',
+            'password' => bcrypt('subamega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ADMINISTRADOR SOACHA',
+            'phone' => '3008755514',
+            'email' => 'soachamega@carnesfriasmega.com',
+            'profile' => 'AdminSoacha',
+            'status' => 'Active',
+            'password' => bcrypt('soachamega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'ADMINISTRADOR LECHONERIA',
+            'phone' => '3008755514',
+            'email' => 'lechoneriamega@carnesfriasmega.com',
+            'profile' => 'AdminLechoneria',
+            'status' => 'Active',
+            'password' => bcrypt('lechoneriamega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'SUPERVISOR PUNTOS DE VENTA',
+            'phone' => '3008755514',
+            'email' => 'supervisorpvmega@carnesfriasmega.com',
+            'profile' => 'SupervisorPuntosDeVenta',
+            'status' => 'Active',
+            'password' => bcrypt('supervisorpvmega@carnesfriasmega.com')
+        ]);
+        User::create([
+            'name' => 'LIDER AUDITORIA',
+            'phone' => '3008755514',
+            'email' => 'auditoriamega@carnesfriasmega.com',
+            'profile' => 'LiderAuditoria',
+            'status' => 'Active',
+            'password' => bcrypt('auditoriamega@carnesfriasmega.com')
         ]);
 
 
