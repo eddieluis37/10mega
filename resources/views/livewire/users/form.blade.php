@@ -57,6 +57,25 @@
 		@error('profile') <span class="text-danger er">{{ $message}}</span>@enderror
 	</div>
 </div>
+<div class="col-sm-12 col-md-6">
+    <div class="form-group">
+        <label>Asignar Bodegas</label>
+        <select wire:model="selectedStores" class="form-control" multiple>
+            @foreach($stores as $store)
+                <option value="{{ $store->id }}">{{ $store->name }}</option>
+            @endforeach
+        </select>
+        @error('selectedStores') <span class="text-danger er">{{ $message }}</span>@enderror
+    </div>
+</div>
+<div class="col-sm-12 col-md-6">
+    <label>Permisos</label>
+    <select wire:model="permissions" multiple class="form-control">
+        @foreach($allPermissions as $permission)
+            <option value="{{$permission->name}}">{{$permission->name}}</option>
+        @endforeach
+    </select>
+</div>
 
 <div class="col-sm-12 col-md-6">
 	<div class="form-group">

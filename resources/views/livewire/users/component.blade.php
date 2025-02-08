@@ -7,9 +7,11 @@
                     <b>{{$componentName}} | {{ $pageTitle }}</b>
                 </h4>
                 <ul class="tabs tab-pills">
+                    @can('crear_usuarios')
                     <li>
                         <a href="javascript:void(0)" class="tabmenu bg-dark" data-toggle="modal" data-target="#theModal">Agregar</a>
                     </li>
+                    @endcan
                 </ul>
             </div>
             @include('common.searchbox')
@@ -20,6 +22,7 @@
                     <table class="table table-bordered table striped mt-1">
                         <thead class="text-white" style="background: #3B3F5C">
                             <tr>
+                                <th class="table-th text-white text-center">BODEGAS</th>
                                 <th class="table-th text-white">USUARIO</th>
                                 <th class="table-th text-white text-center">TELÉFONO</th>
                                 <th class="table-th text-white text-center">EMAIL</th>
@@ -32,10 +35,21 @@
                         <tbody>
                             @foreach($data as $r)
                             <tr>
-                                <td><h6>{{$r->name}}</h6></td>
-                                
-                                <td class="text-center"><h6>{{$r->phone}}</h6></td>
-                                <td class="text-center"><h6>{{$r->email}}</h6></td>
+                                <td class="text-center">
+                                    <h6>
+                                        {{ implode(', ', $r->stores->pluck('name')->toArray()) }}
+                                    </h6>
+                                </td>
+                                <td>
+                                    <h6>{{$r->name}}</h6>
+                                </td>
+
+                                <td class="text-center">
+                                    <h6>{{$r->phone}}</h6>
+                                </td>
+                                <td class="text-center">
+                                    <h6>{{$r->email}}</h6>
+                                </td>
                                 <td class="text-center">
                                     <span class="badge {{ $r->status == 'Active' ? 'badge-success' : 'badge-danger' }} text-uppercase">{{$r->status}}</span>
                                 </td>
@@ -45,50 +59,51 @@
                                 </td>
 
                                 <td class="text-center">
-                                 @if($r->image != null) 
-                                 <img class="card-img-top img-fluid"                                             
-                                 src="{{ asset('storage/users/'.$r->image) }}" 
-                                 > 
-                                 @endif                                  
-                             </td>
+                                    @if($r->image != null)
+                                    <img class="card-img-top img-fluid"
+                                        src="{{ asset('storage/users/'.$r->image) }}">
+                                    @endif
+                                </td>
 
-                             <td class="text-center">
-                                <a href="javascript:void(0)" 
-                                wire:click="edit({{$r->id}})"
-                                class="btn btn-dark mtmobile" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            @if(Auth()->user()->id != $r->id)
-                            <a href="javascript:void(0)" 
-                            onclick="Confirm('{{$r->id}}')" 
-                            class="btn btn-dark" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                        @endif
+                                <td class="text-center">
+                                    @can('editar_usuarios')
+                                    <a href="javascript:void(0)"
+                                        wire:click="edit({{$r->id}})"
+                                        class="btn btn-dark mtmobile" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @endcan
+                                    @if(Auth()->user()->id != $r->id)
+                                    <a href="javascript:void(0)"
+                                        onclick="Confirm('{{$r->id}}')"
+                                        class="btn btn-dark" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    @endif
 
 
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        {{$data->links()}}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    {{$data->links()}}
+                </div>
+
+            </div>
+
+
+        </div>
+
+
     </div>
 
-</div>
-
-
-</div>
-
-
-</div>
-
-@include('livewire.users.form')
+    @include('livewire.users.form')
 </div>
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function(){
+    document.addEventListener('DOMContentLoaded', function() {
         window.livewire.on('user-added', Msg => {
             $('#theModal').modal('hide')
             noty(Msg)
@@ -97,23 +112,22 @@
             $('#theModal').modal('hide')
             noty(Msg)
         })
-        window.livewire.on('user-deleted', Msg => {           
+        window.livewire.on('user-deleted', Msg => {
             noty(Msg)
         })
-        window.livewire.on('hide-modal', Msg => {           
+        window.livewire.on('hide-modal', Msg => {
             $('#theModal').modal('hide')
         })
-        window.livewire.on('show-modal', Msg => {           
+        window.livewire.on('show-modal', Msg => {
             $('#theModal').modal('show')
         })
-        window.livewire.on('user-withsales', Msg => {           
+        window.livewire.on('user-withsales', Msg => {
             noty(Msg)
         })
 
     });
 
-    function Confirm(id)
-    {   
+    function Confirm(id) {
 
         swal({
             title: 'CONFIRMAR',
@@ -125,7 +139,7 @@
             confirmButtonColor: '#3B3F5C',
             confirmButtonText: 'Aceptar'
         }).then(function(result) {
-            if(result.value){
+            if (result.value) {
                 window.livewire.emit('deleteRow', id)
                 swal.close()
             }
