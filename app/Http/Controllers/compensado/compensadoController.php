@@ -35,11 +35,19 @@ class compensadoController extends Controller
      */
     public function index()
     {
-        /*   $category = Category::WhereIn('id',[1,2,3,4,5,6,7])->get(); */
-        $providers = Third::Where('status', 1)->get();
-        $centros = Centrocosto::Where('status', 1)->get();
-        $bodegas = Store::whereNotIn('id', [1, 4, 5, 6, 7])
-            ->orderBy('id', 'asc')
+        $user = auth()->user(); // Obtener el usuario autenticado
+
+        $providers = Third::where('status', 1)->get();
+        $centros = Centrocosto::where('status', 1)->get();
+
+        // Obtener solo las bodegas asociadas al usuario en store_user
+        $bodegas = Store::whereIn('id', function ($query) use ($user) {
+            $query->select('store_id')
+                ->from('store_user')
+                ->where('user_id', $user->id);
+        })
+            ->whereNotIn('id', [1, 4, 5, 6, 7]) // Excluir bodegas específicas si aplica
+            ->orderBy('name', 'asc')
             ->get();
 
         return view('compensado.res.index', compact('providers', 'bodegas', 'centros'));
