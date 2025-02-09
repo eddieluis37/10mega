@@ -124,5 +124,94 @@ class PermissionsSeeder extends Seeder
         if ($user) {
             $user->assignRole($adminCentralGuad);
         }
+        // Creacion y asignacion de roles y permisos masivos a los administradores
+        $rolesUsuarios = [
+            'AdminCerdoGuad' => 'ADMINISTRADOR CERDO GUADALUPE',
+            'AdminGuadCalle' => 'ADMINISTRADOR GUADALUPE CALLE',
+            'AdminPaloquemao' => 'ADMINISTRADOR PALOQUEMADO',
+            'AdminGalan' => 'ADMINISTRADOR GALAN',
+            'AdminSuba' => 'ADMINISTRADOR SUBA',
+            'AdminSoacha' => 'ADMINISTRADOR SOACHA',
+            'AdminLechoneria' => 'ADMINISTRADOR LECHONERIA',
+        ];
+
+        $permisos = [
+            'ver_compras',
+            'ver_compra_productos',
+            'acceder_compra_productos',
+            'crear_compra_productos',
+            'editar_compra_productos',
+            'ver_ventas',
+            'ver_venta_pos',
+            'acceder_venta_pos',
+            'crear_venta_pos',
+            'editar_venta_pos',
+            'ver_venta_dom',
+            'acceder_venta_dom',
+            'crear_venta_dom',
+            'editar_venta_dom',
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+            'ver_orders',
+            'acceder_orders',
+            'crear_orders',
+            'editar_orders',
+            'eliminar_orders',
+        ];
+
+        foreach ($rolesUsuarios as $roleName => $userName) {
+            // Crear o actualizar el rol
+            $role = Role::updateOrCreate(['name' => $roleName]);
+            $role->syncPermissions($permisos);
+
+            // Asignar el rol al usuario correspondiente
+            $user = User::where('name', $userName)->first();
+            if ($user) {
+                $user->assignRole($role);
+            }
+        }
+
+        $supervisorPuntosDeVenta = Role::updateOrCreate(['name' => 'SupervisorPuntosDeVenta']);
+        $supervisorPuntosDeVenta->syncPermissions([
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+
+            'ver_inventario',
+            'acceder_inventario',
+            'crear_inventario',
+            'editar_inventario',
+            'eliminar_inventario',
+
+            'ver_ventas',
+            'ver_venta_pos',
+            'acceder_venta_pos',
+            'crear_venta_pos',
+            'editar_venta_pos',
+
+            'ver_orders',
+            'acceder_orders',
+            'crear_orders',
+            'editar_orders',
+            'eliminar_orders',
+
+        ]);
+
+        $user = User::where('name', 'SUPERVISOR PUNTOS DE VENTA')->first();
+        if ($user) {
+            $user->assignRole($supervisorPuntosDeVenta);
+        }
+
+        $user = User::where('name', 'LIDER AUDITORIA')->first();
+        if ($user) {
+            $user->assignRole($recibidoPlanta);
+            $user->assignRole($analistaCostos);
+            $user->assignRole($supervisorPuntosDeVenta);
+        }
     }
 }

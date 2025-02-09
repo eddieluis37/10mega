@@ -355,7 +355,36 @@ Route::middleware(['auth', 'can:acceder_orders'])->group(function () {
     Route::get('/order-edit/{id}', [orderController::class, 'edit'])->name('order.edit'); // informacion basica inicial de la orden
 });
 
-Route::group(['middleware' => [('auth')]], function () {
+Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
+    /*****************************INVENTORY****************************************** */
+    Route::get('inventory/diary', [diaryController::class, 'index'])->name('inventory.diary');
+    Route::get('inventory/consolidado', [inventoryController::class, 'index'])->name('inventory.consolidado');
+    Route::get('showinventory', [diaryController::class, 'show'])->name('inventory.showlist');
+    Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
+
+    /*****************************INVENTORIO NUEVO****************************************** */
+    Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');   
+    Route::get('showInventarioCierre', [inventarioController::class, 'showInvcierre'])->name('inventario.showInventarioCierre');
+    Route::get('getLotes', [inventarioController::class, 'getLotes'])->name('inventario.getLotes');
+    Route::get('getAllLotes', [inventarioController::class, 'getAllLotes'])->name('inventario.getAllLotes');
+
+    /*****************************INVENTORY-HISTORICO-KG****************************************** */
+    Route::get('inventory/showhistorico', [inventoryController::class, 'showhistorico'])->name('inventory.showhistorico');
+    Route::get('inventory/consolidado_historico', [inventoryController::class, 'indexhistorico'])->name('inventory.consolidadohistorico');
+    Route::get('totaleshist', [inventoryController::class, 'totaleshist'])->name('inventory.totaleshist');
+
+    /*****************************INVENTORY-HISTORICO-UTILIDAD*******************************************/
+    Route::get('inventory/showhistutilidad', [inventoryUtilidadHistoricoController::class, 'showhistutilidad'])->name('inventory.showhistutilidad');
+    Route::get('inventory/consolidado_histutilidad', [inventoryUtilidadHistoricoController::class, 'indexhistutilidad'])->name('inventory.consolidadohistutilidad');
+    Route::get('totaleshistutilidad', [inventoryUtilidadHistoricoController::class, 'totaleshistutilidad'])->name('inventory.totaleshistutilidad');
+
+    /*****************************CARGAR-VENTAS*******************************************/
+    Route::get('inventory/cargar_ventas', [CargarVentasController::class, 'index'])->name('inventory.showcvc');
+    Route::get('showCargarVentasInv', [CargarVentasController::class, 'show'])->name('inventory.showCargarVentas');
+    Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
+});
+
+    Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('categories', CategoriesController::class)->name('categories');
     Route::get('users', UsersController::class);
@@ -470,35 +499,6 @@ Route::group(['middleware' => [('auth')]], function () {
 
 
 
-    /*****************************INVENTORY****************************************** */
-    Route::get('inventory/diary', [diaryController::class, 'index'])->name('inventory.diary');
-    Route::get('inventory/consolidado', [inventoryController::class, 'index'])->name('inventory.consolidado');
-    Route::get('showinventory', [diaryController::class, 'show'])->name('inventory.showlist');
-    Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
-
-    /*****************************INVENTORIO NUEVO****************************************** */
-    Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');
-    // Route::get('showConsolidadoInventory', [inventarioController::class, 'show'])->name('inventory.showConsol');
-    Route::get('showInventarioCierre', [inventarioController::class, 'showInvcierre'])->name('inventario.showInventarioCierre');
-    Route::get('getLotes', [inventarioController::class, 'getLotes'])->name('inventario.getLotes');
-    Route::get('getAllLotes', [inventarioController::class, 'getAllLotes'])->name('inventario.getAllLotes');
-
-
-
-    /*****************************INVENTORY-HISTORICO-KG****************************************** */
-    Route::get('inventory/showhistorico', [inventoryController::class, 'showhistorico'])->name('inventory.showhistorico');
-    Route::get('inventory/consolidado_historico', [inventoryController::class, 'indexhistorico'])->name('inventory.consolidadohistorico');
-    Route::get('totaleshist', [inventoryController::class, 'totaleshist'])->name('inventory.totaleshist');
-
-    /*****************************INVENTORY-HISTORICO-UTILIDAD*******************************************/
-    Route::get('inventory/showhistutilidad', [inventoryUtilidadHistoricoController::class, 'showhistutilidad'])->name('inventory.showhistutilidad');
-    Route::get('inventory/consolidado_histutilidad', [inventoryUtilidadHistoricoController::class, 'indexhistutilidad'])->name('inventory.consolidadohistutilidad');
-    Route::get('totaleshistutilidad', [inventoryUtilidadHistoricoController::class, 'totaleshistutilidad'])->name('inventory.totaleshistutilidad');
-
-    /*****************************CARGAR-VENTAS*******************************************/
-    Route::get('inventory/cargar_ventas', [CargarVentasController::class, 'index'])->name('inventory.showcvc');
-    Route::get('showCargarVentasInv', [CargarVentasController::class, 'show'])->name('inventory.showCargarVentas');
-    Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
 
 
 

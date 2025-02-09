@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
             'email' => 'recibidomega@carnesfriasmega.com',
             'profile' => 'RecibidoPlanta',
             'status' => 'Active',
-            'password' => bcrypt('RecibidoPlanta03.')
+            'password' => bcrypt('a10.RecibidoPlanta+')
         ]);
         User::create([
             'name' => 'Jenny Contadora',
@@ -121,7 +121,7 @@ class UserSeeder extends Seeder
             'email' => 'analistacostosmega@carnesfriasmega.com',
             'profile' => 'AnalistaCostos',
             'status' => 'Active',
-            'password' => bcrypt('analistacostosmega@carnesfriasmega.com')
+            'password' => bcrypt('b11.AnalistaCostos+')
         ]);    
         User::create([
             'name' => 'ADMINISTRADOR CENTRAL GUADALUPE',
@@ -129,7 +129,7 @@ class UserSeeder extends Seeder
             'email' => 'centralguadalupemega@carnesfriasmega.com',
             'profile' => 'AdminCentralGuad',
             'status' => 'Active',
-            'password' => bcrypt('centralguadalupemega@carnesfriasmega.com')
+            'password' => bcrypt('c12.AdminCentralGuad+')
         ]);
         User::create([
             'name' => 'ADMINISTRADOR CERDO GUADALUPE',
@@ -137,7 +137,7 @@ class UserSeeder extends Seeder
             'email' => 'centralcerdomega@carnesfriasmega.com',
             'profile' => 'AdminCerdoGuad',
             'status' => 'Active',
-            'password' => bcrypt('centralcerdomega@carnesfriasmega.com')
+            'password' => bcrypt('a13.AdminCerdoGuad+')
         ]);
         User::create([
             'name' => 'ADMINISTRADOR GUADALUPE CALLE',
@@ -145,7 +145,7 @@ class UserSeeder extends Seeder
             'email' => 'guadalupecallemega@carnesfriasmega.com',
             'profile' => 'AdminGuadCalle',
             'status' => 'Active',
-            'password' => bcrypt('guadalupecallemega@carnesfriasmega.com')
+            'password' => bcrypt('b14.AdminGuadCalle+')
         ]);
         User::create([
             'name' => 'ADMINISTRADOR PALOQUEMADO',
@@ -153,7 +153,7 @@ class UserSeeder extends Seeder
             'email' => 'paloquemadomega@carnesfriasmega.com',
             'profile' => 'AdminPaloquemao',
             'status' => 'Active',
-            'password' => bcrypt('paloquemadomega@carnesfriasmega.com')
+            'password' => bcrypt('c15.AdminPaloquemao+')
         ]);
         User::create([
             'name' => 'ADMINISTRADOR GALAN',
@@ -161,7 +161,7 @@ class UserSeeder extends Seeder
             'email' => 'galanmega@carnesfriasmega.com',
             'profile' => 'AdminGalan',
             'status' => 'Active',
-            'password' => bcrypt('galanmega@carnesfriasmega.com')
+            'password' => bcrypt('a16.AdminGalan+')
         ]);
         User::create([
             'name' => 'ADMINISTRADOR SUBA',
@@ -169,7 +169,7 @@ class UserSeeder extends Seeder
             'email' => 'subamega@carnesfriasmega.com',
             'profile' => 'AdminSuba',
             'status' => 'Active',
-            'password' => bcrypt('subamega@carnesfriasmega.com')
+            'password' => bcrypt('b17.AdminSuba+')
         ]);
         User::create([
             'name' => 'ADMINISTRADOR SOACHA',
@@ -177,7 +177,7 @@ class UserSeeder extends Seeder
             'email' => 'soachamega@carnesfriasmega.com',
             'profile' => 'AdminSoacha',
             'status' => 'Active',
-            'password' => bcrypt('soachamega@carnesfriasmega.com')
+            'password' => bcrypt('c18.AdminSoacha+')
         ]);
         User::create([
             'name' => 'ADMINISTRADOR LECHONERIA',
@@ -185,7 +185,7 @@ class UserSeeder extends Seeder
             'email' => 'lechoneriamega@carnesfriasmega.com',
             'profile' => 'AdminLechoneria',
             'status' => 'Active',
-            'password' => bcrypt('lechoneriamega@carnesfriasmega.com')
+            'password' => bcrypt('a19.AdminLechoneria+')
         ]);
         User::create([
             'name' => 'SUPERVISOR PUNTOS DE VENTA',
@@ -193,7 +193,7 @@ class UserSeeder extends Seeder
             'email' => 'supervisorpvmega@carnesfriasmega.com',
             'profile' => 'SupervisorPuntosDeVenta',
             'status' => 'Active',
-            'password' => bcrypt('supervisorpvmega@carnesfriasmega.com')
+            'password' => bcrypt('b20.SupervisorPuntosDeVenta+')
         ]);
         User::create([
             'name' => 'LIDER AUDITORIA',
@@ -201,7 +201,7 @@ class UserSeeder extends Seeder
             'email' => 'auditoriamega@carnesfriasmega.com',
             'profile' => 'LiderAuditoria',
             'status' => 'Active',
-            'password' => bcrypt('auditoriamega@carnesfriasmega.com')
+            'password' => bcrypt('c21.LiderAuditoria+')
         ]);
 
 
