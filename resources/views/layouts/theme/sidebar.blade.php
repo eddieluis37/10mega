@@ -199,7 +199,7 @@
             </li>
             @endcan
 
-            @can('Workshop')
+            @role('Admin')
             <li class="">
                 <a href="{{url('workshop')}}" class="menu-toggle" data-active="false">
                     <div class="base-menu">
@@ -217,7 +217,7 @@
             </li>
             @endcan -->
 
-            @role('Admin')
+            @can('ver_traslado')
             <li class="">
                 <a href="{{url('transfer')}}" class="menu-toggle" data-active="false">
                     <div class="base-menu">
@@ -227,7 +227,7 @@
                                 <path d="M19 12h2M3 12h2M18 4.06l1.06 1.06M5.94 19.94L4.88 18"></path>
                             </svg>
                         </div>
-                        <span>Traslado</span>
+                        <span>Traslados</span>
                     </div>
                 </a>
             </li>

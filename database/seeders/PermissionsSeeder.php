@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['usuarios', 'compra_productos', 'alistamiento', 'bodegas', 'ventas']; // Agrega los módulos necesarios
+        $modules = ['usuarios', 'compra_productos', 'alistamiento', 'traslado', 'bodegas', 'ventas']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -65,7 +65,13 @@ class PermissionsSeeder extends Seeder
             'acceder_alistamiento',
             'crear_alistamiento',
             'editar_alistamiento',
-            'eliminar_alistamiento'
+            'eliminar_alistamiento',
+
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado'
         ]);
 
         // Asignar rol "AnalistaCostos" a un usuario con el nombre "ANALISTA DE COSTOS"

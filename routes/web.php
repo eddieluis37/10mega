@@ -241,7 +241,6 @@ Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
 
 // Proteger todas las rutas dentro del modulo de alistamiento
 Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
-
     /**ALISTAMIENTO*/
     Route::get('alistamiento', [alistamientoController::class, 'index'])->name('alistamiento.index');
     Route::post('alistamientosave', [alistamientoController::class, 'store'])->name('alistamiento.save');
@@ -259,6 +258,29 @@ Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
 
     Route::get('/get-lotes/{storeId}', [alistamientoController::class, 'getLotes'])->name('get.lotes');
     Route::get('/get-productos/{loteId}', [alistamientoController::class, 'getProductos'])->name('get.productos');
+});
+
+// Proteger todas las rutas dentro del modulo de traslados
+Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
+    /***** TRANSFER ******** */
+    Route::get('transfer', [transferController::class, 'index'])->name('transfer.index');
+    Route::post('transfersave', [transferController::class, 'store'])->name('transfer.save');
+    Route::get('showtransfer', [transferController::class, 'show'])->name('transfer.showlist');
+    Route::get('transfer/create/{id}', [transferController::class, 'create'])->name('transfer.create');
+    Route::post('getproductos', [transferController::class, 'getproducts'])->name('transfer.getproductos');
+    Route::post('productsbycostcenterdest', [transferController::class, 'ProductsByCostcenterDest'])->name('transfer.productsbycostcenterdest');
+    Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin');
+
+    Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
+    Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');
+
+    Route::post('transfersavedetail', [transferController::class, 'savedetail'])->name('transfer.savedetail');
+    Route::post('/transferUpdate', [transferController::class, 'updatedetail'])->name('transfer.update');
+    Route::post('transferdown', [transferController::class, 'destroy'])->name('transfer.down');
+    Route::post('transferById', [transferController::class, 'editTransfer'])->name('transfer.edit');
+    Route::post('productospadre', [transferController::class, 'getProductsCategoryPadre'])->name('transfer.productospadre');
+    Route::post('/downmmaintransfer', [transferController::class, 'destroyTransfer'])->name('transfer.downAlistamiento');
+    Route::post('transferAddShoping', [transferController::class, 'add_shopping'])->name('transfer.addShopping');
 });
 
 Route::group(['middleware' => [('auth')]], function () {
@@ -465,25 +487,6 @@ Route::group(['middleware' => [('auth')]], function () {
 
     Route::post('afectarCostos', [workshopController::class, 'afectarCostos'])->name('afectarCostos.show');
 
-    /***** TRANSFER ******** */
-    Route::get('transfer', [transferController::class, 'index'])->name('transfer.index');
-    Route::post('transfersave', [transferController::class, 'store'])->name('transfer.save');
-    Route::get('showtransfer', [transferController::class, 'show'])->name('transfer.showlist');
-    Route::get('transfer/create/{id}', [transferController::class, 'create'])->name('transfer.create');
-    Route::post('getproductos', [transferController::class, 'getproducts'])->name('transfer.getproductos');
-    Route::post('productsbycostcenterdest', [transferController::class, 'ProductsByCostcenterDest'])->name('transfer.productsbycostcenterdest');
-    Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin');
-
-    Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
-    Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');
-
-    Route::post('transfersavedetail', [transferController::class, 'savedetail'])->name('transfer.savedetail');
-    Route::post('/transferUpdate', [transferController::class, 'updatedetail'])->name('transfer.update');
-    Route::post('transferdown', [transferController::class, 'destroy'])->name('transfer.down');
-    Route::post('transferById', [transferController::class, 'editTransfer'])->name('transfer.edit');
-    Route::post('productospadre', [transferController::class, 'getProductsCategoryPadre'])->name('transfer.productospadre');
-    Route::post('/downmmaintransfer', [transferController::class, 'destroyTransfer'])->name('transfer.downAlistamiento');
-    Route::post('transferAddShoping', [transferController::class, 'add_shopping'])->name('transfer.addShopping');
 
     /***** FASTER ******** */
     Route::get('faster', [fasterController::class, 'index'])->name('faster.index');
