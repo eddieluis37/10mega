@@ -173,8 +173,8 @@ Route::get('reportes', [ReportesController::class, 'index'])->name('reportes.ind
 
 /*****************************BENEFICIO-RES*******************************************/
 
-// Proteger todas las rutas dentro del modulo de compras
-Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
+// Proteger todas las rutas dentro del modulo de compra_lote
+Route::middleware(['auth', 'can:acceder_compra_lote'])->group(function () {
     Route::get('beneficiores', [beneficioresController::class, 'index'])->name('beneficiores.index');
     Route::get('showbeneficiores', [beneficioresController::class, 'show'])->name('beneficiores.showlist');
     Route::get('get_plantasacrificio_by_id', [beneficioresController::class, 'get_plantasacrificio_by_id'])->name('get_plantasacrificio_by_id');
@@ -215,7 +215,18 @@ Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::post('/downdespostec', [despostecerdoController::class, 'destroy']);
     Route::post('cargarInventarioc', [despostecerdoController::class, 'cargarInventariocerdo'])->name('despostecerdo.show');
 
-    /*****************************COMPRAS-COMPENSADOS****************************************** */
+    /**BENEFICIO CERDO */
+    Route::get('beneficiocerdo', [beneficiocerdoController::class, 'index'])->name('beneficiocerdo.index');
+    Route::get('showbeneficiocerdo', [beneficiocerdoController::class, 'show'])->name('beneficiocerdo.showlist');
+    Route::get('get_plantasacrificiocerdo_by_id', [beneficiocerdoController::class, 'get_plantasacrificiocerdo_by_id'])->name('get_plantasacrificiocerdo_by_id');
+    Route::post('savebeneficiocerdo', [beneficiocerdoController::class, 'store'])->name('beneficiocerdo.save');
+    Route::get('/beneficiocerdoedit/{id}', [beneficiocerdoController::class, 'edit'])->name('beneficiocerdo.edit');
+    Route::get('downbeneficiocerdo/{id}', [beneficiocerdoController::class, 'destroy'])->name('beneficiocerdo.destroy');
+});
+
+// Proteger todas las rutas dentro del modulo de compra_productos
+/*****************************COMPRAS-COMPENSADOS****************************************** */
+Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::get('compensado', [compensadoController::class, 'index'])->name('compensado.index');
     Route::get('compensado/create/{id}', [compensadoController::class, 'create'])->name('compensado.create');
     Route::get('showlistcompensado', [compensadoController::class, 'show'])->name('compensado.showlist');
@@ -227,16 +238,7 @@ Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::post('compensadoById', [compensadoController::class, 'editCompensado'])->name('compensado.editCompensado');
     Route::post('/downmaincompensado', [compensadoController::class, 'destroyCompensado'])->name('compensado.downCompensado');
     Route::post('compensadoInvres', [compensadoController::class, 'cargarInventariocr'])->name('compensado.cargarInventariocr');
-
     Route::get('compensado/pdfCompensado/{id}', [pdfCompensadoController::class, 'pdfCompensado']);
-
-    /**BENEFICIO CERDO */
-    Route::get('beneficiocerdo', [beneficiocerdoController::class, 'index'])->name('beneficiocerdo.index');
-    Route::get('showbeneficiocerdo', [beneficiocerdoController::class, 'show'])->name('beneficiocerdo.showlist');
-    Route::get('get_plantasacrificiocerdo_by_id', [beneficiocerdoController::class, 'get_plantasacrificiocerdo_by_id'])->name('get_plantasacrificiocerdo_by_id');
-    Route::post('savebeneficiocerdo', [beneficiocerdoController::class, 'store'])->name('beneficiocerdo.save');
-    Route::get('/beneficiocerdoedit/{id}', [beneficiocerdoController::class, 'edit'])->name('beneficiocerdo.edit');
-    Route::get('downbeneficiocerdo/{id}', [beneficiocerdoController::class, 'destroy'])->name('beneficiocerdo.destroy');
 });
 
 // Proteger todas las rutas dentro del modulo de alistamiento
@@ -281,6 +283,76 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     Route::post('productospadre', [transferController::class, 'getProductsCategoryPadre'])->name('transfer.productospadre');
     Route::post('/downmmaintransfer', [transferController::class, 'destroyTransfer'])->name('transfer.downAlistamiento');
     Route::post('transferAddShoping', [transferController::class, 'add_shopping'])->name('transfer.addShopping');
+});
+
+// Proteger todas las rutas dentro del modulo de cargue de productos terminados
+/*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
+Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function () {
+    Route::post('lotesave', [CargueProductTerminadosController::class, 'storelote'])->name('lote.save');
+    Route::post('productlotesave', [CargueProductTerminadosController::class, 'productlote'])->name('productlote.save');
+    Route::get('/lote-data', [CargueProductTerminadosController::class, 'getLoteData']);
+    Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
+    Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
+    Route::delete('/product-lote/{id}', [ProductLoteController::class, 'destroy']);
+    Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');
+
+    Route::get('/sincronizar-product-lote', [CargueProductTerminadosController::class, 'sincronizarProductLote'])->name('sincronizar.product.lote');
+
+    Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
+
+    Route::get('totales', [inventoryController::class, 'totales'])->name('inventory.totales');
+
+    Route::post('cargarInventariohist', [inventoryController::class, 'cargarInventariohist'])->name('cargarInventariohist');
+    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
+});
+
+// Proteger todas las rutas dentro del modulo de ventas
+/*****************************VENTAS******************************************/
+Route::middleware(['auth', 'can:acceder_venta_pos'])->group(function () {
+    Route::get('sale{saleId}/delete', [SaleController::class, 'delete'])->name('sale.delete');
+    Route::get('sale{ventaId}/edit', [SaleController::class, 'edit'])->name('sale.edit');
+    Route::post('sale/{ventaId}', [SaleController::class, 'update'])->name('sale.update');
+    Route::post('getproductosv', [SaleController::class, 'getproducts'])->name('sale.getproductos');
+
+    Route::get('sales', [saleController::class, 'index'])->name('sale.index');
+    Route::get('showlistVentas', [saleController::class, 'show'])->name('sale.showlistVentas');
+    Route::post('ventasave', [saleController::class, 'store'])->name('sale.save');
+    Route::post('store-venta-mostrador', [saleController::class, 'storeVentaMostrador'])->name('sale.storeVentaMostrador');
+    Route::post('salesavedetail', [saleController::class, 'savedetail'])->name('sale.savedetail');
+    Route::post('saleById', [saleController::class, 'editCompensado'])->name('sale.editCompensado');
+    Route::post('ventadown', [saleController::class, 'destroy'])->name('sale.down');
+    Route::post('/destroyVenta', [saleController::class, 'destroyVenta'])->name('sale.destroyVenta');
+
+    Route::get('sale/create/{id}', [saleController::class, 'create'])->name('sale.create');
+    Route::get('/sa-obtener-precios-producto', [saleController::class, 'SaObtenerPreciosProducto'])->name('sale.sa-obtener-precios-producto');
+
+    Route::get('sale/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
+    Route::post('sale/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
+
+    Route::get('sale/showFactura/{id}', [exportFacturaController::class, 'showFactura'])->name('sale.showFactura');
+
+    Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
+
+    Route::get('/buscar-producto-por-codigo-barras', 'saleController@buscarPorCodigoBarras');
+});
+
+/*****************************ORDENES DE PEDIDOS******************************************/
+Route::middleware(['auth', 'can:acceder_orders'])->group(function () {
+    Route::get('orders', [orderController::class, 'index'])->name('order.index');
+    Route::get('showOrder', [orderController::class, 'show'])->name('order.showOrder');
+    Route::post('ordersave', [orderController::class, 'store'])->name('order.save');
+    Route::get('/getDireccionesByCliente/{cliente_id}', [orderController::class, 'getDireccionesByCliente'])->name('order.getDireccionesByCliente');
+    Route::get('order/create/{id}', [orderController::class, 'create'])->name('order.create');
+    Route::get('abrirOrden/{id}', [orderController::class, 'reopen'])->name('order.reopen');
+    Route::get('delivered/{id}', [orderController::class, 'delivered'])->name('order.delivered');
+    Route::post('ordersavedetail', [orderController::class, 'savedetail'])->name('order.savedetail');
+    Route::post('orderById', [orderController::class, 'editOrder'])->name('order.editOrder');    // order_details 
+    Route::get('downOrder/{id}', [orderController::class, 'destroy'])->name('order.destroy');
+    Route::post('orderdown', [orderController::class, 'destroyDetail'])->name('order.down');
+    Route::get('/order-obtener-valores', [orderController::class, 'obtenerValores'])->name('order.order-obtener-valores');
+    Route::post('order/create/registrar_order/{id}', [orderController::class, 'storeOrder'])->name('order.saveOrder');
+    Route::get('order/showPDFOrder/{id}', [pdfOrderController::class, 'showPDFOrder'])->name('order.showPDFOrder');
+    Route::get('/order-edit/{id}', [orderController::class, 'edit'])->name('order.edit'); // informacion basica inicial de la orden
 });
 
 Route::group(['middleware' => [('auth')]], function () {
@@ -411,27 +483,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('getLotes', [inventarioController::class, 'getLotes'])->name('inventario.getLotes');
     Route::get('getAllLotes', [inventarioController::class, 'getAllLotes'])->name('inventario.getAllLotes');
 
-    /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
 
-    Route::post('lotesave', [CargueProductTerminadosController::class, 'storelote'])->name('lote.save');
-    Route::post('productlotesave', [CargueProductTerminadosController::class, 'productlote'])->name('productlote.save');
-    Route::get('/lote-data', [CargueProductTerminadosController::class, 'getLoteData']);
-    Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
-    Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
-    //  Route::delete('productlote/{id}', [CargueProductTerminadosController::class, 'destroy'])->name('productlote.destroy');    
-    Route::delete('/product-lote/{id}', [ProductLoteController::class, 'destroy']);
-    Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');
-
-    Route::get('/sincronizar-product-lote', [CargueProductTerminadosController::class, 'sincronizarProductLote'])->name('sincronizar.product.lote');
-
-
-    Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
-    // Route::get('showConsolidadoInventory', [inventoryController::class, 'show'])->name('inventory.showConsol');
-
-    Route::get('totales', [inventoryController::class, 'totales'])->name('inventory.totales');
-
-    Route::post('cargarInventariohist', [inventoryController::class, 'cargarInventariohist'])->name('cargarInventariohist');
-    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
 
     /*****************************INVENTORY-HISTORICO-KG****************************************** */
     Route::get('inventory/showhistorico', [inventoryController::class, 'showhistorico'])->name('inventory.showhistorico');
@@ -523,41 +575,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('parametrocontable{parametrocontableId}/edit', [ParametrocontableController::class, 'edit'])->name('parametrocontable.edit');
     Route::post('parametrocontable/{parametrocontableId}', [ParametrocontableController::class, 'update'])->name('parametrocontable.update');
 
-    /*****************************VENTAS******************************************/
 
-    // Route::get('sales', [SaleController::class, 'index'])->name('sale.index');
-    //   Route::post('salesave', [SaleController::class, 'store'])->name('sale.save');
-    Route::get('sale{saleId}/delete', [SaleController::class, 'delete'])->name('sale.delete');
-    Route::get('sale{ventaId}/edit', [SaleController::class, 'edit'])->name('sale.edit');
-    Route::post('sale/{ventaId}', [SaleController::class, 'update'])->name('sale.update');
-    /* Route::get('sale/create/{id}', [SaleController::class, 'create'])->name('sale.create'); */
-    Route::post('getproductosv', [SaleController::class, 'getproducts'])->name('sale.getproductos');
-    //Route::post('salesavedetail', [SaleController::class, 'savedetail'])->name('sale.savedetail');
-
-
-
-    Route::get('sales', [saleController::class, 'index'])->name('sale.index');
-    Route::get('showlistVentas', [saleController::class, 'show'])->name('sale.showlistVentas');
-    Route::post('ventasave', [saleController::class, 'store'])->name('sale.save');
-    Route::post('store-venta-mostrador', [saleController::class, 'storeVentaMostrador'])->name('sale.storeVentaMostrador');
-    Route::post('salesavedetail', [saleController::class, 'savedetail'])->name('sale.savedetail');
-    Route::post('saleById', [saleController::class, 'editCompensado'])->name('sale.editCompensado');
-    Route::post('ventadown', [saleController::class, 'destroy'])->name('sale.down');
-    Route::post('/destroyVenta', [saleController::class, 'destroyVenta'])->name('sale.destroyVenta');
-
-
-
-    Route::get('sale/create/{id}', [saleController::class, 'create'])->name('sale.create');
-    Route::get('/sa-obtener-precios-producto', [saleController::class, 'SaObtenerPreciosProducto'])->name('sale.sa-obtener-precios-producto');
-
-    Route::get('sale/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
-    Route::post('sale/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
-
-    Route::get('sale/showFactura/{id}', [exportFacturaController::class, 'showFactura'])->name('sale.showFactura');
-
-    Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
-
-    Route::get('/buscar-producto-por-codigo-barras', 'saleController@buscarPorCodigoBarras');
 
     /*****************************RECIBO DE CAJAS******************************************/
     Route::get('recibodecajas', [recibodecajaController::class, 'index'])->name('recibodecaja.index');
@@ -572,25 +590,7 @@ Route::group(['middleware' => [('auth')]], function () {
 
     /* Route::post('registroPagoSave', [saleController::class, 'storeRegistroPago'])->name('pago.save'); */
 
-    /*****************************ORDENES DE PEDIDOS******************************************/
 
-    Route::get('orders', [orderController::class, 'index'])->name('order.index');
-    Route::get('showOrder', [orderController::class, 'show'])->name('order.showOrder');
-    Route::post('ordersave', [orderController::class, 'store'])->name('order.save');
-    Route::get('/getDireccionesByCliente/{cliente_id}', [orderController::class, 'getDireccionesByCliente'])->name('order.getDireccionesByCliente');
-    Route::get('order/create/{id}', [orderController::class, 'create'])->name('order.create');
-    // Route::get('order/reopen/{id}', [orderController::class, 'reopen'])->name('order.reopen');
-    Route::get('abrirOrden/{id}', [orderController::class, 'reopen'])->name('order.reopen');
-    Route::get('delivered/{id}', [orderController::class, 'delivered'])->name('order.delivered');
-    Route::post('ordersavedetail', [orderController::class, 'savedetail'])->name('order.savedetail');
-    Route::post('orderById', [orderController::class, 'editOrder'])->name('order.editOrder');    // order_details 
-    Route::get('downOrder/{id}', [orderController::class, 'destroy'])->name('order.destroy');
-    Route::post('orderdown', [orderController::class, 'destroyDetail'])->name('order.down');
-    Route::get('/order-obtener-valores', [orderController::class, 'obtenerValores'])->name('order.order-obtener-valores');
-    Route::post('order/create/registrar_order/{id}', [orderController::class, 'storeOrder'])->name('order.saveOrder');
-    Route::get('order/showPDFOrder/{id}', [pdfOrderController::class, 'showPDFOrder'])->name('order.showPDFOrder');
-
-    Route::get('/order-edit/{id}', [orderController::class, 'edit'])->name('order.edit'); // informacion basica inicial de la orden
 
     /* 
     Route::post('notacreditosavedetail', [notacreditoController::class, 'savedetail'])->name('notacredito.savedetail');

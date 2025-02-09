@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['usuarios', 'compra_productos', 'alistamiento', 'traslado', 'bodegas', 'ventas']; // Agrega los módulos necesarios
+        $modules = ['usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_dom', 'orders', 'bodegas', 'ventas']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -41,25 +41,24 @@ class PermissionsSeeder extends Seeder
 
         $recibidoPlanta = Role::updateOrCreate(['name' => 'RecibidoPlanta']);
         $recibidoPlanta->syncPermissions([
+            'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
             'crear_compra_productos',
-            'editar_compra_productos',            
+            'editar_compra_productos',
         ]);
 
         // Asignar rol "RecibidoPlanta" a un usuario con el nombre "Recibido Planta"
-        $user = User::where('name', 'Recibido Planta')->first();
+        $user = User::where('name', 'RECIBIDO PLANTA')->first();
         if ($user) {
             $user->assignRole($recibidoPlanta);
         }
 
         $analistaCostos = Role::updateOrCreate(['name' => 'AnalistaCostos']);
         $analistaCostos->syncPermissions([
-            'ver_compra_productos',
-            'acceder_compra_productos',
-            'crear_compra_productos',
-            'editar_compra_productos',
-            'eliminar_compra_productos',
+            'ver_compras',
+            'ver_compra_lote',
+            'acceder_compra_lote',
 
             'ver_alistamiento',
             'acceder_alistamiento',
@@ -71,13 +70,59 @@ class PermissionsSeeder extends Seeder
             'acceder_traslado',
             'crear_traslado',
             'editar_traslado',
-            'eliminar_traslado'
+            'eliminar_traslado',
+
+            'ver_inventario',
+
+            'ver_cargue_productos_term',
+            'acceder_cargue_productos_term',
+            'crear_cargue_productos_term',
+            'editar_cargue_productos_term',
+            'eliminar_cargue_productos_term',
         ]);
 
         // Asignar rol "AnalistaCostos" a un usuario con el nombre "ANALISTA DE COSTOS"
         $user = User::where('name', 'ANALISTA DE COSTOS')->first();
         if ($user) {
             $user->assignRole($analistaCostos);
+        }
+
+        $adminCentralGuad = Role::updateOrCreate(['name' => 'AdminCentralGuad']);
+        $adminCentralGuad->syncPermissions([
+            'ver_compras',
+            'ver_compra_productos',
+            'acceder_compra_productos',
+            'crear_compra_productos',
+            'editar_compra_productos',
+
+            'ver_ventas',
+            'ver_venta_pos',
+            'acceder_venta_pos',
+            'crear_venta_pos',
+            'editar_venta_pos',
+
+            'ver_venta_dom',
+            'acceder_venta_dom',
+            'crear_venta_dom',
+            'editar_venta_dom',
+
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+
+            'ver_orders',
+            'acceder_orders',
+            'crear_orders',
+            'editar_orders',
+            'eliminar_orders',
+        ]);
+
+        // Asignar rol "AdminCentralGuad" a un usuario con el nombre "ADMINISTRADOR CENTRAL GUADALUPE"
+        $user = User::where('name', 'ADMINISTRADOR CENTRAL GUADALUPE')->first();
+        if ($user) {
+            $user->assignRole($adminCentralGuad);
         }
     }
 }

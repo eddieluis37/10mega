@@ -15,8 +15,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['middleware' => ['role:Comercial|Admin']], function () {
     Route::get('products', ProductsController::class);
     Route::get('users', UsersController::class);
-    Route::get('reports', ReportsController::class);
-    Route::get('orders', [orderController::class, 'index'])->name('order.index');
+    Route::get('reports', ReportsController::class);   
 });
 
 Route::group(['middleware' => ['role:Admin']], function () {    

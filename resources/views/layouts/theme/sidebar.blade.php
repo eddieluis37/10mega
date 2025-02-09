@@ -43,7 +43,7 @@
             </li>
             @endcan
 
-            @can('ver_compra_productos')
+            @can('ver_compras')
             <li class="menu">
                 <a href="#more" data-active="false" class="menu-toggle">
                     <div class="base-menu">
@@ -84,7 +84,7 @@
             </li>
             @endcan
 
-            @can('Admin_Menu')
+            @can('ver_orders')
             <li class="menu">
                 <a href="#comercial" data-active="false" class="menu-toggle">
                     <div class="base-menu">
@@ -129,9 +129,7 @@
             </li>
             @endcan -->
 
-
-
-            @can('Pos_Create')
+            @can('ver_ventas')
             <li class="">
                 <a href="{{ url('sales') }}" class="menu-toggle" data-active="false">
                     <div class="base-menu">
@@ -233,7 +231,7 @@
             </li>
             @endcan
 
-            @can('Inventory')
+            @can('ver_inventario')
             <li class="menu">
                 <a href="#app" data-active="false" class="menu-toggle">
                     <div class="base-menu">
@@ -606,6 +604,7 @@
                             <line x1="9" y1="15" x2="15" y2="15"></line>
                         </svg> Stock Fisico Real</a>
                 </li>
+                @can('ver_cargue_productos_term')
                 <li>
                     <a href="{{ url('inventory/cargue_products_terminados') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-plus">
@@ -615,6 +614,7 @@
                             <line x1="9" y1="15" x2="15" y2="15"></line>
                         </svg> Cargue Prod Term</a>
                 </li>
+                @endcan
                 <!--   <li>
                     <a href="{{ url('') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign">
                             <line x1="12" y1="1" x2="12" y2="23"></line>
@@ -1143,6 +1143,7 @@
 
         <div class="submenu" id="more">
             <ul class="submenu-list" data-parent-element="#more">
+                @can('ver_compra_lote')
                 <li>
                     <a href="{{ url('beneficiores') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -1158,11 +1159,14 @@
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Lote Pollos </a>
                 </li>
+                @endcan
+                @can('ver_compra_productos')
                 <li>
                     <a href="{{ url('compensado') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Productos </a>
                 </li>
+                @endcan              
 
                 @can('ver_alistamiento')
                 <li>

@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
             'password' => bcrypt('Jr3016032085*')
         ]);
         User::create([
-            'name' => 'Recibido Planta',
+            'name' => 'RECIBIDO PLANTA',
             'phone' => '3108955514',
             'email' => 'recibidomega@carnesfriasmega.com',
             'profile' => 'RecibidoPlanta',
@@ -337,7 +337,7 @@ class UserSeeder extends Seeder
 
         User::find(1)->assignRole('Admin');
         User::find(2)->assignRole('Admin');
-        User::find(3)->assignRole('Comercial');
+       
         User::find(4)->assignRole('Comercial');
         User::find(5)->assignRole('Comercial');
         User::find(6)->assignRole('Comprador');
