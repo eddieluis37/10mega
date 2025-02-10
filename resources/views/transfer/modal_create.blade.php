@@ -8,10 +8,10 @@
       <div class="col">
         <div class="task-header">
           <div class="form-group">
-            <label for="centrocostoOrigen" class="form-label">Centro de costo origen</label>
+            <label for="centrocostoOrigen" class="form-label">Bodega origen</label>
             <select class="form-control form-control-sm input" name="centrocostoOrigen" id="centrocostoOrigen" required>
               <option value="">Seleccione el centro de costo</option>
-              @foreach($centros as $option)
+              @foreach($stores as $option)
               <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
               @endforeach
             </select>
@@ -22,10 +22,10 @@
       <div class="col">
         <div class="task-header">
           <div class="form-group">
-            <label for="centrocostoDestino" class="form-label">Centro de costo Destino</label>
+            <label for="centrocostoDestino" class="form-label">Bodega destino</label>
             <select class="form-control form-control-sm input" name="centrocostoDestino" id="centrocostoDestino" required>
               <option value="">Seleccione el centro de costo</option>
-              @foreach($centros as $option)
+              @foreach($stores as $option)
               <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
               @endforeach
             </select>

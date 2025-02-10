@@ -10,6 +10,7 @@ use App\Models\transfer\Transfer;
 use App\Models\transfer\transfer_details;
 use App\Models\Centro_costo_product;
 use App\Models\Product;
+use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
@@ -28,9 +29,22 @@ class transferController extends Controller
         // $category = Category::WhereIn('id', [1, 2, 3, 4, 5, 6, 7])->get();
         $costcenter = Centrocosto::Where('status', 1)->get();
         $centros = Centrocosto::Where('status', 1)->get();
+       
+        /* $stores = DB::table('inventarios as i')
+        ->join('stores as s', 'i.store_id', '=', 's.id')      
+        ->select('s.name')
+        ->where('s.status', 1)
+        ->get();
+        return $stores; */
+        //return response()->json($stores);
+        
+        $stores = Store::whereNotIn('id', [40])
+        ->orderBy('id', 'asc')
+        ->get();
+       
         $centroCostoProductos = Centro_costo_product::all();
 
-        return view("transfer.index", compact('costcenter', 'centros', 'centroCostoProductos'));
+        return view("transfer.index", compact('costcenter', 'stores', 'centroCostoProductos'));
     }
 
     public function store(Request $request) // modal create primer paso del diligenciado y llenado de la tabla transfer.
