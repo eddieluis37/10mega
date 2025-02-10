@@ -46,7 +46,7 @@ class compensadoController extends Controller
                 ->from('store_user')
                 ->where('user_id', $user->id);
         })
-            ->whereNotIn('id', [1, 4, 5, 6, 7]) // Excluir bodegas específicas si aplica
+            ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
             ->orderBy('name', 'asc')
             ->get();
 
