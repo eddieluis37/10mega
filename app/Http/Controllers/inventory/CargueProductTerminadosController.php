@@ -365,8 +365,7 @@ class CargueProductTerminadosController extends Controller
                                 'lote_id' => $lote->id,
                                 'store_id' => 1,
                             ],
-                            [
-                                'cantidad_inicial' => 0,
+                            [                                
                                 'cantidad_prod_term' => 0,
                                 'costo_unitario' => 0,
                                 'costo_total' => 0,

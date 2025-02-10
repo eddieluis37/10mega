@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('movimiento_inventarios', function (Blueprint $table) {
             $table->id();
-            $table->enum('tipo', ['compensadores', 'desposteres', 'despostecerdos', 'products_terminados','enlistments','venta', 'traslado'])->default('compensadores'); //Tipo de movimiento (compra, traslado, alistamiento, etc.).
+            $table->enum('tipo', ['desposteres', 'despostecerdos', 'enlistments', 'compensadores', 'products_terminados', 'traslado_ingreso', 'traslado_salida', 'venta' ])->default('compensadores'); //Tipo de movimiento (compra, traslado, alistamiento, etc.).
 
-            $table->foreignId('compensador_id')->nullable()->constrained('compensadores')->onDelete('set null');
             $table->foreignId('desposteres_id')->nullable()->constrained('desposteres')->onDelete('set null');
             $table->foreignId('despostecerdos_id')->nullable()->constrained('despostecerdos')->onDelete('set null');
             $table->foreignId('enlistments_id')->nullable()->constrained('enlistments')->onDelete('set null');
-            //La relación entre movimiento_inventarios y compensadores permite rastrear información específica como facturas.
+            $table->foreignId('compensador_id')->nullable()->constrained('compensadores')->onDelete('set null');       
+            $table->foreignId('transfer_id')->nullable()->constrained('transfers')->onDelete('set null');
+            //La relación entre movimiento_inventarios y tipos permite rastrear información específica como facturas.
 
             //$table->unsignedBigInteger('entidad_referencia_id');
 

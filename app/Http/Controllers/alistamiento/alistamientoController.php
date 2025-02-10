@@ -287,7 +287,7 @@ class alistamientoController extends Controller
                 'p.id as productopadreId',
                 'p.name as name',
                 'ali.stock_actual_padre as stockPadre',
-                'i.cantidad_inicial',
+                'i.stock_ideal',
                 'ali.costo_unitario_padre as costoPadre',
                 'p.meatcut_id as meatcut_id',
                 's.name as namebodega',
@@ -793,15 +793,14 @@ class alistamientoController extends Controller
                             'store_id' => $alistamiento->store_id,
                         ],
                         [
-                            'cantidad_inicial' => 0,
-                            'cantidad_final' => 0,
+                            'cantidad_alistamiento' => 0,
                             'costo_unitario' => $detalle->costo_kilo,
                             'costo_total' => 0,
                         ]
                     );
 
-                    $inventario->cantidad_final += $detalle->kgrequeridos;
-                    $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
+                    $inventario->cantidad_alistamiento += $detalle->kgrequeridos;
+                    $inventario->costo_total = $inventario->cantidad_alistamiento * $detalle->costo_kilo;
                     $inventario->save();
 
                     // **Actualizar el campo cost en la tabla products**
@@ -820,11 +819,11 @@ class alistamientoController extends Controller
                 ->first();
             if ($inventarioPadre) {
                 $cantidadARestar = abs($alistamiento->cantidad_padre_a_procesar); // Asegurar que siempre sea negativa
-                $inventarioPadre->cantidad_final -= $cantidadARestar;
-                if ($inventarioPadre->cantidad_final < 0) {
-                    $inventarioPadre->cantidad_final = 0; // Evitar valores negativos
+                $inventarioPadre->cantidad_compra_lote -= $cantidadARestar;
+                if ($inventarioPadre->cantidad_compra_lote < 0) {
+                    $inventarioPadre->cantidad_compra_lote = 0; // Evitar valores negativos
                 }
-                $inventarioPadre->costo_total = $inventarioPadre->cantidad_final * $inventarioPadre->costo_unitario;
+                $inventarioPadre->costo_total = $inventarioPadre->cantidad_compra_lote * $inventarioPadre->costo_unitario;
                 $inventarioPadre->save();
 
                 // **Registrar movimiento en la tabla de movimientos para el lote padre**

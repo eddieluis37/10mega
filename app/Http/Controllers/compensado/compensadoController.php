@@ -817,11 +817,11 @@ class compensadoController extends Controller
                         'lote_id' => $loteId,
                         'product_id' => $productId,
                     ],
-                    ['cantidad_inicial' => 0]
+                    ['cantidad_compra_prod' => 0]
                 );
 
                 // Incrementar la cantidad en el inventario
-                $inventario->increment('cantidad_inicial', $peso);
+                $inventario->increment('cantidad_compra_prod', $peso);
 
                 // Registrar el movimiento en la tabla de movimientos
                 MovimientoInventario::create([

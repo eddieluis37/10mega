@@ -380,16 +380,15 @@ class desposteresController extends Controller
                             'store_id' => $beneficiore->store_id, // Utilizamos el store_id del modelo Beneficiore
                         ],
                         [
-                            'cantidad_inicial' => 0,
-                            'cantidad_final' => 0,
+                            'cantidad_compra_lote' => 0,
                             'costo_unitario' => $detalle->costo_kilo,
                             'costo_total' => 0,
                         ]
                     );
 
                     // Incrementar cantidad y actualizar inventario
-                    $inventario->cantidad_final += $detalle->peso;
-                    $inventario->costo_total = $inventario->cantidad_final * $detalle->costo_kilo;
+                    $inventario->cantidad_compra_lote += $detalle->peso;
+                    $inventario->costo_total = $inventario->cantidad_compra_lote * $detalle->costo_kilo;
                     $inventario->save();
 
                     // **Actualizar el campo cost en la tabla products**
