@@ -40,23 +40,22 @@ class UsersController extends Component
 
     public function render()
     {
-        if (strlen($this->search) > 0)
-            $data = User::where('name', 'like', '%' . $this->search . '%')
-                ->select('*')->orderBy('name', 'asc')->paginate($this->pagination);
-        else
-            $data = User::select('*')->orderBy('name', 'asc')->paginate($this->pagination);
+        $query = User::query();
 
+        if (strlen($this->search) > 0) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        $data = $query->orderBy('name', 'asc')->paginate($this->pagination);
 
         return view('livewire.users.component', [
-            'data' => User::orderBy('name', 'asc')->paginate($this->pagination),
+            'data' => $data,
             'roles' => Role::orderBy('name', 'asc')->get(),
-            'stores' => Store::orderBy('name', 'asc')->get(), // Enviar bodegas disponibles
+            'stores' => Store::orderBy('name', 'asc')->get(),
             'allPermissions' => Permission::orderBy('name', 'asc')->get()
-            
         ])
             ->extends('layouts.theme.app')
             ->section('content');
-      
     }
 
     public function resetUI()
@@ -79,7 +78,7 @@ class UsersController extends Component
         if (!auth()->user()->can('editar_usuarios')) {
             abort(403, 'No tienes permiso para editar usuarios.');
         }
-               
+
         $this->selected_id = $user->id;
         $this->name = $user->name;
         $this->phone = $user->phone;

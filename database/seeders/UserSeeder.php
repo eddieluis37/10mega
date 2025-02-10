@@ -336,7 +336,7 @@ class UserSeeder extends Seeder
         $uAdmin->assignRole('Admin'); */
 
         User::find(1)->assignRole('Admin');
-        User::find(2)->assignRole('Admin');
+        User::find(2)->assignRole('Comercial');
        
         User::find(4)->assignRole('Comercial');
         User::find(5)->assignRole('Comercial');
