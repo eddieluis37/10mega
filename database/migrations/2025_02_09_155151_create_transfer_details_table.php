@@ -18,8 +18,8 @@ class CreateTransferDetailsTable extends Migration
             $table->unsignedBigInteger('transfers_id')->nullable();
             $table->foreign('transfers_id')->references('id')->on('transfers');
 
-            $table->unsignedBigInteger('products_id')->nullable();
-            $table->foreign('products_id')->references('id')->on('products');         
+            $table->unsignedBigInteger('lote_prod_traslado_id')->nullable();
+            $table->foreign('lote_prod_traslado_id')->references('id')->on('lote_products');         
 
             $table->decimal('actual_stock_origen', 18, 2)->nullable();
             

@@ -29,12 +29,12 @@
 									</div>
 								</div>
 							</div>
-						
+
 							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Centro de origen</label>
-										<input type="hidden" id="centrocostoOrigen" name="centrocostoOrigen" value="{{$dataTransfer[0]->centrocostoOrigen_id}}">
+										<label for="" class="form-label">Bodega de origen</label>
+										<input type="hidden" id="bodegaOrigen" name="bodegaOrigen" value="{{$dataTransfer[0]->bodega_origen_id}}">
 										<p>{{$dataTransfer[0]->namecentrocostoOrigen}}</p>
 									</div>
 								</div>
@@ -42,8 +42,8 @@
 							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Centro de destino</label>
-										<input type="hidden" id="centrocostoDestino" name="centrocostoDestino" value="{{$dataTransfer[0]->centrocostoDestino_id}}">
+										<label for="" class="form-label">Bodega de destino</label>
+										<input type="hidden" id="bodegaDestino" name="bodegaDestino" value="{{$dataTransfer[0]->bodega_destino_id}}">
 										<p>{{$dataTransfer[0]->namecentrocostoDestino}}</p>
 									</div>
 								</div>
@@ -59,11 +59,25 @@
 						<form id="form-detail">
 							<input type="hidden" id="transferId" name="transferId" value="{{$dataTransfer[0]->id}}">
 							<div class="row g-3"> <!-- Añadido justify-content-center para centrar los campos horizontalmente -->
+								<div class="col-md-3">
+									<div class="task-header">
+										<div class="form-group">
+											<label for="" class="form-label">Buscar lote</label>
+											<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required="">
+												<option value="">Seleccione el producto</option>
+												@foreach ($lotes as $l)
+												<option value="{{$l->id}}">{{$l->codigo}}</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+								</div>
+
 								<div class="col-md-4">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar producto</label>
-											<input type="hidden" id="centrocostoOrigen" name="centrocostoOrigen" value="{{$dataTransfer[0]->centrocostoOrigen_id}}" data-id="{{$dataTransfer[0]->centrocostoOrigen_id}}">
+											<input type="hidden" id="bodegaOrigen" name="bodegaOrigen" value="{{$dataTransfer[0]->bodega_origen_id}}" data-id="{{$dataTransfer[0]->bodega_origen_id}}">
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
 												<option value="">Seleccione el producto</option>
 												@foreach ($arrayProductsOrigin as $p)
@@ -184,13 +198,13 @@
 								</tbody>
 								<tfoot id="tabletfoot">
 									<tr>
-										<th></th>									
+										<th></th>
 										<th></th>
 										<th>Totales</th>
 										<th> {{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}} KG</th>
 										<th> {{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}} KG</th>
 										<th></th>
-										<th></th>										
+										<th></th>
 										<th class="text-center">
 											@if($dataTransfer[0]->inventario == 'pending')
 											<button class="btn btn-success btn-sm" id="addShopping">Afectar inventario</button>

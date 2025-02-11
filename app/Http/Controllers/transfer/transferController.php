@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Products\Meatcut;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
+use App\Models\Lote;
 use App\Models\updating\updating_transfer;
 use App\Models\updating\updating_transfer_details;
 
@@ -26,25 +27,28 @@ class transferController extends Controller
 {
     public function index() // Alimenta el modal_create.blade para posterior store
     {
-        // $category = Category::WhereIn('id', [1, 2, 3, 4, 5, 6, 7])->get();
-        $costcenter = Centrocosto::Where('status', 1)->get();
-        $centros = Centrocosto::Where('status', 1)->get();
-       
-        /* $stores = DB::table('inventarios as i')
-        ->join('stores as s', 'i.store_id', '=', 's.id')      
-        ->select('s.name')
-        ->where('s.status', 1)
-        ->get();
-        return $stores; */
-        //return response()->json($stores);
-        
-        $stores = Store::whereNotIn('id', [40])
-        ->orderBy('id', 'asc')
-        ->get();
-       
-        $centroCostoProductos = Centro_costo_product::all();
+        $user = auth()->user(); // Obtener el usuario autenticado        
+        // Obtener solo las bodegas asociadas al usuario en store_user
+        $bodegaOrigen = Store::whereIn('id', function ($query) use ($user) {
+            $query->select('store_id')
+                ->from('store_user')
+                ->where('user_id', $user->id);
+        })
+            ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
+            ->orderBy('name', 'asc')
+            ->get();
 
-        return view("transfer.index", compact('costcenter', 'stores', 'centroCostoProductos'));
+        $stores = Store::where('status', 1)->get();
+
+        /*  $stores = DB::table('inventarios as i')
+            ->rightJoin('stores as s', 'i.store_id', '=', 's.id')
+            ->select('s.id', 's.name')
+            ->where('s.status', 1)
+          //  ->where('i.stock_ideal', '>', 0) // Filtrar por stock_ideal mayor a 0
+            ->distinct() // Asegurarse de que no haya bodegas duplicadas
+            ->get(); */
+
+        return view("transfer.index", compact('bodegaOrigen', 'stores'));
     }
 
     public function store(Request $request) // modal create primer paso del diligenciado y llenado de la tabla transfer.
@@ -53,14 +57,14 @@ class transferController extends Controller
 
             $rules = [
                 'transferId' => 'required',
-                'centrocostoOrigen' => 'required|different:centrocostoDestino',
-                'centrocostoDestino' => 'required',
+                'bodegaOrigen' => 'required|different:bodegaDestino',
+                'bodegaDestino' => 'required',
             ];
             $messages = [
                 'transferId.required' => 'El transferId es requerido',
-                'centrocostoOrigen.required' => 'El centro de costo es requerido',
-                'centrocostoOrigen.different' => 'El centro de costo de origen debe ser diferente al centro de costo destino',
-                'centrocostoDestino.required' => 'El centro de costo es requerido',
+                'bodegaOrigen.required' => 'La bodega es requerida',
+                'bodegaOrigen.different' => 'La bodega de origen debe ser diferente a la de destino',
+                'bodegaDestino.required' => 'La bodega es requerida',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -84,8 +88,8 @@ class transferController extends Controller
 
                 $tranf = new Transfer();
                 $tranf->users_id = $id_user;
-                $tranf->centrocostoOrigen_id = $request->centrocostoOrigen;
-                $tranf->centrocostoDestino_id = $request->centrocostoDestino;
+                $tranf->bodega_origen_id = $request->bodegaOrigen;
+                $tranf->bodega_destino_id = $request->bodegaDestino;
                 //   $tranf->products_id = 2;
                 $tranf->fecha_tranfer = $currentDateFormat;
                 $tranf->fecha_cierre = $dateNextMonday;
@@ -104,243 +108,12 @@ class transferController extends Controller
         }
     }
 
-    public function create($id) // http://2puracarnes.test:8080/transfer/create/2  llenado de la vista Translado | Categoria
-    {
-        // dd($id);
-        $dataTransfer = DB::table('transfers as tra')
-            //  ->join('categories as cat', 'tra.categoria_id', '=', 'cat.id')
-            ->join('centro_costo as centroOrigen', 'tra.centrocostoOrigen_id', '=', 'centroOrigen.id')
-            ->join('centro_costo as centroDestino', 'tra.centrocostoDestino_id', '=', 'centroDestino.id')
-            ->select('tra.*', 'centroOrigen.name as namecentrocostoOrigen', 'centroDestino.name as namecentrocostoDestino')
-            ->where('tra.id', $id)
-            ->get();
-        // dd($dataTransfer);
-        /**************************************** */
-        $arrayProductsOrigin = DB::table('products as p')
-            ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-            ->select('p.id', 'p.name', 'ce.stock as stock_origen', 'ce.fisico as fisico_origen')
-            ->where([
-                // ['p.level_product_id', [1,2]],
-                //   ['p.id', $dataTransfer[0]->products_id],
-                // ['p.category_id', $dataTransfer[0]->categoria_id],
-                [
-                    'p.status', 1
-                ],
-                ['ce.centrocosto_id', $dataTransfer[0]->centrocostoOrigen_id],                
-            ])
-            ->orderBy('p.category_id', 'asc')
-            ->orderBy('p.name', 'asc')
-            ->get();
-        // dd($arrayProductsOrigin);
-        /**************************************** */
-        $arrayProductsDestination = DB::table('products as p')
-            ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-            ->select('p.id', 'p.name', 'ce.stock as stock_destino', 'ce.fisico as fisico_destino')
-            ->where([
-                // ['p.level_product_id', [1,2]],
-                //   ['p.id', $dataTransfer[0]->products_id],
-                //    ['p.category_id', $dataTransfer[0]->categoria_id],
-                [
-                    'p.status', 1
-                ],
-                ['ce.centrocosto_id', $dataTransfer[0]->centrocostoDestino_id],          
-            ])->get();
-        // dd($arrayProductsDestination);
-        /**************************************** */
-        $status = '';
-        $fechaTransferCierre = Carbon::parse($dataTransfer[0]->fecha_cierre);
-        $date = Carbon::now();
-        $currentDate = Carbon::parse($date->format('Y-m-d'));
-        if ($currentDate->gt($fechaTransferCierre)) {
-            //'Date 1 is greater than Date 2';
-            $status = 'false';
-        } elseif ($currentDate->lt($fechaTransferCierre)) {
-            //'Date 1 is less than Date 2';
-            $status = 'true';
-        } else {
-            //'Date 1 and Date 2 are equal';
-            $status = 'false';
-        }
-        /**************************************** */
-        $statusInventory = "";
-        if ($dataTransfer[0]->inventario == "added") {
-            $statusInventory = "true";
-        } else {
-            $statusInventory = "false";
-        }
-        /**************************************** */
-        //dd($tt = [$status, $statusInventory]);
-
-        $display = "";
-        if ($status == "false" || $statusInventory == "true") {
-            $display = "display:none;";
-        }
-
-        $transfers = $this->gettransferdetail($id, $dataTransfer[0]->centrocostoOrigen_id);
-
-        $arrayTotales = $this->sumTotales($id);
-
-        return view('transfer.create', compact('dataTransfer', 'transfers', 'arrayProductsOrigin', 'arrayProductsDestination', 'arrayTotales', 'status', 'statusInventory', 'display'));
-    }
-
-    public function obtenerValoresProducto(Request $request)
-    {
-        $centrocostoOrigenId = $request->input('centrocostoOrigen');
-        $producto = DB::table('centro_costo_products')
-            ->where('products_id', $request->productId)
-            ->where('centrocosto_id', $centrocostoOrigenId)
-            ->first();
-        if ($producto) {
-            return response()->json([
-                'stock' => $producto->stock,
-                'fisico' => $producto->fisico
-            ]);
-        } else {
-            // En caso de que el producto no sea encontrado
-            return response()->json([
-                'error' => 'Product not found'
-            ], 404);
-        }
-    }
-
-    public function obtenerValoresProductoDestino(Request $request)
-    {
-        // $productId = $request->input('productId');
-        // Obtén los valores de stock y fisico para el producto seleccionado
-        $centrocostoDestinoId = $request->input('centrocostoDestino');
-        $producto = DB::table('centro_costo_products')
-            ->where('products_id', $request->productId)
-            ->where('centrocosto_id', $centrocostoDestinoId)
-            ->first();
-
-        if ($producto) {
-            return response()->json([
-                'stock' => $producto->stock,
-                'fisico' => $producto->fisico
-            ]);
-        } else {
-            // Handle the case when $producto is null
-            return response()->json([
-                'error' => 'Product not found'
-            ], 404);
-        }
-    }
-
-    public function savedetail(Request $request)
-    {
-        try {
-
-            $rules = [
-                'kgrequeridos' => 'required',
-                'producto' => 'required',
-            ];
-            $messages = [
-                'kgrequeridos.required' => 'Los kg requeridos son necesarios',
-                'producto.required' => 'El producto es requerido',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 0,
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $prodOrigen = DB::table('products as p')
-                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('ce.stock', 'ce.fisico')
-                ->where([
-                    ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->centrocostoOrigen],
-                    ['p.status', 1],                  
-                ])->get();
-
-            $prodDestino = DB::table('products as p')
-                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('ce.stock', 'ce.fisico')
-                ->where([
-                    ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->centrocostoDestino],
-                    ['p.status', 1],                 
-                ])->get();
-
-            $formatCantidad = new metodosrogercodeController();
-            //$prod = Product::firstWhere('id', $request->producto);
-
-            $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
-            $newStockOrigen = $prodOrigen[0]->stock - $formatkgrequeridos;
-            $newStockDestino = $prodDestino[0]->stock + $formatkgrequeridos;
-
-            $details = new transfer_details();
-            $details->transfers_id = $request->transferId;
-            $details->products_id = $request->producto;
-            $details->kgrequeridos = $formatkgrequeridos;
-            $details->actual_stock_origen = $request->stockOrigen;
-            $details->nuevo_stock_origen = $newStockOrigen;
-            $details->actual_stock_destino = $request->stockDestino;
-            $details->nuevo_stock_destino = $newStockDestino;
-            $details->save();
-
-            $arraydetail = $this->gettransferdetail($request->transferId, $request->centrocostoOrigen);
-            $arrayTotales = $this->sumTotales($request->transferId);
-
-            $newStockOrigen = $request->stockOrigen - $arrayTotales['kgTotalRequeridos'];
-            $tranf = Transfer::firstWhere('id', $request->transferId);
-            // $tranf->nuevo_stock_origen = $newStockOrigen;
-            $tranf->save();
-
-            return response()->json([
-                'status' => 1,
-                'message' => "Agregado correctamente",
-                'array' => $arraydetail,
-                'arrayTotales' => $arrayTotales,
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 0,
-                'array' => (array) $th
-            ]);
-        }
-    }
-
-    public function gettransferdetail($transferId, $centrocostoDestinoId)
-    {
-        $detail = DB::table('transfer_details as td')
-            ->join('products as pro', 'td.products_id', '=', 'pro.id')
-            ->join('centro_costo_products as ce', 'pro.id', '=', 'ce.products_id')
-            ->select('td.*', 'pro.name as nameprod', 'pro.code', 'ce.stock', 'ce.fisico')
-            ->where([
-                ['ce.centrocosto_id', $centrocostoDestinoId],
-                ['td.transfers_id', $transferId],
-                ['td.status', 1],        
-            ])->get();
-
-        return $detail;
-    }
-
-    public function sumTotales($id)
-    {
-
-        $kgTotalRequeridos = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('kgrequeridos');
-        $newTotalStock = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('nuevo_stock_origen');
-
-        $array = [
-            'kgTotalRequeridos' => $kgTotalRequeridos,
-            'newTotalStock' => $newTotalStock,
-        ];
-
-        return $array;
-    }
-
     public function show() // http://2puracarnes.test:8080/transfer  Datatable Traslado | listado
     {
         $data = DB::table('transfers as tra')
-            //  ->join('categories as cat', 'tra.categoria_id', '=', 'cat.id')
-            //   ->join('products as cut', 'tra.products_id', '=', 'cut.id')
-            ->join('centro_costo as centroOrigen', 'tra.centrocostoOrigen_id', '=', 'centroOrigen.id')
-            ->join('centro_costo as centroDestino', 'tra.centrocostoDestino_id', '=', 'centroDestino.id')
-            ->select('tra.*', 'centroOrigen.name as namecentrocostoOrigen', 'centroDestino.name as namecentrocostoDestino')
+            ->join('stores as storeOrigen', 'tra.bodega_origen_id', '=', 'storeOrigen.id')
+            ->join('stores as storeDestino', 'tra.bodega_destino_id', '=', 'storeDestino.id')
+            ->select('tra.*', 'storeOrigen.name as namecentrocostoOrigen', 'storeDestino.name as namecentrocostoDestino')
             ->where('tra.status', 1)
             ->get();
         //$data = Compensadores::orderBy('id','desc');
@@ -413,6 +186,235 @@ class transferController extends Controller
             ->make(true);
     }
 
+    public function create($id) // http://2puracarnes.test:8080/transfer/create/2  llenado de la vista Translado | Categoria
+    {
+        $lotes = Lote::orderBy('id', 'desc')->get();
+        // dd($id);
+        $dataTransfer = DB::table('transfers as tra')
+            ->join('stores as storeOrigen', 'tra.bodega_origen_id', '=', 'storeOrigen.id')
+            ->join('stores as storeDestino', 'tra.bodega_destino_id', '=', 'storeDestino.id')
+            ->select('tra.*', 'storeOrigen.name as namecentrocostoOrigen', 'storeDestino.name as namecentrocostoDestino')
+            ->where('tra.id', $id)
+            ->get();
+        // dd($dataTransfer);
+        /**************************************** */
+        $arrayProductsOrigin = DB::table('lote_products as lp')
+            ->join('products as p', 'p.id', '=', 'lp.product_id')
+            ->join('inventarios as i', 'i.product_id', '=', 'p.id')
+            ->select('p.id', 'p.name', 'i.stock_ideal as stock_origen', 'i.stock_ideal as fisico_origen')
+            ->where([
+                [
+                    'p.status',
+                    '1'
+                ],
+                ['i.store_id', $dataTransfer[0]->bodega_origen_id],
+            ])
+            ->orderBy('p.category_id', 'asc')
+            ->orderBy('p.name', 'asc')
+            ->get();
+        //dd($arrayProductsOrigin);
+        /**************************************** */
+        $arrayProductsDestination = DB::table('lote_products as lp')
+            ->join('products as p', 'p.id', '=', 'lp.product_id')
+            ->join('inventarios as i', 'i.product_id', '=', 'p.id')
+            ->select('p.id', 'p.name', 'i.stock_ideal as stock_destino', 'i.stock_ideal as fisico_destino')
+            ->where([
+                [
+                    'p.status',
+                    '1'
+                ],
+                ['i.store_id', $dataTransfer[0]->bodega_destino_id],
+            ])->get();
+        // dd($arrayProductsDestination);
+        /**************************************** */
+        $status = '';
+        $fechaTransferCierre = Carbon::parse($dataTransfer[0]->fecha_cierre);
+        $date = Carbon::now();
+        $currentDate = Carbon::parse($date->format('Y-m-d'));
+        if ($currentDate->gt($fechaTransferCierre)) {
+            //'Date 1 is greater than Date 2';
+            $status = 'false';
+        } elseif ($currentDate->lt($fechaTransferCierre)) {
+            //'Date 1 is less than Date 2';
+            $status = 'true';
+        } else {
+            //'Date 1 and Date 2 are equal';
+            $status = 'false';
+        }
+        /**************************************** */
+        $statusInventory = "";
+        if ($dataTransfer[0]->inventario == "added") {
+            $statusInventory = "true";
+        } else {
+            $statusInventory = "false";
+        }
+        /**************************************** */
+        //dd($tt = [$status, $statusInventory]);
+
+        $display = "";
+        if ($status == "false" || $statusInventory == "true") {
+            $display = "display:none;";
+        }
+
+        $transfers = $this->gettransferdetail($id, $dataTransfer[0]->bodega_origen_id);
+
+        $arrayTotales = $this->sumTotales($id);
+
+        return view('transfer.create', compact('lotes', 'dataTransfer', 'transfers', 'arrayProductsOrigin', 'arrayProductsDestination', 'arrayTotales', 'status', 'statusInventory', 'display'));
+    }
+
+    public function obtenerValoresProducto(Request $request)
+    {
+        $centrocostoOrigenId = $request->input('bodegaOrigen');
+        $producto = DB::table('centro_costo_products')
+            ->where('products_id', $request->productId)
+            ->where('centrocosto_id', $centrocostoOrigenId)
+            ->first();
+        if ($producto) {
+            return response()->json([
+                'stock' => $producto->stock,
+                'fisico' => $producto->fisico
+            ]);
+        } else {
+            // En caso de que el producto no sea encontrado
+            return response()->json([
+                'error' => 'Product not found'
+            ], 404);
+        }
+    }
+
+    public function obtenerValoresProductoDestino(Request $request)
+    {
+        // $productId = $request->input('productId');
+        // Obtén los valores de stock y fisico para el producto seleccionado
+        $centrocostoDestinoId = $request->input('bodegaDestino');
+        $producto = DB::table('centro_costo_products')
+            ->where('products_id', $request->productId)
+            ->where('centrocosto_id', $centrocostoDestinoId)
+            ->first();
+
+        if ($producto) {
+            return response()->json([
+                'stock' => $producto->stock,
+                'fisico' => $producto->fisico
+            ]);
+        } else {
+            // Handle the case when $producto is null
+            return response()->json([
+                'error' => 'Product not found'
+            ], 404);
+        }
+    }
+
+    public function savedetail(Request $request)
+    {
+        try {
+
+            $rules = [
+                'kgrequeridos' => 'required',
+                'producto' => 'required',
+            ];
+            $messages = [
+                'kgrequeridos.required' => 'Los kg requeridos son necesarios',
+                'producto.required' => 'El producto es requerido',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $prodOrigen = DB::table('products as p')
+                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
+                ->select('ce.stock', 'ce.fisico')
+                ->where([
+                    ['p.id', $request->producto],
+                    ['ce.centrocosto_id', $request->bodegaOrigen],
+                    ['p.status', 1],
+                ])->get();
+
+            $prodDestino = DB::table('products as p')
+                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
+                ->select('ce.stock', 'ce.fisico')
+                ->where([
+                    ['p.id', $request->producto],
+                    ['ce.centrocosto_id', $request->bodegaDestino],
+                    ['p.status', 1],
+                ])->get();
+
+            $formatCantidad = new metodosrogercodeController();
+            //$prod = Product::firstWhere('id', $request->producto);
+
+            $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
+            $newStockOrigen = $prodOrigen[0]->stock - $formatkgrequeridos;
+            $newStockDestino = $prodDestino[0]->stock + $formatkgrequeridos;
+
+            $details = new transfer_details();
+            $details->transfers_id = $request->transferId;
+            $details->products_id = $request->producto;
+            $details->kgrequeridos = $formatkgrequeridos;
+            $details->actual_stock_origen = $request->stockOrigen;
+            $details->nuevo_stock_origen = $newStockOrigen;
+            $details->actual_stock_destino = $request->stockDestino;
+            $details->nuevo_stock_destino = $newStockDestino;
+            $details->save();
+
+            $arraydetail = $this->gettransferdetail($request->transferId, $request->bodegaOrigen);
+            $arrayTotales = $this->sumTotales($request->transferId);
+
+            $newStockOrigen = $request->stockOrigen - $arrayTotales['kgTotalRequeridos'];
+            $tranf = Transfer::firstWhere('id', $request->transferId);
+            // $tranf->nuevo_stock_origen = $newStockOrigen;
+            $tranf->save();
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Agregado correctamente",
+                'array' => $arraydetail,
+                'arrayTotales' => $arrayTotales,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'array' => (array) $th
+            ]);
+        }
+    }
+
+    public function gettransferdetail($transferId, $centrocostoDestinoId)
+    {
+        $detail = DB::table('transfer_details as td')
+            ->join('lote_products as lp', 'td.lote_prod_traslado_id', '=', 'lp.id')
+            ->join('products as p', 'lp.product_id', '=', 'p.id')
+            ->join('centro_costo_products as ce', 'lp.id', '=', 'ce.products_id')
+            ->select('td.*', 'p.name as nameprod', 'p.code', 'ce.stock', 'ce.fisico')
+            ->where([
+                ['ce.centrocosto_id', $centrocostoDestinoId],
+                ['td.transfers_id', $transferId],
+                ['td.status', 1],
+            ])->get();
+
+        return $detail;
+    }
+
+    public function sumTotales($id)
+    {
+
+        $kgTotalRequeridos = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('kgrequeridos');
+        $newTotalStock = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('nuevo_stock_origen');
+
+        $array = [
+            'kgTotalRequeridos' => $kgTotalRequeridos,
+            'newTotalStock' => $newTotalStock,
+        ];
+
+        return $array;
+    }
+
+
 
     public function updatedetail(Request $request)
     {
@@ -423,8 +425,8 @@ class transferController extends Controller
                 ->select('ce.stock', 'ce.fisico')
                 ->where([
                     ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->centrocostoOrigen],
-                    ['p.status', 1],          
+                    ['ce.centrocosto_id', $request->bodegaOrigen],
+                    ['p.status', 1],
                 ])->get();
 
             $prodDestino = DB::table('products as p')
@@ -432,8 +434,8 @@ class transferController extends Controller
                 ->select('ce.stock', 'ce.fisico')
                 ->where([
                     ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->centrocostoDestino],
-                    ['p.status', 1],             
+                    ['ce.centrocosto_id', $request->bodegaDestino],
+                    ['p.status', 1],
                 ])->get();
 
 
@@ -451,7 +453,7 @@ class transferController extends Controller
 
             $updatedetails->save();
 
-            $arraydetail = $this->gettransferdetail($request->transferId, $request->centrocostoOrigen);
+            $arraydetail = $this->gettransferdetail($request->transferId, $request->bodegaOrigen);
             $arrayTotales = $this->sumTotales($request->transferId);
 
             $newStockOrigen = $request->stockOrigen - $arrayTotales['kgTotalRequeridos'];
@@ -495,7 +497,7 @@ class transferController extends Controller
             $enlist->status = 0;
             $enlist->save();
 
-            $arraydetail = $this->gettransferdetail($request->transferId, $request->centrocostoOrigen);
+            $arraydetail = $this->gettransferdetail($request->transferId, $request->bodegaOrigen);
             $arrayTotales = $this->sumTotales($request->transferId);
 
             $newStockOrigen = $request->stockOrigen - $arrayTotales['kgTotalRequeridos'];
@@ -546,15 +548,15 @@ class transferController extends Controller
             $shopp->users_id = $id_user;
             $shopp->transfers_id = $request->transferId;
             //  $shopp->productopadre_id = $request->productoPadre;
-            $shopp->centrocostoOrigen_id = $request->centrocostoOrigen;
-            $shopp->centrocostoDestino_id = $request->centrocostoDestino;
+            $shopp->centrocostoOrigen_id = $request->bodegaOrigen;
+            $shopp->centrocostoDestino_id = $request->bodegaDestino;
             $shopp->stock_actual = $request->stockOrigen;
             $shopp->ultimo_conteo_tangible = $request->pesokg;
             $shopp->nuevo_stock = $request->newStockOrigen;
             $shopp->fecha_actualizacion = $currentDateTime;
             $shopp->save();
 
-            $regProd = $this->gettransferdetail($request->transferId, $request->centrocostoOrigen);
+            $regProd = $this->gettransferdetail($request->transferId, $request->bodegaOrigen);
             $count = count($regProd);
             if ($count == 0) {
                 return response()->json([
@@ -575,7 +577,7 @@ class transferController extends Controller
 
                 DB::table('centro_costo_products')
                     ->where('centro_costo_products.products_id', $key->products_id)
-                    ->where('centro_costo_products.centrocosto_id', $request->centrocostoDestino)
+                    ->where('centro_costo_products.centrocosto_id', $request->bodegaDestino)
                     ->join('updating_transfer', 'centro_costo_products.centrocosto_id', '=', 'updating_transfer.centrocostoDestino_id')
                     ->update([
                         'centro_costo_products.trasladoing' => DB::raw('centro_costo_products.trasladoing + ' . $key->kgrequeridos),
@@ -585,7 +587,7 @@ class transferController extends Controller
 
                 DB::table('centro_costo_products')
                     ->where('centro_costo_products.products_id', $key->products_id)
-                    ->where('centro_costo_products.centrocosto_id', $request->centrocostoOrigen)
+                    ->where('centro_costo_products.centrocosto_id', $request->bodegaOrigen)
                     ->join('updating_transfer', 'centro_costo_products.centrocosto_id', '=', 'updating_transfer.centrocostoOrigen_id')
                     ->update([
                         'centro_costo_products.trasladosal' => DB::raw('centro_costo_products.trasladosal + ' . $key->kgrequeridos),

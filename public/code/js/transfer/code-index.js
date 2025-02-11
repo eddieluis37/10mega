@@ -1,4 +1,24 @@
 console.log("Starting");
+
+$(document).ready(function () {
+    // Inicializar select2 en los campos de bodega
+    $("#bodegaOrigen, #bodegaDestino").select2({
+        theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
+        width: "100%",
+        placeholder: "Seleccione una opción",
+        allowClear: true,
+    });
+
+    // Opcional: Evento cuando se cambia la selección
+    $("#bodegaOrigen").on("change", function () {
+        console.log("Bodega Origen seleccionada:", $(this).val());
+    });
+
+    $("#bodegaDestino").on("change", function () {
+        console.log("Bodega Destino seleccionada:", $(this).val());
+    });
+});
+
 const btnAddTransfer = document.querySelector("#btnAddTransfer");
 const formTransfer = document.querySelector("#form-transfer");
 const token = document
@@ -7,8 +27,8 @@ const token = document
 const btnClose = document.querySelector("#btnModalClose");
 
 //const selectCategory = document.querySelector("#categoria");
-const selectCentrocosto = document.querySelector("#centrocostoOrigen");
-const selectCentrocostoDestino = document.querySelector("#centrocostoDestino");
+const selectCentrocosto = document.querySelector("#bodegaOrigen");
+const selectCentrocostoDestino = document.querySelector("#bodegaDestino");
 
 const selectCostcenterOrigin = document.querySelector("#centrocostoorigen");
 const selectCostcenterDest = document.querySelector("#centrocostodestino");
@@ -26,61 +46,56 @@ const stockActualCenterCostDest = document.getElementById(
 );
 
 $(document).ready(initializeDataTable);
-    function initializeDataTable() {
-        $("#tableTransfer").DataTable({
-            paging: true,
-            pageLength: 50,
-            autoWidth: false,
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "/showtransfer",
-                type: "GET",
+function initializeDataTable() {
+    $("#tableTransfer").DataTable({
+        paging: true,
+        pageLength: 50,
+        autoWidth: false,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "/showtransfer",
+            type: "GET",
+        },
+        columns: [
+            { data: "id", name: "id" },
+            { data: "date", name: "date" },
+            { data: "namecentrocostoOrigen", name: "namecentrocostoOrigen" },
+            { data: "namecentrocostoDestino", name: "namecentrocostoDestino" },
+            { data: "inventory", name: "inventory" },
+            { data: "action", name: "action" },
+        ],
+        order: [[0, "DESC"]],
+        language: {
+            processing: "Procesando...",
+            lengthMenu: "Mostrar _MENU_ registros",
+            zeroRecords: "No se encontraron resultados",
+            emptyTable: "Ningún dato disponible en esta tabla",
+            sInfo: "Mostrando del _START_ al _END_ de total _TOTAL_ registros",
+            infoEmpty:
+                "Mostrando registros del 0 al 0 de un total de 0 registros",
+            infoFiltered: "(filtrado de un total de _MAX_ registros)",
+            search: "Buscar:",
+            infoThousands: ",",
+            loadingRecords: "Cargando...",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior",
             },
-            columns: [
-                { data: "id", name: "id" },
-                { data: "date", name: "date" },                
-                { data: "namecentrocostoOrigen", name: "namecentrocostoOrigen" },
-                { data: "namecentrocostoDestino", name: "namecentrocostoDestino" },        
-                { data: "inventory", name: "inventory" },             
-                { data: "action", name: "action" },
-            ],
-            order: [[0, "DESC"]],
-            language: {
-                processing: "Procesando...",
-                lengthMenu: "Mostrar _MENU_ registros",
-                zeroRecords: "No se encontraron resultados",
-                emptyTable: "Ningún dato disponible en esta tabla",
-                sInfo: "Mostrando del _START_ al _END_ de total _TOTAL_ registros",
-                infoEmpty:
-                    "Mostrando registros del 0 al 0 de un total de 0 registros",
-                infoFiltered: "(filtrado de un total de _MAX_ registros)",
-                search: "Buscar:",
-                infoThousands: ",",
-                loadingRecords: "Cargando...",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior",
-                },
-            },
-            dom: 'Bfrtip',
-            buttons: [
-                'copy',
-                'csv',
-                'excel',
-                'pdf'
-            ],
-        });
-    
-        $(".select2corte").select2({
-            placeholder: "Busca un producto",
-            width: "100%",
-            theme: "bootstrap-5",
-            allowClear: true,
-        });
-    }
+        },
+        dom: "Bfrtip",
+        buttons: ["copy", "csv", "excel", "pdf"],
+    });
+
+    $(".select2corte").select2({
+        placeholder: "Busca un producto",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+    });
+}
 
 const showModalcreate = () => {
     if (contentform.hasAttribute("disabled")) {
@@ -88,7 +103,7 @@ const showModalcreate = () => {
         $(".select2corte").prop("disabled", false);
     }
     $(".select2corte").val("").trigger("change");
-  //  selectCortePadre.innerHTML = "";
+    //  selectCortePadre.innerHTML = "";
     formTransfer.reset();
     transfer_id.value = 0;
 };
@@ -112,7 +127,7 @@ const showDataForm = (id) => {
 const showData = (resp) => {
     let register = resp.reg;
     //alistamiento_id.value = register.id;
-  // selectCategory.value = register.categoria_id;
+    // selectCategory.value = register.categoria_id;
     selectCentrocosto.value = register.centrocostoOrigen_id;
     selectCentrocostoDestino.value = register.centrocostoDestino_id;
     getCortes(register.categoria_id);

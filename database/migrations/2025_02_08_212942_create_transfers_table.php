@@ -19,14 +19,13 @@ class CreateTransfersTable extends Migration
             $table->unsignedBigInteger('users_id')->nullable();
             $table->foreign('users_id')->references('id')->on('users');
 
-            $table->unsignedBigInteger('lotes_id')->nullable();
-            $table->foreign('lotes_id')->references('id')->on('lotes');
+            $table->unsignedBigInteger('bodega_origen_id')->nullable();
+            $table->foreign('bodega_origen_id')->references('id')->on('stores');
 
-            $table->unsignedBigInteger('centrocostoOrigen_id')->nullable();
-            $table->foreign('centrocostoOrigen_id')->references('id')->on('centro_costo');
+            $table->unsignedBigInteger('bodega_destino_id')->nullable();
+            $table->foreign('bodega_destino_id')->references('id')->on('stores');
 
-            $table->unsignedBigInteger('centrocostoDestino_id')->nullable();
-            $table->foreign('centrocostoDestino_id')->references('id')->on('centro_costo');
+            $table->decimal('cantidad_total_traslado', 18, 2)->nullable();
 
             $table->enum('inventario', ['pending', 'added'])->default('pending');
             $table->date('fecha_tranfer');

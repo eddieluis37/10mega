@@ -28,13 +28,13 @@ const transferId = document.querySelector("#transferId");
 const kgrequeridos = document.querySelector("#kgrequeridos");
 const addShopping = document.querySelector("#addShopping");
 const productoPadre = document.querySelector("#productopadreId");
-const centrocostoOrigen = document.querySelector("#centrocostoOrigen");
-const centrocostoDestino = document.querySelector("#centrocostoDestino");
+const bodegaOrigen = document.querySelector("#bodegaOrigen");
+const bodegaDestino = document.querySelector("#bodegaDestino");
 const categoryId = document.querySelector("#categoryId");
 
 // Obtén el valor del campo
-var centrocostoOrigenId = document.getElementById("centrocostoOrigen").value;
-var centrocostoDestinoId = document.getElementById("centrocostoDestino").value;
+var centrocostoOrigenId = document.getElementById("bodegaOrigen").value;
+var centrocostoDestinoId = document.getElementById("bodegaDestino").value;
 
 console.log('origen ' + centrocostoOrigenId);
 console.log('destino ' + centrocostoDestinoId);
@@ -64,7 +64,7 @@ function actualizarValoresProducto(productId) {
         type: "GET",
         data: {
             productId: productId,
-            centrocostoOrigen: $("#centrocostoOrigen").val(), // Obtén el valor del campo centrocostoOrigen
+            bodegaOrigen: $("#bodegaOrigen").val(), // Obtén el valor del campo bodegaOrigen
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada del centro de costo origen
@@ -84,7 +84,7 @@ function actualizarValoresProductoDestino(productId) {
         type: "GET",
         data: {
             productId: productId,
-            centrocostoDestino: $("#centrocostoDestino").val(), // Obtén el valor del campo centrocostoDestino
+            bodegaDestino: $("#bodegaDestino").val(), // Obtén el valor del campo bodegaDestino
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada del centro de consto destino
@@ -103,7 +103,7 @@ btnAddTrans.addEventListener("click", (e) => {
     e.preventDefault();
     const dataform = new FormData(formDetail);
     dataform.append("stockOrigen", stockOrigen.value);
-    dataform.append("centrocostoDestino", centrocostoDestino.value);
+    dataform.append("bodegaDestino", bodegaDestino.value);
     dataform.append("stockDestino", stockDestino.value);
     sendData("/transfersavedetail", dataform, token).then((result) => {
         console.log(result);
@@ -198,8 +198,8 @@ tableTransfer.addEventListener("keydown", function (event) {
             let productoId = target.getAttribute("data-id");
             console.log("prodDestino test id: " + transferId.value);
             console.log(productoId);
-            console.log('origen' + centrocostoOrigen.value);
-            console.log(centrocostoDestino.value);
+            console.log('origen' + bodegaOrigen.value);
+            console.log(bodegaDestino.value);
             const trimValue = inputValue.trim();
             const dataform = new FormData();
             dataform.append("id", Number(event.target.id));
@@ -207,12 +207,12 @@ tableTransfer.addEventListener("keydown", function (event) {
             dataform.append("transferId", Number(transferId.value));
             dataform.append("productoId", Number(productoId));
             dataform.append(
-                "centrocostoOrigen",
-                Number(centrocostoOrigen.value)
+                "bodegaOrigen",
+                Number(bodegaOrigen.value)
             );
             dataform.append(
-                "centrocostoDestino",
-                Number(centrocostoDestino.value)
+                "bodegaDestino",
+                Number(bodegaDestino.value)
             );
             dataform.append("stockOrigen", stockOrigen.value);
 
@@ -247,12 +247,12 @@ tbodyTable.addEventListener("click", (e) => {
                 dataform.append("id", Number(id));
                 dataform.append("transferId", Number(transferId.value));
                 dataform.append(
-                    "centrocostoOrigen",
-                    Number(centrocostoOrigen.value)
+                    "bodegaOrigen",
+                    Number(bodegaOrigen.value)
                 );
                 dataform.append(
-                    "centrocostoDestino",
-                    Number(centrocostoDestino.value)
+                    "bodegaDestino",
+                    Number(bodegaDestino.value)
                 );
                 dataform.append("stockOrigen", stockOrigen.value);
                 sendData("/transferdown", dataform, token).then((result) => {
@@ -281,8 +281,8 @@ tfootTable.addEventListener("click", (e) => {
       //  dataform.append("pesokg", Number(pesokg.value));
         dataform.append("stockOrigen", Number(stockOrigen.value));
      //   dataform.append("productoPadre", Number(productoPadre.value));
-        dataform.append("centrocostoOrigen", Number(centrocostoOrigen.value));
-        dataform.append("centrocostoDestino", Number(centrocostoDestino.value));
+        dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
+        dataform.append("bodegaDestino", Number(bodegaDestino.value));
      //   dataform.append("categoryId", Number(categoryId.value));
         sendData("/transferAddShoping", dataform, token).then((result) => {
             console.log(result);
