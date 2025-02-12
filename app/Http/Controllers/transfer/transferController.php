@@ -188,8 +188,18 @@ class transferController extends Controller
 
     public function create($id) // http://2puracarnes.test:8080/transfer/create/2  llenado de la vista Translado | Categoria
     {
-        $lotes = Lote::orderBy('id', 'desc')->get();
+        // $loteId = 99; //$request->lote_id;
+        //  $lotes = Lote::orderBy('id', 'desc')->get();
         // dd($id);
+        $lotes = Lote::select('lotes.id', 'lotes.codigo')
+            ->join('inventarios', 'lotes.id', '=', 'inventarios.lote_id')
+            ->join('transfers', 'inventarios.store_id', '=', 'transfers.bodega_origen_id')
+            ->where('transfers.id', $id)
+            ->orderBy('lotes.codigo', 'asc')
+            ->distinct()
+            ->get();
+
+
         $dataTransfer = DB::table('transfers as tra')
             ->join('stores as storeOrigen', 'tra.bodega_origen_id', '=', 'storeOrigen.id')
             ->join('stores as storeDestino', 'tra.bodega_destino_id', '=', 'storeDestino.id')
@@ -262,6 +272,24 @@ class transferController extends Controller
 
         return view('transfer.create', compact('lotes', 'dataTransfer', 'transfers', 'arrayProductsOrigin', 'arrayProductsDestination', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
+
+    public function getProductsByLote(Request $request)
+    {
+        $loteId = $request->lote_id;
+        $bodegaOrigenId = $request->bodega_origen_id;
+
+        $productos = Product::select('products.id', 'products.name')
+            ->join('lote_products', 'products.id', '=', 'lote_products.product_id')
+            ->join('inventarios as i', 'i.product_id', '=', 'products.id')
+            ->where('lote_products.lote_id', $loteId)
+            ->where('i.store_id', $bodegaOrigenId) // Filtra por la bodega de origen
+            ->where('products.status', '1')
+            ->orderBy('products.name', 'asc')
+            ->get();
+
+        return response()->json($productos);
+    }
+
 
     public function obtenerValoresProducto(Request $request)
     {

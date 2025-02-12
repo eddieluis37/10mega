@@ -269,6 +269,9 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     Route::post('transfersave', [transferController::class, 'store'])->name('transfer.save');
     Route::get('showtransfer', [transferController::class, 'show'])->name('transfer.showlist');
     Route::get('transfer/create/{id}', [transferController::class, 'create'])->name('transfer.create');
+    
+    Route::get('/transfer/get-products-by-lote', [transferController::class, 'getProductsByLote']);
+   
     Route::post('getproductos', [transferController::class, 'getproducts'])->name('transfer.getproductos');
     Route::post('productsbycostcenterdest', [transferController::class, 'ProductsByCostcenterDest'])->name('transfer.productsbycostcenterdest');
     Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin');

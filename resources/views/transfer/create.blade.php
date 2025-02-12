@@ -62,11 +62,11 @@
 								<div class="col-md-3">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="" class="form-label">Buscar lote</label>
-											<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required="">
-												<option value="">Seleccione el producto</option>
+											<label for="lote" class="form-label mt-0">Lote</label>
+											<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required>
+												<option value="">Seleccione el lote</option>
 												@foreach ($lotes as $l)
-												<option value="{{$l->id}}">{{$l->codigo}}</option>
+												<option value="{{ $l->id }}">{{ $l->codigo }}</option>
 												@endforeach
 											</select>
 										</div>
@@ -77,12 +77,8 @@
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar producto</label>
-											<input type="hidden" id="bodegaOrigen" name="bodegaOrigen" value="{{$dataTransfer[0]->bodega_origen_id}}" data-id="{{$dataTransfer[0]->bodega_origen_id}}">
-											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
+											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
-												@foreach ($arrayProductsOrigin as $p)
-												<option value="{{$p->id}}">{{$p->name}}</option>
-												@endforeach
 											</select>
 										</div>
 									</div>
@@ -218,7 +214,6 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 </div>
 @endsection

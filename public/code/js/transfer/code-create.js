@@ -36,12 +36,69 @@ const categoryId = document.querySelector("#categoryId");
 var centrocostoOrigenId = document.getElementById("bodegaOrigen").value;
 var centrocostoDestinoId = document.getElementById("bodegaDestino").value;
 
-console.log('origen ' + centrocostoOrigenId);
-console.log('destino ' + centrocostoDestinoId);
-console.log('pesokg ' + pesokg);
-console.log('stockOrigen ' + stockOrigen.value);
+console.log("origen " + centrocostoOrigenId);
+console.log("destino " + centrocostoDestinoId);
+console.log("pesokg " + pesokg);
+console.log("stockOrigen " + stockOrigen.value);
 
+$(document).ready(function () {
+    // Inicializa Select2
+    $(".select2Lote").select2({
+        placeholder: "Busca un producto",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+    });
+    $(".select2Prod").select2({
+        placeholder: "Busca un producto",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+    });
 
+    $("#lote").on("change", function () {
+        let loteId = $(this).val(); // Obtiene el ID del lote seleccionado
+        let bodegaOrigenId = $("#bodegaOrigen").val(); // Obtiene la bodega de origen
+
+        console.log("Lote seleccionado:", loteId);
+        console.log("Bodega de origen:", bodegaOrigenId);
+
+        if (loteId) {
+            $.ajax({
+                url: "/transfer/get-products-by-lote",
+                type: "GET",
+                data: { lote_id: loteId, bodega_origen_id: bodegaOrigenId },
+                success: function (response) {
+                    console.log("Productos recibidos:", response);
+                    $("#producto")
+                        .empty()
+                        .append(
+                            '<option value="">Seleccione el producto</option>'
+                        );
+                    $.each(response, function (index, product) {
+                        $("#producto").append(
+                            '<option value="' +
+                                product.id +
+                                '">' +
+                                product.name +
+                                "</option>"
+                        );
+                    });
+                },
+                error: function () {
+                    console.log("Error al cargar los productos.");
+                },
+            });
+        } else {
+            console.log("No se seleccionó un lote válido.");
+            $("#producto")
+                .empty()
+                .append('<option value="">Seleccione el producto</option>');
+        }
+    });
+});
+
+/* 
 $(".select2Prod").select2({
     placeholder: "Busca un producto",
     width: "100%",
@@ -56,7 +113,7 @@ $(document).ready(function () {
         actualizarValoresProducto(productId);
         actualizarValoresProductoDestino(productId);
     });
-});
+}); */
 
 function actualizarValoresProducto(productId) {
     $.ajax({
@@ -198,7 +255,7 @@ tableTransfer.addEventListener("keydown", function (event) {
             let productoId = target.getAttribute("data-id");
             console.log("prodDestino test id: " + transferId.value);
             console.log(productoId);
-            console.log('origen' + bodegaOrigen.value);
+            console.log("origen" + bodegaOrigen.value);
             console.log(bodegaDestino.value);
             const trimValue = inputValue.trim();
             const dataform = new FormData();
@@ -206,14 +263,8 @@ tableTransfer.addEventListener("keydown", function (event) {
             dataform.append("newkgrequeridos", Number(trimValue));
             dataform.append("transferId", Number(transferId.value));
             dataform.append("productoId", Number(productoId));
-            dataform.append(
-                "bodegaOrigen",
-                Number(bodegaOrigen.value)
-            );
-            dataform.append(
-                "bodegaDestino",
-                Number(bodegaDestino.value)
-            );
+            dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
+            dataform.append("bodegaDestino", Number(bodegaDestino.value));
             dataform.append("stockOrigen", stockOrigen.value);
 
             sendData("/transferUpdate", dataform, token).then((result) => {
@@ -246,14 +297,8 @@ tbodyTable.addEventListener("click", (e) => {
                 const dataform = new FormData();
                 dataform.append("id", Number(id));
                 dataform.append("transferId", Number(transferId.value));
-                dataform.append(
-                    "bodegaOrigen",
-                    Number(bodegaOrigen.value)
-                );
-                dataform.append(
-                    "bodegaDestino",
-                    Number(bodegaDestino.value)
-                );
+                dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
+                dataform.append("bodegaDestino", Number(bodegaDestino.value));
                 dataform.append("stockOrigen", stockOrigen.value);
                 sendData("/transferdown", dataform, token).then((result) => {
                     console.log(result);
@@ -276,14 +321,13 @@ tfootTable.addEventListener("click", (e) => {
         const dataform = new FormData();
         dataform.append("transferId", Number(transferId.value));
 
-     
-       // dataform.append("newStockOrigen", Number(newStockOrigen.value));
-      //  dataform.append("pesokg", Number(pesokg.value));
+        // dataform.append("newStockOrigen", Number(newStockOrigen.value));
+        //  dataform.append("pesokg", Number(pesokg.value));
         dataform.append("stockOrigen", Number(stockOrigen.value));
-     //   dataform.append("productoPadre", Number(productoPadre.value));
+        //   dataform.append("productoPadre", Number(productoPadre.value));
         dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
         dataform.append("bodegaDestino", Number(bodegaDestino.value));
-     //   dataform.append("categoryId", Number(categoryId.value));
+        //   dataform.append("categoryId", Number(categoryId.value));
         sendData("/transferAddShoping", dataform, token).then((result) => {
             console.log(result);
             if (result.status == 1) {
@@ -299,19 +343,19 @@ tfootTable.addEventListener("click", (e) => {
     }
 });
 
-document.getElementById('addShopping').addEventListener('click', function() {
+document.getElementById("addShopping").addEventListener("click", function () {
     Swal.fire({
-      title: 'Confirmación',
-      text: '¿Desea afectar el inventario?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Aceptar',
-      cancelButtonText: 'Cancelar'
+        title: "Confirmación",
+        text: "¿Desea afectar el inventario?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cancelar",
     }).then((result) => {
-      if (result.isConfirmed) {
-        // Affect inventory logic here
-      }
+        if (result.isConfirmed) {
+            // Affect inventory logic here
+        }
     });
-  });
+});
