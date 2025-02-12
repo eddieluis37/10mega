@@ -193,7 +193,7 @@ span.red {
 /*      Form Group Label       */
 .form-group label, label {
   font-size: 15px;
-  color: #000000d8;
+  color: #000000;
   letter-spacing: 1px; }
 
 /*  Disable forms     */
@@ -1546,7 +1546,7 @@ select.form-control.form-custom {
 input[disabled], select[disabled], textarea[disabled], input[readonly], select[readonly], textarea[readonly] {
   cursor: not-allowed;
   background-color: #f1f2f3 !important;
-  color: #acb0c3; }
+  color: #000000; }
 
 .help-block, .help-inline {
   color: #555555; }
