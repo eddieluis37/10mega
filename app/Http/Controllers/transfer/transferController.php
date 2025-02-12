@@ -293,43 +293,74 @@ class transferController extends Controller
 
     public function obtenerValoresProducto(Request $request)
     {
-        $centrocostoOrigenId = $request->input('bodegaOrigen');
-        $producto = DB::table('centro_costo_products')
-            ->where('products_id', $request->productId)
-            ->where('centrocosto_id', $centrocostoOrigenId)
+        $bodegaOrigenId = $request->input('bodegaOrigen');
+        $loteId = $request->input('loteTraslado');
+        $productId = $request->input('productId');
+
+        // Validación de entrada
+        if (!$bodegaOrigenId || !$loteId || !$productId) {
+            return response()->json([
+                'error' => 'Faltan datos requeridos'
+            ], 400);
+        }
+
+        $producto = DB::table('inventarios as i')
+            ->join('products as p', 'i.product_id', '=', 'p.id')
+            ->join('lote_products as lp', function ($join) use ($loteId) {
+                $join->on('p.id', '=', 'lp.product_id')
+                    ->where('i.lote_id', $loteId);
+            })
+            ->where('i.store_id', $bodegaOrigenId)
+            ->where('p.status', '1')
+            ->where('p.id', $productId)
+            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial')
             ->first();
+
         if ($producto) {
             return response()->json([
-                'stock' => $producto->stock,
-                'fisico' => $producto->fisico
+                'stock' => $producto->stock_ideal,
+                'fisico' => $producto->cantidad_inventario_inicial
             ]);
         } else {
-            // En caso de que el producto no sea encontrado
             return response()->json([
-                'error' => 'Product not found'
+                'error' => 'Producto no encontrado en el inventario'
             ], 404);
         }
     }
 
     public function obtenerValoresProductoDestino(Request $request)
     {
-        // $productId = $request->input('productId');
-        // Obtén los valores de stock y fisico para el producto seleccionado
-        $centrocostoDestinoId = $request->input('bodegaDestino');
-        $producto = DB::table('centro_costo_products')
-            ->where('products_id', $request->productId)
-            ->where('centrocosto_id', $centrocostoDestinoId)
+        $bodegaDestinoId = $request->input('bodegaDestino');
+        $loteId = $request->input('loteTraslado');
+        $productId = $request->input('productId');
+
+        // Validación de entrada
+        if (!$bodegaDestinoId || !$loteId || !$productId) {
+            return response()->json([
+                'error' => 'Faltan datos requeridos'
+            ], 400);
+        }
+
+        $producto = DB::table('inventarios as i')
+            ->join('products as p', 'i.product_id', '=', 'p.id')
+            ->join('lote_products as lp', function ($join) use ($loteId) {
+                $join->on('p.id', '=', 'lp.product_id')
+                    ->where('i.lote_id', $loteId);
+            })
+            ->where('i.store_id', $bodegaDestinoId)
+            ->where('p.status', '1')
+            ->where('p.id', $productId)
+            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial')
             ->first();
 
         if ($producto) {
             return response()->json([
-                'stock' => $producto->stock,
-                'fisico' => $producto->fisico
+                'stock' => $producto->stock_ideal,
+                'fisico' => $producto->cantidad_inventario_inicial
             ]);
         } else {
-            // Handle the case when $producto is null
             return response()->json([
-                'error' => 'Product not found'
+                'error' => 'Producto no encontrado en el inventario'
             ], 404);
         }
     }
@@ -382,7 +413,6 @@ class transferController extends Controller
 
             $details = new transfer_details();
             $details->transfers_id = $request->transferId;
-            $details->products_id = $request->producto;
             $details->kgrequeridos = $formatkgrequeridos;
             $details->actual_stock_origen = $request->stockOrigen;
             $details->nuevo_stock_origen = $newStockOrigen;

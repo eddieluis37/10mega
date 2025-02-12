@@ -105,55 +105,68 @@ $(".select2Prod").select2({
     theme: "bootstrap-5",
     allowClear: true,
 });
-
+*/
 $(document).ready(function () {
     $("#producto").change(function () {
         var productId = $(this).val();
-        // Llama a una función para actualizar los valores en función del producto seleccionado
+
+        // Si no se selecciona un producto, limpiar los campos
+        if (!productId) {
+            limpiarCampos();
+            return;
+        }
+
+        // Llamar a las funciones para actualizar valores
         actualizarValoresProducto(productId);
         actualizarValoresProductoDestino(productId);
     });
-}); */
+});
+
+// Función para limpiar los campos
+function limpiarCampos() {
+    $("#stockOrigen, #pesoKgOrigen, #stockDestino, #pesoKgDestino").val('');
+}
 
 function actualizarValoresProducto(productId) {
     $.ajax({
-        url: "/obtener-valores-producto", // Reemplaza con tu ruta o URL para obtener los valores del producto
+        url: "/obtener-valores-producto",
         type: "GET",
         data: {
             productId: productId,
-            bodegaOrigen: $("#bodegaOrigen").val(), // Obtén el valor del campo bodegaOrigen
+            bodegaOrigen: $("#bodegaOrigen").val(),
+            loteTraslado: $("#lote").val(),
         },
         success: function (response) {
-            // Actualiza los valores en los campos de entrada del centro de costo origen
+            // Actualizar los valores con los datos recibidos
             $("#stockOrigen").val(response.stock);
             $("#pesoKgOrigen").val(response.fisico);
         },
-        error: function (xhr, status, error) {
-            // Maneja el error si la solicitud AJAX falla
-            console.log(error);
+        error: function () {
+            limpiarCampos(); // Si hay un error, limpiar los campos
         },
     });
 }
 
 function actualizarValoresProductoDestino(productId) {
     $.ajax({
-        url: "/obtener-valores-producto-destino", // Reemplaza con tu ruta o URL para obtener los valores del producto
+        url: "/obtener-valores-producto-destino",
         type: "GET",
         data: {
             productId: productId,
-            bodegaDestino: $("#bodegaDestino").val(), // Obtén el valor del campo bodegaDestino
+            bodegaDestino: $("#bodegaDestino").val(),
+            loteTraslado: $("#lote").val(),
         },
         success: function (response) {
-            // Actualiza los valores en los campos de entrada del centro de consto destino
+            // Actualizar los valores con los datos recibidos
             $("#stockDestino").val(response.stock);
             $("#pesoKgDestino").val(response.fisico);
         },
-        error: function (xhr, status, error) {
-            // Maneja el error si la solicitud AJAX falla
-            console.log(error);
+        error: function () {
+            limpiarCampos(); // Si hay un error, limpiar los campos
         },
     });
 }
+
 
 /* Insertar registros al tableTransfer del detalle. Se activa al darle enter en KG a trasladar o boton btnAddTransfer */
 btnAddTrans.addEventListener("click", (e) => {

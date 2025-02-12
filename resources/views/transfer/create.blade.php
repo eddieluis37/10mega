@@ -12,16 +12,15 @@
 			<div class="row">
 				<div class="col-sm-5">
 					<h4 class="">
-						<b> Traslado | Categoria </b>
+						<b> Traslado </b>
 					</h4>
 				</div>
 			</div>
-
 			<div class="widget-content mt-3">
 				<div class="card">
 					<div class="card-body">
 						<div class="row g-3">
-							<div class="col-md-3">
+							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Fecha de traslado</label>
@@ -30,7 +29,7 @@
 								</div>
 							</div>
 
-							<div class="col-md-3">
+							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Bodega de origen</label>
@@ -39,7 +38,7 @@
 									</div>
 								</div>
 							</div>
-							<div class="col-md-3">
+							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Bodega de destino</label>
@@ -52,7 +51,6 @@
 					</div>
 				</div>
 			</div>
-
 			<div class="widget-content mt-3" style="{{$display}}">
 				<div class="card">
 					<div class="card-body">
@@ -72,7 +70,6 @@
 										</div>
 									</div>
 								</div>
-
 								<div class="col-md-4">
 									<div class="task-header">
 										<div class="form-group">
@@ -84,10 +81,10 @@
 									</div>
 								</div>
 								<div class="col-md-3">
-									<label for="" class="form-label">KG a trasladar</label>
+									<label for="" class="form-label">KG|UND a trasladar</label>
 									<div class="input-group flex-nowrap">
-										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10,00 Acepta Coma">
-										<span class="input-group-text" id="addon-wrapping">KG</span>
+										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10.00">
+										<span class="input-group-text" id="addon-wrapping">QT</span>
 									</div>
 								</div>
 								<div class="col-md-2 text-center">
@@ -102,45 +99,42 @@
 					</div>
 				</div>
 			</div>
-
 			<div class="widget-content mt-3">
 				<div class="card">
 					<div class="card-body">
 						<div class="row">
 							<div class="col-sm-3">
-								<label for="pesoKgOrigen" class="form-label">Tangible origen</label>
+								<label for="pesoKgOrigen" class="form-label">TangibleOrigen</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesoKgOrigen" name="pesoKgOrigen" value="{{$arrayProductsOrigin[0]->fisico_origen}}" class="form-control-sm form-control" placeholder="180.40 kg" readonly>
-									<span class="input-group-text" id="addon-wrapping">KG</span>
+									<input type="text" id="pesoKgOrigen" name="pesoKgOrigen" value="{{$arrayProductsOrigin[0]->fisico_origen}}" class="form-control-sm form-control" placeholder="0.00" readonly>
+									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
-								<label for="stockOrigen" class="form-label">Stock actual origen</label>
+								<label for="stockOrigen" class="form-label">StockActualOrigen</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockOrigen" name="stockOrigen" value="{{$arrayProductsOrigin[0]->stock_origen}}" class="form-control-sm form-control" placeholder="10.00 kg" readonly>
-									<span class="input-group-text" id="addon-wrapping">KG</span>
+									<input type="text" id="stockOrigen" name="stockOrigen" value=" " class="form-control-sm form-control" placeholder="0.00" readonly>
+									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
-								<label for="pesoKgDestino" class="form-label">Tangible destino</label>
+								<label for="pesoKgDestino" class="form-label">TangibleDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value="{{$arrayProductsDestination[0]->fisico_destino}}" class="form-control-sm form-control" placeholder="180.40 kg" readonly>
-									<span class="input-group-text" id="addon-wrapping">KG</span>
+									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value=" " class="form-control-sm form-control" placeholder="0.00" readonly>
+									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
-								<label for="stockDestino" class="form-label">Stock actual destino</label>
+								<label for="stockDestino" class="form-label">StockActualDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockDestino" name="stockDestino" value="{{$arrayProductsDestination[0]->stock_destino}}" class="form-control-sm form-control" placeholder="10.00 kg" readonly>
-									<span class="input-group-text" id="addon-wrapping">KG</span>
+									<input type="text" id="stockDestino" name="stockDestino" value=" " class="form-control-sm form-control" placeholder="0.00" readonly>
+									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-
 			<div class="widget-content mt-3">
 				<div class="card">
 					<div class="card-body">
@@ -150,13 +144,13 @@
 									<tr>
 										<!--th class="table-th text-white">Item</th>-->
 										<!-- <th class="table-th text-white">#</th> -->
-										<th class="table-th text-white">Cod</th>
+										<th class="table-th text-white">LOTE</th>
 										<th class="table-th text-white">Producto</th>
-										<th class="table-th text-white">Stk act origen</th>
-										<th class="table-th text-white">kg a trasladar</th>
-										<th class="table-th text-white">New stk origen</th>
-										<th class="table-th text-white">Stk act destino</th>
-										<th class="table-th text-white">New stk destino</th>
+										<th class="table-th text-white">StkActOrigen</th>
+										<th class="table-th text-white">kgAtrasladar</th>
+										<th class="table-th text-white">NewStkOrigen</th>
+										<th class="table-th text-white">StkActDestino</th>
+										<th class="table-th text-white">NewStkDestino</th>
 										<th class="table-th text-white text-center">Acciones</th>
 									</tr>
 								</thead>
