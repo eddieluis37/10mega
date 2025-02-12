@@ -106,28 +106,28 @@
 							<div class="col-sm-3">
 								<label for="pesoKgOrigen" class="form-label">TangibleOrigen</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesoKgOrigen" name="pesoKgOrigen" value="{{$arrayProductsOrigin[0]->fisico_origen}}" class="form-control-sm form-control" placeholder="0.00" readonly>
+									<input type="text" id="pesoKgOrigen" name="pesoKgOrigen" value="{{$arrayProductsOrigin[0]->fisico_origen}}" class="form-control form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="stockOrigen" class="form-label">StockActualOrigen</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockOrigen" name="stockOrigen" value=" " class="form-control-sm form-control" placeholder="0.00" readonly>
+									<input type="text" id="stockOrigen" name="stockOrigen" value=" " class="form-control form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="pesoKgDestino" class="form-label">TangibleDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value=" " class="form-control-sm form-control" placeholder="0.00" readonly>
+									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value=" " class="form-control form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="stockDestino" class="form-label">StockActualDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockDestino" name="stockDestino" value=" " class="form-control-sm form-control" placeholder="0.00" readonly>
+									<input type="text" id="stockDestino" name="stockDestino" value=" " class="form-control form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
