@@ -77,7 +77,7 @@ use App\Http\Controllers\caja\pdfCierreCajaController;
 use App\Http\Controllers\producto\productoController;
 use App\Http\Controllers\compensado\pdfCompensadoController;
 use App\Http\Controllers\faster\fasterController;
-use App\Http\Controllers\transfer\TransferController;
+use App\Http\Controllers\transfer\transferController;
 use App\Http\Controllers\workshop\workshopController;
 
 use App\Http\Controllers\costo\costoController;
