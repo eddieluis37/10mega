@@ -4,7 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Middlewares\RoleMiddleware as Role;
-
+use App\Models\MovimientoInventario;
+use App\Observers\MovimientoInventarioObserver;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        MovimientoInventario::observe(MovimientoInventarioObserver::class);
     }
 }
