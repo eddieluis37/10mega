@@ -9,12 +9,15 @@
 <div class="row sales layout-top-spacing">
 	<div class="col-sm-12">
 		<div class="widget widget-chart-one">
-			<div class="row">
-				<div class="col-sm-5">
-					<h4 class="">
-						<b> Traslado </b>
-					</h4>
-				</div>
+			<div class="widget-heading">
+				<h4 class="">
+					<b> Traslado </b>
+				</h4>
+				<ul class="tabs tab-pills">
+					<li>
+						<a href="javascript:void(0)" onclick="window.location.href = '../../transfer'" class="tabmenu bg-dark" data-toggle="modal" data-target="" title="Regresa al listado">Volver</a>
+					</li>
+				</ul>
 			</div>
 			<div class="widget-content mt-3">
 				<div class="card">
