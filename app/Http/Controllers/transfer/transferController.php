@@ -278,10 +278,9 @@ class transferController extends Controller
         $loteId = $request->lote_id;
         $bodegaOrigenId = $request->bodega_origen_id;
 
-        $productos = Product::select('products.id', 'products.name')
-            ->join('lote_products', 'products.id', '=', 'lote_products.product_id')
+        $productos = Product::select('products.id', 'products.name')           
             ->join('inventarios as i', 'i.product_id', '=', 'products.id')
-            ->where('lote_products.lote_id', $loteId)
+            ->where('i.lote_id', $loteId)
             ->where('i.store_id', $bodegaOrigenId) // Filtra por la bodega de origen
             ->where('products.status', '1')
             ->orderBy('products.name', 'asc')
@@ -313,13 +312,15 @@ class transferController extends Controller
             ->where('i.store_id', $bodegaOrigenId)
             ->where('p.status', '1')
             ->where('p.id', $productId)
-            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial')
+            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'costo_unitario', 'costo_total')
             ->first();
 
         if ($producto) {
             return response()->json([
-                'stock' => $producto->stock_ideal,
-                'fisico' => $producto->cantidad_inventario_inicial
+                'stockOrigen' => $producto->stock_ideal,
+                'fisicoOrigen' => $producto->cantidad_inventario_inicial,
+                'costoOrigen' => $producto->costo_unitario,
+                'costoTotalOrigen' => $producto->costo_total,
             ]);
         } else {
             return response()->json([
@@ -350,13 +351,15 @@ class transferController extends Controller
             ->where('i.store_id', $bodegaDestinoId)
             ->where('p.status', '1')
             ->where('p.id', $productId)
-            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial')
+            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'costo_unitario', 'costo_total')
             ->first();
 
         if ($producto) {
             return response()->json([
-                'stock' => $producto->stock_ideal,
-                'fisico' => $producto->cantidad_inventario_inicial
+                'stockDestino' => $producto->stock_ideal,
+                'fisicoDestino' => $producto->cantidad_inventario_inicial,
+                'costoDestino' => $producto->costo_unitario,
+                'costoTotalDestino' => $producto->costo_total,
             ]);
         } else {
             return response()->json([

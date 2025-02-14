@@ -112,7 +112,8 @@ $(document).ready(function () {
 
         // Si no se selecciona un producto, limpiar los campos
         if (!productId) {
-            limpiarCampos();
+            limpiarCamposOrigen();
+            limpiarCamposDestino();
             return;
         }
 
@@ -123,8 +124,11 @@ $(document).ready(function () {
 });
 
 // Función para limpiar los campos
-function limpiarCampos() {
-    $("#stockOrigen, #pesoKgOrigen, #stockDestino, #pesoKgDestino").val('');
+function limpiarCamposOrigen() {
+    $("#stockOrigen, #pesoKgOrigen, #costoOrigen, #costoTotalOrigen").val("");
+}
+function limpiarCamposDestino() {
+    $("#stockDestino, #pesoKgDestino, #costoDestino, #costoTotalDestino").val("");
 }
 
 function actualizarValoresProducto(productId) {
@@ -138,11 +142,13 @@ function actualizarValoresProducto(productId) {
         },
         success: function (response) {
             // Actualizar los valores con los datos recibidos
-            $("#stockOrigen").val(response.stock);
-            $("#pesoKgOrigen").val(response.fisico);
+            $("#stockOrigen").val(response.stockOrigen);
+            $("#pesoKgOrigen").val(response.fisicoOrigen);
+            $("#costoOrigen").val(formatCantidadSinCero(response.costoOrigen));
+            $("#costoTotalOrigen").val(formatCantidadSinCero(response.costoTotalOrigen));
         },
         error: function () {
-            limpiarCampos(); // Si hay un error, limpiar los campos
+            limpiarCamposOrigen(); // Si hay un error, limpiar los campos
         },
     });
 }
@@ -158,15 +164,16 @@ function actualizarValoresProductoDestino(productId) {
         },
         success: function (response) {
             // Actualizar los valores con los datos recibidos
-            $("#stockDestino").val(response.stock);
-            $("#pesoKgDestino").val(response.fisico);
+            $("#stockDestino").val(response.stockDestino);
+            $("#pesoKgDestino").val(response.fisicoDestino);
+            $("#costoDestino").val(formatCantidadSinCero(response.costoDestino));
+            $("#costoTotalDestino").val(formatCantidadSinCero(response.costoTotalDestino));
         },
         error: function () {
-            limpiarCampos(); // Si hay un error, limpiar los campos
+            limpiarCamposDestino(); // Si hay un error, limpiar los campos
         },
     });
 }
-
 
 /* Insertar registros al tableTransfer del detalle. Se activa al darle enter en KG a trasladar o boton btnAddTransfer */
 btnAddTrans.addEventListener("click", (e) => {

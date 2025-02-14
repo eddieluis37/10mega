@@ -113,22 +113,52 @@
 							<div class="col-sm-3">
 								<label for="stockOrigen" class="form-label">StockActualOrigen</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockOrigen" name="stockOrigen" value=" " class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="stockOrigen" name="stockOrigen" value="" class="form-control form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="pesoKgDestino" class="form-label">TangibleDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value=" " class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="stockDestino" class="form-label">StockActualDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockDestino" name="stockDestino" value=" " class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="stockDestino" name="stockDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
+								</div>
+							</div>
+						</div>
+						<div class="row mt-3">
+							<div class="col-sm-3">
+								<label for="costoOrigen" class="form-label">CostoOrigen</label>
+								<div class="input-group flex-nowrap">
+									<span class="input-group-text" id="addon-wrapping">$</span>
+									<input type="text" id="costoOrigen" name="costoOrigen" value="" class="form-control form-control" placeholder="0.00" readonly>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<label for="costoTotalOrigen" class="form-label">CostoTotalOrigen</label>
+								<div class="input-group flex-nowrap">
+									<span class="input-group-text" id="addon-wrapping">$</span>
+									<input type="text" id="costoTotalOrigen" name="costoTotalOrigen" value="" class="form-control form-control" placeholder="0.00" readonly>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<label for="costoDestino" class="form-label">CostoDestino</label>
+								<div class="input-group flex-nowrap">
+									<span class="input-group-text" id="addon-wrapping">$</span>
+									<input type="text" id="costoDestino" name="costoDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<label for="costoTotalDestino" class="form-label">CostoTotalDestino</label>
+								<div class="input-group flex-nowrap">
+									<span class="input-group-text" id="addon-wrapping">$</span>
+									<input type="text" id="costoTotalDestino" name="costoTotalDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
 								</div>
 							</div>
 						</div>
