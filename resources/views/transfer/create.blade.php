@@ -10,7 +10,7 @@
 	<div class="col-sm-12">
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
-				<h4 class="">
+				<h4 class="card-title">
 					<b> Traslado </b>
 				</h4>
 				<ul class="tabs tab-pills">
@@ -70,6 +70,7 @@
 												<option value="{{ $l->id }}">{{ $l->codigo }}</option>
 												@endforeach
 											</select>
+											<span class="text-danger error-message"></span>
 										</div>
 									</div>
 								</div>
@@ -80,14 +81,18 @@
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
 											</select>
+											<span class="text-danger error-message"></span>
 										</div>
 									</div>
 								</div>
 								<div class="col-md-3">
-									<label for="" class="form-label">KG|UND a trasladar</label>
-									<div class="input-group flex-nowrap">
-										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10.00">
-										<span class="input-group-text" id="addon-wrapping">QT</span>
+									<div class="form-group">
+										<label for="" class="form-label">KG|UND a trasladar</label>
+										<div class="input-group flex-nowrap">
+											<input type=" text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10.00">
+											<span class="input-group-text" id="addon-wrapping">QT</span>
+										</div>
+										<span class="text-danger error-message"></span>
 									</div>
 								</div>
 								<div class="col-md-2 text-center">

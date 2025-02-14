@@ -128,7 +128,9 @@ function limpiarCamposOrigen() {
     $("#stockOrigen, #pesoKgOrigen, #costoOrigen, #costoTotalOrigen").val("");
 }
 function limpiarCamposDestino() {
-    $("#stockDestino, #pesoKgDestino, #costoDestino, #costoTotalDestino").val("");
+    $("#stockDestino, #pesoKgDestino, #costoDestino, #costoTotalDestino").val(
+        ""
+    );
 }
 
 function actualizarValoresProducto(productId) {
@@ -145,7 +147,9 @@ function actualizarValoresProducto(productId) {
             $("#stockOrigen").val(response.stockOrigen);
             $("#pesoKgOrigen").val(response.fisicoOrigen);
             $("#costoOrigen").val(formatCantidadSinCero(response.costoOrigen));
-            $("#costoTotalOrigen").val(formatCantidadSinCero(response.costoTotalOrigen));
+            $("#costoTotalOrigen").val(
+                formatCantidadSinCero(response.costoTotalOrigen)
+            );
         },
         error: function () {
             limpiarCamposOrigen(); // Si hay un error, limpiar los campos
@@ -166,8 +170,12 @@ function actualizarValoresProductoDestino(productId) {
             // Actualizar los valores con los datos recibidos
             $("#stockDestino").val(response.stockDestino);
             $("#pesoKgDestino").val(response.fisicoDestino);
-            $("#costoDestino").val(formatCantidadSinCero(response.costoDestino));
-            $("#costoTotalDestino").val(formatCantidadSinCero(response.costoTotalDestino));
+            $("#costoDestino").val(
+                formatCantidadSinCero(response.costoDestino)
+            );
+            $("#costoTotalDestino").val(
+                formatCantidadSinCero(response.costoTotalDestino)
+            );
         },
         error: function () {
             limpiarCamposDestino(); // Si hay un error, limpiar los campos
@@ -190,7 +198,17 @@ btnAddTrans.addEventListener("click", (e) => {
             showData(result);
         }
         if (result.status === 0) {
-            errorMessage("Tienes vacios");
+            let errors = result.errors;
+            console.log(errors);
+            $.each(errors, function (field, messages) {
+                console.log(field, messages);
+                let $input = $('[name="' + field + '"]');
+                let $errorContainer = $input
+                    .closest(".form-group")
+                    .find(".error-message");
+                $errorContainer.html(messages[0]);
+                $errorContainer.show();
+            });
         }
     });
 });

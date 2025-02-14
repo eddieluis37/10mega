@@ -57,20 +57,27 @@ class alistamientoController extends Controller
                 'fecha' => 'required|date',
                 'inputstore' => 'required|exists:stores,id',
                 'inputlote' => 'required|exists:lotes,id',
-                'select2corte' => 'required|exists:products,id',
-                'cantidadprocesar' => 'required|numeric|min:0',
+                'select2corte' => 'required|exists:products,id',               
+                'cantidadprocesar' => [
+                    'required',
+                    'numeric',
+                    'regex:/^\d+(\.\d{1,2})?$/',
+                    'min:0.1',
+                ],
+
             ];
             $messages = [
                 'fecha.required' => 'La fecha es requerida.',
                 'inputstore.required' => 'La bodega es requerida.',
                 'inputlote.required' => 'El lote es requerido.',
                 'select2corte.required' => 'El corte padre es requerido.',
-                'cantidadprocesar.required' => 'La cantidad a procesar es requerida.',
-                'cantidadprocesar.numeric' => 'La cantidad a procesar debe ser un número.',
-                'cantidadprocesar.min' => 'La cantidad a procesar no puede ser negativa.',
                 'inputstore.exists' => 'La bodega seleccionada no existe.',
                 'inputlote.exists' => 'El lote seleccionado no existe.',
                 'select2corte.exists' => 'El corte padre seleccionado no existe.',
+                'cantidadprocesar.required' => 'La cantidad a procesar es requerida.',
+                'cantidadprocesar.numeric' => 'La cantidad a procesar debe ser un número.',
+                'cantidadprocesar.min' => 'La cantidad a procesar debe ser mayor a 0.1.',
+                'cantidadprocesar.max' => 'La cantidad a procesar no puede ser mayor al stock disponible.',
             ];
 
             // Validar la solicitud
@@ -768,8 +775,8 @@ class alistamientoController extends Controller
 
             // 3. Obtener los detalles de alistamiento
             $detallesAlistamiento = enlistment_details::where('enlistments_id', $alistamientoId)
-            ->where('status', '1')
-            ->get();
+                ->where('status', '1')
+                ->get();
             Log::info('DetalleAlistamiento:', ['detalle' => $detallesAlistamiento]);
 
             // 4. Asociar productos al lote hijo en la tabla lote_products

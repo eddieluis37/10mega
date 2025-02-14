@@ -371,14 +371,15 @@ class transferController extends Controller
     public function savedetail(Request $request)
     {
         try {
-
             $rules = [
-                'kgrequeridos' => 'required',
                 'producto' => 'required',
+                'kgrequeridos' => 'required|numeric|min:0',           
             ];
-            $messages = [
-                'kgrequeridos.required' => 'Los kg requeridos son necesarios',
-                'producto.required' => 'El producto es requerido',
+            $messages = [                
+                'producto.required' => 'El producto es requerido',                
+                'kgrequeridos.required' => 'La cantidad a trasladar es requerida.',
+                'kgrequeridos.numeric' => 'La cantidad a trasladar debe ser un número.',
+                'kgrequeridos.min' => 'La cantidad a trasladar no puede ser negativa.',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
