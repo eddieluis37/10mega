@@ -98,14 +98,6 @@ $(document).ready(function () {
     });
 });
 
-/* 
-$(".select2Prod").select2({
-    placeholder: "Busca un producto",
-    width: "100%",
-    theme: "bootstrap-5",
-    allowClear: true,
-});
-*/
 $(document).ready(function () {
     $("#producto").change(function () {
         var productId = $(this).val();
@@ -225,20 +217,20 @@ const showData = (data) => {
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
     	    <tr>      	
-      	    <td>${element.code}</td>
+      	    <td>${element.codigo}</td>
       	    <td>${element.nameprod}</td>
-      	    <td>${formatCantidad(element.stock)} KG</td>
+      	    <td>${formatCantidad(element.actual_stock_origen)}</td>
               <td>
               <input type="text" class="form-control-sm" data-id="${
                   element.products_id
               }" id="${element.id}" value="${
             element.kgrequeridos
-        }" placeholder="Ingresar" size="10">
+        }" placeholder="Ingresar" size="5">
               </td>
-      	    <td>${formatCantidad(element.nuevo_stock_origen)} KG</td>
+      	    <td>${formatCantidad(element.nuevo_stock_origen)}</td>
       	    
-      	    <td>${formatCantidad(element.actual_stock_destino)} KG</td>
-            <td>${formatCantidad(element.nuevo_stock_destino)} KG</td>
+      	    <td>${formatCantidad(element.actual_stock_destino)}</td>
+            <td>${formatCantidad(element.nuevo_stock_destino)}</td>
 			<td class="text-center">
 				<button class="btn btn-dark fas fa-trash" name="btnDownReg" data-id="${
                     element.id
@@ -254,11 +246,12 @@ const showData = (data) => {
     tableFoot.innerHTML = "";
     tableFoot.innerHTML += `
 	    <tr>
-		    <td></td>
+		 <th>Totales</th>  
+            <td></td>
 		    <td></td>           
-		    <th>Totales</th>		  		   
-		    <th>${formatCantidad(arrayTotales.kgTotalRequeridos)} KG</td>
-		    <th>${formatCantidad(arrayTotales.newTotalStock)} KG</th>
+		   		  		   
+		    <th>${formatCantidad(arrayTotales.kgTotalRequeridos)}</td>
+		    <th>${formatCantidad(arrayTotales.newTotalStock)}</th>
             <td></td>
             <td></td>	    
 		    <td class="text-center">

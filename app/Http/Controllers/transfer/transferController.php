@@ -474,8 +474,23 @@ class transferController extends Controller
                     'numeric',
                     'regex:/^\d+(\.\d{1,2})?$/',
                     'min:0.1',
+                    // Regla personalizada: no permitir que kgrequeridos sea mayor al stock_ideal en bodega origen.
+                    function ($attribute, $value, $fail) use ($bodegaOrigenId, $loteId, $productId) {
+                        $prodOrigen = DB::table('inventarios as i')
+                            ->join('products as p', 'i.product_id', '=', 'p.id')
+                            ->where('i.store_id', $bodegaOrigenId)
+                            ->where('i.lote_id', $loteId)
+                            ->where('p.status', '1')
+                            ->where('p.id', $productId)
+                            ->select('i.stock_ideal')
+                            ->first();
+                        if ($prodOrigen && $value > $prodOrigen->stock_ideal) {
+                            $fail('La cantidad a trasladar no puede ser mayor al stock disponible en origen.');
+                        }
+                    },
                 ],
             ];
+
             $messages = [
                 'producto.required' => 'El producto es requerido',
                 'kgrequeridos.required' => 'La cantidad a trasladar es requerida.',
@@ -490,7 +505,7 @@ class transferController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-
+            
             // Obtener producto en bodega origen
             $prodOrigen = DB::table('inventarios as i')
                 ->join('products as p', 'i.product_id', '=', 'p.id')
@@ -527,10 +542,11 @@ class transferController extends Controller
             $details = new transfer_details();
             $details->transfers_id = $request->transferId;
             $details->lote_prod_traslado_id = $loteId;
+            $details->product_id = $productId;
             $details->kgrequeridos = $formatkgrequeridos;
             $details->actual_stock_origen = $request->stockOrigen;
             $details->nuevo_stock_origen = $newStockOrigen;
-            $details->actual_stock_destino = $request->stockDestino;
+            $details->actual_stock_destino = $stockDestino;
             $details->nuevo_stock_destino = $newStockDestino;
             $details->save();
 
@@ -578,27 +594,24 @@ class transferController extends Controller
     public function gettransferdetail($id)
     {
         return DB::table('transfer_details as td')
-        ->join('inventarios as i', 'td.lote_prod_traslado_id', '=', 'i.lote_id')
-        ->join('lotes as l', 'l.id', '=', 'i.lote_id')
-        ->join('products as p', 'i.product_id', '=', 'p.id')
-        ->select(
-            'l.codigo', 
-            'td.id', 
-            'td.kgrequeridos', 
-            'td.actual_stock_origen', 
-            'td.nuevo_stock_origen', 
-            'td.actual_stock_destino', 
-            'td.nuevo_stock_destino', 
-            'p.id as products_id', 
-            'p.name as nameprod', 
-            'p.code',
-            'i.store_id' // Se incluye store_id si es relevante
-        )
-        ->where('td.transfers_id', $id)
-        ->where('td.status', '1')
-        ->whereColumn('i.product_id', 'p.id') // Asegura la relación correcta
-        ->get();
+            ->join('lotes as l', 'td.lote_prod_traslado_id', '=', 'l.id')
+            ->join('products as p', 'td.product_id', '=', 'p.id')
+            ->select(
+                'l.codigo',
+                'td.id',
+                'td.kgrequeridos',
+                'td.actual_stock_origen',
+                'td.nuevo_stock_origen',
+                'td.actual_stock_destino',
+                'td.nuevo_stock_destino',
+                'p.id as products_id',
+                'p.name as nameprod',
+            )
+            ->where('td.transfers_id', $id)
+            ->where('td.status', '1')
+            ->get();
     }
+
 
 
 

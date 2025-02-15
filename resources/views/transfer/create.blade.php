@@ -185,7 +185,7 @@
 										<th class="table-th text-white">LOTE</th>
 										<th class="table-th text-white">Producto</th>
 										<th class="table-th text-white">StkActOrigen</th>
-										<th class="table-th text-white">kgAtrasladar</th>
+										<th class="table-th text-white">QTAtrasladar</th>
 										<th class="table-th text-white">NewStkOrigen</th>
 										<th class="table-th text-white">StkActDestino</th>
 										<th class="table-th text-white">NewStkDestino</th>
@@ -196,12 +196,12 @@
 									@foreach($transfers as $proddetail)
 									<tr>
 										<!-- <td>{{$proddetail->id}}</td> -->
-										<td>{{$proddetail->code}}</td>
+										<td>{{$proddetail->codigo}}</td>
 										<td>{{$proddetail->nameprod}}</td>
 										<td>{{ number_format($proddetail->actual_stock_origen, 2, ',', '.')}}</td>
 										<td>
 											@if($status == 'true' && $statusInventory == 'false')
-											<input type="text" class="form-control-sm" data-id="{{$proddetail->products_id}}" id="{{$proddetail->id}}" value="{{$proddetail->kgrequeridos}}" placeholder="Ingresar" size="10">
+											<input type="text" class="form-control-sm" data-id="{{$proddetail->products_id}}" id="{{$proddetail->id}}" value="{{$proddetail->kgrequeridos}}" placeholder="Ingresar" size="5">
 											@else
 											<p>{{number_format($proddetail->kgrequeridos, 2, ',', '.')}}</p>
 											@endif
@@ -226,9 +226,9 @@
 								</tbody>
 								<tfoot id="tabletfoot">
 									<tr>
-										<th></th>
-										<th></th>
 										<th>Totales</th>
+										<th></th>
+										<th></th>
 										<th> {{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}}</th>
 										<th> {{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}}</th>
 										<th></th>
