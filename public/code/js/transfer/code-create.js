@@ -188,6 +188,7 @@ btnAddTrans.addEventListener("click", (e) => {
     e.preventDefault();
     const dataform = new FormData(formDetail);
     dataform.append("stockOrigen", stockOrigen.value);
+    dataform.append("bodegaOrigen", bodegaOrigen.value);
     dataform.append("bodegaDestino", bodegaDestino.value);
     dataform.append("stockDestino", stockDestino.value);
     sendData("/transfersavedetail", dataform, token).then((result) => {

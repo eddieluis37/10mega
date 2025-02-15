@@ -4,6 +4,8 @@ namespace App\Http\Controllers\transfer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 use App\Models\centros\Centrocosto;
 use App\Models\Category;
 use App\Models\transfer\Transfer;
@@ -278,7 +280,7 @@ class transferController extends Controller
         $loteId = $request->lote_id;
         $bodegaOrigenId = $request->bodega_origen_id;
 
-        $productos = Product::select('products.id', 'products.name')           
+        $productos = Product::select('products.id', 'products.name')
             ->join('inventarios as i', 'i.product_id', '=', 'products.id')
             ->where('i.lote_id', $loteId)
             ->where('i.store_id', $bodegaOrigenId) // Filtra por la bodega de origen
@@ -368,18 +370,28 @@ class transferController extends Controller
         }
     }
 
-    public function savedetail(Request $request)
+    public function savedetailOriginal(Request $request)
     {
+        $bodegaOrigenId = $request->input('bodegaOrigen'); // 16
+        $bodegaDestinoId = $request->input('bodegaDestino');
+        $loteId = $request->input('lote'); //18
+        $productId = $request->input('producto'); // 297     
+
         try {
             $rules = [
                 'producto' => 'required',
-                'kgrequeridos' => 'required|numeric|min:0',           
+                'kgrequeridos' => [
+                    'required',
+                    'numeric',
+                    'regex:/^\d+(\.\d{1,2})?$/',
+                    'min:0.1',
+                ],
             ];
-            $messages = [                
-                'producto.required' => 'El producto es requerido',                
+            $messages = [
+                'producto.required' => 'El producto es requerido',
                 'kgrequeridos.required' => 'La cantidad a trasladar es requerida.',
                 'kgrequeridos.numeric' => 'La cantidad a trasladar debe ser un número.',
-                'kgrequeridos.min' => 'La cantidad a trasladar no puede ser negativa.',
+                'kgrequeridos.min' => 'La cantidad a trasladar debe ser mayor a 0.1.',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -390,33 +402,34 @@ class transferController extends Controller
                 ], 422);
             }
 
-            $prodOrigen = DB::table('products as p')
-                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('ce.stock', 'ce.fisico')
-                ->where([
-                    ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->bodegaOrigen],
-                    ['p.status', 1],
-                ])->get();
+            $prodOrigen = DB::table('inventarios as i')
+                ->join('products as p', 'i.product_id', '=', 'p.id')
+                ->where('i.store_id', $bodegaOrigenId)
+                ->where('i.lote_id', $loteId)
+                ->where('p.status', '1')
+                ->where('p.id', $productId)
+                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
+                ->get();
 
-            $prodDestino = DB::table('products as p')
-                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('ce.stock', 'ce.fisico')
-                ->where([
-                    ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->bodegaDestino],
-                    ['p.status', 1],
-                ])->get();
+            $prodDestino = DB::table('inventarios as i')
+                ->join('products as p', 'i.product_id', '=', 'p.id')
+                ->where('i.store_id', $bodegaDestinoId)
+                ->where('i.lote_id', $loteId)
+                ->where('p.status', '1')
+                ->where('p.id', $productId)
+                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
+                ->get();
 
             $formatCantidad = new metodosrogercodeController();
             //$prod = Product::firstWhere('id', $request->producto);
 
             $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
-            $newStockOrigen = $prodOrigen[0]->stock - $formatkgrequeridos;
-            $newStockDestino = $prodDestino[0]->stock + $formatkgrequeridos;
+            $newStockOrigen = $prodOrigen[0]->stock_ideal - $formatkgrequeridos;
+            $newStockDestino = $prodDestino[0]->stock_ideal + $formatkgrequeridos;
 
             $details = new transfer_details();
             $details->transfers_id = $request->transferId;
+            $details->lote_prod_traslado_id = $loteId;
             $details->kgrequeridos = $formatkgrequeridos;
             $details->actual_stock_origen = $request->stockOrigen;
             $details->nuevo_stock_origen = $newStockOrigen;
@@ -446,21 +459,148 @@ class transferController extends Controller
         }
     }
 
-    public function gettransferdetail($transferId, $centrocostoDestinoId)
+    public function savedetail(Request $request)
+    {
+        $bodegaOrigenId = $request->input('bodegaOrigen');
+        $bodegaDestinoId = $request->input('bodegaDestino');
+        $loteId = $request->input('lote');
+        $productId = $request->input('producto');
+
+        try {
+            $rules = [
+                'producto' => 'required',
+                'kgrequeridos' => [
+                    'required',
+                    'numeric',
+                    'regex:/^\d+(\.\d{1,2})?$/',
+                    'min:0.1',
+                ],
+            ];
+            $messages = [
+                'producto.required' => 'El producto es requerido',
+                'kgrequeridos.required' => 'La cantidad a trasladar es requerida.',
+                'kgrequeridos.numeric' => 'La cantidad a trasladar debe ser un número.',
+                'kgrequeridos.min' => 'La cantidad a trasladar debe ser mayor a 0.1.',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Obtener producto en bodega origen
+            $prodOrigen = DB::table('inventarios as i')
+                ->join('products as p', 'i.product_id', '=', 'p.id')
+                ->where('i.store_id', $bodegaOrigenId)
+                ->where('i.lote_id', $loteId)
+                ->where('p.status', '1')
+                ->where('p.id', $productId)
+                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
+                ->first();
+
+            // Obtener producto en bodega destino
+            $prodDestino = DB::table('inventarios as i')
+                ->join('products as p', 'i.product_id', '=', 'p.id')
+                ->where('i.store_id', $bodegaDestinoId)
+                ->where('i.lote_id', $loteId)
+                ->where('p.status', '1')
+                ->where('p.id', $productId)
+                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
+                ->first();
+
+            // Asignar valores por defecto si prodDestino es null
+            $stockDestino = optional($prodDestino)->stock_ideal ?? 0;
+            $cantidadInventarioDestino = optional($prodDestino)->cantidad_inventario_inicial ?? 0;
+
+            // Instancia para formateo de números
+            $formatCantidad = new metodosrogercodeController();
+            $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
+
+            // Calcular nuevos stocks
+            $newStockOrigen = optional($prodOrigen)->stock_ideal - $formatkgrequeridos;
+            $newStockDestino = $stockDestino + $formatkgrequeridos;
+
+            // Guardar detalle de traslado
+            $details = new transfer_details();
+            $details->transfers_id = $request->transferId;
+            $details->lote_prod_traslado_id = $loteId;
+            $details->kgrequeridos = $formatkgrequeridos;
+            $details->actual_stock_origen = $request->stockOrigen;
+            $details->nuevo_stock_origen = $newStockOrigen;
+            $details->actual_stock_destino = $request->stockDestino;
+            $details->nuevo_stock_destino = $newStockDestino;
+            $details->save();
+
+            // Obtener detalles y totales
+            $arraydetail = $this->gettransferdetail($request->transferId, $request->bodegaOrigen);
+            $arrayTotales = $this->sumTotales($request->transferId);
+
+            // Actualizar nuevo stock en la transferencia
+            $newStockOrigen = $request->stockOrigen - $arrayTotales['kgTotalRequeridos'];
+            $tranf = Transfer::firstWhere('id', $request->transferId);
+            $tranf->save();
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Agregado correctamente",
+                'array' => $arraydetail,
+                'arrayTotales' => $arrayTotales,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'error' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    public function gettransferdetailVersion3($id)
     {
         $detail = DB::table('transfer_details as td')
-            ->join('lote_products as lp', 'td.lote_prod_traslado_id', '=', 'lp.id')
-            ->join('products as p', 'lp.product_id', '=', 'p.id')
-            ->join('centro_costo_products as ce', 'lp.id', '=', 'ce.products_id')
-            ->select('td.*', 'p.name as nameprod', 'p.code', 'ce.stock', 'ce.fisico')
+            ->join('inventarios as i', 'td.lote_prod_traslado_id', '=', 'i.lote_id')
+            ->join('lotes as l', 'l.id', '=', 'i.lote_id')
+            ->join('products as p', 'i.product_id', '=', 'p.id')
+
+            ->select('l.codigo', 'td.*', 'p.id as products_id', 'p.name as nameprod', 'p.code')
             ->where([
-                ['ce.centrocosto_id', $centrocostoDestinoId],
-                ['td.transfers_id', $transferId],
-                ['td.status', 1],
+                ['td.transfers_id', $id],
+
+                ['td.status', '1'],
             ])->get();
 
         return $detail;
     }
+
+    public function gettransferdetail($id)
+    {
+        return DB::table('transfer_details as td')
+        ->join('inventarios as i', 'td.lote_prod_traslado_id', '=', 'i.lote_id')
+        ->join('lotes as l', 'l.id', '=', 'i.lote_id')
+        ->join('products as p', 'i.product_id', '=', 'p.id')
+        ->select(
+            'l.codigo', 
+            'td.id', 
+            'td.kgrequeridos', 
+            'td.actual_stock_origen', 
+            'td.nuevo_stock_origen', 
+            'td.actual_stock_destino', 
+            'td.nuevo_stock_destino', 
+            'p.id as products_id', 
+            'p.name as nameprod', 
+            'p.code',
+            'i.store_id' // Se incluye store_id si es relevante
+        )
+        ->where('td.transfers_id', $id)
+        ->where('td.status', '1')
+        ->whereColumn('i.product_id', 'p.id') // Asegura la relación correcta
+        ->get();
+    }
+
+
 
     public function sumTotales($id)
     {

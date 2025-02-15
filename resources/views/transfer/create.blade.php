@@ -198,20 +198,20 @@
 										<!-- <td>{{$proddetail->id}}</td> -->
 										<td>{{$proddetail->code}}</td>
 										<td>{{$proddetail->nameprod}}</td>
-										<td>{{ number_format($proddetail->stock, 2, ',', '.')}} KG</td>
+										<td>{{ number_format($proddetail->actual_stock_origen, 2, ',', '.')}}</td>
 										<td>
 											@if($status == 'true' && $statusInventory == 'false')
 											<input type="text" class="form-control-sm" data-id="{{$proddetail->products_id}}" id="{{$proddetail->id}}" value="{{$proddetail->kgrequeridos}}" placeholder="Ingresar" size="10">
 											@else
-											<p>{{number_format($proddetail->kgrequeridos, 2, ',', '.')}} KG</p>
+											<p>{{number_format($proddetail->kgrequeridos, 2, ',', '.')}}</p>
 											@endif
 										</td>
 
-										<td>{{ number_format($proddetail->nuevo_stock_origen, 2, ',', '.')}} KG</td>
+										<td>{{ number_format($proddetail->nuevo_stock_origen, 2, ',', '.')}}</td>
 
-										<td>{{ number_format($proddetail->actual_stock_destino, 2, ',', '.')}} KG</td>
+										<td>{{ number_format($proddetail->actual_stock_destino, 2, ',', '.')}}</td>
 
-										<td>{{ number_format($proddetail->nuevo_stock_destino, 2, ',', '.')}} KG</td>
+										<td>{{ number_format($proddetail->nuevo_stock_destino, 2, ',', '.')}}</td>
 										<td class="text-center">
 											@if($status == 'true' && $statusInventory == 'false')
 											<button type="button" name="btnDownReg" data-id="{{$proddetail->id}}" class="btn btn-dark btn-sm fas fa-trash" title="Cancelar">
@@ -229,13 +229,13 @@
 										<th></th>
 										<th></th>
 										<th>Totales</th>
-										<th> {{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}} KG</th>
-										<th> {{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}} KG</th>
+										<th> {{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}}</th>
+										<th> {{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}}</th>
 										<th></th>
 										<th></th>
 										<th class="text-center">
 											@if($dataTransfer[0]->inventario == 'pending')
-											<button class="btn btn-success btn-sm" id="addShopping">Afectar inventario</button>
+											<button class="btn btn-success btn-sm" id="addShopping">Iniciar_Traslado</button>
 											@endif
 										</th>
 									</tr>
