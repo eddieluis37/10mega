@@ -89,7 +89,7 @@
 									<div class="form-group">
 										<label for="" class="form-label">KG|UND a trasladar</label>
 										<div class="input-group flex-nowrap">
-											<input type=" text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10.00">
+											<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control" placeholder="EJ: 10.00">
 											<span class="input-group-text" id="addon-wrapping">QT</span>
 										</div>
 										<span class="text-danger error-message"></span>
@@ -189,6 +189,8 @@
 										<th class="table-th text-white">NewStkOrigen</th>
 										<th class="table-th text-white">StkActDestino</th>
 										<th class="table-th text-white">NewStkDestino</th>
+										<th class="table-th text-white">CostoUnit</th>
+										<th class="table-th text-white">Subtotal</th>
 										<th class="table-th text-white text-center">Acciones</th>
 									</tr>
 								</thead>
@@ -212,6 +214,8 @@
 										<td>{{ number_format($proddetail->actual_stock_destino, 2, ',', '.')}}</td>
 
 										<td>{{ number_format($proddetail->nuevo_stock_destino, 2, ',', '.')}}</td>
+										<td>${{ number_format($proddetail->costo_unitario_origen, 0, ',', '.')}}</td>
+										<td>${{ number_format($proddetail->subtotal_traslado, 0, ',', '.')}}</td>
 										<td class="text-center">
 											@if($status == 'true' && $statusInventory == 'false')
 											<button type="button" name="btnDownReg" data-id="{{$proddetail->id}}" class="btn btn-dark btn-sm fas fa-trash" title="Cancelar">
@@ -233,6 +237,8 @@
 										<th> {{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}}</th>
 										<th></th>
 										<th></th>
+										<th></th>
+										<th></th>
 										<th class="text-center">
 											@if($dataTransfer[0]->inventario == 'pending')
 											<button class="btn btn-success btn-sm" id="addShopping">Iniciar_Traslado</button>
@@ -248,6 +254,22 @@
 		</div>
 	</div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {      
+
+        // Limpiar mensajes de error al seleccionar un campo
+        $('#producto').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        }); 
+		// Limpiar mensajes de error del campo kgrequeridos
+
+		$('#kgrequeridos').change(function() {         
+			$(this).siblings('.error-message').text(''); // Limpiar mensaje de error			
+        }); 
+        
+    });
+</script>
 @endsection
 @section('script')
 <script src="{{asset('code/js/transfer/code-create.js')}}" type="module"></script>

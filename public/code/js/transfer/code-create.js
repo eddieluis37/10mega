@@ -1,12 +1,12 @@
-import { sendData } from "../../../rogercode/js/exportModule/core/rogercode-core.js";
+import { sendData } from "../exportModule/core/rogercode-core.js";
 import {
     successToastMessage,
     errorMessage,
-} from "../../../rogercode/js/exportModule/message/rogercode-message.js";
+} from "../exportModule/message/rogercode-message.js";
 import {
     loadingStart,
     loadingEnd,
-} from "../../../rogercode/js/exportModule/core/rogercode-core.js";
+} from "../exportModule/core/rogercode-core.js";
 const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
@@ -189,6 +189,9 @@ btnAddTrans.addEventListener("click", (e) => {
             $("#producto").val("").trigger("change");
             formDetail.reset();
             showData(result);
+            limpiarCamposOrigen();
+            limpiarCamposDestino();
+            successToastMessage(result.message);
         }
         if (result.status === 0) {
             let errors = result.errors;
@@ -231,6 +234,8 @@ const showData = (data) => {
       	    
       	    <td>${formatCantidad(element.actual_stock_destino)}</td>
             <td>${formatCantidad(element.nuevo_stock_destino)}</td>
+            <td>$${formatCantidadSinCero(element.costo_unitario_origen)}</td>
+            <td>$${formatCantidadSinCero(element.subtotal_traslado)}</td>
 			<td class="text-center">
 				<button class="btn btn-dark fas fa-trash" name="btnDownReg" data-id="${
                     element.id
@@ -253,9 +258,11 @@ const showData = (data) => {
 		    <th>${formatCantidad(arrayTotales.kgTotalRequeridos)}</td>
 		    <th>${formatCantidad(arrayTotales.newTotalStock)}</th>
             <td></td>
+            <td></td>	
+            <td></td>
             <td></td>	    
 		    <td class="text-center">
-                <button class="btn btn-success btn-sm" id="addShopping">Afectar inventario</button>
+                <button class="btn btn-success btn-sm" id="addShopping">Afectar_Inventario</button>
             </td>
 	    </tr>
     `;

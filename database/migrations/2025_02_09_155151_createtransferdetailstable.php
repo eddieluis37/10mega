@@ -34,6 +34,10 @@ class CreateTransferDetailsTable extends Migration
 
             $table->decimal('nuevo_stock_destino', 18, 2)->nullable();
 
+            $table->decimal('costo_unitario_origen', 18, 2)->nullable();
+
+            $table->decimal('subtotal_traslado', 18, 2)->nullable();
+
             $table->boolean('status')->parent_select()->default(true)->nullable();  
 
             $table->timestamps();

@@ -505,7 +505,7 @@ class transferController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            
+
             // Obtener producto en bodega origen
             $prodOrigen = DB::table('inventarios as i')
                 ->join('products as p', 'i.product_id', '=', 'p.id')
@@ -537,6 +537,11 @@ class transferController extends Controller
             // Calcular nuevos stocks
             $newStockOrigen = optional($prodOrigen)->stock_ideal - $formatkgrequeridos;
             $newStockDestino = $stockDestino + $formatkgrequeridos;
+            
+            // Calcular subtotal costo traslado
+            $costoUnitarioOrigen = optional($prodOrigen)->costo_unitario ?? 0;
+            $subTotalTraslado = $formatkgrequeridos * $costoUnitarioOrigen;
+
 
             // Guardar detalle de traslado
             $details = new transfer_details();
@@ -548,6 +553,8 @@ class transferController extends Controller
             $details->nuevo_stock_origen = $newStockOrigen;
             $details->actual_stock_destino = $stockDestino;
             $details->nuevo_stock_destino = $newStockDestino;
+            $details->costo_unitario_origen = $costoUnitarioOrigen;
+            $details->subtotal_traslado = $subTotalTraslado;
             $details->save();
 
             // Obtener detalles y totales
@@ -604,6 +611,8 @@ class transferController extends Controller
                 'td.nuevo_stock_origen',
                 'td.actual_stock_destino',
                 'td.nuevo_stock_destino',
+                'td.costo_unitario_origen',
+                'td.subtotal_traslado',
                 'p.id as products_id',
                 'p.name as nameprod',
             )
