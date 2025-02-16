@@ -20,7 +20,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Products\Meatcut;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
+use App\Models\Inventario;
 use App\Models\Lote;
+use App\Models\MovimientoInventario;
 use App\Models\updating\updating_transfer;
 use App\Models\updating\updating_transfer_details;
 
@@ -852,6 +854,131 @@ class transferController extends Controller
     }
 
     public function add_shopping(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'transferId'    => 'required|exists:transfers,id',
+            'stockOrigen'   => 'required|numeric',
+            'bodegaOrigen'  => 'required|exists:stores,id',
+            'bodegaDestino' => 'required|exists:stores,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Datos inválidos.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $transferId    = $request->input('transferId');
+            $bodegaOrigen  = $request->input('bodegaOrigen');
+            $bodegaDestino = $request->input('bodegaDestino');
+
+            // Obtener la transferencia activa (status = '1')
+            $transfer = Transfer::where('id', $transferId)
+                ->where('status', '1')
+                ->first();
+            if (!$transfer) {
+                throw new \Exception("Transferencia no encontrada o no está activa.");
+            }
+
+            // Obtener los detalles de la transferencia activos (status = '1')
+            $transferDetails = transfer_details::where('transfers_id', $transferId)
+                ->where('status', '1')
+                ->get();
+
+            foreach ($transferDetails as $detail) {
+                $loteId    = $detail->lote_prod_traslado_id;
+                $productId = $detail->product_id;
+                $quantity  = $detail->kgrequeridos; // Cantidad a trasladar
+
+                /*** PROCESO EN BODEGA ORIGEN ***/
+                // Obtener el inventario de origen
+                $inventarioOrigen = Inventario::where('store_id', $bodegaOrigen)
+                    ->where('lote_id', $loteId)
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if (!$inventarioOrigen) {
+                    throw new \Exception("No se encontró inventario en la bodega de origen para el producto ID {$productId} y lote ID {$loteId}.");
+                }
+
+                // Actualizar stock ideal en origen (se resta la cantidad trasladada)
+                $inventarioOrigen->stock_ideal -= $quantity;
+                // Acumular la cantidad trasladada en salida
+                $inventarioOrigen->cantidad_traslado_salida = ($inventarioOrigen->cantidad_traslado_salida ?? 0) + $quantity;
+                $inventarioOrigen->save();
+
+                // Registrar movimiento de traslado salida (almacena transferId)
+                MovimientoInventario::create([
+                    'tipo'             => 'traslado_salida',
+                    'transfer_id'      => $transferId,
+                    'store_destino_id' => $bodegaOrigen, // Bodega que sufre la salida
+                    'lote_id'          => $loteId,   
+                    'product_id'       => $productId,   
+                ]);
+
+                /*** PROCESO EN BODEGA DESTINO ***/
+                // Obtener (o crear) el inventario en destino
+                $inventarioDestino = Inventario::where('store_id', $bodegaDestino)
+                    ->where('lote_id', $loteId)
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if ($inventarioDestino) {
+                    // Sumar la cantidad trasladada
+                    $inventarioDestino->stock_ideal += $quantity;
+                    // Acumular la cantidad trasladada en ingreso
+                    $inventarioDestino->cantidad_traslado_ingreso = ($inventarioDestino->cantidad_traslado_ingreso ?? 0) + $quantity;
+                    $inventarioDestino->save();
+                } else {
+                    // Crear un nuevo registro de inventario para la bodega destino
+                    $inventarioDestino = Inventario::create([
+                        'store_id'                  => $bodegaDestino,
+                        'lote_id'                   => $loteId,
+                        'product_id'                => $productId,
+                        'stock_ideal'               => $quantity,
+                        'cantidad_traslado_ingreso' => $quantity,
+                        // Otros campos (como cantidad_inventario_inicial, costo, etc.) se pueden inicializar según convenga
+                    ]);
+                }
+
+                // Registrar movimiento de traslado ingreso (almacena transferId)
+                MovimientoInventario::create([
+                    'tipo'             => 'traslado_ingreso',
+                    'transfer_id'      => $transferId,
+                    'store_destino_id' => $bodegaDestino,
+                    'lote_id'          => $loteId,                                        
+                    'product_id'       => $productId,
+                    'cantidad'         => $quantity,                  
+                ]);
+            }
+
+            // (Opcional) Actualizar el estado de la transferencia (por ejemplo, marcarla como completada)
+            $transfer->inventario = 'added';
+            $transfer->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Inventario actualizado correctamente.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Error al actualizar el inventario.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+    public function add_shoppingOriginal(Request $request)
     {
         try {
             $id_user = Auth::user()->id;

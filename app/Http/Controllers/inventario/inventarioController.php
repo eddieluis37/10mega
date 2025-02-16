@@ -114,8 +114,8 @@ class inventarioController extends Controller
                     'alistamiento' => $enlistments,
                     'compensados' => $compensadores,
                     'ProductoTerminado' => $inventario->cantidad_prod_term,                
-                    'trasladoing' => 0,
-                    'trasladosal' => 0,
+                    'trasladoing' => $trasladoIngreso,
+                    'trasladosal' => $trasladoSalida,
 
                     'venta' => 0,
                     'notacredito' => 0,

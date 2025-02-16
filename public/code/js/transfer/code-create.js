@@ -370,16 +370,13 @@ tfootTable.addEventListener("click", (e) => {
         //added to inventory
         console.log("click");
         loadingStart(element);
+        // Preparar los datos a enviar
         const dataform = new FormData();
         dataform.append("transferId", Number(transferId.value));
-
-        // dataform.append("newStockOrigen", Number(newStockOrigen.value));
-        //  dataform.append("pesokg", Number(pesokg.value));
         dataform.append("stockOrigen", Number(stockOrigen.value));
-        //   dataform.append("productoPadre", Number(productoPadre.value));
         dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
         dataform.append("bodegaDestino", Number(bodegaDestino.value));
-        //   dataform.append("categoryId", Number(categoryId.value));
+        
         sendData("/transferAddShoping", dataform, token).then((result) => {
             console.log(result);
             if (result.status == 1) {
