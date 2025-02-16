@@ -537,7 +537,7 @@ class transferController extends Controller
             // Calcular nuevos stocks
             $newStockOrigen = optional($prodOrigen)->stock_ideal - $formatkgrequeridos;
             $newStockDestino = $stockDestino + $formatkgrequeridos;
-            
+
             // Calcular subtotal costo traslado
             $costoUnitarioOrigen = optional($prodOrigen)->costo_unitario ?? 0;
             $subTotalTraslado = $formatkgrequeridos * $costoUnitarioOrigen;
@@ -621,83 +621,173 @@ class transferController extends Controller
             ->get();
     }
 
-
-
-
     public function sumTotales($id)
     {
-
         $kgTotalRequeridos = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('kgrequeridos');
         $newTotalStock = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('nuevo_stock_origen');
+        $newTotalStockDestino = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('nuevo_stock_destino');
+
+        $totalTraslado = (float)transfer_details::Where([['transfers_id', $id], ['status', 1]])->sum('subtotal_traslado');
 
         $array = [
             'kgTotalRequeridos' => $kgTotalRequeridos,
             'newTotalStock' => $newTotalStock,
+            'newTotalStockDestino' => $newTotalStockDestino,
+            'totalTraslado' => $totalTraslado,
         ];
 
         return $array;
     }
 
-
-
     public function updatedetail(Request $request)
     {
-        try {
+        // Validar los datos de entrada
+        $rules = [
+            'id' => 'required|exists:transfer_details,id',
+            'newkgrequeridos' => [
+                'required',
+                'numeric',
+                'regex:/^\d+(\.\d{1,2})?$/',
+                'min:0.1',
+                // Regla personalizada: que la nueva cantidad no exceda el stock disponible
+                function ($attribute, $value, $fail) use ($request) {
+                    // Obtener el detalle actual
+                    $detail = transfer_details::find($request->id);
+                    if (!$detail) {
+                        $fail('Detalle no encontrado.');
+                        return;
+                    }
+                    // Datos necesarios: lote, producto y bodega origen
+                    $loteId = $detail->lote_prod_traslado_id;
+                    $productId = $detail->product_id;
+                    $bodegaOrigenId = $request->bodegaOrigen;
+                    // Consultar el inventario en la bodega origen
+                    $inventario = DB::table('inventarios as i')
+                        ->join('products as p', 'i.product_id', '=', 'p.id')
+                        ->where('i.store_id', $bodegaOrigenId)
+                        ->where('i.lote_id', $loteId)
+                        ->where('p.status', '1')
+                        ->where('p.id', $productId)
+                        ->select('i.stock_ideal')
+                        ->first();
+                    if (!$inventario) {
+                        $fail('No se encontró el inventario del producto en la bodega origen.');
+                        return;
+                    }
+                    // Sumar las cantidades de otros detalles para este producto y lote en la transferencia
+                    $sumOther = DB::table('transfer_details')
+                        ->where('transfers_id', $request->transferId)
+                        ->where('lote_prod_traslado_id', $loteId)
+                        ->where('product_id', $productId)
+                        ->where('id', '!=', $request->id)
+                        ->sum('kgrequeridos');
+                    // Cantidad disponible para actualizar este detalle
+                    $available = $inventario->stock_ideal - $sumOther;
+                    if ($value > $available) {
+                        $fail('La cantidad a trasladar no puede ser mayor al stock disponible en origen.');
+                    }
+                },
+            ],
+        ];
 
-            $prodOrigen = DB::table('products as p')
-                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('ce.stock', 'ce.fisico')
-                ->where([
-                    ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->bodegaOrigen],
-                    ['p.status', 1],
-                ])->get();
+        $messages = [
+            'newkgrequeridos.required' => 'La cantidad a trasladar es requerida.',
+            'newkgrequeridos.numeric'  => 'La cantidad a trasladar debe ser un número.',
+            'newkgrequeridos.min'      => 'La cantidad a trasladar debe ser mayor a 0.1.',
+        ];
 
-            $prodDestino = DB::table('products as p')
-                ->join('centro_costo_products as ce', 'p.id', '=', 'ce.products_id')
-                ->select('ce.stock', 'ce.fisico')
-                ->where([
-                    ['p.id', $request->producto],
-                    ['ce.centrocosto_id', $request->bodegaDestino],
-                    ['p.status', 1],
-                ])->get();
-
-
-            //$prod = Product::firstWhere('id', $request->productoId);
-            //$newStockOrigen = $prod->stock + $request->newkgrequeridos;
-            $newStockOrigen = $prodOrigen[0]->stock + $request->newkgrequeridos;
-            $newStockDestino = $prodDestino[0]->stock + $request->newkgrequeridos;
-
-            $updatedetails = transfer_details::firstWhere('id', $request->id);
-            $updatedetails->actual_stock_origen = $request->StockOrigen;
-            $updatedetails->kgrequeridos = $request->newkgrequeridos;
-            $updatedetails->nuevo_stock_origen = $newStockOrigen;
-            $updatedetails->actual_stock_destino = $request->stockDestino;
-            $updatedetails->nuevo_stock_destino = $request->$newStockDestino;
-
-            $updatedetails->save();
-
-            $arraydetail = $this->gettransferdetail($request->transferId, $request->bodegaOrigen);
-            $arrayTotales = $this->sumTotales($request->transferId);
-
-            $newStockOrigen = $request->stockOrigen - $arrayTotales['kgTotalRequeridos'];
-            $tranf = Transfer::firstWhere('id', $request->transferId);
-            $tranf->nuevo_stock_origen = $newStockOrigen;
-            $tranf->save();
-
-            return response()->json([
-                'status' => 1,
-                'message' => 'Guardado correctamente',
-                'array' => $arraydetail,
-                'arrayTotales' => $arrayTotales
-            ]);
-        } catch (\Throwable $th) {
+        $validator = Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 0,
-                'array' => (array) $th
-            ]);
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        // Recuperar el detalle a actualizar
+        $detail = transfer_details::find($request->id);
+        if (!$detail) {
+            return response()->json([
+                'status' => 0,
+                'error' => 'Detalle no encontrado.'
+            ], 404);
+        }
+
+        // Datos de referencia para recalcular
+        $loteId = $detail->lote_prod_traslado_id;
+        $productId = $detail->product_id;
+        $bodegaOrigenId = $request->bodegaOrigen;
+        $bodegaDestinoId = $request->bodegaDestino;
+
+        // Consultar el inventario en la bodega de origen para obtener stock y costo unitario
+        $inventarioOrigen = DB::table('inventarios as i')
+            ->join('products as p', 'i.product_id', '=', 'p.id')
+            ->where('i.store_id', $bodegaOrigenId)
+            ->where('i.lote_id', $loteId)
+            ->where('p.status', '1')
+            ->where('p.id', $productId)
+            ->select('i.stock_ideal', 'i.costo_unitario')
+            ->first();
+        if (!$inventarioOrigen) {
+            return response()->json([
+                'status' => 0,
+                'error' => 'No se encontró el inventario en la bodega origen.'
+            ], 404);
+        }
+
+        // Calcular la nueva cantidad, nuevos stocks y subtotal
+        $newKgs = $request->newkgrequeridos;
+
+        // Sumar las cantidades de otros detalles para este producto (excluyendo el actual)
+        $sumOther = DB::table('transfer_details')
+            ->where('transfers_id', $request->transferId)
+            ->where('lote_prod_traslado_id', $loteId)
+            ->where('product_id', $productId)
+            ->where('id', '!=', $request->id)
+            ->sum('kgrequeridos');
+
+        // Nuevo stock en origen: se resta la suma de otros detalles más la nueva cantidad
+        $newStockOrigen = $inventarioOrigen->stock_ideal - ($sumOther + $newKgs);
+
+        // Consultar el inventario en la bodega destino (si existe)
+        $inventarioDestino = DB::table('inventarios as i')
+            ->join('products as p', 'i.product_id', '=', 'p.id')
+            ->where('i.store_id', $bodegaDestinoId)
+            ->where('i.lote_id', $loteId)
+            ->where('p.status', '1')
+            ->where('p.id', $productId)
+            ->select('i.stock_ideal')
+            ->first();
+        $stockDestino = optional($inventarioDestino)->stock_ideal ?? 0;
+        // Nuevo stock en destino se calcula sumando la nueva cantidad (suponiendo que cada detalle se suma al stock destino)
+        $newStockDestino = $stockDestino + $newKgs;
+
+        // Calcular el subtotal del traslado
+        $subtotal = $newKgs * $inventarioOrigen->costo_unitario;
+
+        // Actualizar el detalle
+        $detail->kgrequeridos = $newKgs;
+        $detail->nuevo_stock_origen = $newStockOrigen;
+        $detail->nuevo_stock_destino = $newStockDestino;
+        $detail->subtotal_traslado = $subtotal;
+        $detail->save();
+
+        // Actualizar la vista: se vuelven a calcular los detalles y totales
+        $arraydetail = $this->gettransferdetail($request->transferId, $bodegaOrigenId);
+        $arrayTotales = $this->sumTotales($request->transferId);
+
+        // (Opcional) Actualizar el registro de la transferencia si es necesario
+        $transfer = Transfer::find($request->transferId);
+        $transfer->save();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Detalle actualizado correctamente',
+            'array' => $arraydetail,
+            'arrayTotales' => $arrayTotales,
+        ]);
     }
+
 
     public function editTransfer(Request $request)
     {

@@ -222,7 +222,7 @@ const showData = (data) => {
     	    <tr>      	
       	    <td>${element.codigo}</td>
       	    <td>${element.nameprod}</td>
-      	    <td>${formatCantidad(element.actual_stock_origen)}</td>
+      	    <td>${element.actual_stock_origen}</td>
               <td>
               <input type="text" class="form-control-sm" data-id="${
                   element.products_id
@@ -230,10 +230,10 @@ const showData = (data) => {
             element.kgrequeridos
         }" placeholder="Ingresar" size="5">
               </td>
-      	    <td>${formatCantidad(element.nuevo_stock_origen)}</td>
+      	    <td>${element.nuevo_stock_origen}</td>
       	    
-      	    <td>${formatCantidad(element.actual_stock_destino)}</td>
-            <td>${formatCantidad(element.nuevo_stock_destino)}</td>
+      	    <td>${element.actual_stock_destino}</td>
+            <td>${element.nuevo_stock_destino}</td>
             <td>$${formatCantidadSinCero(element.costo_unitario_origen)}</td>
             <td>$${formatCantidadSinCero(element.subtotal_traslado)}</td>
 			<td class="text-center">
@@ -253,16 +253,15 @@ const showData = (data) => {
 	    <tr>
 		 <th>Totales</th>  
             <td></td>
-		    <td></td>           
-		   		  		   
-		    <th>${formatCantidad(arrayTotales.kgTotalRequeridos)}</td>
-		    <th>${formatCantidad(arrayTotales.newTotalStock)}</th>
+		    <td></td>         	   
+		    <th>${(arrayTotales.kgTotalRequeridos)}</td>
+		    <th>${(arrayTotales.newTotalStock)}</th>
             <td></td>
-            <td></td>	
+            <th>${(arrayTotales.newTotalStockDestino)}</th>	
             <td></td>
-            <td></td>	    
+            <th>$${formatCantidadSinCero(arrayTotales.totalTraslado)}</th>
 		    <td class="text-center">
-                <button class="btn btn-success btn-sm" id="addShopping">Afectar_Inventario</button>
+                <button class="btn btn-success btn-sm" id="addShopping">Iniciar_Traslado</button>
             </td>
 	    </tr>
     `;
@@ -277,39 +276,53 @@ kgrequeridos.addEventListener("change", function () {
     kgrequeridos.value = enteredValue;
 });
 
-tableTransfer.addEventListener("keydown", function (event) {
-    if (event.keyCode === 13) {
+tableTransfer.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
         const target = event.target;
-        console.log(target);
+        // Verificar que se presionó Enter en un input dentro de una fila de la tabla
         if (target.tagName === "INPUT" && target.closest("tr")) {
-            console.log("Enter key pressed on an input inside a table row");
-            console.log(event.target.value);
-            console.log(event.target.id);
-
-            const inputValue = event.target.value;
-            if (inputValue == "") {
-                return false;
+            const inputValue = target.value.trim();
+            if (inputValue === "") {
+                return;
             }
+            // Extraer los datos necesarios: id del detalle, id del producto, etc.
+            const detailId = target.id; // El id del input coincide con el id del detalle
+            const productoId = target.getAttribute("data-id");
 
-            let productoId = target.getAttribute("data-id");
-            console.log("prodDestino test id: " + transferId.value);
-            console.log(productoId);
-            console.log("origen" + bodegaOrigen.value);
-            console.log(bodegaDestino.value);
-            const trimValue = inputValue.trim();
+            // Preparar el objeto FormData con los datos requeridos
             const dataform = new FormData();
-            dataform.append("id", Number(event.target.id));
-            dataform.append("newkgrequeridos", Number(trimValue));
-            dataform.append("transferId", Number(transferId.value));
-            dataform.append("productoId", Number(productoId));
-            dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
-            dataform.append("bodegaDestino", Number(bodegaDestino.value));
+            dataform.append("id", detailId);
+            dataform.append("newkgrequeridos", inputValue);
+            dataform.append("transferId", transferId.value);
+            dataform.append("productoId", productoId);
+            dataform.append("bodegaOrigen", bodegaOrigen.value);
+            dataform.append("bodegaDestino", bodegaDestino.value);
             dataform.append("stockOrigen", stockOrigen.value);
 
-            sendData("/transferUpdate", dataform, token).then((result) => {
-                console.log(result);
-                showData(result);
-            });
+            // Enviar la información vía AJAX a la ruta /transferUpdate
+            sendData("/transferUpdate", dataform, token)
+                .then((result) => {
+                    if (result.status === 1) {
+                        // Actualizar la tabla con los detalles y totales actualizados
+                        showData(result);
+                        successToastMessage(result.message);
+                    } else if (result.status === 0) {
+                        // Si hay errores, recorremos los errores y los mostramos
+                        $.each(result.errors, function (field, messages) {
+                            if (field === "newkgrequeridos") {
+                                // Mostrar el mensaje de error junto al input que lo causó
+                                $(target)
+                                    .siblings(".error-message")
+                                    .text(messages[0]);
+                            }
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error al actualizar el detalle:", error);
+                    errorToastMessage("Error al actualizar el detalle.");
+                });
         }
     }
 });

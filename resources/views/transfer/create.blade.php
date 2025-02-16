@@ -180,8 +180,6 @@
 							<table id="tableTransfer" class="table table-sm table-striped mt-1 table-bordered"> <!-- http://2puracarnes.test:8080/transfer/create/1  code-create.js showData -->
 								<thead class="text-white" style="background: #3B3F5C">
 									<tr>
-										<!--th class="table-th text-white">Item</th>-->
-										<!-- <th class="table-th text-white">#</th> -->
 										<th class="table-th text-white">LOTE</th>
 										<th class="table-th text-white">Producto</th>
 										<th class="table-th text-white">StkActOrigen</th>
@@ -200,20 +198,22 @@
 										<!-- <td>{{$proddetail->id}}</td> -->
 										<td>{{$proddetail->codigo}}</td>
 										<td>{{$proddetail->nameprod}}</td>
-										<td>{{ number_format($proddetail->actual_stock_origen, 2, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->actual_stock_origen, 2, '.', '.')}}</td>
 										<td>
 											@if($status == 'true' && $statusInventory == 'false')
-											<input type="text" class="form-control-sm" data-id="{{$proddetail->products_id}}" id="{{$proddetail->id}}" value="{{$proddetail->kgrequeridos}}" placeholder="Ingresar" size="5">
+											<input type="text" class="form-control-sm" data-id="{{ $proddetail->products_id }}" id="{{ $proddetail->id }}" value="{{ $proddetail->kgrequeridos }}" placeholder="Ingresar" size="5">
+											<!-- Contenedor para mostrar el mensaje de error -->
+											<span class="text-danger error-message"></span>
 											@else
-											<p>{{number_format($proddetail->kgrequeridos, 2, ',', '.')}}</p>
+											<p>{{ number_format($proddetail->kgrequeridos, 2, '.', '.') }}</p>
 											@endif
 										</td>
 
-										<td>{{ number_format($proddetail->nuevo_stock_origen, 2, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->nuevo_stock_origen, 2, '.', '.')}}</td>
 
-										<td>{{ number_format($proddetail->actual_stock_destino, 2, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->actual_stock_destino, 2, '.', '.')}}</td>
 
-										<td>{{ number_format($proddetail->nuevo_stock_destino, 2, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->nuevo_stock_destino, 2, '.', '.')}}</td>
 										<td>${{ number_format($proddetail->costo_unitario_origen, 0, ',', '.')}}</td>
 										<td>${{ number_format($proddetail->subtotal_traslado, 0, ',', '.')}}</td>
 										<td class="text-center">
@@ -233,12 +233,12 @@
 										<th>Totales</th>
 										<th></th>
 										<th></th>
-										<th> {{number_format($arrayTotales['kgTotalRequeridos'], 2, ',', '.')}}</th>
-										<th> {{number_format($arrayTotales['newTotalStock'], 2, ',', '.')}}</th>
+										<th>{{number_format($arrayTotales['kgTotalRequeridos'], 2 , '.', '.')}}</th>
+										<th>{{number_format($arrayTotales['newTotalStock'], 2, '.', '.')}}</th>
 										<th></th>
+										<th>{{number_format($arrayTotales['newTotalStockDestino'], 2, '.', '.')}}</th>
 										<th></th>
-										<th></th>
-										<th></th>
+										<th>${{number_format($arrayTotales['totalTraslado'], 0, ',', '.')}}</th>
 										<th class="text-center">
 											@if($dataTransfer[0]->inventario == 'pending')
 											<button class="btn btn-success btn-sm" id="addShopping">Iniciar_Traslado</button>
@@ -256,19 +256,19 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {      
+	$(document).ready(function() {
 
-        // Limpiar mensajes de error al seleccionar un campo
-        $('#producto').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        }); 
+		// Limpiar mensajes de error al seleccionar un campo
+		$('#producto').change(function() {
+			$(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+		});
 		// Limpiar mensajes de error del campo kgrequeridos
 
-		$('#kgrequeridos').change(function() {         
+		$('#kgrequeridos').change(function() {
 			$(this).siblings('.error-message').text(''); // Limpiar mensaje de error			
-        }); 
-        
-    });
+		});
+
+	});
 </script>
 @endsection
 @section('script')
