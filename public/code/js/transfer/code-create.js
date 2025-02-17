@@ -176,7 +176,7 @@ function actualizarValoresProductoDestino(productId) {
 }
 
 /* Insertar registros al tableTransfer del detalle. Se activa al darle enter en KG a trasladar o boton btnAddTransfer */
-btnAddTrans.addEventListener("click", (e) => {
+btnAddTrans.addEventListener("click", async (e) => {
     e.preventDefault();
     const dataform = new FormData(formDetail);
     dataform.append("stockOrigen", stockOrigen.value);
@@ -255,10 +255,10 @@ const showData = (data) => {
 		 <th>Totales</th>  
             <td></td>
 		    <td></td>         	   
-		    <th>${(arrayTotales.kgTotalRequeridos)}</td>
-		    <th>${(arrayTotales.newTotalStock)}</th>
+		    <th>${arrayTotales.kgTotalRequeridos}</td>
+		    <th>${arrayTotales.newTotalStock}</th>
             <td></td>
-            <th>${(arrayTotales.newTotalStockDestino)}</th>	
+            <th>${arrayTotales.newTotalStockDestino}</th>	
             <td></td>
             <th>$${formatCantidadSinCero(arrayTotales.totalTraslado)}</th>
 		    <td class="text-center">
@@ -363,49 +363,63 @@ tbodyTable.addEventListener("click", (e) => {
 });
 
 /* Accciona el boton Cargar Inventario */
-tfootTable.addEventListener("click", (e) => {
+tfootTable.addEventListener("click", async (e) => {
     e.preventDefault();
     let element = e.target;
-    console.log(element);
+
     if (element.id === "addShopping") {
-        //added to inventory
-        console.log("click");
-        loadingStart(element);
-        // Preparar los datos a enviar
-        const dataform = new FormData();
-        dataform.append("transferId", Number(transferId.value));
-        dataform.append("stockOrigen", Number(stockOrigen.value));
-        dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
-        dataform.append("bodegaDestino", Number(bodegaDestino.value));
-        
-        sendData("/transferAddShoping", dataform, token).then((result) => {
-            console.log(result);
-            if (result.status == 1) {
-                loadingEnd(element, "success", "Cargar al inventario");
-                element.disabled = true;
-                window.location.href = `/transfer`;
+        console.log("Se hizo clic en el botón addShopping");
+
+        try {
+            const result = await showConfirmationAlert();
+
+            console.log("Resultado de la alerta:", result);
+
+            if (result.value) {
+                console.log("Usuario confirmó la acción, procediendo...");
+
+                loadingStart(element);
+
+                const dataform = new FormData();
+                dataform.append("transferId", Number(transferId.value));
+                dataform.append("stockOrigen", Number(stockOrigen.value));
+                dataform.append("bodegaOrigen", Number(bodegaOrigen.value));
+                dataform.append("bodegaDestino", Number(bodegaDestino.value));
+
+                const response = await sendData(
+                    "/transferAddShoping",
+                    dataform,
+                    token
+                );
+                console.log("Resultado de la petición:", response);
+
+                if (response.status === 1) {
+                    loadingEnd(element, "success", "Cargar al inventario");
+                    element.disabled = true;
+                    window.location.href = `/transfer`;
+                } else {
+                    loadingEnd(element, "error", "Cargar al inventario");
+                    errorMessage(response.message);
+                }
+            } else {
+                console.log("El usuario canceló la acción.");
             }
-            if (result.status == 0) {
-                loadingEnd(element, "success", "Cargar al inventario");
-                errorMessage(result.message);
-            }
-        });
+        } catch (error) {
+            console.error("Error en la ejecución:", error);
+        }
     }
 });
 
-document.getElementById("addShopping").addEventListener("click", function () {
-    Swal.fire({
-        title: "Confirmación",
-        text: "¿Desea afectar el inventario?",
+function showConfirmationAlert() {
+    return Swal.fire({
+        title: "CONFIRMAR",
+        text: "¿Estás seguro de que deseas cargar el inventario?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
         confirmButtonText: "Aceptar",
         cancelButtonText: "Cancelar",
     }).then((result) => {
-        if (result.isConfirmed) {
-            // Affect inventory logic here
-        }
+        console.log("Respuesta de SweetAlert2:", result);
+        return result;
     });
-});
+}
