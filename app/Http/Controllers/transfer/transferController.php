@@ -908,16 +908,17 @@ class transferController extends Controller
                 // Actualizar stock ideal en origen (se resta la cantidad trasladada)
                 $inventarioOrigen->stock_ideal -= $quantity;
                 // Acumular la cantidad trasladada en salida
-                $inventarioOrigen->cantidad_traslado_salida = ($inventarioOrigen->cantidad_traslado_salida ?? 0) + $quantity;
+                $inventarioOrigen->cantidad_traslado = ($inventarioOrigen->cantidad_traslado ?? 0) + $quantity;
                 $inventarioOrigen->save();
 
-                // Registrar movimiento de traslado salida (almacena transferId)
+                // Registrar movimiento de traslado salida
                 MovimientoInventario::create([
                     'tipo'             => 'traslado_salida',
                     'transfer_id'      => $transferId,
-                    'store_destino_id' => $bodegaOrigen, // Bodega que sufre la salida
+                    'store_origen_id' => $bodegaOrigen, // Bodega que sufre la salida
                     'lote_id'          => $loteId,   
-                    'product_id'       => $productId,   
+                    'product_id'       => $productId,
+                    'cantidad'         => $quantity,    
                 ]);
 
                 /*** PROCESO EN BODEGA DESTINO ***/
@@ -931,7 +932,7 @@ class transferController extends Controller
                     // Sumar la cantidad trasladada
                     $inventarioDestino->stock_ideal += $quantity;
                     // Acumular la cantidad trasladada en ingreso
-                    $inventarioDestino->cantidad_traslado_ingreso = ($inventarioDestino->cantidad_traslado_ingreso ?? 0) + $quantity;
+                    $inventarioDestino->cantidad_traslado = ($inventarioDestino->cantidad_traslado ?? 0) + $quantity;
                     $inventarioDestino->save();
                 } else {
                     // Crear un nuevo registro de inventario para la bodega destino
@@ -940,7 +941,7 @@ class transferController extends Controller
                         'lote_id'                   => $loteId,
                         'product_id'                => $productId,
                         'stock_ideal'               => $quantity,
-                        'cantidad_traslado_ingreso' => $quantity,
+                        'cantidad_traslado'         => $quantity,
                         // Otros campos (como cantidad_inventario_inicial, costo, etc.) se pueden inicializar según convenga
                     ]);
                 }

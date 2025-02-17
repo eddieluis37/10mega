@@ -54,8 +54,8 @@ class inventarioController extends Controller
 
         DB::beginTransaction();
 
-        try {
 
+        try {
             // Obtener todos los inventarios activos con filtros de store y lote
             $inventarios = Inventario::with(['lote', 'product', 'store', 'store.centroCosto'])
                 ->when($storeId, function ($query, $storeId) {
@@ -69,65 +69,69 @@ class inventarioController extends Controller
             $resultados = [];
 
             foreach ($inventarios as $inventario) {
-                // Obtener los movimientos de inventario relacionados
-                $movimientos = MovimientoInventario::where('lote_id', $inventario->lote_id)
+                // Movimientos asociados a ingresos (incluye traslado_ingreso y otros movimientos que se registran en store_destino_id)
+                $movimientosIngreso = MovimientoInventario::where('lote_id', $inventario->lote_id)
                     ->where('store_destino_id', $inventario->store_id)
                     ->where('product_id', $inventario->product_id)
+                    // ->where('status', 1) // Descomenta si necesitas filtrar por movimientos activos
                     ->select('tipo', DB::raw('SUM(cantidad) AS cantidad_total'))
                     ->groupBy('tipo')
                     ->get();
 
-                // Calcular cantidades por tipo de movimiento            
-                $desposteres = $movimientos->where('tipo', 'desposteres')->sum('cantidad_total');
-                $despostecerdos = $movimientos->where('tipo', 'despostecerdos')->sum('cantidad_total');
-                $enlistments = $movimientos->where('tipo', 'enlistments')->sum('cantidad_total');
-                $compensadores = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
-                $trasladoIngreso = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
-                $trasladoSalida = $movimientos->where('tipo', 'traslado_salida')->sum('cantidad_total');
+                // Movimientos asociados a salidas (traslado_salida se registra en store_origen_id)
+                $movimientosSalida = MovimientoInventario::where('lote_id', $inventario->lote_id)
+                    ->where('store_origen_id', $inventario->store_id)
+                    ->where('product_id', $inventario->product_id)
+                    // ->where('status', 1) // Descomenta si necesitas filtrar por movimientos activos
+                    ->select('tipo', DB::raw('SUM(cantidad) AS cantidad_total'))
+                    ->groupBy('tipo')
+                    ->get();
 
-                /*       //$products_terminados = $movimientos->where('tipo', 'products_terminados')->pluck('cantidad_final');          
-                $venta = $movimientos->where('tipo', 'venta')->sum('cantidad_total');
-                $ajuste = $movimientos->where('tipo', 'ajuste')->sum('cantidad_total'); */
+                // Sumar otros movimientos que se encuentran en la consulta de ingresos
+                $desposteres    = $movimientosIngreso->where('tipo', 'desposteres')->sum('cantidad_total');
+                $despostecerdos = $movimientosIngreso->where('tipo', 'despostecerdos')->sum('cantidad_total');
+                $enlistments    = $movimientosIngreso->where('tipo', 'enlistments')->sum('cantidad_total');
+                $compensadores  = $movimientosIngreso->where('tipo', 'compensadores')->sum('cantidad_total');
 
-                // Calcular inventario final
-                $cantidadFinal = $inventario->cantidad_inventario_inicial;
+                // Para los traslados, se toman de cada consulta según corresponda:
+                $trasladoIngreso = $movimientosIngreso->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
+                $trasladoSalida  = $movimientosSalida->where('tipo', 'traslado_salida')->sum('cantidad_total');
 
-                // Calcular stock ideal
-                $stockIdeal = ($inventario->cantidad_inventario_inicial + $desposteres + $despostecerdos + $enlistments + $compensadores + $inventario->cantidad_prod_term + $trasladoIngreso) - $trasladoSalida;
+                // Calcular stock ideal:
+                $stockIdeal = ($inventario->cantidad_inventario_inicial
+                    + $desposteres
+                    + $despostecerdos
+                    + $enlistments
+                    + $compensadores
+                    + $inventario->cantidad_prod_term
+                    + $trasladoIngreso) - $trasladoSalida;
 
-                // Actualizar los campos del inventario
+                // Actualizar el inventario con el stock ideal calculado
                 $inventario->update([
-                    //  'cantidad_final' => $cantidadFinal,
                     'stock_ideal' => $stockIdeal,
-                    //  'cantidad_inventario_inicial' => $inventario->cantidad_inventario_inicial, // Actualizar inventario inicial si aplica
                 ]);
 
-                // Guardar los resultados para visualización
+                // Preparar el resultado para visualización
                 $resultados[] = [
-                    'StoreNombre' => $inventario->store->name,
-                    'codigoLote' => $inventario->lote->codigo, // Código del lote                    
-                    'fechaVencimientoLote' => $inventario->lote->fecha_vencimiento, // Fecha de vencimiento del lote
-                    'CategoriaNombre' => $inventario->product->category->name,
-                    'ProductoNombre' => $inventario->product->name,
-                    'CantidadInicial' => $inventario->cantidad_inventario_inicial,
-                    'compraLote' => $desposteres + $despostecerdos, // Sumar desposteres y despostecerdos
-                    'alistamiento' => $enlistments,
-                    'compensados' => $compensadores,
-                    'ProductoTerminado' => $inventario->cantidad_prod_term,                
-                    'trasladoing' => $trasladoIngreso,
-                    'trasladosal' => $trasladoSalida,
-
-                    'venta' => 0,
-                    'notacredito' => 0,
-                    'notadebito' => 0,
-                    'venta_real' => 0,
-                    'StockIdeal' => $stockIdeal,
-                    'stock' => 0,
-                    'fisico' => 0,
-                    //  'Venta' => $venta,
-                    //  'Ajuste' => $ajuste,
-                    // 'CantidadFinal' => $cantidadFinal,
-
+                    'StoreNombre'           => $inventario->store->name,
+                    'codigoLote'            => $inventario->lote->codigo,
+                    'fechaVencimientoLote'  => $inventario->lote->fecha_vencimiento,
+                    'CategoriaNombre'       => $inventario->product->category->name,
+                    'ProductoNombre'        => $inventario->product->name,
+                    'CantidadInicial'       => $inventario->cantidad_inventario_inicial,
+                    'compraLote'            => $desposteres + $despostecerdos,
+                    'alistamiento'          => $enlistments,
+                    'compensados'           => $compensadores,
+                    'ProductoTerminado'     => $inventario->cantidad_prod_term,
+                    'trasladoing'           => $trasladoIngreso,
+                    'trasladosal'           => $trasladoSalida,
+                    'venta'                 => 0,
+                    'notacredito'           => 0,
+                    'notadebito'            => 0,
+                    'venta_real'            => 0,
+                    'StockIdeal'            => $stockIdeal,
+                    'stock'                 => 0,
+                    'fisico'                => 0,
                 ];
             }
 

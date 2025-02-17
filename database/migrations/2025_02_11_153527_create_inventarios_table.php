@@ -28,8 +28,8 @@ return new class extends Migration
             $table->decimal('cantidad_compra_prod', 18, 2)->default(0)->nullable();         
             $table->decimal('cantidad_prod_term', 18, 2)->default(0)->nullable();
 
-            $table->decimal('cantidad_traslado_ingreso', 18, 2)->default(0)->nullable();
-            $table->decimal('cantidad_traslado_salida', 18, 2)->default(0)->nullable();
+            $table->decimal('cantidad_traslado', 18, 2)->default(0)->nullable();
+           // $table->decimal('cantidad_traslado_salida', 18, 2)->default(0)->nullable();
             
 
 
