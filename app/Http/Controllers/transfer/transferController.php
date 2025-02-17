@@ -859,13 +859,25 @@ class transferController extends Controller
             'transferId'    => 'required|exists:transfers,id',
             'stockOrigen'   => 'required|numeric',
             'bodegaOrigen'  => 'required|exists:stores,id',
-            'bodegaDestino' => 'required|exists:stores,id',
+            'bodegaDestino'  => [
+                'required',
+                'exists:stores,id',
+                // Validación personalizada: el usuario debe estar asociado a la bodega
+                function ($attribute, $value, $fail) {
+                    if (!DB::table('store_user')
+                        ->where('user_id', auth()->id())
+                        ->where('store_id', $value)
+                        ->exists()) {
+                        $fail('Usuario no autorizado para operar en esta bodega.');
+                    }
+                },
+            ],
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status'  => 0,
-                'message' => 'Datos inválidos.',
+                'message' => 'Datos de usuario inválidos.',
                 'errors'  => $validator->errors(),
             ], 422);
         }
@@ -916,9 +928,9 @@ class transferController extends Controller
                     'tipo'             => 'traslado_salida',
                     'transfer_id'      => $transferId,
                     'store_origen_id' => $bodegaOrigen, // Bodega que sufre la salida
-                    'lote_id'          => $loteId,   
+                    'lote_id'          => $loteId,
                     'product_id'       => $productId,
-                    'cantidad'         => $quantity,    
+                    'cantidad'         => $quantity,
                 ]);
 
                 /*** PROCESO EN BODEGA DESTINO ***/
@@ -951,9 +963,9 @@ class transferController extends Controller
                     'tipo'             => 'traslado_ingreso',
                     'transfer_id'      => $transferId,
                     'store_destino_id' => $bodegaDestino,
-                    'lote_id'          => $loteId,                                        
+                    'lote_id'          => $loteId,
                     'product_id'       => $productId,
-                    'cantidad'         => $quantity,                  
+                    'cantidad'         => $quantity,
                 ]);
             }
 

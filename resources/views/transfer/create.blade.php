@@ -48,6 +48,7 @@
 										<input type="hidden" id="bodegaDestino" name="bodegaDestino" value="{{$dataTransfer[0]->bodega_destino_id}}">
 										<p>{{$dataTransfer[0]->namecentrocostoDestino}}</p>
 									</div>
+									<span class="text-danger error-message"></span>
 								</div>
 							</div>
 						</div>
@@ -173,6 +174,14 @@
 					</div>
 				</div>
 			</div>
+			@php
+			// Verificamos si el usuario autenticado está asociado a la bodega de origen de la transferencia
+			$authorized = DB::table('store_user')
+			->where('user_id', auth()->user()->id)
+			->where('store_id', $dataTransfer[0]->bodega_destino_id)
+			->exists();
+			@endphp
+			
 			<div class="widget-content mt-3">
 				<div class="card">
 					<div class="card-body">
@@ -240,8 +249,8 @@
 										<th></th>
 										<th>${{number_format($arrayTotales['totalTraslado'], 0, ',', '.')}}</th>
 										<th class="text-center">
-											@if($dataTransfer[0]->inventario == 'pending')
-											<button class="btn btn-success btn-sm" id="addShopping">Iniciar_Traslado</button>
+											@if($dataTransfer[0]->inventario == 'pending' && $authorized)
+											<button class="btn btn-success btn-sm" id="addShopping">Aceptar_Traslado</button>
 											@endif
 										</th>
 									</tr>
@@ -254,6 +263,16 @@
 		</div>
 	</div>
 </div>
+<script>
+    // Definimos la variable en JavaScript
+    const isAuthorized = @json(
+        DB::table('store_user')
+            ->where('user_id', auth()->user()->id)
+            ->where('store_id', $dataTransfer[0]->bodega_destino_id) // Ajusta según corresponda
+            ->exists()
+    );
+</script>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 	$(document).ready(function() {

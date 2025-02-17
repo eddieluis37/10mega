@@ -262,8 +262,8 @@ const showData = (data) => {
             <td></td>
             <th>$${formatCantidadSinCero(arrayTotales.totalTraslado)}</th>
 		    <td class="text-center">
-                <button class="btn btn-success btn-sm" id="addShopping">Iniciar_Traslado</button>
-            </td>
+                 ${ isAuthorized ? `<button class="btn btn-success btn-sm" id="addShopping">Aceptar_Traslado</button>` : '' }
+             </td>
 	    </tr>
     `;
     /*  let newTotalStockPadre = stockOrigen.value - arrayTotales.kgTotalRequeridos;
@@ -423,3 +423,4 @@ function showConfirmationAlert() {
         return result;
     });
 }
+
