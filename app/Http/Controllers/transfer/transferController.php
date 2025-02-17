@@ -932,7 +932,7 @@ class transferController extends Controller
                     // Sumar la cantidad trasladada
                     $inventarioDestino->stock_ideal += $quantity;
                     // Acumular la cantidad trasladada en ingreso
-                    $inventarioDestino->cantidad_traslado = ($inventarioDestino->cantidad_traslado ?? 0) + $quantity;
+                    $inventarioDestino->cantidad_traslado += $quantity;
                     $inventarioDestino->save();
                 } else {
                     // Crear un nuevo registro de inventario para la bodega destino
