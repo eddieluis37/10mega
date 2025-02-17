@@ -187,6 +187,7 @@ btnAddTrans.addEventListener("click", (e) => {
         console.log(result);
         if (result.status === 1) {
             $("#producto").val("").trigger("change");
+            $("#lote").val("").trigger("change");
             formDetail.reset();
             showData(result);
             limpiarCamposOrigen();
