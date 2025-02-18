@@ -14,6 +14,13 @@ function showModalcreateLote() {
     $('#modal-create-lote').modal('show');
 }
 
+$(".select2Store").select2({
+    placeholder: "Busca una bodega",
+    width: "100%",
+    theme: "bootstrap-5",
+    allowClear: true,
+});
+
 $(".select2Prod").select2({
     placeholder: "Busca un producto",
     width: "100%",
@@ -81,7 +88,7 @@ $(document).ready(function () {
 
                         return {
                             productoLoteId: item.productoLoteId,
-                            namecategoria: item.namecategoria,
+                            namebodega: item.namebodega,
                             nameproducto: item.nameproducto,
                             productId: item.productId,
                             codigolote: item.codigolote,
@@ -107,7 +114,7 @@ $(document).ready(function () {
             },
             columns: [
                 { data: "productoLoteId", name: "productoLoteId" },
-                { data: "namecategoria", name: "namecategoria" },
+                { data: "namebodega", name: "namebodega" },
                 { data: "productId", name: "productId" },
                 { data: "nameproducto", name: "nameproducto" },
                 { data: "codigolote", name: "codigolote" },

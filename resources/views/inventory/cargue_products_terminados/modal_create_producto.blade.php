@@ -8,13 +8,13 @@
                             <input type="hidden" value="0" name="productloteId" id="productloteId">
                             <input type="hidden" value="1" name="store_id" id="store_id">
                         </div>
-                        <div class="col-sm-6 col-md-3">
+                        <div class="col-sm-6 col-md-4">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label for="" class="form-label">Buscar producto</label>
-                                    <select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
-                                        <option value="">Seleccione el producto</option>
-                                        @foreach ($prod as $p)
+                                    <label for="" class="form-label">Buscar bodega</label>
+                                    <select class="form-control form-control-sm select2Store" name="bodega" id="bodega" required="">
+                                        <option value="">Seleccione la bodega</option>
+                                        @foreach ($bodegas as $p)
                                         <option value="{{$p->id}}">{{$p->name}}</option>
                                         @endforeach
                                     </select>
@@ -22,7 +22,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
+                        <div class="col-sm-6 col-md-4">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label for="loteProd" class="form-label">Buscar lote</label>
@@ -36,19 +36,36 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
+                        <div class="col-sm-6 col-md-4">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label for="" class="form-label">Buscar producto</label>
+                                    <select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
+                                        <option value="">Seleccione el producto</option>
+                                        @foreach ($prod as $p)
+                                        <option value="{{$p->id}}">{{$p->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    <span class="text-danger error-message"></span>
+                                </div>
+                            </div>
+                        </div>    
+                        <div class="col-sm-6 col-md-4">
+                            
+                        </div>                    
+                        <div class="col-sm-6 col-md-4">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label for="" class="form-label">Cantidad</label>
                                     <div class="input-group flex-nowrap">
                                         <input type="text" name="quantity" id="quantity" class="form-control" aria-describedby="helpId" placeholder="0" step="0.01" required="">
-                                        <span class="input-group-text" id="addon-wrapping"></span>
+                                        <span class="input-group-text" id="addon-wrapping">QT</span>
                                     </div>
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
+                        <div class="col-sm-6 col-md-4">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label for="" class="form-label">Costo</label>

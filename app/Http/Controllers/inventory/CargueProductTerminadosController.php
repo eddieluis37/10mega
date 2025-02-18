@@ -34,7 +34,7 @@ class CargueProductTerminadosController extends Controller
         /*  $category = Category::orderBy('name', 'asc')->get(); */
         //  $centros = Centrocosto::whereIn('id', [1])->orderBy('name', 'asc')->get();
         // $centroCostoProductos = Centro_costo_product::all();
-        $bodegas = Store::whereIn('id', [1])->orderBy('name', 'asc')->get();
+        $bodegas = Store::whereIn('id', [1, 4, 5, 6])->orderBy('name', 'asc')->get();
         $lote = Lote::orderBy('id', 'desc')->get();
         $prod = Product::Where('category_id', 1)->get();
 
@@ -137,7 +137,7 @@ class CargueProductTerminadosController extends Controller
                 'loteProd' => 'required',
                 'quantity' => 'required',
                 'costo' => 'required',
-                'store_id' => 'required|exists:stores,id', // Ensure the store exists
+                'bodega' => 'required|exists:stores,id', // Ensure the store exists
             ];
             $messages = [
                 'productloteId.required' => 'El id es requerido',
@@ -146,8 +146,8 @@ class CargueProductTerminadosController extends Controller
                 'loteProd.required' => 'Lote es requerido',
                 'quantity.required' => 'Cantidad es requerida',
                 'costo.required' => 'Costo es requerido',
-                'store_id.required' => 'El ID de la tienda es requerido',
-                'store_id.exists' => 'La tienda no existe', // Custom message for store existence
+                'bodega.required' => 'El ID de la tienda es requerido',
+                'bodega.exists' => 'La tienda no existe', // Custom message for store existence
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -167,6 +167,7 @@ class CargueProductTerminadosController extends Controller
                 // Create new ProductLote
                 $productLote = new ProductLote();
                 $productLote->product_id = $request->producto;
+                $productLote->store_id = $request->bodega;
                 $productLote->lote_id = $request->loteProd;
                 $productLote->quantity = $request->quantity;
                 $productLote->costo = $cleanCosto; // Guarda el costo limpio
@@ -175,7 +176,7 @@ class CargueProductTerminadosController extends Controller
                 // Cargue el Producto para adjuntarlo a las tiendas
                 $product = Product::find($request->producto);
                 if ($product) {
-                    $product->stores()->attach($request->store_id);
+                    $product->stores()->attach($request->bodega);
                 }
 
                 return response()->json([
@@ -189,6 +190,7 @@ class CargueProductTerminadosController extends Controller
                 // Update existing ProductLote
                 $updateLote = ProductLote::firstWhere('id', $request->productloteId);
                 $updateLote->product_id = $request->producto;
+                $updateLote->storelote_id = $request->bodega;
                 $updateLote->lote_id = $request->loteProd;
                 $updateLote->quantity = $request->quantity;
                 $updateLote->costo = $cleanCosto; // Guarda el costo limpio
@@ -263,13 +265,14 @@ class CargueProductTerminadosController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request)
-    {
+    {     
         $storeId = $request->input('storeId');
         $categoriaId = $request->input('categoriaId');
         $loteId = $request->input('loteId');
 
 
         $data = DB::table('product_lote as pl')
+            ->join('stores as s', 's.id', '=', 'pl.store_id')
             ->join('products as pro', 'pro.id', '=', 'pl.product_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             //    ->join('product_store as ps', 'ps.product_id', '=', 'pl.product_id')
@@ -279,7 +282,7 @@ class CargueProductTerminadosController extends Controller
             ->select(
                 'pl.id as productoLoteId',
                 'pro.id as productId',
-                'cat.name as namecategoria',
+                's.name as namebodega',
                 'pro.name as nameproducto',
                 'l.codigo as codigolote',
                 'l.fecha_vencimiento as fechavence',
@@ -288,6 +291,7 @@ class CargueProductTerminadosController extends Controller
                 //   'pl.lote as lote',
             )
             ->where('pro.category_id', $categoriaId)
+            ->where('pl.store_id', $storeId)
             ->where('pl.lote_id', $loteId)
             //    ->where('ps.store_id', $storeId)
             ->where('pro.status', 1)
@@ -363,7 +367,7 @@ class CargueProductTerminadosController extends Controller
                             [
                                 'product_id' => $detalle->product_id,
                                 'lote_id' => $lote->id,
-                                'store_id' => 1,
+                                'store_id' => $detalle->store_id,
                             ],
                             [                                
                                 'cantidad_prod_term' => 0,

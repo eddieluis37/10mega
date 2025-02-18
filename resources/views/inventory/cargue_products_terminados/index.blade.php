@@ -137,7 +137,7 @@
             <thead class="text-white" style="background: #3B3F5C">
               <tr>
                 <th class="table-th text-white">ID</th>
-                <th class="table-th text-white">CAT</th>
+                <th class="table-th text-white">BODEGA</th>
                 <th class="table-th text-white">ID</th>
                 <th class="table-th text-white">PRODUCTO</th>
                 <th class="table-th text-white">LOTE</th>
@@ -195,7 +195,7 @@
         <fieldset id="contentDisable">
           <form action="" id="form-producto">
             <div class="modal-header bg-secondary">
-              <h4 class="modal-title" style="color: white; font-weight: bold;">Producto | Asociar | Lote </h4>
+              <h4 class="modal-title" style="color: white; font-weight: bold;">Asociar |Producto |Bodega |Lote </h4>
               <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>

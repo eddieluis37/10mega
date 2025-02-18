@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('product_lote', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('store_id')->constrained()->onDelete('cascade');
             $table->foreignId('lote_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');           
             $table->decimal('quantity', 18, 2)->default(0)->nullable();
             $table->decimal('costo', 18, 2)->default(0);  
             $table->timestamps();
