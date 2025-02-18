@@ -23,7 +23,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
         autoWidth: false,
         processing: true,
         serverSide: true,
-        scrollX: true,
+        scrollX: false,
         ajax: {
             url: "/showInventarioCierre",
             type: "GET",

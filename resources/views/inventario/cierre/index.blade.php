@@ -199,9 +199,13 @@
           <tfoot>
             <tr>
               <th>Total</th>
-              <td> -- </td>
-              <td> -- </td>
-
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>0.00</td>
+              <td>0.00</td>
+              <td>0.00</td>
               <td>0.00</td>
               <td>0.00</td>
               <td>0.00</td>
