@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Facade;
 
 return [
 
+    'env_label' => env('APP_ENV') === 'production' ? null : '⚠️ Ambiente de Pruebas - No usar datos reales ⚠️',
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
