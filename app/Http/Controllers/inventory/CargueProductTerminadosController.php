@@ -133,21 +133,21 @@ class CargueProductTerminadosController extends Controller
         try {
             $rules = [
                 'productloteId' => 'required',
-                'producto' => 'required|exists:products,id', // Ensure the product exists
+                'producto' => 'required|exists:products,id',
                 'loteProd' => 'required',
                 'quantity' => 'required',
                 'costo' => 'required',
-                'bodega' => 'required|exists:stores,id', // Ensure the store exists
+                'bodega' => 'required|exists:stores,id', 
             ];
             $messages = [
                 'productloteId.required' => 'El id es requerido',
                 'producto.required' => 'Producto es requerido',
-                'producto.exists' => 'El producto no existe', // Custom message for product existence
+                'producto.exists' => 'El producto no existe', 
                 'loteProd.required' => 'Lote es requerido',
                 'quantity.required' => 'Cantidad es requerida',
                 'costo.required' => 'Costo es requerido',
-                'bodega.required' => 'El ID de la tienda es requerido',
-                'bodega.exists' => 'La tienda no existe', // Custom message for store existence
+                'bodega.required' => 'La bodega es requerida',
+                'bodega.exists' => 'La bodega no existe',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -386,7 +386,7 @@ class CargueProductTerminadosController extends Controller
                         MovimientoInventario::create([
                             'tipo' => 'products_terminados',
                             'store_origen_id' => null,
-                            'store_destino_id' => 1,
+                            'store_destino_id' => $detalle->store_id,
                             'lote_id' => $lote->id,
                             'product_id' => $detalle->product_id,
                             'cantidad' => $detalle->quantity,

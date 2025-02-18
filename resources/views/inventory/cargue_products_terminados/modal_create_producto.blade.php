@@ -93,12 +93,16 @@
             $('#loteId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
 
             $('#producto').val('').trigger('change'); // Limpiar el select2 y actualizar
+            $('#bodega').val('').trigger('change'); // Limpiar el select2 y actualizar
             $('#loteProd').val('').trigger('change');
             $('#quantity').val('').trigger('change');
 
         });
 
         // Limpiar mensajes de error al seleccionar un campo
+        $('#bodega').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });
         $('#producto').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
