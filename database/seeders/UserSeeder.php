@@ -203,7 +203,7 @@ class UserSeeder extends Seeder
             'status' => 'Active',
             'password' => bcrypt('c21.LiderAuditoria+')
         ]);
-
+        
 
         /**********************************************************************/
         /*** Al agregar nuevos roles  se debe agregar el rol en la migracion tabla User

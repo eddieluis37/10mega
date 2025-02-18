@@ -217,5 +217,19 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($analistaCostos);
             $user->assignRole($supervisorPuntosDeVenta);
         }
+
+        User::create([
+            'name' => 'ROBERTO BARROSO',
+            'phone' => '3214154625',
+            'email' => 'implementador@carnesfriasmega.com',
+            'profile' => 'Comercial',
+            'status' => 'Active',
+            'password' => bcrypt('Imple2025*.')
+        ]);
+
+        $user = User::where('name', 'ROBERTO BARROSO')->first();
+        if ($user) {
+            $user->assignRole($comercial);          
+        }
     }
 }
