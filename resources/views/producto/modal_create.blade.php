@@ -106,32 +106,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label>Stock Alertas</label>
-                                    <div>
-                                        <select class="form-control form-control-sm" name="alerta" id="alerta" required="">
-                                            <option value="">Seleccione</option>
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                            <option value="7">7</option>
-                                            <option value="8">8</option>
-                                            <option value="9">9</option>
-                                            <option value="10">10</option>
-                                            <option value="11">11</option>
-                                            <option value="12">12</option>
-                                        </select>
-                                        <span class="text-danger error-message"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                         <!-- <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
@@ -172,9 +147,25 @@
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>%IVA</label>
+                                    <label>%Ultraproceso</label>
                                     <div>
                                         <select class="form-control form-control-sm" name="isa" id="isa" required="">
+                                            <option value="">Seleccione</option>
+                                            <option value="0">0%</option>
+                                            <option value="10">10%</option>
+                                            <option value="19">19%</option>
+                                        </select>
+                                        <span class="text-danger error-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label>ImpoConsumo</label>
+                                    <div>
+                                        <select class="form-control form-control-sm" name="impoconsumo" id="impoconsumo" required="">
                                             <option value="">Seleccione</option>
                                             <option value="0">0%</option>
                                             <option value="10">10%</option>
@@ -214,9 +205,9 @@
             $('#subfamilia').val('');
             $('#code').val('');
             $('#codigobarra').val('');          
-            $('#stockalerta').val('');
             $('#impuestoiva').val('');
-            $('#isa').val('');
+            $('#isa').val('');                        
+            $('#impoconsumo').val('');
         });
 
         // Limpiar mensajes de error al seleccionar un campo
@@ -241,7 +232,7 @@
         $('#marca').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
-        $('#stockalerta').change(function() {
+        $('#impoconsumo').change(function() {
             $(this).siblings('.error-message').text(''); // Clear error message on blur
         });
         $('#impuestoiva').change(function() {

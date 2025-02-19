@@ -26,7 +26,8 @@
 								<th class="table-th text-white ">CODE</th>
 								<th class="table-th text-white">PRECIO_M</th>
 								<th class="table-th text-white">IVA</th>
-								<th class="table-th text-white">ISA</th>
+								<th class="table-th text-white">IUP</th>
+								<th class="table-th text-white">IAC</th>
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
 						</thead>

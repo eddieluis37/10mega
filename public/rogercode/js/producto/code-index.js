@@ -55,7 +55,14 @@ $(document).ready(function () {
                     render: function (data, type, row) {
                         return formatCantidadSinCero(data) + "%";
                     },
-                },                            
+                },  
+                {
+                    data: "impoconsumo",
+                    name: "impoconsumo",
+                    render: function (data, type, row) {
+                        return formatCantidadSinCero(data) + "%";
+                    },
+                },                           
                 { data: "action", name: "action" },
             ],
             order: [[0, "DESC"]],
@@ -110,15 +117,18 @@ const showForm = (data) => {
     console.log("alerta:", resp.alerts, "Type:", typeof resp.alerts);
     console.log("iva:", resp.iva, "Type:", typeof resp.iva);
     console.log("otro_impuesto:", resp.otro_impuesto, "Type:", typeof resp.otro_impuesto);
+    console.log("impoconsumo:", resp.impoconsumo, "Type:", typeof resp.impoconsumo);
 
     // Convierte a numero
     const ivaNumber = Number(resp.iva);
     const otroImpuestoNumber = Number(resp.otro_impuesto);
+    const impoconsumoNumber = Number(resp.impoconsumo);
 
     // Log de tipos y valores despues de conversion
     console.log("Despues de conversion:");
     console.log("iva:", ivaNumber, "Type:", typeof ivaNumber);
     console.log("otro_impuesto:", otroImpuestoNumber, "Type:", typeof otroImpuestoNumber);
+    console.log("impoconsumo:", impoconsumoNumber, "Type:", typeof impoconsumoNumber);
     
     producto_id.value = resp.id;
     $("#categoria").val(resp.category_id).trigger("change");
@@ -131,7 +141,8 @@ const showForm = (data) => {
     $("#codigobarra").val(resp.barcode).trigger("change");
     $("#alerta").val(resp.alerts).trigger("change");
     $("#impuestoiva").val(ivaNumber).trigger("change");
-    $("#isa").val(otroImpuestoNumber).trigger("change");   
+    $("#isa").val(otroImpuestoNumber).trigger("change");  
+    $("#impoconsumo").val(impoconsumoNumber).trigger("change"); 
 
     const modal = new bootstrap.Modal(
         document.getElementById("modal-create-producto")

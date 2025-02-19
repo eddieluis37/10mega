@@ -378,10 +378,10 @@ class productoController extends Controller
                 'marca' => 'required',
                 'nivel' => 'required',
                 'familia' => 'required',
-                'subfamilia' => 'required',
-                'alerta' => 'required|numeric',
+                'subfamilia' => 'required',                
                 'impuestoiva' => 'required|numeric',
                 'isa' => 'required|numeric',
+                'impoconsumo' => 'required|numeric',
             ];
 
             $messages = [
@@ -390,13 +390,13 @@ class productoController extends Controller
                 'marca.required' => 'La marca proveedora es requerida',
                 'nivel.required' => 'Nivel es requerido',
                 'familia.required' => 'Nombre de familia es requerido',
-                'subfamilia.required' => 'Nombre de producto requerido',
-                'alerta.required' => 'Stock alerta es requerido',
-                'alerta.numeric' => 'Stock alerta debe ser un numero',
+                'subfamilia.required' => 'Nombre de producto requerido',               
                 'impuestoiva.required' => 'El IVA es requerido',
                 'impuestoiva.numeric' => 'El IVA debe ser un numero',
                 'isa.required' => 'El Imp Saludable es requerido',
                 'isa.numeric' => 'El ISA debe ser un numero',
+                'impoconsumo.required' => 'Impoconsumo es requerido',
+                'impoconsumo.numeric' => 'Impoconsumo debe ser un numero',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -418,10 +418,10 @@ class productoController extends Controller
                 $prod->meatcut_id = $request->familia;
                 $prod->name = $request->subfamilia;
                 $prod->code = $request->code;
-                $prod->barcode = $request->codigobarra;
-                $prod->alerts = $request->alerta;
+                $prod->barcode = $request->codigobarra;               
                 $prod->iva = $request->impuestoiva;
                 $prod->otro_impuesto = $request->isa;
+                $prod->impoconsumo = $request->impoconsumo;
                 $prod->status = '1'; // Activo
                 $prod->save();
                 $this->CrearProductoEnCentroCosto();
@@ -440,10 +440,10 @@ class productoController extends Controller
                 $updateProd->meatcut_id = $request->familia;
                 $updateProd->name = $request->subfamilia;
                 $updateProd->code = $request->code;
-                $updateProd->barcode = $request->codigobarra;
-                $updateProd->alerts = $request->alerta;
+                $updateProd->barcode = $request->codigobarra;                
                 $updateProd->iva = $request->impuestoiva;
                 $updateProd->otro_impuesto = $request->isa;
+                $updateProd->impoconsumo = $request->impoconsumo;
                 $updateProd->save();
 
                 return response()->json([
