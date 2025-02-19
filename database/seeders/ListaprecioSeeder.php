@@ -17,7 +17,7 @@ class ListaprecioSeeder extends Seeder
     {
         $lp = new Listaprecio([
             "centrocosto_id" => "1",
-            "nombre" => "1 - HOGAR",
+            "nombre" => "1 - PUNTO DE VENTAS",
             "tipo" => "NICHO",
             "fecha_cierre" => now(),
         ]);
@@ -25,92 +25,11 @@ class ListaprecioSeeder extends Seeder
 
         $lp = new Listaprecio([
             "centrocosto_id" => "1",
-            "nombre" => "1 - PUNTO DE VENTA",
+            "nombre" => "2 - DOMICILIO",
             "tipo" => "NICHO",
             "fecha_cierre" => now(),
         ]);
         $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - INSTITUCIONAL/ FAMA",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - RESTAURANTES  PORCIONADOS",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - RESTAURANTES PRODUCTOS  POSTA",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - APP",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - RAPPI",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - CEMID",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - RAMDY",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - 14 INKA",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - FAC",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();     
-
-        $lp = new Listaprecio([
-            "centrocosto_id" => "1",
-            "nombre" => "1 - GRUPO VEZA",
-            "tipo" => "NICHO",
-            "fecha_cierre" => now(),
-        ]);
-        $lp->save();
-
 
         // PARA SEGUNDO CENTRO COSTO
 
