@@ -23,8 +23,13 @@ class Store extends Model
         return $this->belongsTo(Centrocosto::class);
     }
 
-    public function users(): BelongsToMany
+    /* public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
+    } */
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'store_user', 'store_id', 'user_id');
     }
 }

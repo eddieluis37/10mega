@@ -49,9 +49,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function stores(): BelongsToMany
+    public function stores()
     {
-        return $this->belongsToMany(Store::class);
+        return $this->belongsToMany(Store::class, 'store_user', 'user_id', 'store_id');
     }
-
 }

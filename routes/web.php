@@ -269,9 +269,9 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     Route::post('transfersave', [transferController::class, 'store'])->name('transfer.save');
     Route::get('showtransfer', [transferController::class, 'show'])->name('transfer.showlist');
     Route::get('transfer/create/{id}', [transferController::class, 'create'])->name('transfer.create');
-    
+
     Route::get('/transfer/get-products-by-lote', [transferController::class, 'getProductsByLote']);
-   
+
     Route::post('getproductos', [transferController::class, 'getproducts'])->name('transfer.getproductos');
     Route::post('productsbycostcenterdest', [transferController::class, 'ProductsByCostcenterDest'])->name('transfer.productsbycostcenterdest');
     Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin');
@@ -366,7 +366,7 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
 
     /*****************************INVENTORIO NUEVO****************************************** */
-    Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');   
+    Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');
     Route::get('showInventarioCierre', [inventarioController::class, 'showInvcierre'])->name('inventario.showInventarioCierre');
     Route::get('getLotes', [inventarioController::class, 'getLotes'])->name('inventario.getLotes');
     Route::get('getAllLotes', [inventarioController::class, 'getAllLotes'])->name('inventario.getAllLotes');
@@ -387,7 +387,11 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
 });
 
-    Route::group(['middleware' => [('auth')]], function () {
+Route::group(['middleware' => [('auth')]], function () {
+
+    Route::get('/profile', [App\Http\Controllers\UserController::class, 'profile'])
+        ->name('users.profile')
+        ->middleware('auth');
 
     Route::get('categories', CategoriesController::class)->name('categories');
     Route::get('users', UsersController::class);
