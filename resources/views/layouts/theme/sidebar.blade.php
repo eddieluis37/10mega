@@ -308,59 +308,124 @@
 
         <div class="submenu" id="sales">
             <ul class="submenu-list" data-parent-element="#sales">
-
-                <li>
-                    <a href="{{ url('sales') }}" style="display: flex; align-items: center">
-                        <!-- Ícono de Autoservicio -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart">
-                            <circle cx="9" cy="21" r="1"></circle>
-                            <circle cx="20" cy="21" r="1"></circle>
-                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                <li class="sub-submenu">
+                    <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenuauto" aria-expanded="false">
+                        <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                </svg></span> AUTOSERVICIO </div> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                            <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
-                        Autoservicio
                     </a>
+                    <ul id="submenuauto" class="collapse" data-parent="#compact_submenuSidebar">
+                        <li>
+                            <a href="{{ url('sales') }}"> VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> CIERRE DE CAJA </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> MANEJO DE EFECTIVO </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> HISTORICO DE VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> REMISIONES </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sub-submenu">
+                    <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenubar" aria-expanded="false">
+                        <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                </svg></span> BAR </div> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                    <ul id="submenubar" class="collapse" data-parent="#compact_submenuSidebar">
+                        <li>
+                            <a href="{{ url('sales') }}"> VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> CIERRE DE CAJA </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> MANEJO DE EFECTIVO </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> HISTORICO DE VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> REMISIONES </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sub-submenu">
+                    <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenudomicilio" aria-expanded="false">
+                        <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                </svg></span> DOMICILIO </div> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                    <ul id="submenudomicilio" class="collapse" data-parent="#compact_submenuSidebar">
+                        <li>
+                            <a href="{{ url('sales') }}"> VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> CIERRE DE CAJA </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> MANEJO DE EFECTIVO </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> HISTORICO DE VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> REMISIONES </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sub-submenu">
+                    <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenuparrilla" aria-expanded="false">
+                        <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                </svg></span> PARRILLA </div> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                    <ul id="submenuparrilla" class="collapse" data-parent="#compact_submenuSidebar">
+                        <li>
+                            <a href="{{ url('sales') }}"> VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> CIERRE DE CAJA </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> MANEJO DE EFECTIVO </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> HISTORICO DE VENTAS </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> REMISIONES </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                        </li>
+                    </ul>
                 </li>
 
-                <li>
-                    <a href="{{ url('bar') }}" style="display: flex; align-items: center">
-                        <!-- Ícono de Bar -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-coffee">
-                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                            <path d="M2 8h16v8a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                            <line x1="6" y1="1" x2="6" y2="4"></line>
-                            <line x1="10" y1="1" x2="10" y2="4"></line>
-                            <line x1="14" y1="1" x2="14" y2="4"></line>
-                        </svg>
-                        Bar
-                    </a>
-                </li>
 
-                <li>
-                    <a href="{{ url('sales') }}" style="display: flex; align-items: center">
-                        <!-- Ícono de Domicilio -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-truck">
-                            <rect x="1" y="3" width="15" height="13"></rect>
-                            <polygon points="16 8 20 8 23 11 23 16 16 16"></polygon>
-                            <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                            <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                        </svg>
-                        Domicilio
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url('parrilla') }}" style="display: flex; align-items: center">
-                        <!-- Ícono de Parrilla -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bar-chart">
-                            <line x1="12" y1="20" x2="12" y2="10"></line>
-                            <line x1="18" y1="20" x2="18" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="16"></line>
-                        </svg>
-                        Parrilla
-                    </a>
-                </li>
-
-            </ul>
         </div>
 
 
