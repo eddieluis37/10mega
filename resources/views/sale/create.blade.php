@@ -23,7 +23,7 @@
 				<div class="card">
 					<div class="card-body">
 						<div class="row g-3">
-							<div class="col-md-3">
+							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="date1" class="form-label">Fecha de venta</label>
@@ -31,10 +31,10 @@
 									</div>
 								</div>
 							</div>
-							<div class="col-md-3">
+							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Centro de costo</label>
+										<label for="" class="form-label">Bodega</label>
 										<p>{{$datacompensado[0]->namecentrocosto}}</p>
 									</div>
 								</div>
@@ -49,7 +49,11 @@
 								</div>
 							</div>
 
-							<div class="col-md-2">
+							<div class="col-md-4">
+
+							</div>
+
+							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Consecutivo</label>
@@ -58,7 +62,7 @@
 								</div>
 							</div>
 
-							<div class="col-md-2">
+							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">% Descuento cliente</label>
@@ -72,7 +76,7 @@
 				</div>
 			</div>
 
-			<div class="widget-content mt-3">
+			<div class="widget-content mt-2">
 				<div class="card">
 					<div class="card-body">
 						<form id="form-detail">
@@ -80,24 +84,30 @@
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
 							<input type="hidden" id="codigoBarras" name="codigoBarras" value="999999999">
 							<div class="row g-3">
-								<div class="col-md-3">
+								<div class="col-md-4">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar producto</label>
 											<input type="hidden" id="centrocosto" name="centrocosto" value="{{$datacompensado[0]->centrocosto_id}}" data-id="{{$datacompensado[0]->centrocosto_id}}">
 											<input type="hidden" id="cliente" name="cliente" value="{{$datacompensado[0]->third_id}}" data-id="{{$datacompensado[0]->third_id}}">
 											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{$datacompensado[0]->porc_descuento_cliente}}" data-id="{{$datacompensado[0]->porc_descuento_cliente}}">
-											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
+											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
-												@foreach ($prod as $p)
-												<option value="{{$p->id}}">{{$p->name}}</option>
+												@foreach ($prod as $producto)
+												@foreach ($producto->lotesPorVencer as $lote)
+												<option value="{{ $producto->id }}"
+													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}">
+													{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}
+												</option>
+												@endforeach
 												@endforeach
 											</select>
+
 											<span class="text-danger error-message"></span>
 										</div>
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-2">
 									<label for="" class="form-label">Precio venta</label>
 									<div class="input-group flex-nowrap">
 										<span class="input-group-text" id="addon-wrapping">$</span>
@@ -105,19 +115,29 @@
 									</div>
 								</div>
 
-								<div class="col-md-3">
-									<label for="" class="form-label">IVA</label>
+								<div class="col-md-2">
+									<label for="" class="form-label">I.V.A</label>
 									<div class="input-group flex-nowrap">
 
 										<input type="text" id="porc_iva" name="porc_iva" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
-								<div class="col-md-3">
-									<label for="" class="form-label">I.S</label>
+								<div class="col-md-2">
+									<label for="" class="form-label">I.U.P</label>
 									<div class="input-group flex-nowrap">
 
 										<input type="text" id="porc_otro_impuesto" name="porc_otro_impuesto" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+
+
+								<div class="col-md-2">
+									<label for="" class="form-label">I.A.C</label>
+									<div class="input-group flex-nowrap">
+
+										<input type="text" id="impoconsumo" name="impoconsumo" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
@@ -184,7 +204,7 @@
 		</div>
 	</div>
 
-	<div class="widget-content mt-3">
+	<div class="widget-content mt-1">
 		<div class="card">
 			<div class="card-body">
 				<div class="table-responsive mt-3">
@@ -272,6 +292,30 @@
 	</div>
 </div>
 </div>
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		const costoInput = document.getElementById("price");
+
+		// Función para formatear el número con puntos
+		function formatCurrency(value) {
+			return value
+				.replace(/\D/g, "") // Elimina caracteres que no sean dígitos
+				.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos como separadores de miles
+		}
+
+		costoInput.addEventListener("input", function(e) {
+			const value = e.target.value;
+			e.target.value = formatCurrency(value);
+		});
+
+		costoInput.addEventListener("blur", function(e) {
+			// Opcional: Agrega un "0" si el campo está vacío al salir
+			if (!e.target.value) {
+				e.target.value = "0";
+			}
+		});
+	});
+</script>
 @endsection
 @section('script')
 <script src="{{asset('rogercode/js/sale/rogercode-create.js')}}" type="module"></script>

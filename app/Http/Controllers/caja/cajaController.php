@@ -21,7 +21,7 @@ use App\Models\Products\Meatcut;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\shopping\shopping_enlistment;
 use App\Models\shopping\shopping_enlistment_details;
-
+use App\Models\Store;
 
 class cajaController extends Controller
 {
@@ -40,8 +40,8 @@ class cajaController extends Controller
         $caja = Caja::findOrFail($id)
             ->join('users as u', 'cajas.cajero_id', '=', 'u.id')
             /*   ->join('meatcuts as cut', 'cajas.meatcut_id', '=', 'cut.id')*/
-            ->join('centro_costo as centro', 'cajas.centrocosto_id', '=', 'centro.id')
-            ->select('cajas.*', 'centro.name as namecentrocosto', 'u.name as namecajero')
+            ->join('store as s', 'cajas.store_id', '=', 's.id')
+            ->select('cajas.*', 's.name as namecentrocosto', 'u.name as namecajero')
             ->where('cajas.status', 1)
             ->where('cajas.id', $id)
             ->get();
@@ -135,8 +135,20 @@ class cajaController extends Controller
         $category = Category::WhereIn('id', [1, 2, 3])->get();
         $usuario = User::WhereIn('id', [9, 11, 12])->get();
 
-        $centros = Centrocosto::WhereIn('id', [1])->get();
-        return view("caja.index", compact('usuario', 'category', 'centros'));
+
+        $user = auth()->user(); // Obtener el usuario autenticado        
+        // Obtener solo las bodegas asociadas al usuario en store_user
+        $bodegaUser = Store::whereIn('id', function ($query) use ($user) {
+            $query->select('store_id')
+                ->from('store_user')
+                ->where('user_id', $user->id);
+        })
+            ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
+            ->orderBy('name', 'asc')
+            ->get();
+     
+       
+        return view("caja.index", compact('usuario', 'category', 'bodegaUser'));
     }
 
     /**
@@ -147,7 +159,7 @@ class cajaController extends Controller
      * /*   $valorApagarEfectivo = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.third_id', 33)
@@ -164,8 +176,8 @@ class cajaController extends Controller
                 $join->on('ca.cajero_id', '=', 'sa.user_id');
             })
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
-            ->select('ca.*', 'centro.name as namecentrocosto', 'u.name as namecajero')
+            ->join('store as s', 'ca.store_id', '=', 's.id')
+            ->select('ca.*', 's.name as namecentrocosto', 'u.name as namecajero')
             ->where('ca.id', $id)
             ->get();
 
@@ -187,7 +199,7 @@ class cajaController extends Controller
         $valorApagarEfectivo = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -196,7 +208,7 @@ class cajaController extends Controller
         $valorCambio = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -207,7 +219,7 @@ class cajaController extends Controller
         $valorApagarTarjeta = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -216,7 +228,7 @@ class cajaController extends Controller
         $valorApagarOtros = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -246,6 +258,9 @@ class cajaController extends Controller
      */
     public function store(Request $request)
     {
+           // Limpia el campo "base" (elimina puntos y otros caracteres no numéricos)
+           $cleanBase = str_replace('.', '', $request->base);
+
         try {
             $rules = [
                 'alistamientoId' => 'required',
@@ -295,9 +310,9 @@ class cajaController extends Controller
                 $id_user = Auth::user()->id;
                 $alist = new Caja();
                 $alist->user_id = $id_user;
-                $alist->centrocosto_id = $request->centrocosto;
+                $alist->store_id = $request->centrocosto;
                 $alist->cajero_id = $request->cajero;
-                $alist->base = $request->base;
+                $alist->base = $cleanBase;
                 //$alist->fecha_alistamiento = $currentDateFormat;
                 $alist->fecha_hora_inicio = $currentDateTime;
                 $alist->fecha_hora_cierre = $fechaHoraCierre;
@@ -325,12 +340,11 @@ class cajaController extends Controller
      */
     public function show()
     {
-        $data = DB::table('cajas as ali')
-            ->join('users as u', 'ali.cajero_id', '=', 'u.id')
-            /*   ->join('meatcuts as cut', 'ali.meatcut_id', '=', 'cut.id')*/
-            ->join('centro_costo as centro', 'ali.centrocosto_id', '=', 'centro.id')
-            ->select('ali.*', 'centro.name as namecentrocosto', 'u.name as namecajero')
-            /*  ->where('ali.status', 1) */
+        $data = DB::table('cajas as c')
+            ->join('users as u', 'c.cajero_id', '=', 'u.id')           
+            ->join('stores as s', 'c.store_id', '=', 's.id')
+            ->select('c.*', 's.name as namecentrocosto', 'u.name as namecajero')
+            /*  ->where('c.status', 1) */
             ->get();
         //$data = Compensadores::orderBy('id','desc');
         return Datatables::of($data)->addIndexColumn()

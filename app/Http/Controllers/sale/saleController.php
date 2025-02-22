@@ -333,13 +333,51 @@ class saleController extends Controller
     public function create($id)
     {
         $venta = Sale::find($id);
-        $prod = Product::Where([
 
-            ['status', 1]
-        ])
+        /*  $prod = Product::where('status', '1')
+        ->whereHas('inventarios', function ($query) {
+            $query->where('stock_ideal', '>', 0);
+        })
+        ->whereHas('lotesPorVencer') // Filtra solo productos con lotes próximos a vencer
+        ->with('lotesPorVencer') // Carga los lotes próximos a vencer para cada producto
+        ->orderBy('category_id', 'asc')
+        ->orderBy('name', 'asc')
+        ->get();
+
+ */
+        /* 
+        $prod = Product::where('status', '1')
+            ->whereHas('inventarios', function ($query) {
+                $query->where('stock_ideal', '>', 0);
+            })
+            ->whereHas('lotesPorVencer') // Asegura que haya al menos un lote próximo a vencer
+            ->with(['lotesPorVencer' => function ($query) {
+                $query->select('lotes.*') // Evita problemas de alias duplicados
+                    ->orderBy('fecha_vencimiento', 'asc'); // Ordena por fecha más próxima
+            }])
+            ->orderBy('category_id', 'asc')
+            ->orderBy('name', 'asc')
+            ->get(); */
+
+        $prod = Product::where('status', '1')
+            ->whereHas('inventarios', function ($query) {
+                $query->where('stock_ideal', '>', 0);
+            })
+            ->whereHas('lotesPorVencer') // Asegura que haya al menos un lote próximo a vencer
+          
             ->orderBy('category_id', 'asc')
             ->orderBy('name', 'asc')
             ->get();
+
+        $prod->transform(function ($prod) {
+            $prod->lotesPorVencer->transform(function ($lote) use ($prod) {
+                $lote->producto_lote_vencimiento = "{$prod->name} - {$lote->codigo} - " . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y');
+                return $lote;
+            });
+            return $prod;
+        });
+
+
         $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
         $arrayTotales = $this->sumTotales($id);
 

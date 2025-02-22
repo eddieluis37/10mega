@@ -54,6 +54,9 @@ class DatabaseSeeder extends Seeder
     $this->call(Relaciones_contableSeeder::class);
     $this->call(ParametrocontableSeeder::class);
     $this->call(SubcentrocostoSeeder::class);
+   
+    $this->call(StoreSeeder::class);
+    
     $this->call(CajaSeeder::class);
     $this->call(SalesSeeder::class);
     $this->call(Sales_detailSeeder::class);
@@ -65,7 +68,7 @@ class DatabaseSeeder extends Seeder
     $this->call(Cuentas_por_cobrarSeeder::class);
 
     $this->call(ProductLoteSeeder::class);
-    $this->call(StoreSeeder::class);
+  
     $this->call(ProductStoreSeeder::class);
     //  $this->call(CompensadoresSeeder::class);
   //  $this->call(BeneficioreSeeder::class);

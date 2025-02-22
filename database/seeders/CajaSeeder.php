@@ -19,7 +19,7 @@ class CajaSeeder extends Seeder
         Caja::create([
             'user_id' => 1,
             'cajero_id' => 1,
-            'centrocosto_id' => 1,
+            'store_id' => 1,
             'base' => 300000,           
             'valor_real' => 19145893,          
             

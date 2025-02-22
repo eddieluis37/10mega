@@ -58,7 +58,11 @@ class StoreUserSeeder extends Seeder
             'SupervisorPuntosDeVenta' => [
                 'users' => [22],
                 'stores' => Store::whereIn('id', [22, 23])->pluck('id')->toArray(), // Bodegas específicas
-            ],                      
+            ],   
+            'CajeroPuntosDeVentaPrincipal' => [
+                'users' => [11],
+                'stores' => Store::whereIn('id', [1, 4, 5, 6, 8, 9, 10])->pluck('id')->toArray(), // Bodegas específicas
+            ],                   
         ];
 
         foreach ($assignments as $group) {

@@ -21,7 +21,7 @@
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
 								<th class="table-th text-white">T</th>							
-								<th class="table-th text-white ">CentroCosto</th>		
+								<th class="table-th text-white ">BODEGAS</th>		
 								<th class="table-th text-white ">CAJERO</th>
 								<th class="table-th text-white ">BASE</th>							
 								<th class="table-th text-white ">ESTADO</th>

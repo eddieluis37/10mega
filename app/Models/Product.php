@@ -15,6 +15,18 @@ class Product extends Model
 	protected $table = 'products';
 
 
+	public function inventarios()
+    {
+        return $this->hasMany(Inventario::class);
+    }
+
+    public function lotesPorVencer() // Nueva relación con lotes a través de lote_products
+    {
+        return $this->belongsToMany(Lote::class, 'lote_products')
+            ->whereDate('fecha_vencimiento', '>=', now()) // Solo lotes no vencidos
+            ->orderBy('fecha_vencimiento', 'asc') // Ordenar por fecha más próxima
+			->limit(1); // Solo trae el lote más próximo
+    }
 	/**
 	 * Relación muchos a muchos con el modelo Lote.
 	 */

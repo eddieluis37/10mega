@@ -56,7 +56,10 @@ function actualizarValoresProducto(productId) {
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada del centro de costo
-            $("#price").val(response.precio);
+          
+            const formattedPrice = formatCantidadSinCero(response.precio);
+
+            $("#price").val(formattedPrice);
             $("#porc_iva").val(response.iva);
             $("#porc_otro_impuesto").val(response.otro_impuesto);
             $("#porc_descuento").val(response.porc_descuento);
