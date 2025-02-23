@@ -44,8 +44,8 @@ $(document).ready(function () {
                     data: "namecentrocosto",
                     name: "namecentrocosto",
                     render: function (data) {
-                        if (data.length > 5) {
-                            return data.substring(0, 3) + ".";
+                        if (data.length > 9) {
+                            return `<span title="${data}">${data.substring(0, 7)}.</span>`;
                         } else {
                             return data;
                         }

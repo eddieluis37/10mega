@@ -17,17 +17,29 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\caja\Caja;
-use App\Models\Centro_costo_product;
 use App\Models\Cuentas_por_cobrar;
 use App\Models\Formapago;
 use App\Models\Listapreciodetalle;
 use App\Models\Sale;
 use App\Models\SaleCaja;
 use App\Models\SaleDetail;
+use App\Models\Store;
 use App\Models\Subcentrocosto;
 
 class saleController extends Controller
 {
+
+    public function index()
+    {
+        $ventas = Sale::get();
+        $centros = Store::Where('status', 1)->get();
+        $clientes = Third::Where('cliente', 1)->get();
+        $vendedores = Third::Where('vendedor', 1)->get();
+        $domiciliarios = Third::Where('domiciliario', 1)->get();
+        $subcentrodecostos = Subcentrocosto::get();
+
+        return view('sale.index', compact('ventas', 'centros', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
+    }
 
     public $valorCambio;
 
@@ -318,17 +330,7 @@ class saleController extends Controller
         $cXc->save();
     }
 
-    public function index()
-    {
-        $ventas = Sale::get();
-        $centros = Centrocosto::Where('status', 1)->get();
-        $clientes = Third::Where('cliente', 1)->get();
-        $vendedores = Third::Where('vendedor', 1)->get();
-        $domiciliarios = Third::Where('domiciliario', 1)->get();
-        $subcentrodecostos = Subcentrocosto::get();
 
-        return view('sale.index', compact('ventas', 'centros', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
-    }
 
     public function create($id)
     {
@@ -364,7 +366,7 @@ class saleController extends Controller
                 $query->where('stock_ideal', '>', 0);
             })
             ->whereHas('lotesPorVencer') // Asegura que haya al menos un lote próximo a vencer
-          
+
             ->orderBy('category_id', 'asc')
             ->orderBy('name', 'asc')
             ->get();
