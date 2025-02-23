@@ -168,8 +168,7 @@
                                         <select class="form-control form-control-sm" name="impoconsumo" id="impoconsumo" required="">
                                             <option value="">Seleccione</option>
                                             <option value="0">0%</option>
-                                            <option value="10">10%</option>
-                                            <option value="19">19%</option>
+                                            <option value="10">20%</option>                                            
                                         </select>
                                         <span class="text-danger error-message"></span>
                                     </div>

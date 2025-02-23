@@ -40,6 +40,80 @@ class saleController extends Controller
 
         return view('sale.index', compact('ventas', 'centros', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
     }
+    
+    public function show()
+    {
+        $data = DB::table('sales as sa')
+            /*   ->join('categories as cat', 'sa.categoria_id', '=', 'cat.id') */
+            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
+            ->join('stores as s', 'sa.store_id', '=', 's.id')
+            ->select('sa.*', 'tird.name as namethird', 's.name as namecentrocosto')
+            /*  ->where('sa.status', 1) */
+            ->get();
+
+        //  $data = Sale::orderBy('id','desc');
+
+        return Datatables::of($data)->addIndexColumn()
+            ->addColumn('status', function ($data) {
+                if ($data->status == 1) {
+                    $status = '<span class="badge bg-success">Close</span>';
+                } else {
+                    $status = '<span class="badge bg-danger">Open</span>';
+                }
+                return $status;
+            })
+            ->addColumn('date', function ($data) {
+                $date = Carbon::parse($data->created_at);
+                $formattedDate = $date->format('M-d. H:i');
+                return $formattedDate;
+            })
+            ->addColumn('action', function ($data) {
+                $currentDateTime = Carbon::now();
+
+                if (Carbon::parse($currentDateTime->format('Y-m-d'))->gt(Carbon::parse($data->fecha_cierre))) {
+                    $btn = '
+                        <div class="text-center">
+					    
+                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFactura" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>				
+					    <button class="btn btn-dark" title="Borrar venta" disabled>
+						    <i class="fas fa-trash"></i>
+					    </button>
+                        </div>
+                        ';
+                } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
+                    $btn = '
+                        <div class="text-center">
+					    <a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
+						    <i class="fas fa-directions"></i>
+					    </a>
+					   
+                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFacturaPendiente" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>
+					  
+                        </div>
+                        ';
+                    //ESTADO Cerrada
+                } else {
+                    $btn = '
+                        <div class="text-center">
+                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFacturaCerrada" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>
+					    <button class="btn btn-dark" title="Borra la venta" disabled>
+						    <i class="fas fa-trash"></i>
+					    </button>
+					  
+                        </div>
+                        ';
+                }
+                return $btn;
+            })
+            ->rawColumns(['status', 'date', 'action'])
+            ->make(true);
+    }
 
     public $valorCambio;
 
@@ -115,13 +189,13 @@ class saleController extends Controller
                     $venta->status = $status;
                     $venta->fecha_cierre = now();
                     /* 
-            if (($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) && $venta->tipo == '0') {
+            if (($venta->store_id == 1 || $venta->store_id == 2) && $venta->tipo == '0') {
                 $count = DB::table('sales')->where('tipo', '0')->count();
                 $resolucion = 'PC ' . str_pad(9000 + $count, 4, '0', STR_PAD_LEFT);
                 $venta->resolucion = $resolucion;
             } */
 
-                    if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
+                    if ($venta->store_id == 1 || $venta->store_id == 2) {
                         $count1 = DB::table('sales')->where('status', '1')->count();
                         $count2 = DB::table('notacreditos')->where('status', '1')->count();
                         $count3 = DB::table('notadebitos')->where('status', '1')->count();
@@ -190,10 +264,10 @@ class saleController extends Controller
         $ventadetalle = SaleDetail::where('sale_id', $ventaId)->get();
         $product_ids = $ventadetalle->pluck('product_id');
 
-        $centrocosto_id = 1;
+        $store_id = 1;
 
         $centroCostoProducts = Centro_costo_product::whereIn('products_id', $product_ids)
-            ->where('centrocosto_id', $centrocosto_id)
+            ->where('store_id', $store_id)
             ->get();
 
         foreach ($centroCostoProducts as $centroCostoProduct) {
@@ -254,10 +328,10 @@ class saleController extends Controller
             ->get();
 
         $product_ids = $ventadetalle->pluck('product_id');
-        $centrocosto_id = '1';
+        $store_id = '1';
         $centroCostoProducts = DB::table('centro_costo_products')
             ->whereIn('products_id', $product_ids)
-            ->where('centrocosto_id', $centrocosto_id)
+            ->where('store_id', $store_id)
             ->get();
 
         // Calculate accumulated values and insert into temporary table
@@ -380,12 +454,12 @@ class saleController extends Controller
         });
 
 
-        $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
+        $ventasdetalle = $this->getventasdetalle($id, $venta->store_id);
         $arrayTotales = $this->sumTotales($id);
 
         $datacompensado = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('centro_costo as centro', 'sa.centrocosto_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'sa.store_id', '=', 'centro.id')
             ->select('sa.*', 'tird.name as namethird', 'centro.name as namecentrocosto', 'tird.porc_descuento as porc_descuento_cliente')
             ->where('sa.id', $id)
             ->get();
@@ -425,16 +499,16 @@ class saleController extends Controller
 
     public function getventasdetalle($ventaId, $centrocostoId)
     {
-        $detail = DB::table('sale_details as dv')
-            ->join('products as pro', 'dv.product_id', '=', 'pro.id')
-            ->join('centro_costo_products as ce', 'pro.id', '=', 'ce.products_id')
-            ->select('dv.*', 'pro.name as nameprod', 'pro.code',  'ce.fisico')
-            ->selectRaw('ce.invinicial + ce.compraLote + ce.alistamiento +
-            ce.compensados + ce.trasladoing - (ce.venta + ce.trasladosal) stock')
+        $detail = DB::table('sale_details as sd')
+            ->join('products as pro', 'sd.product_id', '=', 'pro.id')
+            ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
+            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')
+           /*  ->selectRaw('i.invinicial + i.compraLote + i.alistamiento +
+            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stock') */
             ->where([
-                ['ce.centrocosto_id', $centrocostoId],
-                ['dv.sale_id', $ventaId],
-            ])->orderBy('dv.id', 'DESC')->get();
+                ['i.store_id', $centrocostoId],
+                ['sd.sale_id', $ventaId],
+            ])->orderBy('sd.id', 'DESC')->get();
 
         return $detail;
     }
@@ -447,7 +521,7 @@ class saleController extends Controller
 
         $dataVenta = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('centro_costo as centro', 'sa.centrocosto_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'sa.store_id', '=', 'centro.id')
             ->select('sa.*', 'tird.name as namethird', 'centro.name as namecentrocosto', 'tird.porc_descuento', 'sa.total_iva', 'sa.vendedor_id')
             ->where('sa.id', $id)
             ->get();
@@ -460,7 +534,7 @@ class saleController extends Controller
 
         $venta = Sale::find($id);
         $producto = Product::get();
-        /*   $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id); */
+        /*   $ventasdetalle = $this->getventasdetalle($id, $venta->store_id); */
         $arrayTotales = $this->sumTotales($id);
 
         $descuento = $dataVenta[0]->porc_descuento / 100 * $arrayTotales['TotalValorAPagar'];
@@ -685,7 +759,7 @@ class saleController extends Controller
 
                 $venta = new Sale();
                 $venta->user_id = $id_user;
-                $venta->centrocosto_id = $request->centrocosto;
+                $venta->store_id = $request->centrocosto;
                 $venta->third_id = $request->cliente;
                 $venta->vendedor_id = $request->vendedor;
                 $venta->domiciliario_id = $request->domiciliario;
@@ -719,7 +793,7 @@ class saleController extends Controller
                     "
         UPDATE sales a,    
         (
-            SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
+            SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where store_id = :vcentrocosto1 ),
             @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
         ) as tabla
         SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
@@ -739,7 +813,7 @@ class saleController extends Controller
             } else {
                 $getReg = Sale::firstWhere('id', $request->ventaId);
                 $getReg->third_id = $request->vendedor;
-                $getReg->centrocosto_id = $request->centrocosto;
+                $getReg->store_id = $request->centrocosto;
                 $getReg->subcentrocostos_id = $request->subcentrodecosto;
                 $getReg->factura = $request->factura;
                 $getReg->save();
@@ -758,79 +832,7 @@ class saleController extends Controller
         }
     }
 
-    public function show()
-    {
-        $data = DB::table('sales as sa')
-            /*   ->join('categories as cat', 'sa.categoria_id', '=', 'cat.id') */
-            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('centro_costo as centro', 'sa.centrocosto_id', '=', 'centro.id')
-            ->select('sa.*', 'tird.name as namethird', 'centro.name as namecentrocosto')
-            /*  ->where('sa.status', 1) */
-            ->get();
-
-        //  $data = Sale::orderBy('id','desc');
-
-        return Datatables::of($data)->addIndexColumn()
-            ->addColumn('status', function ($data) {
-                if ($data->status == 1) {
-                    $status = '<span class="badge bg-success">Close</span>';
-                } else {
-                    $status = '<span class="badge bg-danger">Open</span>';
-                }
-                return $status;
-            })
-            ->addColumn('date', function ($data) {
-                $date = Carbon::parse($data->created_at);
-                $formattedDate = $date->format('M-d. H:i');
-                return $formattedDate;
-            })
-            ->addColumn('action', function ($data) {
-                $currentDateTime = Carbon::now();
-
-                if (Carbon::parse($currentDateTime->format('Y-m-d'))->gt(Carbon::parse($data->fecha_cierre))) {
-                    $btn = '
-                        <div class="text-center">
-					    
-                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFactura" target="_blank">
-                        <i class="far fa-file-pdf"></i>
-					    </a>				
-					    <button class="btn btn-dark" title="Borrar venta" disabled>
-						    <i class="fas fa-trash"></i>
-					    </button>
-                        </div>
-                        ';
-                } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
-                    $btn = '
-                        <div class="text-center">
-					    <a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
-						    <i class="fas fa-directions"></i>
-					    </a>
-					   
-                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFacturaPendiente" target="_blank">
-                        <i class="far fa-file-pdf"></i>
-					    </a>
-					  
-                        </div>
-                        ';
-                    //ESTADO Cerrada
-                } else {
-                    $btn = '
-                        <div class="text-center">
-                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFacturaCerrada" target="_blank">
-                        <i class="far fa-file-pdf"></i>
-					    </a>
-					    <button class="btn btn-dark" title="Borra la venta" disabled>
-						    <i class="fas fa-trash"></i>
-					    </button>
-					  
-                        </div>
-                        ';
-                }
-                return $btn;
-            })
-            ->rawColumns(['status', 'date', 'action'])
-            ->make(true);
-    }
+   
 
     /**
      * Show the form for editing the specified resource.
@@ -1012,7 +1014,7 @@ class saleController extends Controller
 
             $venta = new Sale();
             $venta->user_id = $id_user;
-            $venta->centrocosto_id = 1; // Valor estático para el campo centrocosto
+            $venta->store_id = 1; // Valor estático para el campo centrocosto
             $venta->subcentrocostos_id = 2; // Valor estático para el campo Subcentrocosto PUNTO DE VENTA GUAD
             $venta->third_id = 52; // Valor estático para el campo third_id
             $venta->vendedor_id = 52; // Valor estático para el campo vendedor_id
@@ -1036,7 +1038,7 @@ class saleController extends Controller
 
             $venta->save();
 
-            /*     if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
+            /*     if ($venta->store_id == 1 || $venta->store_id == 2) {
                 $count1 = DB::table('sales')->count();
                 $count2 = DB::table('notacreditos')->count();
                 $count3 = DB::table('notadebitos')->count();
@@ -1052,7 +1054,7 @@ class saleController extends Controller
                 "
      UPDATE sales a,    
      (
-         SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
+         SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where store_id = :vcentrocosto1 ),
          @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
      ) as tabla
      SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
@@ -1108,7 +1110,7 @@ class saleController extends Controller
 
                 $venta = new Sale();
                 $venta->user_id = $id_user;
-                $venta->centrocosto_id = 1; // Valor estático para el campo centrocosto
+                $venta->store_id = 1; // Valor estático para el campo centrocosto
                 $venta->third_id = 33; // Valor estático para el campo third_id
                 $venta->vendedor_id = 33; // Valor estático para el campo vendedor_id
                 $venta->fecha_venta = $currentDateFormat;
