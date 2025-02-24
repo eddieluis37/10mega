@@ -135,8 +135,7 @@
                                     <div>
                                         <select class="form-control form-control-sm" name="impuestoiva" id="impuestoiva" required="">
                                             <option value="">Seleccione</option>
-                                            <option value="0">0%</option>
-                                            <option value="10">10%</option>
+                                            <option value="0">0%</option>                                           
                                             <option value="19">19%</option>
                                         </select>
                                         <span class="text-danger error-message"></span>
@@ -151,9 +150,8 @@
                                     <div>
                                         <select class="form-control form-control-sm" name="isa" id="isa" required="">
                                             <option value="">Seleccione</option>
-                                            <option value="0">0%</option>
-                                            <option value="10">10%</option>
-                                            <option value="19">19%</option>
+                                            <option value="0">0%</option>                                           
+                                            <option value="20">20%</option>
                                         </select>
                                         <span class="text-danger error-message"></span>
                                     </div>
@@ -168,6 +166,9 @@
                                         <select class="form-control form-control-sm" name="impoconsumo" id="impoconsumo" required="">
                                             <option value="">Seleccione</option>
                                             <option value="0">0%</option>
+                                            <option value="5">5%</option>
+                                            <option value="8">8%</option>
+                                            <option value="8">19%</option>
                                             <option value="10">20%</option>                                            
                                         </select>
                                         <span class="text-danger error-message"></span>
