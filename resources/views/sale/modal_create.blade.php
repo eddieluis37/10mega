@@ -16,7 +16,7 @@
 				<div class="task-header">
 					<div class="form-group">
 						<label for="" class="form-label">Centro de costo</label>
-						<select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
+						<select class="form-control form-control-sm input" name="store" id="store" required>
 							<option value="">Seleccione el centro de costo</option>
 							@foreach($centros as $cencosto)
 							<option value="{{$cencosto->id}}" {{ $cencosto->id == 1 ? 'selected' : '' }}>{{$cencosto->name}}</option>

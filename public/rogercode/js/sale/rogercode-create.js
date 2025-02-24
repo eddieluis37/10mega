@@ -15,7 +15,6 @@ const btnAdd = document.querySelector("#btnAdd");
 const showRegTbody = document.querySelector("#tbodyDetail");
 let tbodyTable = document.querySelector("#tableDespostere tbody");
 const venta_id = document.querySelector("#ventaId");
-const centrocosto_id = document.querySelector("#centrocosto_id");
 const quantity = document.querySelector("#quantity");
 const price = document.querySelector("#price");
 const iva = document.querySelector("#iva");
@@ -24,8 +23,8 @@ const tableFoot = document.querySelector("#tabletfoot");
 const cargarInventarioBtn = document.getElementById("cargarInventarioBtn");
 const btnRemove = document.querySelector("#btnRemove");
 
-var centrocosto = document.getElementById("centrocosto").value;
-console.log("centro " + centrocosto);
+var store = document.getElementById("store").value;
+console.log("centro " + store);
 
 var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
@@ -51,8 +50,8 @@ function actualizarValoresProducto(productId) {
         type: "GET",
         data: {
             productId: productId,
-            centrocosto: $("#centrocosto").val(), // Obtén el valor del campo centrocosto
-            cliente: $("#cliente").val(), // Obtén el valor del campo centrocosto
+            store: $("#store").val(), // Obtén el valor del campo store
+            cliente: $("#cliente").val(), // Obtén el valor del campo store
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada del centro de costo

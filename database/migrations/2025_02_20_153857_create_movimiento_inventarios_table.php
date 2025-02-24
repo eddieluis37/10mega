@@ -30,6 +30,8 @@ return new class extends Migration
             $table->unsignedBigInteger('store_destino_id')->nullable();
             $table->foreign('store_destino_id')->references('id')->on('stores');
 
+            $table->foreignId('sale_id')->nullable()->constrained('sales')->onDelete('set null');
+
             $table->foreignId('lote_id')->constrained('lotes')->onDelete('cascade'); //Relación Lotes - Productos - Categorías
 
             $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con un producto específico

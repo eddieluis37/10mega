@@ -184,9 +184,9 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <th scope="row" style="text-align: left">Centro_Costo</th>
+                                <th scope="row" style="text-align: left">BODEGA</th>
                                 <td style="text-align: left">
-                                    <p>{{$venta->centrocosto->name}}</p>
+                                    <p>{{$dataVenta[0]->namebodega}}</p>
                                 </td>
                             </tr>
                             <tr>

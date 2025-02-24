@@ -97,6 +97,8 @@ class inventarioController extends Controller
                 $trasladoIngreso = $movimientosIngreso->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
                 $trasladoSalida  = $movimientosSalida->where('tipo', 'traslado_salida')->sum('cantidad_total');
 
+                $totalVenta  = $movimientosSalida->where('tipo', 'venta')->sum('cantidad_total');
+
                 // Calcular stock ideal:
                 $stockIdeal = ($inventario->cantidad_inventario_inicial
                     + $desposteres
@@ -104,7 +106,7 @@ class inventarioController extends Controller
                     + $enlistments
                     + $compensadores
                     + $inventario->cantidad_prod_term
-                    + $trasladoIngreso) - $trasladoSalida;
+                    + $trasladoIngreso) - $trasladoSalida - $totalVenta;
 
                 // Actualizar el inventario con el stock ideal calculado
                 $inventario->update([
@@ -125,7 +127,7 @@ class inventarioController extends Controller
                     'ProductoTerminado'     => $inventario->cantidad_prod_term,
                     'trasladoing'           => $trasladoIngreso,
                     'trasladosal'           => $trasladoSalida,
-                    'venta'                 => 0,
+                    'venta'                 => $totalVenta,
                     'notacredito'           => 0,
                     'notadebito'            => 0,
                     'venta_real'            => 0,

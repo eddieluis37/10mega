@@ -17,6 +17,8 @@ class Inventario extends Model
         'product_id',
         'inventario_inicial',
         'cantidad_inicial',
+        'cantidad_traslado',
+        'cantidad_venta',
         'cantidad_final',
         'stock_ideal',
         'costo_unitario',

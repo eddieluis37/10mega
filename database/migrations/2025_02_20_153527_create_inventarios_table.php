@@ -30,6 +30,8 @@ return new class extends Migration
 
             $table->decimal('cantidad_traslado', 18, 2)->default(0)->nullable();
            // $table->decimal('cantidad_traslado_salida', 18, 2)->default(0)->nullable();
+
+           $table->decimal('cantidad_venta', 18, 2)->default(0)->nullable();
             
 
 

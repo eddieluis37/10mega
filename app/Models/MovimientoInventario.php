@@ -18,6 +18,7 @@ class MovimientoInventario extends Model
         'despostecerdos_id',
         'enlistments_id',
         'transfer_id',
+        'sale_id',
         'store_origen_id',
         'store_destino_id',
         'lote_id',
