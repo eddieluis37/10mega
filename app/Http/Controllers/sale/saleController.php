@@ -120,130 +120,100 @@ class saleController extends Controller
 
     public function storeRegistroPago(Request $request, $ventaId)
     {
+        // Obtener y sanitizar los valores del request
+        $valor_a_pagar_efectivo = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_efectivo'));
+        $forma_pago_tarjeta_id  = $request->input('forma_pago_tarjeta_id');
+        $forma_pago_otros_id    = $request->input('forma_pago_otros_id');
+        $forma_pago_credito_id  = $request->input('forma_pago_credito_id');
 
-        // Obtener los valores
-        $valor_a_pagar_efectivo = $request->input('valor_a_pagar_efectivo');
-        $valor_a_pagar_efectivo = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_efectivo);
+        $codigo_pago_tarjeta    = $request->input('codigo_pago_tarjeta');
+        $codigo_pago_otros      = $request->input('codigo_pago_otros');
+        $codigo_pago_credito    = $request->input('codigo_pago_credito');
 
-        $forma_pago_tarjeta_id = $request->input('forma_pago_tarjeta_id');
-        $forma_pago_otros_id = $request->input('forma_pago_otros_id');
-        $forma_pago_credito_id = $request->input('forma_pago_credito_id');
+        $valor_a_pagar_tarjeta  = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_tarjeta'));
+        $valor_a_pagar_otros    = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_otros'));
 
-        $codigo_pago_tarjeta = $request->input('codigo_pago_tarjeta');
-        $codigo_pago_otros = $request->input('codigo_pago_otros');
-        $codigo_pago_credito = $request->input('codigo_pago_credito');
-
-        $valor_a_pagar_tarjeta = $request->input('valor_a_pagar_tarjeta');
-        $valor_a_pagar_tarjeta = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_tarjeta);
-
-        $valor_a_pagar_otros = $request->input('valor_a_pagar_otros');
-        $valor_a_pagar_otros = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_otros);
-
-        $valor_a_pagar_credito = $request->input('valor_a_pagar_credito');
+        $valor_a_pagar_credito  = $request->input('valor_a_pagar_credito');
         if (is_null($valor_a_pagar_credito)) {
             $valor_a_pagar_credito = 0;
         }
-        $valor_a_pagar_credito = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_credito);
+        $valor_a_pagar_credito  = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_credito);
 
-        $valor_pagado = $request->input('valor_pagado');
-        $valor_pagado = str_replace(['.', ',', '$', '#'], '', $valor_pagado);
+        $valor_pagado           = str_replace(['.', ',', '$', '#'], '', $request->input('valor_pagado'));
+        $cambio                 = str_replace(['.', ',', '$', '#'], '', $request->input('cambio'));
 
-        $cambio = $request->input('cambio');
-        $cambio = str_replace(['.', ',', '$', '#'], '', $cambio);
-
-        $status = '0'; //1 = pagado   
+        $status = '0'; // Estado pendiente (1 = pagado)
 
         try {
-            // Obtener el cajero_id autenticado
+            // Obtener el usuario autenticado (cajero)
             $cajeroId = $request->user()->id;
 
-            // Buscar la caja en estado "open" asociada al cajero_id
+            // Buscar la caja en estado "open" asociada al cajero
             $caja = Caja::where('cajero_id', $cajeroId)
                 ->where('estado', 'open')
                 ->first();
 
-            if ($caja) {
-                // Crear una nueva instancia de SaleCaja
-                $saleCaja = new SaleCaja();
-                $saleCaja->sale_id = $ventaId;
-                $saleCaja->caja_id = $caja->id;
-                $saleCaja->save();
+            if (!$caja) {
+                return redirect()->route('sale.index')
+                    ->with('error', 'No se encontró una caja abierta para el cajero actual.');
+            }
 
-                try {
-                    $venta = Sale::find($ventaId);
-                    $venta->user_id = $request->user()->id;
+            // Crear un registro en SaleCaja
+            $saleCaja = new SaleCaja();
+            $saleCaja->sale_id = $ventaId;
+            $saleCaja->caja_id = $caja->id;
+            $saleCaja->save();
 
-                    $venta->forma_pago_tarjeta_id = $forma_pago_tarjeta_id;
-                    $venta->forma_pago_otros_id = $forma_pago_otros_id;
-                    $venta->forma_pago_credito_id = $forma_pago_credito_id;
+            try {
+                // Actualizar la venta
+                $venta = Sale::find($ventaId);
+                $venta->user_id                  = $request->user()->id;
+                $venta->forma_pago_tarjeta_id    = $forma_pago_tarjeta_id;
+                $venta->forma_pago_otros_id      = $forma_pago_otros_id;
+                $venta->forma_pago_credito_id    = $forma_pago_credito_id;
+                $venta->codigo_pago_tarjeta      = $codigo_pago_tarjeta;
+                $venta->codigo_pago_otros        = $codigo_pago_otros;
+                $venta->codigo_pago_credito      = $codigo_pago_credito;
+                $venta->valor_a_pagar_tarjeta    = $valor_a_pagar_tarjeta;
+                $venta->valor_a_pagar_efectivo   = $valor_a_pagar_efectivo;
+                $venta->valor_a_pagar_otros      = $valor_a_pagar_otros;
+                $venta->valor_a_pagar_credito    = $valor_a_pagar_credito;
+                $venta->valor_pagado             = $valor_pagado;
+                $venta->cambio                   = $cambio;
+                $venta->status                   = $status;
 
-                    $venta->codigo_pago_tarjeta = $codigo_pago_tarjeta;
-                    $venta->codigo_pago_otros = $codigo_pago_otros;
-                    $venta->codigo_pago_credito = $codigo_pago_credito;
-
-                    $venta->valor_a_pagar_tarjeta = $valor_a_pagar_tarjeta;
-                    $venta->valor_a_pagar_efectivo = $valor_a_pagar_efectivo;
-                    $venta->valor_a_pagar_otros = $valor_a_pagar_otros;
-                    $venta->valor_a_pagar_credito = $valor_a_pagar_credito;
-                    $venta->valor_pagado = $valor_pagado;
-                    $venta->cambio = $cambio;
-                    $venta->status = $status;
-                    //  $venta->fecha_cierre = now();
-                    /* 
-            if (($venta->store_id == 1 || $venta->store_id == 2) && $venta->tipo == '0') {
-                $count = DB::table('sales')->where('tipo', '0')->count();
-                $resolucion = 'PC ' . str_pad(9000 + $count, 4, '0', STR_PAD_LEFT);
-                $venta->resolucion = $resolucion;
-            } */
-
-                    if ($venta->store_id == 1 || $venta->store_id == 2) {
-                        $count1 = DB::table('sales')->where('status', '1')->count();
-                        $count2 = DB::table('notacreditos')->where('status', '1')->count();
-                        $count3 = DB::table('notadebitos')->where('status', '1')->count();
-                        $count = $count1 + $count2 + $count3;
-                        /*  $resolucion = 'ERPC ' . str_pad(1 + $count, 4, '0', STR_PAD_LEFT); // ERPC 00001 */
-                        $resolucion = 'ERPC ' . (1 + $count);
-                        $venta->resolucion = $resolucion;
-                        $venta->save();
-                    }
-
-                    // Call the cargarInventariocr method
-                    $this->cargarInventariocr($ventaId);
-
-                    if ($venta->status == 1) {
-                        session()->regenerate();
-                        return redirect()->route('sale.index');
-                        /*  session()->flush(); */
-                        /*   return redirect()->route('sale.showFactura', $ventaId, 302); */
-                        /*   return redirect()->route('sale.showFactura', $ventaId, 302)->flush(); */
-                    }
-
-                    return response()->json([
-                        'status' => 1,
-                        'message' => 'Guardado correctamente',
-                        "registroId" => $venta->id,
-                        /* 'redirect' => route('sale.showFactura', 'registroId') */
-                        'redirect' => route('sale.index')
-                    ]);
-                } catch (\Throwable $th) {
-                    return response()->json([
-                        'status' => 0,
-                        'array' => (array) $th
-                    ]);
+                // Si la venta corresponde a las tiendas 1 o 2, asignar resolución
+                if ($venta->store_id == 1 || $venta->store_id == 2) {
+                    $count1 = DB::table('sales')->where('status', '1')->count();
+                    $count2 = DB::table('notacreditos')->where('status', '1')->count();
+                    $count3 = DB::table('notadebitos')->where('status', '1')->count();
+                    $count  = $count1 + $count2 + $count3;
+                    $resolucion = 'ERPC ' . (1 + $count);
+                    $venta->resolucion = $resolucion;
                 }
-            } else {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'No se encontró una caja abierta para el cajero actual.'
-                ]);
+                $venta->save();
+
+                // Llamar al método para cargar el inventario
+                $this->cargarInventariocr($ventaId);
+
+                // Regenerar la sesión si es necesario
+                session()->regenerate();
+
+                // Redirigir a la ruta sale.index con un mensaje de éxito
+                return redirect()->route('sale.index')
+                    ->with('success', 'Guardado correctamente y cargado al inventario.');
+            } catch (\Throwable $th) {
+                // En caso de error al actualizar la venta
+                return redirect()->route('sale.index')
+                    ->with('error', 'Error al actualizar la venta: ' . $th->getMessage());
             }
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 0,
-                'array' => (array) $th
-            ]);
+            // En caso de error general en el proceso de pago
+            return redirect()->route('sale.index')
+                ->with('error', 'Error al procesar el pago: ' . $th->getMessage());
         }
     }
+
 
     public function cargarInventariocr($ventaId)
     {
@@ -367,10 +337,7 @@ class saleController extends Controller
                 ]);
             } else {
                 Log::debug('No se generaron movimientos de inventario');
-            }         
-
-            DB::commit();
-            Log::debug('Transacción commit exitosa para venta', ['ventaId' => $ventaId]);
+            }          
 
             // Si la venta tiene un valor a pagar en crédito, se debe invocar la función correspondiente
             if ($compensadores->valor_a_pagar_credito > 0) {
@@ -380,22 +347,29 @@ class saleController extends Controller
                 // Llamar a la función cuentasPorCobrar según la implementación requerida
             }
 
-            return response()->json([
-                'status'  => 1,
-                'message' => 'Cargado al inventario exitosamente',
-                'compensadores' => $compensadores
-            ]);
+            // Actualizar la venta: marcarla como cerrada (status = 1) y asignar la fecha de cierre a hoy
+            DB::table('sales')
+                ->where('id', $ventaId)
+                ->update([
+                    'status'       => '1',
+                    'fecha_cierre' => now()
+                ]);
+            Log::debug('Venta actualizada a cerrada', ['ventaId' => $ventaId]);
+
+            DB::commit();
+            Log::debug('Transacción commit exitosa para venta', ['ventaId' => $ventaId]);
+
+            // Redirigir a la ruta 'sales.index' con un mensaje de éxito
+            return redirect()->route('sale.index')
+                ->with('success', 'Cargado al inventario exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al cargar inventario', [
                 'error'   => $e->getMessage(),
                 'ventaId' => $ventaId
             ]);
-            return response()->json([
-                'status'  => 0,
-                'message' => 'Error al cargar inventario',
-                'error'   => $e->getMessage()
-            ], 500);
+            return redirect()->route('sale.index')
+                ->with('error', 'Error al cargar inventario: ' . $e->getMessage());
         }
     }
 
@@ -926,7 +900,7 @@ class saleController extends Controller
                 $venta->subcentrocostos_id = $request->subcentrodecosto;
 
                 $venta->fecha_venta = $currentDateFormat;
-                $venta->fecha_cierre = $dateNextMonday;
+                // $venta->fecha_cierre = $dateNextMonday;
 
                 $venta->total_bruto = 0;
                 $venta->descuentos = 0;
