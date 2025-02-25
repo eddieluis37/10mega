@@ -24,11 +24,11 @@ class exportFacturaController extends Controller
         $sale = Sale::findOrFail($id)
             ->join('thirds as third', 'sales.third_id', '=', 'third.id')
             ->join('users as u', 'sales.user_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'sales.centrocosto_id', '=', 'centro.id')
+            ->join('stores as s', 'sales.store_id', '=', 's.id')
             ->leftJoin('formapagos as fp', 'sales.forma_pago_tarjeta_id', '=', 'fp.id')
             ->leftJoin('formapagos as fp2', 'sales.forma_pago_otros_id', '=', 'fp2.id')
             ->leftJoin('formapagos as fp3', 'sales.forma_pago_credito_id', '=', 'fp3.id')
-            ->select('sales.*', 'u.name as nameuser', 'third.name as namethird', 'fp.nombre as formapago1', 'fp2.nombre as formapago2', 'fp3.nombre as formapago3', 'third.identification', 'third.direccion', 'centro.name as namecentrocosto', 'third.porc_descuento', 'sales.total_iva', 'sales.vendedor_id')
+            ->select('sales.*', 'u.name as nameuser', 'third.name as namethird', 'fp.nombre as formapago1', 'fp2.nombre as formapago2', 'fp3.nombre as formapago3', 'third.identification', 'third.direccion', 's.name as namecentrocosto', 'third.porc_descuento', 'sales.total_iva', 'sales.vendedor_id')
             ->where([
                 ['sales.id', $id],
                 /*  ['sale_details.status', 1]  */

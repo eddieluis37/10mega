@@ -27,7 +27,7 @@ use App\Models\Store;
 use App\Models\Subcentrocosto;
 use Illuminate\Support\Facades\Log;
 
-class saleController extends Controller
+class saleautoservicioController extends Controller
 {
 
     public function index()
@@ -767,11 +767,8 @@ class saleController extends Controller
             $precioUnitarioBrutoConDesc = $precioUnitarioBruto - $totalDescuento;
             $porcIva = $request->get('porc_iva');
             $porcOtroImpuesto = $request->get('porc_otro_impuesto');
-            $porcImpoconsumo = $request->get('impoconsumo');
             $iva = $precioUnitarioBrutoConDesc * ($porcIva / 100);
             $otroImpuesto = $precioUnitarioBrutoConDesc * ($porcOtroImpuesto / 100);
-            $Impoconsumo = $precioUnitarioBrutoConDesc * ($porcImpoconsumo / 100);
-
 
             $totalOtrosImpuestos =  $precioUnitarioBrutoConDesc * ($request->porc_otro_impuesto / 100);
             $valorApagar = $precioUnitarioBrutoConDesc + $totalOtrosImpuestos;
@@ -788,11 +785,9 @@ class saleController extends Controller
                 $total_sin_impuesto = $precioUnitarioBruto - ($descuentoProducto + $descuentoCliente);
                 $detail->porc_iva = $porcIva;
                 $detail->iva = $iva;
-                $detail->porc_otro_impuesto = $porcOtroImpuesto;           
+                $detail->porc_otro_impuesto = $porcOtroImpuesto;
                 $detail->otro_impuesto = $otroImpuesto;
-                $detail->porc_impoconsumo = $porcImpoconsumo;
-                $detail->impoconsumo = $Impoconsumo;
-                $total_impuestos = $iva + $otroImpuesto + $Impoconsumo;
+                $total_impuestos = $iva + $otroImpuesto;
                 $detail->total_bruto = $precioUnitarioBruto;
                 $detail->total = $total_sin_impuesto + $total_impuestos;
                 $detail->save();
@@ -1094,14 +1089,13 @@ class saleController extends Controller
             ->join('thirds as t', 'listapreciodetalles.listaprecio_id', '=', 't.id')
             ->where('prod.id', $request->productId)
             ->where('t.id', $cliente->listaprecio_genericid)
-            ->select('listapreciodetalles.precio', 'prod.iva', 'otro_impuesto', 'prod.impoconsumo', 'listapreciodetalles.porc_descuento') // Select only the
+            ->select('listapreciodetalles.precio', 'prod.iva', 'otro_impuesto', 'listapreciodetalles.porc_descuento') // Select only the
             ->first();
         if ($producto) {
             return response()->json([
                 'precio' => $producto->precio,
                 'iva' => $producto->iva,
                 'otro_impuesto' => $producto->otro_impuesto,
-                'impoconsumo' => $producto->impoconsumo,
                 'porc_descuento' => $producto->porc_descuento
             ]);
         } else {

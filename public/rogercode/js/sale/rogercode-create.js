@@ -46,7 +46,7 @@ $(document).ready(function () {
 
 function actualizarValoresProducto(productId) {
     $.ajax({
-        url: "/sa-obtener-precios-producto", // Reemplaza con tu ruta o URL para obtener los valores del producto
+        url: "/sa-obtener-precios-producto", 
         type: "GET",
         data: {
             productId: productId,
@@ -61,6 +61,7 @@ function actualizarValoresProducto(productId) {
             $("#price").val(formattedPrice);
             $("#porc_iva").val(response.iva);
             $("#porc_otro_impuesto").val(response.otro_impuesto);
+            $("#impoconsumo").val(response.impoconsumo);
             $("#porc_descuento").val(response.porc_descuento);
         },
         error: function (xhr, status, error) {
@@ -166,7 +167,9 @@ const showData = (data) => {
                 <td>${element.porc_otro_impuesto}%</td>     
                 <td>$${formatCantidadSinCero(
                     element.otro_impuesto
-                )}</td>             
+                )}</td>   
+                <td>${element.porc_impoconsumo}%</td> 
+                <td>$${formatCantidadSinCero(element.impoconsumo)}</td>               
                 <td>$${formatCantidadSinCero(element.total)}</td>        
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${
