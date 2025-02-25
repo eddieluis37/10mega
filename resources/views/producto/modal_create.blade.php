@@ -168,8 +168,8 @@
                                             <option value="0">0%</option>
                                             <option value="5">5%</option>
                                             <option value="8">8%</option>
-                                            <option value="8">19%</option>
-                                            <option value="10">20%</option>                                            
+                                            <option value="19">19%</option>
+                                            <option value="20">20%</option>                                            
                                         </select>
                                         <span class="text-danger error-message"></span>
                                     </div>
