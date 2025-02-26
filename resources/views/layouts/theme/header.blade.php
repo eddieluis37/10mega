@@ -53,42 +53,46 @@
                     id="userProfileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <!-- Sección de info en línea: tienda y usuario -->
                     <div class="d-flex align-items-center user-info mr-2 text-right text-white" style="font-size:0.75rem;">
-                        @if(Auth::check())
-                        @if(Auth::user()->stores->count())
-                        <span class="d-flex align-items-center mr-3">
-                            <!-- Icono de tienda reducido -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag">
-                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                                <line x1="3" y1="6" x2="21" y2="6"></line>
-                                <path d="M16 10a4 4 0 0 1-8 0"></path>
-                            </svg>
-                            <span class="ml-1">{{ Auth::user()->stores->first()->name }}</span>
-                        </span>
-                        @endif
-                        <span class="d-flex align-items-center">
-                            <!-- Icono de usuario reducido -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            <span class="ml-1">{{ Auth::user()->name }}</span>
-                        </span>
-                        @else
-                        <span class="d-flex align-items-center">
-                            <!-- Icono de usuario reducido -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            <span class="ml-1">Invitado</span>
-                        </span>
-                        @endif
+                        <div class="header-info d-flex align-items-center">
+                            @if(Auth::check())
+                            @php
+                            // Obtenemos la primera tienda asociada al usuario
+                            $firstStore = Auth::user()->stores->first();
+                            // Del objeto Store, obtenemos el centro de costo asociado (si existe)
+                            $centroCosto = $firstStore ? $firstStore->centroCosto : null;
+                            @endphp
+
+                            @if($centroCosto)
+                            <div class="cost-center d-flex align-items-center mr-3">
+                                <!-- Ícono de tienda reducido -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                </svg>
+                                <span class="ml-1">{{ $centroCosto->name }}</span>
+                            </div>
+                            @endif
+
+                            <div class="user-info d-flex align-items-center">
+                                <!-- Ícono de usuario reducido -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span class="ml-1">{{ Auth::user()->name }}</span>
+                            </div>
+                            @else
+                            <div class="guest-info d-flex align-items-center">
+                                <!-- Ícono de usuario reducido -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span class="ml-1">Invitado</span>
+                            </div>
+                            @endif
+                        </div>
                     </div>
                     <!-- Imagen fija (mega-carnes-frias.svg) -->
                     <img src="{{ asset('assets/img/mega-carnes-frias.svg') }}" alt="admin-profile" class="img-fluid">
