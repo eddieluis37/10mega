@@ -19,6 +19,12 @@ class CreateSalesTable extends Migration
             $table->unsignedBigInteger('user_id');           
             $table->foreign('user_id')->references('id')->on('users');
 
+            $table->unsignedBigInteger('centrocosto_id')->nullable();
+            $table->foreign('centrocosto_id')->references('id')->on('centro_costo'); 
+
+            $table->unsignedBigInteger('subcentrocostos_id')->nullable();
+            $table->foreign('subcentrocostos_id')->references('id')->on('subcentrocostos'); 
+
             $table->unsignedBigInteger('third_id')->nullable();           
             $table->foreign('third_id')->references('id')->on('thirds');         
             
@@ -27,13 +33,7 @@ class CreateSalesTable extends Migration
             
             $table->unsignedBigInteger('domiciliario_id')->nullable();           
             $table->foreign('domiciliario_id')->references('id')->on('thirds');                   
-                 
-            $table->unsignedBigInteger('store_id')->nullable();
-            $table->foreign('store_id')->references('id')->on('stores'); 
-
-            $table->unsignedBigInteger('subcentrocostos_id')->nullable();
-            $table->foreign('subcentrocostos_id')->references('id')->on('subcentrocostos'); 
-
+                  
             $table->decimal('items',10,0);
             
             $table->decimal('total_bruto',12,0)->default(0)->nullable();

@@ -25,6 +25,7 @@ use App\Models\SaleCaja;
 use App\Models\SaleDetail;
 use App\Models\Store;
 use App\Models\Subcentrocosto;
+use FontLib\Table\Type\name;
 use Illuminate\Support\Facades\Log;
 
 class saleController extends Controller
@@ -33,7 +34,7 @@ class saleController extends Controller
     public function index()
     {
         $ventas = Sale::get();
-        $centros = Store::Where('status', 1)->get();
+        $centros = Centrocosto::WhereIn('id', [1])->get();
         $clientes = Third::Where('cliente', 1)->get();
         $vendedores = Third::Where('vendedor', 1)->get();
         $domiciliarios = Third::Where('domiciliario', 1)->get();
@@ -47,8 +48,8 @@ class saleController extends Controller
         $data = DB::table('sales as sa')
             /*   ->join('categories as cat', 'sa.categoria_id', '=', 'cat.id') */
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('stores as s', 'sa.store_id', '=', 's.id')
-            ->select('sa.*', 'tird.name as namethird', 's.name as namecentrocosto')
+            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
+            ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto')
             /*  ->where('sa.status', 1) */
             ->get();
 
@@ -183,7 +184,7 @@ class saleController extends Controller
                 $venta->status                   = $status;
 
                 // Si la venta corresponde a las tiendas 1 o 2, asignar resolución
-                if ($venta->store_id == 1 || $venta->store_id == 2) {
+                if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
                     $count1 = DB::table('sales')->where('status', '1')->count();
                     $count2 = DB::table('notacreditos')->where('status', '1')->count();
                     $count3 = DB::table('notadebitos')->where('status', '1')->count();
@@ -242,7 +243,7 @@ class saleController extends Controller
                 ->get();
 
             Log::debug('Detalles de venta obtenidos', [
-                'ventaId'      => $ventaId,
+                'ventaId'       => $ventaId,
                 'detalle_count' => $ventadetalle->count()
             ]);
 
@@ -254,18 +255,21 @@ class saleController extends Controller
                 ], 404);
             }
 
+            // Obtener los IDs de productos involucrados
             $product_ids = $ventadetalle->pluck('product_id');
-            $store_id = $compensadores->store_id;
 
-            Log::debug('IDs de productos y tienda obtenidos', [
+            // Extraer los store_ids únicos de los detalles de venta
+            $store_ids = $ventadetalle->pluck('store_id')->unique();
+
+            Log::debug('IDs de productos y tiendas obtenidos', [
                 'product_ids' => $product_ids,
-                'store_id'    => $store_id
+                'store_ids'   => $store_ids
             ]);
 
-            // Obtener los registros de inventario de los productos involucrados para la tienda
+            // Obtener los registros de inventario de los productos involucrados para las tiendas correspondientes
             $inventarios = DB::table('inventarios')
                 ->whereIn('product_id', $product_ids)
-                ->where('store_id', $store_id)
+                ->whereIn('store_id', $store_ids)
                 ->get();
 
             Log::debug('Registros de inventario obtenidos', [
@@ -275,13 +279,19 @@ class saleController extends Controller
             $movimientos = [];
             foreach ($inventarios as $inventario) {
                 $productId = $inventario->product_id;
+                $store_id  = $inventario->store_id;
 
-                // Calcular los acumulados para el producto a partir de los detalles de venta
-                $accumulatedQuantity = $ventadetalle->where('product_id', $productId)->sum('quantity');
-                $accumulatedTotalBruto = $ventadetalle->where('product_id', $productId)->sum('total_bruto');
+                // Calcular los acumulados para el producto y la tienda a partir de los detalles de venta
+                $accumulatedQuantity = $ventadetalle->where('product_id', $productId)
+                    ->where('store_id', $store_id)
+                    ->sum('quantity');
+                $accumulatedTotalBruto = $ventadetalle->where('product_id', $productId)
+                    ->where('store_id', $store_id)
+                    ->sum('total_bruto');
 
-                Log::debug('Acumulados calculados para producto', [
+                Log::debug('Acumulados calculados para producto y tienda', [
                     'product_id'            => $productId,
+                    'store_id'              => $store_id,
                     'accumulatedQuantity'   => $accumulatedQuantity,
                     'accumulatedTotalBruto' => $accumulatedTotalBruto
                 ]);
@@ -295,7 +305,7 @@ class saleController extends Controller
                 $lote = $productModel->lotesPorVencer()->orderBy('fecha_vencimiento', 'asc')->first();
                 if (!$lote) {
                     Log::debug('No se encontró lote próximo a vencer para producto', ['product_id' => $productId]);
-                    continue; // Se omite si no se encuentra un lote proximo a vencer
+                    continue; // Se omite si no se encuentra un lote próximo a vencer
                 }
                 $lote_id = $lote->id;
 
@@ -323,6 +333,7 @@ class saleController extends Controller
 
                 Log::debug('Inventario actualizado', [
                     'inventario_id'       => $inventario->id,
+                    'store_id'            => $store_id,
                     'incremento_cantidad' => $accumulatedQuantity,
                     'incremento_costo'    => $accumulatedTotalBruto
                 ]);
@@ -332,12 +343,12 @@ class saleController extends Controller
             if (!empty($movimientos)) {
                 $insertResult = DB::table('movimiento_inventarios')->insert($movimientos);
                 Log::debug('Movimientos de inventario insertados', [
-                    'movimientos'       => $movimientos,
-                    'resultado_insert'  => $insertResult
+                    'movimientos'      => $movimientos,
+                    'resultado_insert' => $insertResult
                 ]);
             } else {
                 Log::debug('No se generaron movimientos de inventario');
-            }          
+            }
 
             // Si la venta tiene un valor a pagar en crédito, se debe invocar la función correspondiente
             if ($compensadores->valor_a_pagar_credito > 0) {
@@ -372,6 +383,7 @@ class saleController extends Controller
                 ->with('error', 'Error al cargar inventario: ' . $e->getMessage());
         }
     }
+
 
 
 
@@ -543,6 +555,10 @@ class saleController extends Controller
     public function create($id)
     {
         $venta = Sale::find($id);
+        $stores = Store::WhereIn('id', [1, 4, 5, 6, 8, 9, 10])
+            ->orderBy('name', 'asc')
+            ->get();
+        //        $stores = Store::all();
 
         /*  $prod = Product::where('status', '1')
         ->whereHas('inventarios', function ($query) {
@@ -588,13 +604,13 @@ class saleController extends Controller
         });
 
 
-        $ventasdetalle = $this->getventasdetalle($id, $venta->store_id);
+        $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
         $arrayTotales = $this->sumTotales($id);
 
         $datacompensado = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('stores as s', 'sa.store_id', '=', 's.id')
-            ->select('sa.*', 'tird.name as namethird', 's.name as namestore', 'tird.porc_descuento as porc_descuento_cliente')
+            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
+            ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto', 'tird.porc_descuento as porc_descuento_cliente')
             ->where('sa.id', $id)
             ->get();
         $status = '';
@@ -628,7 +644,7 @@ class saleController extends Controller
         $detalleVenta = $this->getventasdetail($id);
 
 
-        return view('sale.create', compact('datacompensado', 'id', 'prod', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('sale.create', compact('datacompensado', 'stores', 'id', 'prod', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
 
     public function getventasdetalle($ventaId, $centrocostoId)
@@ -655,8 +671,8 @@ class saleController extends Controller
 
         $dataVenta = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('stores as s', 'sa.store_id', '=', 's.id')
-            ->select('sa.*', 'tird.name as namethird', 's.name as namebodega', 'tird.porc_descuento', 'sa.total_iva', 'sa.vendedor_id')
+            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
+            ->select('sa.*', 'tird.name as namethird', 'c.name as namebodega', 'tird.porc_descuento', 'sa.total_iva', 'sa.vendedor_id')
             ->where('sa.id', $id)
             ->get();
 
@@ -779,6 +795,7 @@ class saleController extends Controller
             if ($getReg == null) {
                 $detail = new SaleDetail();
                 $detail->sale_id = $request->ventaId;
+                $detail->store_id = $request->store;
                 $detail->product_id = $request->producto;
                 $detail->price = $formatPrVenta;
                 $detail->quantity = $formatPesoKg;
@@ -788,7 +805,7 @@ class saleController extends Controller
                 $total_sin_impuesto = $precioUnitarioBruto - ($descuentoProducto + $descuentoCliente);
                 $detail->porc_iva = $porcIva;
                 $detail->iva = $iva;
-                $detail->porc_otro_impuesto = $porcOtroImpuesto;           
+                $detail->porc_otro_impuesto = $porcOtroImpuesto;
                 $detail->otro_impuesto = $otroImpuesto;
                 $detail->porc_impoconsumo = $porcImpoconsumo;
                 $detail->impoconsumo = $Impoconsumo;
@@ -799,6 +816,7 @@ class saleController extends Controller
             } else {
                 $updateReg = SaleDetail::firstWhere('id', $request->regdetailId);
                 $detalleVenta = $this->getventasdetail($request->ventaId);
+                $updateReg->store_id = $request->store;
                 $ivaprod = $detalleVenta[0]->porc_iva;
                 $updateReg->product_id = $request->producto;
                 $updateReg->price = $formatPrVenta;
@@ -863,7 +881,7 @@ class saleController extends Controller
                 'ventaId' => 'required',
                 'cliente' => 'required',
                 'vendedor' => 'required',
-                'store' => 'required',
+                'centrocosto' => 'required',
                 'subcentrodecosto' => 'required',
 
             ];
@@ -871,7 +889,7 @@ class saleController extends Controller
                 'ventaId.required' => 'El ventaId es requerido',
                 'cliente.required' => 'El cliente es requerido',
                 'vendedor.required' => 'El proveedor es requerido',
-                'store.required' => 'La bodega es requerida',
+                'centrocosto.required' => 'El centro costo es requerido',
                 'subcentrodecosto.required' => 'El subcentro de costo es requerido',
             ];
 
@@ -894,11 +912,11 @@ class saleController extends Controller
                 $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
 
                 $id_user = Auth::user()->id;
-                //    $idcc = $request->store;
+                //    $idcc = $request->centrocosto;
 
                 $venta = new Sale();
                 $venta->user_id = $id_user;
-                $venta->store_id = $request->store;
+                $venta->centrocosto_id = $request->centrocosto;
                 $venta->third_id = $request->cliente;
                 $venta->vendedor_id = $request->vendedor;
                 $venta->domiciliario_id = $request->domiciliario;
@@ -927,12 +945,12 @@ class saleController extends Controller
                 $venta->save();
 
                 //ACTUALIZA CONSECUTIVO 
-                $idcc = $request->store;
+                $idcc = $request->centrocosto;
                 DB::update(
                     "
         UPDATE sales a,    
         (
-            SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where store_id = :vcentrocosto1 ),
+            SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
             @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
         ) as tabla
         SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
@@ -952,7 +970,7 @@ class saleController extends Controller
             } else {
                 $getReg = Sale::firstWhere('id', $request->ventaId);
                 $getReg->third_id = $request->vendedor;
-                $getReg->store_id = $request->store;
+                $getReg->centrocosto_id = $request->centrocosto;
                 $getReg->subcentrocostos_id = $request->subcentrodecosto;
                 $getReg->factura = $request->factura;
                 $getReg->save();
@@ -1085,9 +1103,36 @@ class saleController extends Controller
         }
     }
 
+    public function getProductsByStore(Request $request)
+    {
+        $storeId = $request->store_id;
+
+        // Obtiene los productos que tienen inventario en la bodega seleccionada y stock_ideal > 0
+        $productos = Product::whereHas('inventarios', function ($query) use ($storeId) {
+            $query->where('store_id', $storeId)
+                ->where('stock_ideal', '>', 0);
+        })->get();
+
+        $options = [];
+        foreach ($productos as $producto) {
+            // Iterar sobre cada lote asociado al producto
+            foreach ($producto->lotesPorVencer as $lote) {
+                $options[] = [
+                    'id'   => $producto->id, // O puedes combinar product_id y lote_id si es necesario
+                    'text' => "{$producto->name} - {$lote->codigo} - " . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y'),
+                ];
+            }
+        }
+
+        return response()->json($options);
+    }
+
+
+
+
     public function SaObtenerPreciosProducto(Request $request)
     {
-        $centrocostoId = $request->input('store');
+        $centrocostoId = $request->input('centrocosto');
         $clienteId = $request->input('cliente');
         $cliente = Third::find($clienteId);
         $producto = Listapreciodetalle::join('products as prod', 'listapreciodetalles.product_id', '=', 'prod.id')
@@ -1115,7 +1160,7 @@ class saleController extends Controller
     public function buscarPorCodigoBarras(Request $request)
     {
         $codigoBarras = $request->input('codigoBarras');
-        $centrocostoId = $request->input('store');
+        $centrocostoId = $request->input('centrocosto');
         $clienteId = $request->input('cliente');
 
         $cliente = Third::find($clienteId);
@@ -1154,7 +1199,7 @@ class saleController extends Controller
 
             $venta = new Sale();
             $venta->user_id = $id_user;
-            $venta->store_id = 1; // Valor estático para el campo store
+            $venta->centrocosto_id = 1; // Valor estático para el campo centrocosto
             $venta->subcentrocostos_id = 2; // Valor estático para el campo Subcentrocosto PUNTO DE VENTA GUAD
             $venta->third_id = 52; // Valor estático para el campo third_id
             $venta->vendedor_id = 52; // Valor estático para el campo vendedor_id
@@ -1178,7 +1223,7 @@ class saleController extends Controller
 
             $venta->save();
 
-            /*     if ($venta->store_id == 1 || $venta->store_id == 2) {
+            /*     if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
                 $count1 = DB::table('sales')->count();
                 $count2 = DB::table('notacreditos')->count();
                 $count3 = DB::table('notadebitos')->count();
@@ -1189,12 +1234,12 @@ class saleController extends Controller
             }  */
 
             //ACTUALIZA CONSECUTIVO 
-            $idcc = $request->store;
+            $idcc = $request->centrocosto;
             DB::update(
                 "
      UPDATE sales a,    
      (
-         SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where store_id = :vcentrocosto1 ),
+         SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
          @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
      ) as tabla
      SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
@@ -1250,7 +1295,7 @@ class saleController extends Controller
 
                 $venta = new Sale();
                 $venta->user_id = $id_user;
-                $venta->store_id = 1; // Valor estático para el campo store
+                $venta->centrocosto_id = 1; // Valor estático para el campo centrocosto
                 $venta->third_id = 33; // Valor estático para el campo third_id
                 $venta->vendedor_id = 33; // Valor estático para el campo vendedor_id
                 $venta->fecha_venta = $currentDateFormat;

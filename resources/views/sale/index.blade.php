@@ -37,7 +37,7 @@
 							<tr>
 								<th class="table-th text-white">#</th>
 								<th class="table-th text-white">CLIENT</th>
-								<th class="table-th text-white ">BODEGA</th>
+								<th class="table-th text-white ">CENTROCOSTO</th>
 								<th class="table-th text-white">ST</th>
 								<th class="table-th text-white">VALOR.F</th>
 								<th class="table-th text-white">DIA.HORA</th>

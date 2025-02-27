@@ -17,7 +17,7 @@ class ListaprecioSeeder extends Seeder
     {
         $lp = new Listaprecio([
             "centrocosto_id" => "1",
-            "nombre" => "1 - PUNTO DE VENTAS",
+            "nombre" => "1 - DOMICILIO",
             "tipo" => "NICHO",
             "fecha_cierre" => now(),
         ]);
@@ -25,7 +25,7 @@ class ListaprecioSeeder extends Seeder
 
         $lp = new Listaprecio([
             "centrocosto_id" => "1",
-            "nombre" => "2 - DOMICILIO",
+            "nombre" => "2 - PUNTO DE VENTAS",
             "tipo" => "NICHO",
             "fecha_cierre" => now(),
         ]);

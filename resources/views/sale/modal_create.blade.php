@@ -16,7 +16,7 @@
 				<div class="task-header">
 					<div class="form-group">
 						<label for="" class="form-label">Centro de costo</label>
-						<select class="form-control form-control-sm input" name="store" id="store" required>
+						<select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
 							<option value="">Seleccione el centro de costo</option>
 							@foreach($centros as $cencosto)
 							<option value="{{$cencosto->id}}" {{ $cencosto->id == 1 ? 'selected' : '' }}>{{$cencosto->name}}</option>
@@ -85,3 +85,30 @@
 		</div>
 	</div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Limpiar mensajes de error al cerrar el modal
+        $('#modal-create-compensado').on('hidden.bs.modal', function() {
+            $(this).find('.error-message').text(''); // Limpiar mensaje de error
+			$('#centrocosto').val('');			
+            $('#cliente').val('');
+            $('#vendedor').val('');
+            $('#subcentrodecosto').val('');          ;
+        });
+
+        // Limpiar mensajes de error al seleccionar un campo
+		$('#centrocosto').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });
+        $('#cliente').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });       
+        $('#vendedor').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });
+        $('#subcentrodecosto').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });      
+    });
+</script>

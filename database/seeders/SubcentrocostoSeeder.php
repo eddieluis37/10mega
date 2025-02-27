@@ -17,38 +17,26 @@ class SubcentrocostoSeeder extends Seeder
         Subcentrocosto::create([
             'centrocosto_id' => 1,
             'name' => "HOGAR",
-        ]);
-        Subcentrocosto::create([
-            'centrocosto_id' => 1,
-            'name' => "PUNTO DE VENTA GUAD",
-        ]);
+        ]);       
         Subcentrocosto::create([
             'centrocosto_id' => 1,
             'name' => "HORECA",
         ]);
         Subcentrocosto::create([
             'centrocosto_id' => 1,
-            'name' => "ADMINISTRATIVO",
+            'name' => "COMIDAS RAPIDAS",
         ]);
         Subcentrocosto::create([
             'centrocosto_id' => 1,
-            'name' => "INSTITUCIONALES / FAMA",
+            'name' => "INSTITUCIONAL",
         ]);
         Subcentrocosto::create([
             'centrocosto_id' => 1,
-            'name' => "INSTITUCIONALES / LICITAC",
+            'name' => "FAMA",
         ]);
         Subcentrocosto::create([
             'centrocosto_id' => 1,
-            'name' => "ON LINE / RESTAU PORCIONADO",
-        ]);
-        Subcentrocosto::create([
-            'centrocosto_id' => 1,
-            'name' => "ON LINE / RESTAU POSTA",
-        ]);
-        Subcentrocosto::create([
-            'centrocosto_id' => 1,
-            'name' => "PIELES / VISCERAS",
-        ]);
+            'name' => "SUPERMERCADOS",
+        ]);        
     }
 }

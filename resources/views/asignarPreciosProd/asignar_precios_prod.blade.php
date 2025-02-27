@@ -63,7 +63,7 @@
           <div class="task-header">
             <div class="form-group">
               <label for="centrocosto" class="form-label">Costo variable</label>
-              <input class="form-control" type="text" placeholder="$ 1.357" aria-label="Disabled input example" disabled>
+              <input class="form-control" type="text" placeholder="$ 0.00" aria-label="Disabled input example" disabled>
               <span class="text-danger error-message"></span>
             </div>
           </div>
@@ -73,7 +73,7 @@
           <div class="task-header">
             <div class="form-group">
               <label for="centrocosto" class="form-label">Costo fijo</label>
-              <input class="form-control" type="text" placeholder="$ 1.389" aria-label="Disabled input example" disabled>
+              <input class="form-control" type="text" placeholder="$ 0.00" aria-label="Disabled input example" disabled>
               <span class="text-danger error-message"></span>
             </div>
           </div>

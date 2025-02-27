@@ -39,8 +39,8 @@ class AsignarPreciosProdController extends Controller
 
         //     $costoVariable = $request->input('costo_variable'); // Recibir el valor de costo_variable
 
-        $costoVariable = 1357; // Recibir el valor de costo_variable
-        $costoFijo = 1389; // valor de costo_fijo
+        $costoVariable = 0; // 1357 Recibir el valor de costo_variable
+        $costoFijo = 0; // 1389 valor de costo_fijo
 
         $data = DB::table('listapreciodetalles as lpd')
             ->join('listaprecios as lp', 'lp.id', '=', 'lpd.listaprecio_id')

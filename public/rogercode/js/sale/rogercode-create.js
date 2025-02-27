@@ -23,18 +23,19 @@ const tableFoot = document.querySelector("#tabletfoot");
 const cargarInventarioBtn = document.getElementById("cargarInventarioBtn");
 const btnRemove = document.querySelector("#btnRemove");
 
-var store = document.getElementById("store").value;
-console.log("centro " + store);
+var centrocosto = document.getElementById("centrocosto").value;
+console.log("centro " + centrocosto);
 
 var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
 
-$(".select2Prod").select2({
+/* $(".select2Prod").select2({
     placeholder: "Busca un producto",
     width: "100%",
     theme: "bootstrap-5",
     allowClear: true,
 });
+ */
 
 $(document).ready(function () {
     $("#producto").change(function () {
@@ -50,8 +51,8 @@ function actualizarValoresProducto(productId) {
         type: "GET",
         data: {
             productId: productId,
-            store: $("#store").val(), // Obtén el valor del campo store
-            cliente: $("#cliente").val(), // Obtén el valor del campo store
+            centrocosto: $("#centrocosto").val(), // Obtén el valor del campo centrocosto
+            cliente: $("#cliente").val(), // Obtén el valor del campo centrocosto
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada del centro de costo
@@ -70,6 +71,49 @@ function actualizarValoresProducto(productId) {
         },
     });
 }
+
+$(document).ready(function () {
+    $(".select2Store").select2({
+        placeholder: "Seleccione una bodega",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+    });
+
+    $(".select2Prod").select2({
+        placeholder: "Seleccione un producto",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+    });
+
+    $("#store").change(function () {
+        var storeId = $(this).val();
+        $("#producto").empty().trigger("change"); // Limpiar productos
+
+        if (storeId) {
+            $.ajax({
+                url: "/get-products-by-store",
+                type: "GET",
+                data: { store_id: storeId },
+                success: function (data) {
+                    var newOptions = [
+                        { id: "", text: "Seleccione un producto" },
+                    ].concat(data);
+                    $("#producto").select2({
+                        data: newOptions,
+                        width: "100%",
+                        theme: "bootstrap-5",
+                        allowClear: true,
+                    });
+                },
+                error: function () {
+                    console.log("Error al obtener los productos");
+                },
+            });
+        }
+    });
+});
 
 tbodyTable.addEventListener("click", (e) => {
     e.preventDefault();
@@ -165,11 +209,11 @@ const showData = (data) => {
                 <td>${formatCantidad(element.porc_iva)}%</td> 
                 <td>$${formatCantidadSinCero(element.iva)}</td> 
                 <td>${element.porc_otro_impuesto}%</td>     
-                <td>$${formatCantidadSinCero(
-                    element.otro_impuesto
-                )}</td>   
+                <td>$${formatCantidadSinCero(element.otro_impuesto)}</td>   
                 <td>${element.porc_impoconsumo}%</td> 
-                <td>$${formatCantidadSinCero(element.impoconsumo)}</td>               
+                <td>$${formatCantidadSinCero(
+                    element.impoconsumo
+                )}</td>               
                 <td>$${formatCantidadSinCero(element.total)}</td>        
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${

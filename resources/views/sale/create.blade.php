@@ -34,8 +34,8 @@
 							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Bodega</label>
-										<p>{{$datacompensado[0]->namestore}}</p>
+										<label for="" class="form-label">Centro costo</label>
+										<p>{{$datacompensado[0]->namecentrocosto}}</p>
 									</div>
 								</div>
 							</div>
@@ -84,11 +84,23 @@
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
 							<input type="hidden" id="codigoBarras" name="codigoBarras" value="999999999">
 							<div class="row g-3">
-								<div class="col-md-4">
+
+								<div class="col-md-3">
+									<div class="form-group">
+										<label for="store" class="form-label">Seleccionar Bodega</label>
+										<select class="form-control form-control-sm select2Store" name="store" id="store">
+											<option value="">Seleccione una bodega</option>
+											@foreach ($stores as $store)
+											<option value="{{ $store->id }}">{{ $store->name }}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+								<div class="col-md-6">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar producto</label>
-											<input type="hidden" id="store" name="store" value="{{$datacompensado[0]->store_id}}" data-id="{{$datacompensado[0]->store_id}}">
+											<input type="hidden" id="centrocosto" name="centrocosto" value="{{$datacompensado[0]->centrocosto_id}}" data-id="{{$datacompensado[0]->centrocosto_id}}">
 											<input type="hidden" id="cliente" name="cliente" value="{{$datacompensado[0]->third_id}}" data-id="{{$datacompensado[0]->third_id}}">
 											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{$datacompensado[0]->porc_descuento_cliente}}" data-id="{{$datacompensado[0]->porc_descuento_cliente}}">
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
@@ -107,6 +119,15 @@
 										</div>
 									</div>
 								</div>
+								<div class="col-md-3">
+									<label for="" class="form-label">Peso KG</label>
+									<div class="input-group flex-nowrap"">
+										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10,00">
+										<span class="input-group-text" id="addon-wrapping">KG</span>
+									</div>
+									<span class="text-danger error-message"></span>
+								</div>
+
 								<div class="col-md-2">
 									<label for="" class="form-label">Precio venta</label>
 									<div class="input-group flex-nowrap">
@@ -142,35 +163,30 @@
 									</div>
 								</div>
 
+								<div class="col-md-2">
+									<label for="" class="form-label">Descuento</label>
+									<div class="input-group flex-nowrap">
 
-								<div class="form-group row" style="margin-top:3px; margin-left:3px">
+										<input type="text" id="porc_descuento" name="porc_descuento" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
 
-									<div class="col-md-3">
-										<label for="" class="form-label">Descuento</label>
-										<div class="input-group flex-nowrap">
-
-											<input type="text" id="porc_descuento" name="porc_descuento" class="form-control input" readonly placeholder="">
-											<span class="input-group-text" id="addon-wrapping">%</span>
+								<div class="col-md-2">
+									<div class="" style="margin-top:30px;">
+										<div class="d-grid gap-2">
+											<button id="btnAdd" class="btn btn-primary btn-block">Añadir Producto</button>
 										</div>
 									</div>
+								</div>
 
-									<div class="col-md-3">
-										<label for="" class="form-label">Peso KG</label>
-										<div class="input-group flex-nowrap"">
-										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10,00">
-											<span class="input-group-text" id="addon-wrapping">KG</span>
-										</div>
-										<span class="text-danger error-message"></span>
-									</div>
-									@if($datacompensado[0]->status == '0')
-									<div class="col-md-2">
-										<div class="" style="margin-top:30px;">
-											<div class="d-grid gap-2">
-												<button id="btnAdd" class="btn btn-primary">Añadir</button>
-											</div>
-										</div>
-									</div>
-									<!-- <div class="col-md-1">
+
+								<div class="col-md-12">
+									<div class="form-group row" style="margin-top:3px; margin-left:400px">
+
+										@if($datacompensado[0]->status == '0')
+
+										<!-- <div class="col-md-1">
 										<div class="" style="margin-top:30px;">
 											<div class="d-grid gap-2">
 												<button onclick="window.location.reload();" class="btn btn-danger" data-bs-toggle="tooltip" title="Solo en caso que edites un producto, y requieras ingresar uno nuevo">Limpiar</button>
@@ -178,24 +194,28 @@
 										</div>
 									</div> -->
 
-									@can('Admin_Menu')
-									<div class="col-md-2">
-										<div class="" style="margin-top:0px; margin-left:3px">
-											<label for="password">Contraseña:</label>
-											<input type="password" id="password" name="password" class="form-control input">
+										@can('Admin_Menu')
 
-										</div>
-									</div>
 
-									<div class="col-md-2">
-										<div class="" style="margin-top:30px;">
-											<div class="d-grid gap-2">
-												<button id="btnRemove" class="btn btn-warning">Modificar Precio</button>
+
+										<div class="col-md-4">
+											<div class="" style="margin-top:0px; margin-left:3px">
+												<label for="password">PassWord</label>
+												<input type="password" id="password" name="password" class="form-control input" placeholder="Contraseña">
+
 											</div>
 										</div>
+
+										<div class="col-md-3">
+											<div class="" style="margin-top:30px;">
+												<div class="d-grid gap-2">
+													<button id="btnRemove" class="btn btn-warning btn-block">Modificar Precio</button>
+												</div>
+											</div>
+										</div>
+										@endcan
+										@endif
 									</div>
-									@endcan
-									@endif
 								</div>
 						</form>
 					</div>
@@ -243,7 +263,7 @@
 								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
 								<td>{{$proddetail->porc_otro_impuesto}}%</td>
 								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_impoconsumo}}%</td>								
+								<td>{{$proddetail->porc_impoconsumo}}%</td>
 								<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
 								<td class="text-center">
@@ -266,7 +286,7 @@
 							<tr>
 								<th>Totales</th>
 								<th></th>
-								<th></th>								
+								<th></th>
 								<td></td>
 								<th></th>
 								<th></th>
@@ -282,11 +302,11 @@
 						</tfoot>
 					</table>
 					@if($datacompensado[0]->status == '0')
-					<div>
+					<div class="col-md-12">
 						<form method="GET" action="registrar_pago/{{$id}}">
 							@csrf
-							<div class="text-center mt-1">
-								<button id="cargarInventarioBtn" type="submit" class="btn btn-success">Pagar</button>
+							<div class="col-md-12 text-right mt-1">
+								<button id="cargarInventarioBtn" type="submit" class="btn btn-success btn-block">Pagar</button>
 								<!-- <a href="registrar_pago/{{$id}}" target="_blank" class="btn btn-success">Pagar</a> -->
 							</div>
 						</form>
