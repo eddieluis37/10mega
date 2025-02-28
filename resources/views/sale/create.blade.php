@@ -85,7 +85,7 @@
 							<input type="hidden" id="codigoBarras" name="codigoBarras" value="999999999">
 							<div class="row g-3">
 
-								<div class="col-md-3">
+								<div class="col-md-3" id="storeDiv">
 									<div class="form-group">
 										<label for="store" class="form-label">Seleccionar Bodega</label>
 										<select class="form-control form-control-sm select2Store" name="store" id="store">
@@ -96,25 +96,33 @@
 										</select>
 									</div>
 								</div>
+								<script>
+									$(document).ready(function() {
+										
+									});
+								</script>
 								<div class="col-md-6">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="" class="form-label">Buscar producto</label>
-											<input type="hidden" id="centrocosto" name="centrocosto" value="{{$datacompensado[0]->centrocosto_id}}" data-id="{{$datacompensado[0]->centrocosto_id}}">
-											<input type="hidden" id="cliente" name="cliente" value="{{$datacompensado[0]->third_id}}" data-id="{{$datacompensado[0]->third_id}}">
-											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{$datacompensado[0]->porc_descuento_cliente}}" data-id="{{$datacompensado[0]->porc_descuento_cliente}}">
+											<label for="producto" class="form-label">Buscar producto</label>
+											<input type="hidden" id="centrocosto" name="centrocosto" value="{{$datacompensado[0]->centrocosto_id}}">
+											<input type="hidden" id="cliente" name="cliente" value="{{$datacompensado[0]->third_id}}">
+											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{$datacompensado[0]->porc_descuento_cliente}}">
+											<!-- Campo oculto para enviar el lote_id -->
+											<input type="hidden" id="lote_id" name="lote_id" value="">
+
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
 												@foreach ($prod as $producto)
 												@foreach ($producto->lotesPorVencer as $lote)
 												<option value="{{ $producto->id }}"
+													data-lote-id="{{ $lote->id }}"
 													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}">
-													{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}
+													{{ $producto->name }} - {{ $lote->id }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}
 												</option>
 												@endforeach
 												@endforeach
 											</select>
-
 											<span class="text-danger error-message"></span>
 										</div>
 									</div>
@@ -340,6 +348,8 @@
 				e.target.value = "0";
 			}
 		});
+		
+		$('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
 	});
 </script>
 @endsection

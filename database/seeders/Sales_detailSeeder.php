@@ -17,6 +17,7 @@ class Sales_detailSeeder extends Seeder
         SaleDetail::create([
             'sale_id' => 1,
             'store_id' => 1,
+            'lote_id' => 1,
             'product_id' => 1,
             'quantity' => 3,
             'price' => 7000,

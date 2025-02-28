@@ -736,21 +736,23 @@ class saleController extends Controller
         return response()->json(['products' => $prod]);
     }
 
-
     public function savedetail(Request $request)
     {
         try {
+            // Reglas de validación incluyendo lote_id
             $rules = [
-                'ventaId' => 'required',
+                'ventaId'  => 'required',
                 'producto' => 'required',
-                'price' => 'required',
+                'price'    => 'required',
                 'quantity' => 'required',
+                'lote_id'  => 'required', // nueva validación para lote_id
             ];
             $messages = [
-                'ventaId.required' => 'El compensado es requerido',
+                'ventaId.required'  => 'El compensado es requerido',
                 'producto.required' => 'El producto es requerido',
-                'price.required' => 'El precio de compra es requerido',
+                'price.required'    => 'El precio de compra es requerido',
                 'quantity.required' => 'El peso es requerido',
+                'lote_id.required'  => 'El lote es requerido', // nuevo mensaje
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -760,20 +762,14 @@ class saleController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            //$yourController->yourFunction($request);
-            //$total = $request->kgrequeridos * $request->precioventa;
-            //$preciov = $request->precioventa * 1.0;
-            //$subtotal = $request->price * $request->quantity;
-
-            //$total = $precioUnitarioBruto *  $request->iva;          
 
             $formatCantidad = new metodosrogercodeController();
-
             $formatPrVenta = $formatCantidad->MoneyToNumber($request->price);
-            $formatPesoKg = $formatCantidad->MoneyToNumber($request->quantity);
+            $formatPesoKg  = $formatCantidad->MoneyToNumber($request->quantity);
 
             $getReg = SaleDetail::firstWhere('id', $request->regdetailId);
 
+            // Cálculos de descuentos e impuestos
             $porcDescuento = $request->get('porc_descuento');
             $precioUnitarioBruto = ($formatPrVenta * $formatPesoKg);
             $descuentoProducto = $precioUnitarioBruto * ($porcDescuento / 100);
@@ -788,17 +784,18 @@ class saleController extends Controller
             $otroImpuesto = $precioUnitarioBrutoConDesc * ($porcOtroImpuesto / 100);
             $Impoconsumo = $precioUnitarioBrutoConDesc * ($porcImpoconsumo / 100);
 
-
             $totalOtrosImpuestos =  $precioUnitarioBrutoConDesc * ($request->porc_otro_impuesto / 100);
             $valorApagar = $precioUnitarioBrutoConDesc + $totalOtrosImpuestos;
 
             if ($getReg == null) {
+                // Crear nuevo detalle de venta
                 $detail = new SaleDetail();
                 $detail->sale_id = $request->ventaId;
                 $detail->store_id = $request->store;
                 $detail->product_id = $request->producto;
                 $detail->price = $formatPrVenta;
                 $detail->quantity = $formatPesoKg;
+                $detail->lote_id = $request->lote_id; // Se captura el lote_id
                 $detail->porc_desc = $porcDescuento;
                 $detail->descuento = $descuentoProducto;
                 $detail->descuento_cliente = $descuentoCliente;
@@ -814,13 +811,14 @@ class saleController extends Controller
                 $detail->total = $total_sin_impuesto + $total_impuestos;
                 $detail->save();
             } else {
+                // Actualizar detalle existente
                 $updateReg = SaleDetail::firstWhere('id', $request->regdetailId);
                 $detalleVenta = $this->getventasdetail($request->ventaId);
                 $updateReg->store_id = $request->store;
-                $ivaprod = $detalleVenta[0]->porc_iva;
                 $updateReg->product_id = $request->producto;
                 $updateReg->price = $formatPrVenta;
                 $updateReg->quantity = $formatPesoKg;
+                $updateReg->lote_id = $request->lote_id; // Se actualiza el lote_id
                 $updateReg->porc_desc = $porcDescuento;
                 $updateReg->descuento = $descuentoProducto;
                 $updateReg->descuento_cliente = $descuentoCliente;
@@ -835,6 +833,7 @@ class saleController extends Controller
                 $updateReg->save();
             }
 
+            // Actualización de la venta
             $sale = Sale::find($request->ventaId);
             $sale->items = SaleDetail::where('sale_id', $sale->id)->count();
             $sale->descuentos = $totalDescuento;
@@ -842,9 +841,6 @@ class saleController extends Controller
             $sale->total_otros_impuestos = $totalOtrosImpuestos;
             $sale->total_valor_a_pagar = $valorApagar;
             $saleDetails = SaleDetail::where('sale_id', $sale->id)->get();
-            $totalBruto = 0;
-            $totalDesc = 0;
-            $sale->total_valor_a_pagar = $saleDetails->where('sale_id', $sale->id)->sum('total');
             $totalBruto = $saleDetails->sum(function ($saleDetail) {
                 return $saleDetail->quantity * $saleDetail->price;
             });
@@ -853,25 +849,27 @@ class saleController extends Controller
             });
             $sale->total_bruto = $totalBruto;
             $sale->descuentos = $totalDesc;
+            $sale->total_valor_a_pagar = $saleDetails->where('sale_id', $sale->id)->sum('total');
             $sale->save();
 
             $arraydetail = $this->getventasdetail($request->ventaId);
-
             $arrayTotales = $this->sumTotales($request->ventaId);
 
             return response()->json([
-                'status' => 1,
-                'message' => "Agregado correctamente",
-                'array' => $arraydetail,
+                'status'       => 1,
+                'message'      => "Agregado correctamente",
+                'array'        => $arraydetail,
                 'arrayTotales' => $arrayTotales
             ]);
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => 0,
+                'status'  => 0,
                 'message' => (array) $th
             ]);
         }
     }
+
+
 
     public function store(Request $request) // Guardar venta por domicilio
     {

@@ -40,23 +40,31 @@ console.log("cliente " + cliente);
 $(document).ready(function () {
     $("#producto").change(function () {
         var productId = $(this).val();
-        // Llama a una función para actualizar los valores en función del producto seleccionado
-        actualizarValoresProducto(productId);
+        // Extrae el atributo data-lote-id de la opción seleccionada
+        var loteId = $(this).find(":selected").data("lote-id");
+        console.log("loteId seleccionado:", loteId); // Para verificar en consola
+        // Asigna el valor al campo oculto, si lo utilizas en el formulario
+        $("#lote_id").val(loteId);
+        
+        // Llama a la función para actualizar los valores del producto y enviar loteId
+        actualizarValoresProducto(productId, loteId);
     });
 });
 
-function actualizarValoresProducto(productId) {
+function actualizarValoresProducto(productId, loteId) {
     $.ajax({
-        url: "/sa-obtener-precios-producto", 
+        url: "/sa-obtener-precios-producto",
         type: "GET",
         data: {
             productId: productId,
+            loteId: loteId, // Se envía el lote_id seleccionado
             centrocosto: $("#centrocosto").val(), // Obtén el valor del campo centrocosto
             cliente: $("#cliente").val(), // Obtén el valor del campo centrocosto
+            
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada del centro de costo
-          
+
             const formattedPrice = formatCantidadSinCero(response.precio);
 
             $("#price").val(formattedPrice);
@@ -89,7 +97,7 @@ $(document).ready(function () {
 
     $("#store").change(function () {
         var storeId = $(this).val();
-        $("#producto").empty().trigger("change"); // Limpiar productos
+       // $("#producto").empty().trigger("change"); // Limpiar productos
 
         if (storeId) {
             $.ajax({
