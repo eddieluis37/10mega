@@ -98,33 +98,44 @@
 								</div>
 								<script>
 									$(document).ready(function() {
-										
+
 									});
 								</script>
-								<div class="col-md-6">
+								<div class="col-md-8">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="producto" class="form-label">Buscar producto</label>
-											<input type="hidden" id="centrocosto" name="centrocosto" value="{{$datacompensado[0]->centrocosto_id}}">
-											<input type="hidden" id="cliente" name="cliente" value="{{$datacompensado[0]->third_id}}">
-											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{$datacompensado[0]->porc_descuento_cliente}}">
-											<!-- Campo oculto para enviar el lote_id -->
+											<input type="hidden" id="centrocosto" name="centrocosto" value="{{ $datacompensado[0]->centrocosto_id }}">
+											<input type="hidden" id="cliente" name="cliente" value="{{ $datacompensado[0]->third_id }}">
+											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{ $datacompensado[0]->porc_descuento_cliente }}">
+											<!-- Campos ocultos para enviar lote_id, inventario_id y stock ideal -->
 											<input type="hidden" id="lote_id" name="lote_id" value="">
+											<input type="hidden" id="inventario_id" name="inventario_id" value="">
+											<input type="hidden" id="stock_ideal" name="stock_ideal" value="">
 
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
 												@foreach ($prod as $producto)
 												@foreach ($producto->lotesPorVencer as $lote)
+												@php
+												$inventario = $producto->inventarios->first(); // Ya se cargó mediante eager loading
+												@endphp
 												<option value="{{ $producto->id }}"
 													data-lote-id="{{ $lote->id }}"
-													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}">
-													{{ $producto->name }} - {{ $lote->id }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}
+													data-inventario-id="{{ $inventario ? $inventario->id : '' }}"
+													data-stock-ideal="{{ $inventario ? $inventario->stock_ideal : '' }}"
+													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stock Ideal: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - Inventario ID: {{ $inventario ? $inventario->id : 'N/A' }}">
+													{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - InvID: {{ $inventario ? $inventario->id : 'N/A' }}
 												</option>
 												@endforeach
 												@endforeach
 											</select>
 											<span class="text-danger error-message"></span>
 										</div>
+
+
+
+
 									</div>
 								</div>
 								<div class="col-md-3">
@@ -348,7 +359,7 @@
 				e.target.value = "0";
 			}
 		});
-		
+
 		$('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
 	});
 </script>

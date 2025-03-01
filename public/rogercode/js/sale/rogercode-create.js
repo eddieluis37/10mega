@@ -36,7 +36,7 @@ console.log("cliente " + cliente);
     allowClear: true,
 });
  */
-
+/* 
 $(document).ready(function () {
     $("#producto").change(function () {
         var productId = $(this).val();
@@ -49,7 +49,33 @@ $(document).ready(function () {
         // Llama a la función para actualizar los valores del producto y enviar loteId
         actualizarValoresProducto(productId, loteId);
     });
+}); */
+
+$(document).ready(function(){
+    $('#producto').on('change', function(){
+        var productId = $(this).val();
+        var selectedOption = $(this).find('option:selected');
+        var loteId       = selectedOption.data('lote-id');
+        var inventarioId = selectedOption.data('inventario-id');
+        var stockIdeal   = selectedOption.data('stock-ideal');
+
+        // Mostrar en consola para verificar
+        console.log('Lote ID:', loteId);
+        console.log('Inventario ID:', inventarioId);
+        console.log('Stock Ideal:', stockIdeal);
+
+        // Asignar los valores a los campos ocultos
+        $('#lote_id').val(loteId);
+        $('#inventario_id').val(inventarioId);
+        $('#stock_ideal').val(stockIdeal);
+
+         // Llama a la función para actualizar los valores del producto y enviar loteId
+         actualizarValoresProducto(productId, loteId);
+
+    });
 });
+
+
 
 function actualizarValoresProducto(productId, loteId) {
     $.ajax({

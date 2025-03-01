@@ -1105,25 +1105,41 @@ class saleController extends Controller
     {
         $storeId = $request->store_id;
 
-        // Obtiene los productos que tienen inventario en la bodega seleccionada y stock_ideal > 0
+        // Obtiene los productos que tienen inventario en la bodega seleccionada y stock_ideal > 0.
+        // Se hace _eager loading_ de la relación inventarios filtrada por store_id.
         $productos = Product::whereHas('inventarios', function ($query) use ($storeId) {
             $query->where('store_id', $storeId)
                 ->where('stock_ideal', '>', 0);
-        })->get();
+        })
+            ->with(['inventarios' => function ($query) use ($storeId) {
+                $query->where('store_id', $storeId);
+            }])
+            ->with('lotesPorVencer') // Se asume que usas esta relación para mostrar los lotes.
+            ->get();
 
+        // Prepara las opciones para el select (en este ejemplo se hace desde el controlador y se envía vía JSON).
         $options = [];
         foreach ($productos as $producto) {
-            // Iterar sobre cada lote asociado al producto
+            // Obtiene el inventario para la tienda (suponiendo que solo hay un registro por producto y tienda)
+            $inventario = $producto->inventarios->first();
             foreach ($producto->lotesPorVencer as $lote) {
                 $options[] = [
-                    'id'   => $producto->id, // O puedes combinar product_id y lote_id si es necesario
-                    'text' => "{$producto->name} - {$lote->codigo} - " . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y'),
+                    'id'               => $producto->id,
+                    'text'             => "{$producto->name} - {$lote->codigo} - " .
+                        \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') .
+                        " - Stock Ideal: " . ($inventario ? $inventario->stock_ideal : 'N/A') .
+                        " - Inventario ID: " . ($inventario ? $inventario->id : 'N/A'),
+                    'lote_id'          => $lote->id,
+                    'inventario_id'    => $inventario ? $inventario->id : '',
+                    'stock_ideal'      => $inventario ? $inventario->stock_ideal : '',
                 ];
             }
         }
 
         return response()->json($options);
     }
+
+
 
 
 

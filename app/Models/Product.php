@@ -17,7 +17,7 @@ class Product extends Model
 
 	public function inventarios()
     {
-        return $this->hasMany(Inventario::class);
+		return $this->hasMany(Inventario::class, 'product_id');
     }
 
     public function lotesPorVencer() // Nueva relación con lotes a través de lote_products
@@ -133,4 +133,6 @@ class Product extends Model
 	{
 		return $this->belongsToMany(Store::class, 'product_store');
 	}
+
+
 }
