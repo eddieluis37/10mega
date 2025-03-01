@@ -58,6 +58,7 @@ $(document).ready(function(){
         var loteId       = selectedOption.data('lote-id');
         var inventarioId = selectedOption.data('inventario-id');
         var stockIdeal   = selectedOption.data('stock-ideal');
+        var storeName    = selectedOption.data('store-name');
 
         // Mostrar en consola para verificar
         console.log('Lote ID:', loteId);
@@ -68,6 +69,7 @@ $(document).ready(function(){
         $('#lote_id').val(loteId);
         $('#inventario_id').val(inventarioId);
         $('#stock_ideal').val(stockIdeal);
+        $('#store_name').val(storeName);
 
          // Llama a la función para actualizar los valores del producto y enviar loteId
          actualizarValoresProducto(productId, loteId);

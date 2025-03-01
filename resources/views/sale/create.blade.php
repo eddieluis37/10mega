@@ -108,41 +108,40 @@
 											<input type="hidden" id="centrocosto" name="centrocosto" value="{{ $datacompensado[0]->centrocosto_id }}">
 											<input type="hidden" id="cliente" name="cliente" value="{{ $datacompensado[0]->third_id }}">
 											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{ $datacompensado[0]->porc_descuento_cliente }}">
-											<!-- Campos ocultos para enviar lote_id, inventario_id y stock ideal -->
+											<!-- Campos ocultos para enviar los datos adicionales -->
 											<input type="hidden" id="lote_id" name="lote_id" value="">
 											<input type="hidden" id="inventario_id" name="inventario_id" value="">
 											<input type="hidden" id="stock_ideal" name="stock_ideal" value="">
+											<input type="hidden" id="store_name" name="store_name" value="">
 
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
 												@foreach ($prod as $producto)
 												@foreach ($producto->lotesPorVencer as $lote)
 												@php
-												$inventario = $producto->inventarios->first(); // Ya se cargó mediante eager loading
+												// Se asume que se realizó eager loading de inventarios filtrado por store.
+												$inventario = $producto->inventarios->first();
 												@endphp
 												<option value="{{ $producto->id }}"
 													data-lote-id="{{ $lote->id }}"
 													data-inventario-id="{{ $inventario ? $inventario->id : '' }}"
 													data-stock-ideal="{{ $inventario ? $inventario->stock_ideal : '' }}"
-													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stock Ideal: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - Inventario ID: {{ $inventario ? $inventario->id : 'N/A' }}">
-													{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - InvID: {{ $inventario ? $inventario->id : 'N/A' }}
+													data-store-name="{{ ($inventario && $inventario->store) ? $inventario->store->name : '' }}"
+													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stock Ideal: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - Inventario ID: {{ $inventario ? $inventario->id : 'N/A' }} - Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }}">													
+													Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - {{ $producto->name }} -  Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }}
 												</option>
 												@endforeach
 												@endforeach
 											</select>
 											<span class="text-danger error-message"></span>
 										</div>
-
-
-
-
 									</div>
 								</div>
 								<div class="col-md-3">
-									<label for="" class="form-label">Peso KG</label>
+									<label for="" class="form-label">KG|QT</label>
 									<div class="input-group flex-nowrap"">
 										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10,00">
-										<span class="input-group-text" id="addon-wrapping">KG</span>
+										<span class="input-group-text" id="addon-wrapping">QT</span>
 									</div>
 									<span class="text-danger error-message"></span>
 								</div>
