@@ -58,17 +58,21 @@ $(document).ready(function(){
         var loteId       = selectedOption.data('lote-id');
         var inventarioId = selectedOption.data('inventario-id');
         var stockIdeal   = selectedOption.data('stock-ideal');
+        var storeId      = selectedOption.data('store-id');
         var storeName    = selectedOption.data('store-name');
 
         // Mostrar en consola para verificar
         console.log('Lote ID:', loteId);
         console.log('Inventario ID:', inventarioId);
         console.log('Stock Ideal:', stockIdeal);
+        console.log('Store ID:', storeId);
+        console.log('Store Name:', storeName);
 
         // Asignar los valores a los campos ocultos
         $('#lote_id').val(loteId);
         $('#inventario_id').val(inventarioId);
         $('#stock_ideal').val(stockIdeal);
+        $('#store_id').val(storeId);
         $('#store_name').val(storeName);
 
          // Llama a la función para actualizar los valores del producto y enviar loteId

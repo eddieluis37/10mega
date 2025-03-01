@@ -739,22 +739,23 @@ class saleController extends Controller
     public function savedetail(Request $request)
     {
         try {
-            // Reglas de validación incluyendo lote_id
+            // Validación
             $rules = [
                 'ventaId'  => 'required',
                 'producto' => 'required',
                 'price'    => 'required',
                 'quantity' => 'required',
-                'lote_id'  => 'required', // nueva validación para lote_id
+                'lote_id'  => 'required',
+                'store'    => 'required', // se requiere el store_id
             ];
             $messages = [
                 'ventaId.required'  => 'El compensado es requerido',
                 'producto.required' => 'El producto es requerido',
                 'price.required'    => 'El precio de compra es requerido',
                 'quantity.required' => 'El peso es requerido',
-                'lote_id.required'  => 'El lote es requerido', // nuevo mensaje
+                'lote_id.required'  => 'El lote es requerido',
+                'store.required'    => 'La bodega es requerida',
             ];
-
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
                 return response()->json([
@@ -763,95 +764,78 @@ class saleController extends Controller
                 ], 422);
             }
 
+            // Formateo de valores
             $formatCantidad = new metodosrogercodeController();
-            $formatPrVenta = $formatCantidad->MoneyToNumber($request->price);
-            $formatPesoKg  = $formatCantidad->MoneyToNumber($request->quantity);
+            $price   = $formatCantidad->MoneyToNumber($request->price);
+            $quantity = $formatCantidad->MoneyToNumber($request->quantity);
 
-            $getReg = SaleDetail::firstWhere('id', $request->regdetailId);
-
-            // Cálculos de descuentos e impuestos
+            // Cálculos comunes
+            $precioUnitarioBruto = $price * $quantity;
             $porcDescuento = $request->get('porc_descuento');
-            $precioUnitarioBruto = ($formatPrVenta * $formatPesoKg);
             $descuentoProducto = $precioUnitarioBruto * ($porcDescuento / 100);
             $porc_descuento_cliente = $request->get('porc_descuento_cliente');
             $descuentoCliente = $precioUnitarioBruto * ($porc_descuento_cliente / 100);
             $totalDescuento = $descuentoProducto + $descuentoCliente;
-            $precioUnitarioBrutoConDesc = $precioUnitarioBruto - $totalDescuento;
-            $porcIva = $request->get('porc_iva');
+            $netoSinImpuesto = $precioUnitarioBruto - $totalDescuento;
+
+            $porcIva          = $request->get('porc_iva');
             $porcOtroImpuesto = $request->get('porc_otro_impuesto');
-            $porcImpoconsumo = $request->get('impoconsumo');
-            $iva = $precioUnitarioBrutoConDesc * ($porcIva / 100);
-            $otroImpuesto = $precioUnitarioBrutoConDesc * ($porcOtroImpuesto / 100);
-            $Impoconsumo = $precioUnitarioBrutoConDesc * ($porcImpoconsumo / 100);
+            $porcImpoconsumo  = $request->get('impoconsumo');
+            $iva         = $netoSinImpuesto * ($porcIva / 100);
+            $otroImpuesto = $netoSinImpuesto * ($porcOtroImpuesto / 100);
+            $impoconsumo  = $netoSinImpuesto * ($porcImpoconsumo / 100);
+            $totalImpuestos = $iva + $otroImpuesto + $impoconsumo;
+            $valorApagar    = $netoSinImpuesto + $totalImpuestos;
 
-            $totalOtrosImpuestos =  $precioUnitarioBrutoConDesc * ($request->porc_otro_impuesto / 100);
-            $valorApagar = $precioUnitarioBrutoConDesc + $totalOtrosImpuestos;
+            // Arreglo con datos a almacenar
+            $dataDetail = [
+                'sale_id'           => $request->ventaId,
+                'store_id'          => $request->store, // Capturado desde la vista
+                'product_id'        => $request->producto,
+                'price'             => $price,
+                'quantity'          => $quantity,
+                'lote_id'           => $request->lote_id,
+                'porc_desc'         => $porcDescuento,
+                'descuento'         => $descuentoProducto,
+                'descuento_cliente' => $descuentoCliente,
+                'porc_iva'          => $porcIva,
+                'iva'               => $iva,
+                'porc_otro_impuesto' => $porcOtroImpuesto,
+                'otro_impuesto'     => $otroImpuesto,
+                'porc_impoconsumo'  => $porcImpoconsumo,
+                'impoconsumo'       => $impoconsumo,
+                'total_bruto'       => $precioUnitarioBruto,
+                'total'             => $netoSinImpuesto + $totalImpuestos,
+            ];
 
-            if ($getReg == null) {
-                // Crear nuevo detalle de venta
-                $detail = new SaleDetail();
-                $detail->sale_id = $request->ventaId;
-                $detail->store_id = $request->store;
-                $detail->product_id = $request->producto;
-                $detail->price = $formatPrVenta;
-                $detail->quantity = $formatPesoKg;
-                $detail->lote_id = $request->lote_id; // Se captura el lote_id
-                $detail->porc_desc = $porcDescuento;
-                $detail->descuento = $descuentoProducto;
-                $detail->descuento_cliente = $descuentoCliente;
-                $total_sin_impuesto = $precioUnitarioBruto - ($descuentoProducto + $descuentoCliente);
-                $detail->porc_iva = $porcIva;
-                $detail->iva = $iva;
-                $detail->porc_otro_impuesto = $porcOtroImpuesto;
-                $detail->otro_impuesto = $otroImpuesto;
-                $detail->porc_impoconsumo = $porcImpoconsumo;
-                $detail->impoconsumo = $Impoconsumo;
-                $total_impuestos = $iva + $otroImpuesto + $Impoconsumo;
-                $detail->total_bruto = $precioUnitarioBruto;
-                $detail->total = $total_sin_impuesto + $total_impuestos;
-                $detail->save();
+            // Crear o actualizar el detalle de venta
+            if (empty($request->regdetailId)) {
+                SaleDetail::create($dataDetail);
             } else {
-                // Actualizar detalle existente
-                $updateReg = SaleDetail::firstWhere('id', $request->regdetailId);
-                $detalleVenta = $this->getventasdetail($request->ventaId);
-                $updateReg->store_id = $request->store;
-                $updateReg->product_id = $request->producto;
-                $updateReg->price = $formatPrVenta;
-                $updateReg->quantity = $formatPesoKg;
-                $updateReg->lote_id = $request->lote_id; // Se actualiza el lote_id
-                $updateReg->porc_desc = $porcDescuento;
-                $updateReg->descuento = $descuentoProducto;
-                $updateReg->descuento_cliente = $descuentoCliente;
-                $total_sin_impuesto = $precioUnitarioBruto - ($descuentoProducto + $descuentoCliente);
-                $updateReg->porc_iva = $porcIva;
-                $updateReg->iva = $iva;
-                $updateReg->porc_otro_impuesto = $porcOtroImpuesto;
-                $updateReg->otro_impuesto = $otroImpuesto;
-                $total_impuestos = $iva + $otroImpuesto;
-                $updateReg->total_bruto = $precioUnitarioBruto;
-                $updateReg->total = $total_sin_impuesto + $total_impuestos;
-                $updateReg->save();
+                $detail = SaleDetail::find($request->regdetailId);
+                $detail->update($dataDetail);
             }
 
             // Actualización de la venta
             $sale = Sale::find($request->ventaId);
-            $sale->items = SaleDetail::where('sale_id', $sale->id)->count();
-            $sale->descuentos = $totalDescuento;
-            $sale->total_iva = $iva;
-            $sale->total_otros_impuestos = $totalOtrosImpuestos;
-            $sale->total_valor_a_pagar = $valorApagar;
             $saleDetails = SaleDetail::where('sale_id', $sale->id)->get();
-            $totalBruto = $saleDetails->sum(function ($saleDetail) {
-                return $saleDetail->quantity * $saleDetail->price;
+            $sale->items = $saleDetails->count();
+            $totalBruto = $saleDetails->sum(function ($detail) {
+                return $detail->quantity * $detail->price;
             });
-            $totalDesc = $saleDetails->sum(function ($saleDetail) {
-                return $saleDetail->descuento + $saleDetail->descuento_cliente;
+            $totalDesc  = $saleDetails->sum(function ($detail) {
+                return $detail->descuento + $detail->descuento_cliente;
             });
+            $totalValor = $saleDetails->sum('total');
+
             $sale->total_bruto = $totalBruto;
-            $sale->descuentos = $totalDesc;
-            $sale->total_valor_a_pagar = $saleDetails->where('sale_id', $sale->id)->sum('total');
+            $sale->descuentos    = $totalDesc;
+            $sale->total_valor_a_pagar = $totalValor;
+            $sale->total_iva     = $iva; // Puedes ajustar si el IVA se debe sumar de forma global
+            $sale->total_otros_impuestos = $netoSinImpuesto * ($porcOtroImpuesto / 100);
             $sale->save();
 
+            // Se obtienen los arrays para la respuesta
             $arraydetail = $this->getventasdetail($request->ventaId);
             $arrayTotales = $this->sumTotales($request->ventaId);
 
@@ -868,6 +852,7 @@ class saleController extends Controller
             ]);
         }
     }
+
 
 
 

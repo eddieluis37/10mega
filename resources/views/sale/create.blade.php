@@ -108,10 +108,12 @@
 											<input type="hidden" id="centrocosto" name="centrocosto" value="{{ $datacompensado[0]->centrocosto_id }}">
 											<input type="hidden" id="cliente" name="cliente" value="{{ $datacompensado[0]->third_id }}">
 											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{ $datacompensado[0]->porc_descuento_cliente }}">
-											<!-- Campos ocultos para enviar los datos adicionales -->
+
+											<!-- Campos ocultos para enviar datos adicionales -->
 											<input type="hidden" id="lote_id" name="lote_id" value="">
 											<input type="hidden" id="inventario_id" name="inventario_id" value="">
 											<input type="hidden" id="stock_ideal" name="stock_ideal" value="">
+											<input type="hidden" id="store_id" name="store" value="">
 											<input type="hidden" id="store_name" name="store_name" value="">
 
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
@@ -119,22 +121,24 @@
 												@foreach ($prod as $producto)
 												@foreach ($producto->lotesPorVencer as $lote)
 												@php
-												// Se asume que se realizó eager loading de inventarios filtrado por store.
+												// Se asume que se realizó eager loading de la relación inventarios filtrada por store
 												$inventario = $producto->inventarios->first();
 												@endphp
 												<option value="{{ $producto->id }}"
 													data-lote-id="{{ $lote->id }}"
 													data-inventario-id="{{ $inventario ? $inventario->id : '' }}"
 													data-stock-ideal="{{ $inventario ? $inventario->stock_ideal : '' }}"
+													data-store-id="{{ ($inventario && $inventario->store) ? $inventario->store->id : '' }}"
 													data-store-name="{{ ($inventario && $inventario->store) ? $inventario->store->name : '' }}"
-													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stock Ideal: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - Inventario ID: {{ $inventario ? $inventario->id : 'N/A' }} - Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }}">													
-													Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - {{ $producto->name }} -  Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }}
+													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stock Ideal: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - Inventario ID: {{ $inventario ? $inventario->id : 'N/A' }} - Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }}">
+													Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - {{ $producto->name }} - Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }}
 												</option>
 												@endforeach
 												@endforeach
 											</select>
 											<span class="text-danger error-message"></span>
 										</div>
+
 									</div>
 								</div>
 								<div class="col-md-3">
@@ -271,7 +275,7 @@
 							<tr>
 								<!--td>{{$proddetail->id}}</td-->
 								<td>{{$proddetail->nameprod}}</td>
-								<td>{{ number_format($proddetail->quantity, 2, ',', '.')}}KG</td>
+								<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}KG</td>
 								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
 								<td>{{$proddetail->porc_desc}}%</td>
 								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
