@@ -362,10 +362,6 @@ class saleController extends Controller
         }
     }
 
-
-
-
-
     public function cargarInventarioMasivo()
     {
         for ($ventaId = 484; $ventaId <= 592; $ventaId++) {
@@ -377,141 +373,6 @@ class saleController extends Controller
             'message' => 'Cargado al inventario masivamente desde el ID 672 hasta el ID 1127'
         ]);
     }
-
-    /* public function cargarInventariocr($ventaId)
-    {
-        $currentDateTime = Carbon::now();
-        $formattedDate = $currentDateTime->format('Y-m-d');
-        $compensadores = Sale::where('id', $ventaId)->get();
-        $ventadetalle = SaleDetail::where('sale_id', $ventaId)->get();
-        $product_ids = $ventadetalle->pluck('product_id');
-
-        $store_id = 1;
-
-        $centroCostoProducts = Centro_costo_product::whereIn('products_id', $product_ids)
-            ->where('store_id', $store_id)
-            ->get();
-
-        foreach ($centroCostoProducts as $centroCostoProduct) {
-            $accumulatedQuantity = SaleDetail::where('sale_id', '=', $ventaId)
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('quantity');
-
-            $accumulatedTotalBruto = 0;
-
-            $accumulatedTotalBruto += SaleDetail::where('sale_id', '=', $ventaId)
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('total_bruto');
-
-            DB::table('table_temporary_accumulated_sales')->insert([
-                'product_id' => $centroCostoProduct->products_id,
-                'accumulated_quantity' => $accumulatedQuantity,
-                'accumulated_total_bruto' => $accumulatedTotalBruto
-            ]);
-        }
-        // Recuperar los registros de la tabla table_temporary_accumulated_sales
-        $accumulatedQuantitys = DB::table('table_temporary_accumulated_sales')->get();
-
-        foreach ($accumulatedQuantitys as $accumulatedQuantity) {
-            $centroCostoProduct = Centro_costo_product::find($accumulatedQuantity->product_id);
-
-            $centroCostoProduct->venta += $accumulatedQuantity->accumulated_quantity;
-            $centroCostoProduct->cto_venta_total += $accumulatedQuantity->accumulated_total_bruto;
-            $centroCostoProduct->save();
-
-            // Limpiar la tabla table_temporary_accumulated_sales
-            DB::table('table_temporary_accumulated_sales')->truncate();
-        }
-
-        if (($compensadores[0]->valor_a_pagar_credito) > 0) {
-            $this->cuentasPorCobrar($ventaId);
-        }
-
-        return response()->json([
-            'status' => 1,
-            'message' => 'Cargado al inventario exitosamente',
-            'compensadores' => $compensadores
-        ]);
-    } */
-
-    // Opcion 2 sin Eloquent
-    public function cargarInventariocrOriginal($ventaId)
-    {
-
-        $compensadores = DB::table('sales')
-            ->where('id', $ventaId)
-            ->where('status', '1')
-            ->get();
-
-
-        $ventadetalle = DB::table('sale_details')
-            ->where('sale_id', $ventaId)
-            ->where('status', '1')
-            ->get();
-
-        $product_ids = $ventadetalle->pluck('product_id');
-        $store_id = '1';
-        $centroCostoProducts = DB::table('centro_costo_products')
-            ->whereIn('products_id', $product_ids)
-            ->where('store_id', $store_id)
-            ->get();
-
-        // Calculate accumulated values and insert into temporary table
-        foreach ($centroCostoProducts as $centroCostoProduct) {
-            $accumulatedQuantity = DB::table('sale_details')
-                ->where('sale_id', $ventaId)
-                ->where('status', '1')
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('quantity');
-            //   ->value('quantity');
-
-            $accumulatedTotalBruto = DB::table('sale_details')
-                ->where('sale_id', $ventaId)
-                ->where('status', '1')
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('total_bruto');
-
-            DB::table('table_temporary_accumulated_sales')->insert([
-                'product_id' => $centroCostoProduct->products_id,
-                'accumulated_quantity' => $accumulatedQuantity,
-                'accumulated_total_bruto' => $accumulatedTotalBruto
-            ]);
-
-            // Update Centro_costo_product records
-            $centroCostoProduct = DB::table('centro_costo_products')
-                ->where('products_id', $centroCostoProduct->products_id)
-                ->first();
-
-            $centroCostoProduct->venta += $accumulatedQuantity;
-            $centroCostoProduct->cto_venta_total += $accumulatedTotalBruto;
-
-            DB::table('centro_costo_products')
-                ->where('products_id', $centroCostoProduct->products_id)
-                ->update([
-                    'venta' => $centroCostoProduct->venta,
-                    'cto_venta_total' => $centroCostoProduct->cto_venta_total
-                ]);
-        }
-
-        // Clear the temporary table
-        DB::table('table_temporary_accumulated_sales')->truncate();
-
-        // Check and call cuentasPorCobrar function
-        if (($compensadores[0]->valor_a_pagar_credito) > 0) {
-            // Call cuentasPorCobrar function
-        }
-
-        return response()->json([
-            'status' => 1,
-            'message' => 'Cargado al inventario exitosamente',
-            'compensadores' => $compensadores
-        ]);
-    }
-
-
-
-
-
 
     public function cuentasPorCobrar($ventaId)
     {
@@ -1016,9 +877,7 @@ class saleController extends Controller
     public function destroy(Request $request)
     {
 
-
         try {
-
             $compe = SaleDetail::where('id', $request->id)->first();
             $compe->delete();
 
@@ -1081,48 +940,6 @@ class saleController extends Controller
             ]);
         }
     }
-
-    /*   public function getProductsByStore(Request $request)
-    {
-        $storeId = $request->store_id;
-
-        // Obtiene los productos que tienen inventario en la bodega seleccionada y stock_ideal > 0.
-        // Se hace _eager loading_ de la relación inventarios filtrada por store_id.
-        $productos = Product::whereHas('inventarios', function ($query) use ($storeId) {
-            $query->where('store_id', $storeId)
-                ->where('stock_ideal', '>', 0);
-        })
-            ->with(['inventarios' => function ($query) use ($storeId) {
-                $query->where('store_id', $storeId);
-            }])
-            ->with('lotesPorVencer') // Se asume que usas esta relación para mostrar los lotes.
-            ->get();
-
-        // Prepara las opciones para el select (en este ejemplo se hace desde el controlador y se envía vía JSON).
-        $options = [];
-        foreach ($productos as $producto) {
-            // Obtiene el inventario para la tienda (suponiendo que solo hay un registro por producto y tienda)
-            $inventario = $producto->inventarios->first();
-            foreach ($producto->lotesPorVencer as $lote) {
-                $options[] = [
-                    'id'               => $producto->id,
-                    'text'             => "{$producto->name} - {$lote->codigo} - " .
-                        \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') .
-                        " - Stock Ideal: " . ($inventario ? $inventario->stock_ideal : 'N/A') .
-                        " - Inventario ID: " . ($inventario ? $inventario->id : 'N/A'),
-                    'lote_id'          => $lote->id,
-                    'inventario_id'    => $inventario ? $inventario->id : '',
-                    'stock_ideal'      => $inventario ? $inventario->stock_ideal : '',
-                ];
-            }
-        }
-
-        return response()->json($options);
-    }
- */
-
-
-
 
 
     public function SaObtenerPreciosProducto(Request $request)
@@ -1259,7 +1076,151 @@ class saleController extends Controller
         }
     }
 
-    /*    public function storeVentaMostrador()
+
+    public function obtenerNombreCliente($id)
+    {
+        $venta = Sale::find($id);
+        if ($venta) {
+            $nombreCliente = $venta->third->name;
+            return "Nombre del cliente: " . $nombreCliente;
+        } else {
+            return "Venta no encontrada";
+        }
+    }
+
+   /*  // Opcion 2 sin Eloquent
+    public function cargarInventariocrOriginal($ventaId)
+    {
+
+        $compensadores = DB::table('sales')
+            ->where('id', $ventaId)
+            ->where('status', '1')
+            ->get();
+
+
+        $ventadetalle = DB::table('sale_details')
+            ->where('sale_id', $ventaId)
+            ->where('status', '1')
+            ->get();
+
+        $product_ids = $ventadetalle->pluck('product_id');
+        $store_id = '1';
+        $centroCostoProducts = DB::table('centro_costo_products')
+            ->whereIn('products_id', $product_ids)
+            ->where('store_id', $store_id)
+            ->get();
+
+        // Calculate accumulated values and insert into temporary table
+        foreach ($centroCostoProducts as $centroCostoProduct) {
+            $accumulatedQuantity = DB::table('sale_details')
+                ->where('sale_id', $ventaId)
+                ->where('status', '1')
+                ->where('product_id', $centroCostoProduct->products_id)
+                ->sum('quantity');
+            //   ->value('quantity');
+
+            $accumulatedTotalBruto = DB::table('sale_details')
+                ->where('sale_id', $ventaId)
+                ->where('status', '1')
+                ->where('product_id', $centroCostoProduct->products_id)
+                ->sum('total_bruto');
+
+            DB::table('table_temporary_accumulated_sales')->insert([
+                'product_id' => $centroCostoProduct->products_id,
+                'accumulated_quantity' => $accumulatedQuantity,
+                'accumulated_total_bruto' => $accumulatedTotalBruto
+            ]);
+
+            // Update Centro_costo_product records
+            $centroCostoProduct = DB::table('centro_costo_products')
+                ->where('products_id', $centroCostoProduct->products_id)
+                ->first();
+
+            $centroCostoProduct->venta += $accumulatedQuantity;
+            $centroCostoProduct->cto_venta_total += $accumulatedTotalBruto;
+
+            DB::table('centro_costo_products')
+                ->where('products_id', $centroCostoProduct->products_id)
+                ->update([
+                    'venta' => $centroCostoProduct->venta,
+                    'cto_venta_total' => $centroCostoProduct->cto_venta_total
+                ]);
+        }
+
+        // Clear the temporary table
+        DB::table('table_temporary_accumulated_sales')->truncate();
+
+        // Check and call cuentasPorCobrar function
+        if (($compensadores[0]->valor_a_pagar_credito) > 0) {
+            // Call cuentasPorCobrar function
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Cargado al inventario exitosamente',
+            'compensadores' => $compensadores
+        ]);
+    } */
+}
+
+
+ /* public function cargarInventariocr($ventaId)
+    {
+        $currentDateTime = Carbon::now();
+        $formattedDate = $currentDateTime->format('Y-m-d');
+        $compensadores = Sale::where('id', $ventaId)->get();
+        $ventadetalle = SaleDetail::where('sale_id', $ventaId)->get();
+        $product_ids = $ventadetalle->pluck('product_id');
+
+        $store_id = 1;
+
+        $centroCostoProducts = Centro_costo_product::whereIn('products_id', $product_ids)
+            ->where('store_id', $store_id)
+            ->get();
+
+        foreach ($centroCostoProducts as $centroCostoProduct) {
+            $accumulatedQuantity = SaleDetail::where('sale_id', '=', $ventaId)
+                ->where('product_id', $centroCostoProduct->products_id)
+                ->sum('quantity');
+
+            $accumulatedTotalBruto = 0;
+
+            $accumulatedTotalBruto += SaleDetail::where('sale_id', '=', $ventaId)
+                ->where('product_id', $centroCostoProduct->products_id)
+                ->sum('total_bruto');
+
+            DB::table('table_temporary_accumulated_sales')->insert([
+                'product_id' => $centroCostoProduct->products_id,
+                'accumulated_quantity' => $accumulatedQuantity,
+                'accumulated_total_bruto' => $accumulatedTotalBruto
+            ]);
+        }
+        // Recuperar los registros de la tabla table_temporary_accumulated_sales
+        $accumulatedQuantitys = DB::table('table_temporary_accumulated_sales')->get();
+
+        foreach ($accumulatedQuantitys as $accumulatedQuantity) {
+            $centroCostoProduct = Centro_costo_product::find($accumulatedQuantity->product_id);
+
+            $centroCostoProduct->venta += $accumulatedQuantity->accumulated_quantity;
+            $centroCostoProduct->cto_venta_total += $accumulatedQuantity->accumulated_total_bruto;
+            $centroCostoProduct->save();
+
+            // Limpiar la tabla table_temporary_accumulated_sales
+            DB::table('table_temporary_accumulated_sales')->truncate();
+        }
+
+        if (($compensadores[0]->valor_a_pagar_credito) > 0) {
+            $this->cuentasPorCobrar($ventaId);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Cargado al inventario exitosamente',
+            'compensadores' => $compensadores
+        ]);
+    } */
+
+        /*    public function storeVentaMostrador()
     {
         try {
 
@@ -1330,14 +1291,41 @@ class saleController extends Controller
         }
     }
  */
-    public function obtenerNombreCliente($id)
+/*   public function getProductsByStore(Request $request)
     {
-        $venta = Sale::find($id);
-        if ($venta) {
-            $nombreCliente = $venta->third->name;
-            return "Nombre del cliente: " . $nombreCliente;
-        } else {
-            return "Venta no encontrada";
+        $storeId = $request->store_id;
+
+        // Obtiene los productos que tienen inventario en la bodega seleccionada y stock_ideal > 0.
+        // Se hace _eager loading_ de la relación inventarios filtrada por store_id.
+        $productos = Product::whereHas('inventarios', function ($query) use ($storeId) {
+            $query->where('store_id', $storeId)
+                ->where('stock_ideal', '>', 0);
+        })
+            ->with(['inventarios' => function ($query) use ($storeId) {
+                $query->where('store_id', $storeId);
+            }])
+            ->with('lotesPorVencer') // Se asume que usas esta relación para mostrar los lotes.
+            ->get();
+
+        // Prepara las opciones para el select (en este ejemplo se hace desde el controlador y se envía vía JSON).
+        $options = [];
+        foreach ($productos as $producto) {
+            // Obtiene el inventario para la tienda (suponiendo que solo hay un registro por producto y tienda)
+            $inventario = $producto->inventarios->first();
+            foreach ($producto->lotesPorVencer as $lote) {
+                $options[] = [
+                    'id'               => $producto->id,
+                    'text'             => "{$producto->name} - {$lote->codigo} - " .
+                        \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') .
+                        " - Stock Ideal: " . ($inventario ? $inventario->stock_ideal : 'N/A') .
+                        " - Inventario ID: " . ($inventario ? $inventario->id : 'N/A'),
+                    'lote_id'          => $lote->id,
+                    'inventario_id'    => $inventario ? $inventario->id : '',
+                    'stock_ideal'      => $inventario ? $inventario->stock_ideal : '',
+                ];
+            }
         }
+
+        return response()->json($options);
     }
-}
+ */

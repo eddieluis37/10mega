@@ -131,7 +131,7 @@
 													data-store-id="{{ ($inventario && $inventario->store) ? $inventario->store->id : '' }}"
 													data-store-name="{{ ($inventario && $inventario->store) ? $inventario->store->name : '' }}"
 													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stock Ideal: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - Inventario ID: {{ $inventario ? $inventario->id : 'N/A' }} - Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }}">
-													Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - {{ $producto->name }} - Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }}
+													Bg: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - {{ $producto->name }} - Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }}
 												</option>
 												@endforeach
 												@endforeach
