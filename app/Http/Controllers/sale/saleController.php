@@ -1103,7 +1103,7 @@ class saleController extends Controller
         }
     }
 
-    public function getProductsByStore(Request $request)
+  /*   public function getProductsByStore(Request $request)
     {
         $storeId = $request->store_id;
 
@@ -1140,7 +1140,7 @@ class saleController extends Controller
 
         return response()->json($options);
     }
-
+ */
 
 
 
