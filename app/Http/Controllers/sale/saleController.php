@@ -585,7 +585,9 @@ class saleController extends Controller
             ->orderBy('name', 'asc')
             ->get(); */
 
-        $prod = Product::where('status', '1')
+
+
+        /*    $prod = Product::where('status', '1')
             ->whereHas('inventarios', function ($query) {
                 $query->where('stock_ideal', '>', 0);
             })
@@ -594,15 +596,30 @@ class saleController extends Controller
             ->orderBy('category_id', 'asc')
             ->orderBy('name', 'asc')
             ->get();
+ */
+
+        //  $storeId = [10];
+
+        $storeIds = [1, 4, 5, 6, 8, 9, 10];
+
+        $prod = Product::whereHas('inventarios', function ($query) use ($storeIds) {
+            $query->whereIn('store_id', $storeIds)
+                ->where('stock_ideal', '>', 0);
+        })
+            ->with(['inventarios' => function ($query) use ($storeIds) {
+                $query->whereIn('store_id', $storeIds);
+            }])
+            ->whereHas('lotesPorVencer')
+            ->get();
 
         $prod->transform(function ($prod) {
             $prod->lotesPorVencer->transform(function ($lote) use ($prod) {
-                $lote->producto_lote_vencimiento = "{$prod->name} - {$lote->codigo} - " . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y');
+                $lote->producto_lote_vencimiento = "{$prod->name} - {$lote->codigo} - "
+                    . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y');
                 return $lote;
             });
             return $prod;
         });
-
 
         $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
         $arrayTotales = $this->sumTotales($id);
