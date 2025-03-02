@@ -220,15 +220,14 @@ class saleController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Obtener la venta (compensadores)
-            $compensadores = DB::table('sales')
-                ->where('id', $ventaId)
+            // Obtener la venta (compensadores) con Eloquent
+            $sale = \App\Models\Sale::where('id', $ventaId)
                 ->where('status', '0')
                 ->first();
 
-            Log::debug('Venta obtenida', ['ventaId' => $ventaId, 'compensadores' => $compensadores]);
+            Log::debug('Venta obtenida', ['ventaId' => $ventaId, 'compensadores' => $sale]);
 
-            if (!$compensadores) {
+            if (!$sale) {
                 Log::debug('Venta no encontrada o cerrada', ['ventaId' => $ventaId]);
                 return response()->json([
                     'status'  => 1,
@@ -236,18 +235,17 @@ class saleController extends Controller
                 ], 404);
             }
 
-            // Obtener los detalles de la venta
-            $ventadetalle = DB::table('sale_details')
-                ->where('sale_id', $ventaId)
+            // Obtener los detalles de la venta con Eloquent
+            $saleDetails = \App\Models\SaleDetail::where('sale_id', $ventaId)
                 ->where('status', '1')
                 ->get();
 
             Log::debug('Detalles de venta obtenidos', [
                 'ventaId'       => $ventaId,
-                'detalle_count' => $ventadetalle->count()
+                'detalle_count' => $saleDetails->count()
             ]);
 
-            if ($ventadetalle->isEmpty()) {
+            if ($saleDetails->isEmpty()) {
                 Log::debug('No hay detalles de venta activos', ['ventaId' => $ventaId]);
                 return response()->json([
                     'status'  => 0,
@@ -255,20 +253,17 @@ class saleController extends Controller
                 ], 404);
             }
 
-            // Obtener los IDs de productos involucrados
-            $product_ids = $ventadetalle->pluck('product_id');
-
-            // Extraer los store_ids únicos de los detalles de venta
-            $store_ids = $ventadetalle->pluck('store_id')->unique();
+            // Obtener los IDs de productos involucrados y los IDs únicos de tiendas
+            $product_ids = $saleDetails->pluck('product_id');
+            $store_ids   = $saleDetails->pluck('store_id')->unique();
 
             Log::debug('IDs de productos y tiendas obtenidos', [
                 'product_ids' => $product_ids,
                 'store_ids'   => $store_ids
             ]);
 
-            // Obtener los registros de inventario de los productos involucrados para las tiendas correspondientes
-            $inventarios = DB::table('inventarios')
-                ->whereIn('product_id', $product_ids)
+            // Obtener los registros de inventario usando Eloquent
+            $inventarios = \App\Models\Inventario::whereIn('product_id', $product_ids)
                 ->whereIn('store_id', $store_ids)
                 ->get();
 
@@ -276,22 +271,22 @@ class saleController extends Controller
                 'inventarios_count' => $inventarios->count()
             ]);
 
-            $movimientos = [];
+            // Recorrer cada inventario para procesar sus movimientos
             foreach ($inventarios as $inventario) {
                 $productId = $inventario->product_id;
-                $store_id  = $inventario->store_id;
+                $storeId   = $inventario->store_id;
 
                 // Calcular los acumulados para el producto y la tienda a partir de los detalles de venta
-                $accumulatedQuantity = $ventadetalle->where('product_id', $productId)
-                    ->where('store_id', $store_id)
+                $accumulatedQuantity = $saleDetails->where('product_id', $productId)
+                    ->where('store_id', $storeId)
                     ->sum('quantity');
-                $accumulatedTotalBruto = $ventadetalle->where('product_id', $productId)
-                    ->where('store_id', $store_id)
+                $accumulatedTotalBruto = $saleDetails->where('product_id', $productId)
+                    ->where('store_id', $storeId)
                     ->sum('total_bruto');
 
                 Log::debug('Acumulados calculados para producto y tienda', [
                     'product_id'            => $productId,
-                    'store_id'              => $store_id,
+                    'store_id'              => $storeId,
                     'accumulatedQuantity'   => $accumulatedQuantity,
                     'accumulatedTotalBruto' => $accumulatedTotalBruto
                 ]);
@@ -305,72 +300,55 @@ class saleController extends Controller
                 $lote = $productModel->lotesPorVencer()->orderBy('fecha_vencimiento', 'asc')->first();
                 if (!$lote) {
                     Log::debug('No se encontró lote próximo a vencer para producto', ['product_id' => $productId]);
-                    continue; // Se omite si no se encuentra un lote próximo a vencer
+                    continue;
                 }
                 $lote_id = $lote->id;
 
-                // Preparar el movimiento de inventario (tipo venta)
-                $movimientos[] = [
+                // Crear el movimiento de inventario usando Eloquent para disparar eventos
+                $movimiento = \App\Models\MovimientoInventario::create([
                     'product_id'       => $productId,
                     'lote_id'          => $lote_id,
-                    'store_origen_id'  => $store_id,
-                    'store_destino_id' => null,
+                    'store_origen_id'  => $storeId,
+                    'store_destino_id' => null, // Para tipo venta, no hay tienda de destino
                     'tipo'             => 'venta',
                     'sale_id'          => $ventaId,
                     'cantidad'         => $accumulatedQuantity,
                     'costo_unitario'   => $accumulatedTotalBruto,
-                    'created_at'       => now(),
-                    'updated_at'       => now(),
-                ];
+                ]);
+                Log::debug('Movimiento de inventario creado', ['movimiento' => $movimiento->toArray()]);
 
-                // Actualizar el registro de inventario, incrementando los campos de venta y costo
-                DB::table('inventarios')
-                    ->where('id', $inventario->id)
-                    ->update([
-                        'cantidad_venta' => DB::raw("cantidad_venta + $accumulatedQuantity"),
-                        'costo_unitario' => DB::raw("costo_unitario + $accumulatedTotalBruto"),
-                    ]);
+                // Actualizar el registro de inventario: incrementar campos de venta y costo
+                $inventario->cantidad_venta += $accumulatedQuantity;
+                $inventario->costo_unitario += $accumulatedTotalBruto;
+                $inventario->save();
 
                 Log::debug('Inventario actualizado', [
                     'inventario_id'       => $inventario->id,
-                    'store_id'            => $store_id,
+                    'store_id'            => $storeId,
                     'incremento_cantidad' => $accumulatedQuantity,
                     'incremento_costo'    => $accumulatedTotalBruto
                 ]);
             }
 
-            // Insertar los movimientos en una sola operación para optimizar
-            if (!empty($movimientos)) {
-                $insertResult = DB::table('movimiento_inventarios')->insert($movimientos);
-                Log::debug('Movimientos de inventario insertados', [
-                    'movimientos'      => $movimientos,
-                    'resultado_insert' => $insertResult
-                ]);
-            } else {
-                Log::debug('No se generaron movimientos de inventario');
-            }
-
-            // Si la venta tiene un valor a pagar en crédito, se debe invocar la función correspondiente
-            if ($compensadores->valor_a_pagar_credito > 0) {
+            // Si la venta tiene valor a pagar en crédito, se invoca la función correspondiente
+            if ($sale->valor_a_pagar_credito > 0) {
                 Log::debug('Venta tiene valor a pagar en crédito, se debe invocar cuentasPorCobrar', [
-                    'valor_a_pagar_credito' => $compensadores->valor_a_pagar_credito
+                    'valor_a_pagar_credito' => $sale->valor_a_pagar_credito
                 ]);
-                // Llamar a la función cuentasPorCobrar según la implementación requerida
+                // Aquí se puede llamar al método correspondiente, por ejemplo:
+                // $this->cuentasPorCobrar($sale);
             }
 
-            // Actualizar la venta: marcarla como cerrada (status = 1) y asignar la fecha de cierre a hoy
-            DB::table('sales')
-                ->where('id', $ventaId)
-                ->update([
-                    'status'       => '1',
-                    'fecha_cierre' => now()
-                ]);
+            // Actualizar la venta: marcarla como cerrada y asignar la fecha de cierre
+            $sale->status = '1';
+            $sale->fecha_cierre = now();
+            $sale->save();
+
             Log::debug('Venta actualizada a cerrada', ['ventaId' => $ventaId]);
 
             DB::commit();
             Log::debug('Transacción commit exitosa para venta', ['ventaId' => $ventaId]);
 
-            // Redirigir a la ruta 'sales.index' con un mensaje de éxito
             return redirect()->route('sale.index')
                 ->with('success', 'Cargado al inventario exitosamente');
         } catch (\Exception $e) {
@@ -383,6 +361,7 @@ class saleController extends Controller
                 ->with('error', 'Error al cargar inventario: ' . $e->getMessage());
         }
     }
+
 
 
 
@@ -1103,7 +1082,7 @@ class saleController extends Controller
         }
     }
 
-  /*   public function getProductsByStore(Request $request)
+    /*   public function getProductsByStore(Request $request)
     {
         $storeId = $request->store_id;
 
