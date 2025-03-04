@@ -101,7 +101,7 @@
 
 									});
 								</script>
-								<div class="col-md-8">
+								<div class="col-md-10">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="producto" class="form-label">Buscar producto</label>
@@ -141,7 +141,7 @@
 
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-2">
 									<label for="" class="form-label">KG|QT</label>
 									<div class="input-group flex-nowrap"">
 										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10,00">

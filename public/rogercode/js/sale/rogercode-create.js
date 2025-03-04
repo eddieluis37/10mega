@@ -214,7 +214,7 @@ btnAdd.addEventListener("click", (e) => {
             showData(result);
 
             // Recarga la pagina para evitar que se renombren productos en la edición
-            window.location.reload();
+          //  window.location.reload();
         }
         if (result.status === 0) {
             let errors = result.errors;
