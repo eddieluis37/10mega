@@ -144,7 +144,7 @@
 								<div class="col-md-2">
 									<label for="" class="form-label">KG|QT</label>
 									<div class="input-group flex-nowrap"">
-										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10,00">
+										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10.00">
 										<span class="input-group-text" id="addon-wrapping">QT</span>
 									</div>
 									<span class="text-danger error-message"></span>
@@ -275,7 +275,7 @@
 							<tr>
 								<!--td>{{$proddetail->id}}</td-->
 								<td>{{$proddetail->nameprod}}</td>
-								<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}KG</td>
+								<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
 								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
 								<td>{{$proddetail->porc_desc}}%</td>
 								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>

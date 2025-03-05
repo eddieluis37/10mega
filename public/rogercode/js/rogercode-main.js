@@ -12,6 +12,20 @@ const formatPeso = (number) => {
     return formatMoney;
 };
 
+const formatPeso2 = (number) => {
+    // Formateo con "en-US" para obtener "1,234,567.89"
+    let formatMoney = new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        useGrouping: true,
+    }).format(number);
+    // Reemplaza las comas (separador de miles) por puntos
+    return formatMoney.replace(/,/g, '.');
+};
+
+console.log(formatPeso2(1234567.89)); // "1.234.567.89"
+
+
 const formatCantidad = (number) => {
     let formatMoney = new Intl.NumberFormat("es-CL", {
         //style: 'currency',

@@ -666,11 +666,11 @@ class saleController extends Controller
             ];
 
             // Crear o actualizar el detalle de venta
-            if (empty($request->regdetailId)) {
-                SaleDetail::create($dataDetail);
-            } else {
+            if ($request->regdetailId > 0) {
                 $detail = SaleDetail::find($request->regdetailId);
                 $detail->update($dataDetail);
+            } else {
+                SaleDetail::create($dataDetail);
             }
 
             // Actualización de la venta
@@ -1088,7 +1088,7 @@ class saleController extends Controller
         }
     }
 
-   /*  // Opcion 2 sin Eloquent
+    /*  // Opcion 2 sin Eloquent
     public function cargarInventariocrOriginal($ventaId)
     {
 

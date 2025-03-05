@@ -51,37 +51,34 @@ $(document).ready(function () {
     });
 }); */
 
-$(document).ready(function(){
-    $('#producto').on('change', function(){
+$(document).ready(function () {
+    $("#producto").on("change", function () {
         var productId = $(this).val();
-        var selectedOption = $(this).find('option:selected');
-        var loteId       = selectedOption.data('lote-id');
-        var inventarioId = selectedOption.data('inventario-id');
-        var stockIdeal   = selectedOption.data('stock-ideal');
-        var storeId      = selectedOption.data('store-id');
-        var storeName    = selectedOption.data('store-name');
+        var selectedOption = $(this).find("option:selected");
+        var loteId = selectedOption.data("lote-id");
+        var inventarioId = selectedOption.data("inventario-id");
+        var stockIdeal = selectedOption.data("stock-ideal");
+        var storeId = selectedOption.data("store-id");
+        var storeName = selectedOption.data("store-name");
 
         // Mostrar en consola para verificar
-        console.log('Lote ID:', loteId);
-        console.log('Inventario ID:', inventarioId);
-        console.log('Stock Ideal:', stockIdeal);
-        console.log('Store ID:', storeId);
-        console.log('Store Name:', storeName);
+        console.log("Lote ID:", loteId);
+        console.log("Inventario ID:", inventarioId);
+        console.log("Stock Ideal:", stockIdeal);
+        console.log("Store ID:", storeId);
+        console.log("Store Name:", storeName);
 
         // Asignar los valores a los campos ocultos
-        $('#lote_id').val(loteId);
-        $('#inventario_id').val(inventarioId);
-        $('#stock_ideal').val(stockIdeal);
-        $('#store_id').val(storeId);
-        $('#store_name').val(storeName);
+        $("#lote_id").val(loteId);
+        $("#inventario_id").val(inventarioId);
+        $("#stock_ideal").val(stockIdeal);
+        $("#store_id").val(storeId);
+        $("#store_name").val(storeName);
 
-         // Llama a la función para actualizar los valores del producto y enviar loteId
-         actualizarValoresProducto(productId, loteId);
-
+        // Llama a la función para actualizar los valores del producto y enviar loteId
+        actualizarValoresProducto(productId, loteId);
     });
 });
-
-
 
 function actualizarValoresProducto(productId, loteId) {
     $.ajax({
@@ -92,7 +89,6 @@ function actualizarValoresProducto(productId, loteId) {
             loteId: loteId, // Se envía el lote_id seleccionado
             centrocosto: $("#centrocosto").val(), // Obtén el valor del campo centrocosto
             cliente: $("#cliente").val(), // Obtén el valor del campo centrocosto
-            
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada del centro de costo
@@ -129,7 +125,7 @@ $(document).ready(function () {
 
     $("#store").change(function () {
         var storeId = $(this).val();
-       // $("#producto").empty().trigger("change"); // Limpiar productos
+        // $("#producto").empty().trigger("change"); // Limpiar productos
 
         if (storeId) {
             $.ajax({
@@ -196,7 +192,7 @@ tbodyTable.addEventListener("click", (e) => {
             console.log(editReg);
             regDetail.value = editReg.id;
             price.value = formatCantidadSinCero(editReg.price);
-            quantity.value = formatCantidad(editReg.quantity);
+            quantity.value = formatPeso2(editReg.quantity);
 
             $(".select2Prod").val(editReg.product_id).trigger("change");
         });
@@ -209,12 +205,14 @@ btnAdd.addEventListener("click", (e) => {
     sendData("/salesavedetail", dataform, token).then((result) => {
         console.log(result);
         if (result.status === 1) {
+            // Reiniciar el valor de regdetailId para que en la próxima acción se cree un nuevo detalle
+            $("#regdetailId").val("0");
             $("#producto").val("").trigger("change");
             formDetail.reset();
             showData(result);
 
             // Recarga la pagina para evitar que se renombren productos en la edición
-          //  window.location.reload();
+            //  window.location.reload();
         }
         if (result.status === 0) {
             let errors = result.errors;
@@ -240,7 +238,7 @@ const showData = (data) => {
         showRegTbody.innerHTML += `
             <tr>                              
                 <td>${element.nameprod}</td>
-                <td>${formatCantidad(element.quantity)}KG</td>
+                <td>${(element.quantity)}</td>
                 <td>$${formatCantidadSinCero(element.price)}</td> 
                 <td>${formatCantidad(element.porc_desc)}%</td>                 
                 <td>$${formatCantidadSinCero(element.descuento)}</td> 
