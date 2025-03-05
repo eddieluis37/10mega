@@ -290,6 +290,8 @@ const showData = (data) => {
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
+            <td></td>
             <td></td>          
             <th>$${formatCantidadSinCero(
                 arrayTotales.TotalValorAPagar

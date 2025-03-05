@@ -19,6 +19,7 @@ use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\caja\Caja;
 use App\Models\Cuentas_por_cobrar;
 use App\Models\Formapago;
+use App\Models\Inventario;
 use App\Models\Listapreciodetalle;
 use App\Models\Sale;
 use App\Models\SaleCaja;
@@ -596,11 +597,24 @@ class saleController extends Controller
     public function savedetail(Request $request)
     {
         try {
+            // Obtener el stock_ideal del producto en la bodega y lote
+            $stockDisponible = Inventario::where('product_id', $request->producto)
+                ->where('store_id', $request->store)
+                ->where('lote_id', $request->lote_id)
+                ->value('stock_ideal'); // Se obtiene el valor del stock ideal
+
+            if (is_null($stockDisponible)) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'No se encontró stock disponible para el producto en la bodega y lote seleccionados.'
+                ], 422);
+            }
+
             // Validación
             $rules = [
                 'ventaId'  => 'required',
                 'producto' => 'required',
-                'price'    => 'required',               
+                'price'    => 'required',
                 'lote_id'  => 'required',
                 'store'    => 'required',
                 'quantity' => [
@@ -608,19 +622,22 @@ class saleController extends Controller
                     'numeric',
                     'regex:/^\d+(\.\d{1,2})?$/',
                     'min:0.1',
+                    'max:' . $stockDisponible, // Se agrega la validación de máximo stock disponible
                 ],
             ];
+
             $messages = [
                 'ventaId.required'  => 'El compensado es requerido',
                 'producto.required' => 'El producto es requerido',
-                'price.required'    => 'El precio de compra es requerido',                
+                'price.required'    => 'El precio de compra es requerido',
                 'lote_id.required'  => 'El lote es requerido',
                 'store.required'    => 'La bodega es requerida',
                 'quantity.required' => 'La cantidad es requerida.',
                 'quantity.numeric' => 'La cantidad debe ser un número.',
                 'quantity.min' => 'La cantidad debe ser mayor a 0.1.',
-                'quantity.max' => 'La cantidad no puede ser mayor al stock disponible.',
+                'quantity.max' => 'La cantidad no puede ser mayor al stock disponible (' . $stockDisponible . ').',
             ];
+
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
                 return response()->json([
@@ -629,10 +646,17 @@ class saleController extends Controller
                 ], 422);
             }
 
+            // Validación manual adicional (por si la validación de Laravel no lo bloquea correctamente)
+            if ($request->quantity > $stockDisponible) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'La cantidad ingresada supera el stock disponible (' . $stockDisponible . ').'
+                ], 422);
+            }
+
             // Formateo de valores
             $formatCantidad = new metodosrogercodeController();
             $price   = $formatCantidad->MoneyToNumber($request->price);
-            //$quantity = $formatCantidad->MoneyToNumber($request->quantity);
             $quantity = ($request->quantity);
 
             // Cálculos comunes
@@ -656,7 +680,7 @@ class saleController extends Controller
             // Arreglo con datos a almacenar
             $dataDetail = [
                 'sale_id'           => $request->ventaId,
-                'store_id'          => $request->store, // Capturado desde la vista
+                'store_id'          => $request->store,
                 'product_id'        => $request->producto,
                 'price'             => $price,
                 'quantity'          => $quantity,
@@ -697,7 +721,7 @@ class saleController extends Controller
             $sale->total_bruto = $totalBruto;
             $sale->descuentos    = $totalDesc;
             $sale->total_valor_a_pagar = $totalValor;
-            $sale->total_iva     = $iva; // Puedes ajustar si el IVA se debe sumar de forma global
+            $sale->total_iva     = $iva;
             $sale->total_otros_impuestos = $netoSinImpuesto * ($porcOtroImpuesto / 100);
             $sale->save();
 
@@ -718,6 +742,7 @@ class saleController extends Controller
             ]);
         }
     }
+
 
 
 
