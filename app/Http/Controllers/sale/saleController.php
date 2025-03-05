@@ -600,18 +600,26 @@ class saleController extends Controller
             $rules = [
                 'ventaId'  => 'required',
                 'producto' => 'required',
-                'price'    => 'required',
-                'quantity' => 'required',
+                'price'    => 'required',               
                 'lote_id'  => 'required',
-                'store'    => 'required', // se requiere el store_id
+                'store'    => 'required',
+                'quantity' => [
+                    'required',
+                    'numeric',
+                    'regex:/^\d+(\.\d{1,2})?$/',
+                    'min:0.1',
+                ],
             ];
             $messages = [
                 'ventaId.required'  => 'El compensado es requerido',
                 'producto.required' => 'El producto es requerido',
-                'price.required'    => 'El precio de compra es requerido',
-                'quantity.required' => 'El peso es requerido',
+                'price.required'    => 'El precio de compra es requerido',                
                 'lote_id.required'  => 'El lote es requerido',
                 'store.required'    => 'La bodega es requerida',
+                'quantity.required' => 'La cantidad es requerida.',
+                'quantity.numeric' => 'La cantidad debe ser un número.',
+                'quantity.min' => 'La cantidad debe ser mayor a 0.1.',
+                'quantity.max' => 'La cantidad no puede ser mayor al stock disponible.',
             ];
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
@@ -624,7 +632,8 @@ class saleController extends Controller
             // Formateo de valores
             $formatCantidad = new metodosrogercodeController();
             $price   = $formatCantidad->MoneyToNumber($request->price);
-            $quantity = $formatCantidad->MoneyToNumber($request->quantity);
+            //$quantity = $formatCantidad->MoneyToNumber($request->quantity);
+            $quantity = ($request->quantity);
 
             // Cálculos comunes
             $precioUnitarioBruto = $price * $quantity;

@@ -160,7 +160,7 @@ const showData = (resp) => {
     selectCentrocosto.value = register.centrocosto_id;
     /*    inputFactura.value = register.factura; */
     const modal = new bootstrap.Modal(
-        document.getElementById("modal-create-compensado")
+        document.getElementById("modal-create-sale")
     );
     modal.show();
 };

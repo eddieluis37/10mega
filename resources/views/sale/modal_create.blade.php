@@ -89,7 +89,7 @@
 <script>
     $(document).ready(function() {
         // Limpiar mensajes de error al cerrar el modal
-        $('#modal-create-compensado').on('hidden.bs.modal', function() {
+        $('#modal-create-sale').on('hidden.bs.modal', function() {
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
 			$('#centrocosto').val('');			
             $('#cliente').val('');

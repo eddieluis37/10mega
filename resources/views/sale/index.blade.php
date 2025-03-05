@@ -13,7 +13,7 @@
 						<a href="{{ route('cargar.inventario.masivo') }}" class="btn btn-primary">Cargar Inventario Masivo</a>
 					</li> -->
 					<li>
-						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-compensado" title="Nueva venta por domicilio">Domicilio</a>
+						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-sale" title="Nueva venta por domicilio">Domicilio</a>
 					</li>
 					<li></li>
 					@php
@@ -54,7 +54,7 @@
 		</div>
 	</div>
 	<!-- modal -->
-	<div class="modal fade" id="modal-create-compensado" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+	<div class="modal fade" id="modal-create-sale" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
 			<div class="modal-content bg-default">
 				<fieldset id="contentDisable">

@@ -75,8 +75,18 @@ $(document).ready(function () {
         $("#store_id").val(storeId);
         $("#store_name").val(storeName);
 
+        $(this).siblings(".error-message").text(""); // Limpiar mensaje de error
+
         // Llama a la función para actualizar los valores del producto y enviar loteId
         actualizarValoresProducto(productId, loteId);
+    });
+
+    document.getElementById("quantity").addEventListener("input", function () {
+        let errorMessage =
+            this.closest(".form-group").querySelector(".error-message");
+        if (errorMessage) {
+            errorMessage.textContent = ""; // Borra el mensaje de error
+        }
     });
 });
 
@@ -192,7 +202,7 @@ tbodyTable.addEventListener("click", (e) => {
             console.log(editReg);
             regDetail.value = editReg.id;
             price.value = formatCantidadSinCero(editReg.price);
-            quantity.value = formatPeso2(editReg.quantity);
+            quantity.value = editReg.quantity;
 
             $(".select2Prod").val(editReg.product_id).trigger("change");
         });
@@ -238,7 +248,7 @@ const showData = (data) => {
         showRegTbody.innerHTML += `
             <tr>                              
                 <td>${element.nameprod}</td>
-                <td>${(element.quantity)}</td>
+                <td>${element.quantity}</td>
                 <td>$${formatCantidadSinCero(element.price)}</td> 
                 <td>${formatCantidad(element.porc_desc)}%</td>                 
                 <td>$${formatCantidadSinCero(element.descuento)}</td> 
@@ -310,7 +320,7 @@ price.addEventListener("change", function () {
 });
 
 quantity.addEventListener("change", function () {
-    const enteredValue = formatPeso(quantity.value);
+    const enteredValue = Number(quantity.value);
     console.log("Valor ingresado: " + enteredValue);
     quantity.value = enteredValue;
 });

@@ -142,12 +142,14 @@
 									</div>
 								</div>
 								<div class="col-md-2">
-									<label for="" class="form-label">KG|QT</label>
-									<div class="input-group flex-nowrap"">
+									<div class="form-group">
+										<label for="" class="form-label">KG|QT</label>
+										<div class="input-group flex-nowrap"">
 										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10.00">
-										<span class="input-group-text" id="addon-wrapping">QT</span>
+											<span class="input-group-text" id="addon-wrapping">QT</span>
+										</div>
+										<span class="text-danger error-message"></span>
 									</div>
-									<span class="text-danger error-message"></span>
 								</div>
 
 								<div class="col-md-2">
@@ -218,23 +220,25 @@
 
 										@can('Admin_Menu')
 
+										<div class="col-md-3" id="cambiarContraseDiv">
 
+											<div class="col-md-4">
+												<div class="" style="margin-top:0px; margin-left:3px">
+													<label for="password">PassWord</label>
+													<input type="password" id="password" name="password" class="form-control input" placeholder="Contraseña">
 
-										<div class="col-md-4">
-											<div class="" style="margin-top:0px; margin-left:3px">
-												<label for="password">PassWord</label>
-												<input type="password" id="password" name="password" class="form-control input" placeholder="Contraseña">
-
+												</div>
 											</div>
-										</div>
 
-										<div class="col-md-3">
-											<div class="" style="margin-top:30px;">
-												<div class="d-grid gap-2">
-													<button id="btnRemove" class="btn btn-warning btn-block">Modificar Precio</button>
+											<div class="col-md-3">
+												<div class="" style="margin-top:30px;">
+													<div class="d-grid gap-2">
+														<button id="btnRemove" class="btn btn-warning btn-block">Modificar Precio</button>
+													</div>
 												</div>
 											</div>
 										</div>
+
 										@endcan
 										@endif
 									</div>
@@ -364,8 +368,10 @@
 		});
 
 		$('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
+		$('#cambiarContraseDiv').hide(); // 
 	});
 </script>
+
 @endsection
 @section('script')
 <script src="{{asset('rogercode/js/sale/rogercode-create.js')}}" type="module"></script>
