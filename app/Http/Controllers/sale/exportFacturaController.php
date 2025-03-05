@@ -38,11 +38,21 @@ class exportFacturaController extends Controller
 
         $saleDetails = SaleDetail::where('sale_id', $id)
             ->join('products as pro', 'sale_details.product_id', '=', 'pro.id')
-            ->select('sale_details.*', 'pro.name as nameprod', 'pro.code', 'sale_details.porc_iva', 'sale_details.iva', 'sale_details.porc_otro_impuesto')
+            ->leftJoin('lotes as lot', 'sale_details.lote_id', '=', 'lot.id')
+            ->select(
+                'sale_details.*',
+                'pro.name as nameprod',
+                'pro.code',
+                'lot.codigo as lote_codigo',           // Campo código del lote
+                'lot.fecha_vencimiento as lote_fecha_vencimiento', // Campo fecha de vencimiento
+                'sale_details.porc_iva',
+                'sale_details.iva',
+                'sale_details.porc_otro_impuesto'
+            )
             ->where([
                 ['sale_details.sale_id', $id],
-                /*   ['sale_details.status', 1] */
-            ])->get();
+            ])
+            ->get();
 
         //  dd($saleDetails);
 
