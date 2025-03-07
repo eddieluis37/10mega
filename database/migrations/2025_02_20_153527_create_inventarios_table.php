@@ -22,20 +22,20 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id')->nullable(); // Relacionar con los productos
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             
-            $table->decimal('cantidad_inventario_inicial', 18, 2)->default(0)->nullable()->comment('Cantidad inicial que tiene el inventario como stock al iniciar.');
-            $table->decimal('cantidad_compra_lote', 18, 2)->default(0)->nullable();
-            $table->decimal('cantidad_alistamiento', 18, 2)->default(0)->nullable();
-            $table->decimal('cantidad_compra_prod', 18, 2)->default(0)->nullable();         
-            $table->decimal('cantidad_prod_term', 18, 2)->default(0)->nullable();
+            $table->decimal('cantidad_inventario_inicial', 10, 2)->default(0)->nullable()->comment('Cantidad inicial que tiene el inventario como stock al iniciar.');
+            $table->decimal('cantidad_compra_lote', 10, 2)->default(0)->nullable();
+            $table->decimal('cantidad_alistamiento', 10, 2)->default(0)->nullable();
+            $table->decimal('cantidad_compra_prod', 10, 2)->default(0)->nullable();         
+            $table->decimal('cantidad_prod_term', 10, 2)->default(0)->nullable();
 
-            $table->decimal('cantidad_traslado', 18, 2)->default(0)->nullable();
+            $table->decimal('cantidad_traslado', 10, 2)->default(0)->nullable();
            // $table->decimal('cantidad_traslado_salida', 18, 2)->default(0)->nullable();
 
-           $table->decimal('cantidad_venta', 18, 2)->default(0)->nullable();
+           $table->decimal('cantidad_venta', 10, 2)->default(0)->nullable();
             
 
 
-            $table->decimal('stock_ideal', 18, 2)->default(0)->nullable()->comment('Cálculo de la suma de la compra compensada + inventario_inicial.');
+            $table->decimal('stock_ideal', 10, 2)->default(0)->nullable()->comment('Cálculo de la suma de la compra compensada + inventario_inicial.');
 
             $table->decimal('costo_unitario', 18, 2)->default(0)->nullable(); // Costo unitario promedio.
             $table->decimal('costo_total', 18, 2)->default(0)->nullable(); // Costo total del inventario final.

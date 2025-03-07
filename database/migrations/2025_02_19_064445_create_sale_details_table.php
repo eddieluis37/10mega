@@ -25,7 +25,7 @@ class CreateSaleDetailsTable extends Migration
            
             $table->foreignId('product_id')->constrained(); 
             $table->decimal('quantity',8,2)->default(0)->nullable();         
-            $table->decimal('price',10,2);
+            $table->decimal('price',12,2);
             $table->decimal('porc_desc',10,2)->default(0)->nullable();
             $table->decimal('descuento',12,0)->default(0)->nullable();
             $table->decimal('descuento_cliente',10,0)->default(0)->nullable();            
