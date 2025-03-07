@@ -103,13 +103,25 @@ btnAdd.addEventListener("click", (e) => {
     sendData("/compensadosavedetail", dataform, token).then((result) => {
         console.log(result);
         if (result.status === 1) {
+            // Reiniciar el valor de regdetailId para que en la próxima acción se cree un nuevo detalle
+            $("#regdetailId").val("0");
             $("#producto").val("").trigger("change");
             $("#lote").val("").trigger("change");
             formDetail.reset();
             showData(result);
         }
         if (result.status === 0) {
-            Swal("Error!", "Tiene campos vacios!", "error");
+            let errors = result.errors;
+            console.log(errors);
+            $.each(errors, function (field, messages) {
+                console.log(field, messages);
+                let $input = $('[name="' + field + '"]');
+                let $errorContainer = $input
+                    .closest(".form-group")
+                    .find(".error-message");
+                $errorContainer.html(messages[0]);
+                $errorContainer.show();
+            });
         }
     });
 });
@@ -125,7 +137,7 @@ const showData = (data) => {
                 <td>${element.codigo}</td>                    
                 <td>${element.nameprod}</td>
                 <td>$${formatCantidadSinCero(element.pcompra)}</td>
-                <td>${(element.peso)}</td>
+                <td>${element.peso}</td>
                 <td>$${formatCantidadSinCero(element.subtotal)}</td>
                 <td>${element.iva}</td>
                 <td class="text-center">

@@ -14,7 +14,7 @@ class Compensadores_detail extends Model
     protected $fillable = [
         'compensadores_id',
         'lote_id',
-        'product_id',
+        'products_id',
         'pcompra',
         'peso',
         'iva',

@@ -132,81 +132,65 @@ class compensadoController extends Controller
     }
 
 
-    public function savedetail(Request $request) // Detallado 
+    public function savedetail(Request $request)
     {
         try {
-            $rules = [
+            $validator = Validator::make($request->all(), [
                 'compensadoId' => 'required',
                 'lote' => 'required',
                 'producto' => 'required',
                 'pcompra' => 'required',
                 'pesokg' => 'required',
-            ];
-            $messages = [
+            ], [
                 'compensadoId.required' => 'El compensado es requerido',
                 'lote.required' => 'El lote es requerido',
                 'producto.required' => 'El producto es requerido',
                 'pcompra.required' => 'El precio de compra es requerido',
                 'pesokg.required' => 'El peso es requerido',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
+            ]);
+    
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 0,
                     'errors' => $validator->errors()
                 ], 422);
             }
-
+    
             $formatCantidad = new metodosrogercodeController();
-            //$yourController->yourFunction($request);
             $formatPcompra = $formatCantidad->MoneyToNumber($request->pcompra);
             $formatPesoKg = $formatCantidad->MoneyToNumber($request->pesokg);
             $subtotal = $formatPcompra * $formatPesoKg;
-
-            $getReg = Compensadores_detail::firstWhere('id', $request->regdetailId);
-
-            if ($getReg == null) {
-                //$subtotal = $request->pcompra * $request->pesokg;
-                $detail = new Compensadores_detail();
-                $detail->compensadores_id = $request->compensadoId;
-                $detail->lote_id = $request->lote;
-                $detail->products_id = $request->producto;
-                $detail->pcompra = $formatPcompra;
-                $detail->peso = $formatPesoKg;
-                $detail->iva = 0;
-                $detail->subtotal = $subtotal;
-                $detail->save();
-            } else {
-                $updateReg = Compensadores_detail::firstWhere('id', $request->regdetailId);
-                //$subtotal = $request->pcompra * $request->pesokg;
-                $updateReg->lote_id = $request->lote;
-                $updateReg->products_id = $request->producto;
-                $updateReg->pcompra = $formatPcompra;
-                $updateReg->peso = $formatPesoKg;
-                $updateReg->subtotal = $subtotal;
-                $updateReg->save();
-            }
-
-            $arraydetail = $this->getcompensadoresdetail($request->compensadoId);
-
-            $arrayTotales = $this->sumTotales($request->compensadoId);
-
+    
+            $data = [
+                'compensadores_id' => $request->compensadoId,
+                'lote_id' => $request->lote,
+                'products_id' => $request->producto,
+                'pcompra' => $formatPcompra,
+                'peso' => $formatPesoKg,
+                'iva' => 0,
+                'subtotal' => $subtotal,
+            ];
+    
+            // Actualiza si existe, crea si no
+            Compensadores_detail::updateOrCreate(
+                ['id' => $request->regdetailId], // Busca por ID si existe
+                $data // Asigna datos
+            );
+    
             return response()->json([
                 'status' => 1,
                 'message' => "Agregado correctamente",
-                'array' => $arraydetail,
-                'arrayTotales' => $arrayTotales
+                'array' => $this->getcompensadoresdetail($request->compensadoId),
+                'arrayTotales' => $this->sumTotales($request->compensadoId),
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 0,
-                'message' => (array) $th
-            ]);
+                'message' => $th->getMessage()
+            ], 500);
         }
     }
-
-
+    
     public function sumTotales($id)
     {
 

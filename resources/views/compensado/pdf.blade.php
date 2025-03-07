@@ -9,8 +9,8 @@
 
 	<!-- cargar a través de la url del sistema -->
 
-	<link rel="stylesheet" href="{{ asset('css/custom_pdf.css') }}">
-	<link rel="stylesheet" href="{{ asset('css/custom_page_vertical.css') }}">
+	<link rel="stylesheet" href="{{ public_path('css/custom_pdf.css') }}">
+	<link rel="stylesheet" href="{{ public_path('css/custom_page_vertical.css') }}">
 
 	<!-- ruta física relativa OS -->
 	<!-- <link rel="stylesheet" href="{{ public_path('css/custom_pdf.css') }}">
@@ -23,8 +23,8 @@
 		<table cellpadding="0" cellspacing="0" width="100%">
 			<tr>
 				<td colspan="2" class="text-center">
-					<img src="{{ asset('assets/img/Logo_CSV.png') }}" alt="" class="invoice-logo" width="7%" style="vertical-align: top; padding-top: -38px; position: relative">
-					<span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">CARNICOS SV SAS</span>
+					<img src="{{ public_path('assets/img/Logo_CSV.png') }}" alt="" class="invoice-logo" width="7%" style="vertical-align: top; padding-top: -38px; position: relative">
+					<span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
 					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Nit 901.531.807-3</span>
 					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">AUTOPISTA SUR 66 78 LC B 22 FRIGORIFICO GUADALUPE</span>
 					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Bogotá - Tel. (601) 9502998</span>
