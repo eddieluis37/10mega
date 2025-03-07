@@ -674,20 +674,40 @@ class saleController extends Controller
     public function savedetail(Request $request)
     {
         try {
+            // Registrar inicio del proceso de guardado del detalle de venta
+            Log::info('Iniciando proceso de guardado de detalle de venta', [
+                'ventaId'  => $request->ventaId,
+                'producto' => $request->producto,
+                'lote_id'  => $request->lote_id,
+                'store'    => $request->store,
+            ]);
+
             // Obtener el stock_ideal del producto en la bodega y lote
             $stockDisponible = Inventario::where('product_id', $request->producto)
                 ->where('store_id', $request->store)
                 ->where('lote_id', $request->lote_id)
-                ->value('stock_ideal'); // Se obtiene el valor del stock ideal
+                ->value('stock_ideal');
+
+            Log::info('Stock disponible recuperado', [
+                'product_id'  => $request->producto,
+                'store_id'    => $request->store,
+                'lote_id'     => $request->lote_id,
+                'stock_ideal' => $stockDisponible,
+            ]);
 
             if (is_null($stockDisponible)) {
+                Log::warning('Stock disponible no encontrado para producto en bodega y lote', [
+                    'producto' => $request->producto,
+                    'store'    => $request->store,
+                    'lote_id'  => $request->lote_id,
+                ]);
                 return response()->json([
                     'status'  => 0,
                     'message' => 'No se encontró stock disponible para el producto en la bodega y lote seleccionados.'
                 ], 422);
             }
 
-            // Validación
+            // Validación de datos
             $rules = [
                 'ventaId'  => 'required',
                 'producto' => 'required',
@@ -699,7 +719,7 @@ class saleController extends Controller
                     'numeric',
                     'regex:/^\d+(\.\d{1,2})?$/',
                     'min:0.1',
-                    'max:' . $stockDisponible, // Se agrega la validación de máximo stock disponible
+                    'max:' . $stockDisponible,
                 ],
             ];
 
@@ -710,33 +730,42 @@ class saleController extends Controller
                 'lote_id.required'  => 'El lote es requerido',
                 'store.required'    => 'La bodega es requerida',
                 'quantity.required' => 'La cantidad es requerida.',
-                'quantity.numeric' => 'La cantidad debe ser un número.',
-                'quantity.min' => 'La cantidad debe ser mayor a 0.1.',
-                'quantity.max' => 'La cantidad no puede ser mayor al stock disponible (' . $stockDisponible . ').',
+                'quantity.numeric'  => 'La cantidad debe ser un número.',
+                'quantity.min'      => 'La cantidad debe ser mayor a 0.1.',
+                'quantity.max'      => 'La cantidad no puede ser mayor al stock disponible (' . $stockDisponible . ').',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
+                Log::warning('Validación fallida en savedetail', [
+                    'errors' => $validator->errors(),
+                    'data'   => $request->all()
+                ]);
                 return response()->json([
                     'status' => 0,
                     'errors' => $validator->errors()
                 ], 422);
             }
 
-            // Validación manual adicional (por si la validación de Laravel no lo bloquea correctamente)
+            Log::info('Validación de datos exitosa', ['data' => $request->all()]);
+
+            // Validación manual adicional
             if ($request->quantity > $stockDisponible) {
+                Log::warning('La cantidad ingresada supera el stock disponible', [
+                    'quantity'        => $request->quantity,
+                    'stockDisponible' => $stockDisponible
+                ]);
                 return response()->json([
                     'status'  => 0,
                     'message' => 'La cantidad ingresada supera el stock disponible (' . $stockDisponible . ').'
                 ], 422);
             }
 
-            // Formateo de valores
+            // Formateo de valores y cálculos
             $formatCantidad = new metodosrogercodeController();
-            $price   = $formatCantidad->MoneyToNumber($request->price);
-            $quantity = ($request->quantity);
+            $price = $formatCantidad->MoneyToNumber($request->price);
+            $quantity = $request->quantity;
 
-            // Cálculos comunes
             $precioUnitarioBruto = $price * $quantity;
             $porcDescuento = $request->get('porc_descuento');
             $descuentoProducto = $precioUnitarioBruto * ($porcDescuento / 100);
@@ -745,42 +774,63 @@ class saleController extends Controller
             $totalDescuento = $descuentoProducto + $descuentoCliente;
             $netoSinImpuesto = $precioUnitarioBruto - $totalDescuento;
 
-            $porcIva          = $request->get('porc_iva');
+            $porcIva = $request->get('porc_iva');
             $porcOtroImpuesto = $request->get('porc_otro_impuesto');
-            $porcImpoconsumo  = $request->get('impoconsumo');
-            $iva         = $netoSinImpuesto * ($porcIva / 100);
+            $porcImpoconsumo = $request->get('impoconsumo');
+            $iva = $netoSinImpuesto * ($porcIva / 100);
             $otroImpuesto = $netoSinImpuesto * ($porcOtroImpuesto / 100);
-            $impoconsumo  = $netoSinImpuesto * ($porcImpoconsumo / 100);
+            $impoconsumo = $netoSinImpuesto * ($porcImpoconsumo / 100);
             $totalImpuestos = $iva + $otroImpuesto + $impoconsumo;
-            $valorApagar    = $netoSinImpuesto + $totalImpuestos;
+            $valorApagar = $netoSinImpuesto + $totalImpuestos;
 
-            // Arreglo con datos a almacenar
+            Log::info('Cálculos realizados', [
+                'precioUnitarioBruto' => $precioUnitarioBruto,
+                'descuentoProducto'   => $descuentoProducto,
+                'descuentoCliente'    => $descuentoCliente,
+                'totalDescuento'      => $totalDescuento,
+                'netoSinImpuesto'     => $netoSinImpuesto,
+                'iva'                 => $iva,
+                'otroImpuesto'        => $otroImpuesto,
+                'impoconsumo'         => $impoconsumo,
+                'totalImpuestos'      => $totalImpuestos,
+                'valorApagar'         => $valorApagar
+            ]);
+
+            // Preparar datos a almacenar
             $dataDetail = [
-                'sale_id'           => $request->ventaId,
-                'store_id'          => $request->store,
-                'product_id'        => $request->producto,
-                'price'             => $price,
-                'quantity'          => $quantity,
-                'lote_id'           => $request->lote_id,
-                'porc_desc'         => $porcDescuento,
-                'descuento'         => $descuentoProducto,
-                'descuento_cliente' => $descuentoCliente,
-                'porc_iva'          => $porcIva,
-                'iva'               => $iva,
+                'sale_id'            => $request->ventaId,
+                'store_id'           => $request->store,
+                'product_id'         => $request->producto,
+                'price'              => $price,
+                'quantity'           => $quantity,
+                'lote_id'            => $request->lote_id,
+                'porc_desc'          => $porcDescuento,
+                'descuento'          => $descuentoProducto,
+                'descuento_cliente'  => $descuentoCliente,
+                'porc_iva'           => $porcIva,
+                'iva'                => $iva,
                 'porc_otro_impuesto' => $porcOtroImpuesto,
-                'otro_impuesto'     => $otroImpuesto,
-                'porc_impoconsumo'  => $porcImpoconsumo,
-                'impoconsumo'       => $impoconsumo,
-                'total_bruto'       => $precioUnitarioBruto,
-                'total'             => $netoSinImpuesto + $totalImpuestos,
+                'otro_impuesto'      => $otroImpuesto,
+                'porc_impoconsumo'   => $porcImpoconsumo,
+                'impoconsumo'        => $impoconsumo,
+                'total_bruto'        => $precioUnitarioBruto,
+                'total'              => $netoSinImpuesto + $totalImpuestos,
             ];
 
             // Crear o actualizar el detalle de venta
             if ($request->regdetailId > 0) {
                 $detail = SaleDetail::find($request->regdetailId);
                 $detail->update($dataDetail);
+                Log::info('Detalle de venta actualizado', [
+                    'regdetailId' => $request->regdetailId,
+                    'dataDetail'  => $dataDetail
+                ]);
             } else {
-                SaleDetail::create($dataDetail);
+                $newDetail = SaleDetail::create($dataDetail);
+                Log::info('Detalle de venta creado', [
+                    'newDetailId' => $newDetail->id,
+                    'dataDetail'  => $dataDetail
+                ]);
             }
 
             // Actualización de la venta
@@ -796,15 +846,29 @@ class saleController extends Controller
             $totalValor = $saleDetails->sum('total');
 
             $sale->total_bruto = $totalBruto;
-            $sale->descuentos    = $totalDesc;
+            $sale->descuentos = $totalDesc;
             $sale->total_valor_a_pagar = $totalValor;
-            $sale->total_iva     = $iva;
+            $sale->total_iva = $iva;
             $sale->total_otros_impuestos = $netoSinImpuesto * ($porcOtroImpuesto / 100);
             $sale->save();
+
+            Log::info('Venta actualizada', [
+                'sale_id'                => $sale->id,
+                'items'                  => $sale->items,
+                'total_bruto'            => $totalBruto,
+                'descuentos'             => $totalDesc,
+                'total_valor_a_pagar'    => $totalValor,
+                'total_iva'              => $iva,
+                'total_otros_impuestos'  => $sale->total_otros_impuestos,
+            ]);
 
             // Se obtienen los arrays para la respuesta
             $arraydetail = $this->getventasdetail($request->ventaId);
             $arrayTotales = $this->sumTotales($request->ventaId);
+
+            Log::info('Proceso savedetail completado exitosamente', [
+                'ventaId' => $request->ventaId
+            ]);
 
             return response()->json([
                 'status'       => 1,
@@ -813,12 +877,17 @@ class saleController extends Controller
                 'arrayTotales' => $arrayTotales
             ]);
         } catch (\Throwable $th) {
+            Log::error('Error en savedetail', [
+                'error' => $th->getMessage(),
+                'stack' => $th->getTraceAsString()
+            ]);
             return response()->json([
                 'status'  => 0,
                 'message' => (array) $th
             ]);
         }
     }
+
 
 
 
@@ -1080,7 +1149,7 @@ class saleController extends Controller
         }
     }
 
-   
+
     public function storeVentaMostrador(Request $request) // POS-Mostrador
     {
         try {
@@ -1088,7 +1157,7 @@ class saleController extends Controller
             $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
             $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
             $current_date->modify('next monday'); // Move to the next Monday
-            $dateNextMonday = $current_date->format('Y-m-d'); 
+            $dateNextMonday = $current_date->format('Y-m-d');
             $id_user = Auth::user()->id;
 
             $venta = new Sale();
