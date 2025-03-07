@@ -25,10 +25,10 @@
 		<table cellpadding="0" cellspacing="0" width="100%">
 			<tr>
 				<td class="text-center">
-					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">CARNICOS SV SAS</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 2;">901.836.683-7</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">TV 76 # 82C - 97</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">FRIGORIFICO ENGATIVA</span>
+					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
+					<!-- <span style="font-size: 11px; font-weight: bold; display: block; margin: 2;">900.490.684-3</span> -->
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">CL 35 SUR # 70B - 79</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale[0]->namecentrocosto}}</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Bogotá - Tels: 01-3178302986</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Resolución DIAN 18764064061708</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Autorizada el: 2024/01/20 :</span>
@@ -36,8 +36,8 @@
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Vigencia: 6</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Responsable de IVA</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Actividad Economica 4620 Tartifa</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina carnicossv@gmail.com</span>
-					<img src="{{ asset('assets/img/CSV-TRANSP.png') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina carnicossv@gmail.com</span>					
+					<img src="{{ public_path('assets/img/logocopy.png') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
 				</td>
 			</tr>
 			<tr>
@@ -45,7 +45,7 @@
 			</tr>
 			<tr>
 				<td colspan=" 2" class="">
-					<span style="font-size: 13px; font-weight: bold; display: block; margin-top: -2;">Sistema POS: {{$sale[0]->resolucion}}</span>
+					<span style="font-size: 13px; font-weight: bold; display: block; margin-top: 3;">Sistema POS: {{$sale[0]->resolucion}}</span>
 				</td>
 			</tr>
 			<tr>

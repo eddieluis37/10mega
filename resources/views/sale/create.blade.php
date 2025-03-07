@@ -280,16 +280,16 @@
 								<!--td>{{$proddetail->id}}</td-->
 								<td>{{$proddetail->nameprod}}</td>
 								<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
-								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_desc}}%</td>
+								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>								
+								<td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_iva}}%</td>
-								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_otro_impuesto}}%</td>
-								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_impoconsumo}}%</td>
+								<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
+								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>								
+								<td>{{ number_format($proddetail->porc_otro_impuesto, 0, ',', '.')}}</td>
+								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>								
+								<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
 								<td class="text-center">

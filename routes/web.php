@@ -317,7 +317,9 @@ Route::middleware(['auth', 'can:acceder_venta_pos'])->group(function () {
     Route::post('sale/{ventaId}', [SaleController::class, 'update'])->name('sale.update');
     Route::post('getproductosv', [SaleController::class, 'getproducts'])->name('sale.getproductos');
 
-    Route::get('/get-products-by-store', [SaleController::class, 'getProductsByStore']);
+    Route::get('/products/search', [SaleController::class, 'search'])->name('products.search');
+
+   // Route::get('/get-products-by-store', [SaleController::class, 'getProductsByStore']);
 
 
     Route::get('sales', [saleController::class, 'index'])->name('sale.index');

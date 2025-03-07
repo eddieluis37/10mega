@@ -19,6 +19,8 @@ class CreateSalesTable extends Migration
             $table->unsignedBigInteger('user_id');           
             $table->foreign('user_id')->references('id')->on('users');
 
+            $table->enum('tipo',['0','1','2','3','4','5'])->default('0'); // 0 = POS-Mostrador , 1 =  Domicilio  
+
             $table->unsignedBigInteger('centrocosto_id')->nullable();
             $table->foreign('centrocosto_id')->references('id')->on('centro_costo'); 
 
@@ -71,7 +73,7 @@ class CreateSalesTable extends Migration
             $table->string('consecutivo', 50, 0)->nullable();
             $table->bigInteger('consec')->length(50)->nullable();
             $table->string('resolucion', 50, 0)->nullable();          
-            $table->enum('tipo',['0','1','2','3','4','5'])->default('0');    // 0 = Mostrador , 1 =  Domicilio   
+           
             $table->enum('status',['0','1','2','3','4','5'])->default('0');                   
 
             $table->timestamps();

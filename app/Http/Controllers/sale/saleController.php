@@ -521,6 +521,83 @@ class saleController extends Controller
         return $detail;
     }
 
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        $storeIds = [1, 4, 5, 6, 8, 9, 10];
+
+        // Iniciamos la consulta de productos
+        $productsQuery = Product::query();
+
+        // Filtrar por barcode si el término es numérico y tiene 13 dígitos,
+        // de lo contrario se busca por nombre.
+        if ($query) {
+            if (preg_match('/^\d{13}$/', $query)) {
+                $productsQuery->where('barcode', $query);
+            } else {
+                $productsQuery->where(function ($q) use ($query) {
+                    $q->where('name', 'LIKE', "%{$query}%")
+                        ->orWhereHas('lotesPorVencer', function ($q2) use ($query) {
+                            $q2->where('codigo', 'LIKE', "%{$query}%");
+                        });
+                });
+            }
+        }
+
+        // Aplicar los filtros de inventarios y lotes por vencer
+        $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
+            $q->whereIn('store_id', $storeIds)
+                ->where('stock_ideal', '>', 0);
+        })
+            ->with(['inventarios' => function ($q) use ($storeIds) {
+                $q->whereIn('store_id', $storeIds);
+            }])
+            ->whereHas('lotesPorVencer');
+
+        $products = $productsQuery->get();
+
+        // Transformamos los productos para incluir en cada lote un campo que muestre
+        // "nombre - código del lote - fecha de vencimiento formateada"
+        $products->transform(function ($prod) {
+            $prod->lotesPorVencer->transform(function ($lote) use ($prod) {
+                $lote->producto_lote_vencimiento = "{$prod->name} - {$lote->codigo} - "
+                    . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y');
+                return $lote;
+            });
+            return $prod;
+        });
+
+        // Armar las opciones para el select2: se creará una opción por cada combinación
+        // producto - lote. Así se envían los datos de inventario asociados (stock_ideal, store, etc.)
+        $results = [];
+        foreach ($products as $prod) {
+            // Se obtiene el primer registro de inventario para obtener los datos de bodega y stock
+            $inventario = $prod->inventarios->first();
+            foreach ($prod->lotesPorVencer as $lote) {
+                // Se arma el texto que se mostrará en el select
+                $text = "Bg: " . ($inventario && $inventario->store ? $inventario->store->name : 'N/A')
+                    . " - " . $lote->codigo
+                    . " - " . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y')
+                    . " - " . $prod->name
+                    . " - Stk: " . ($inventario ? $inventario->stock_ideal : 'N/A');
+
+                $results[] = [
+                    'id'             => $prod->id,  // Identificador del producto
+                    'text'           => $text,
+                    'lote_id'        => $lote->id,
+                    'inventario_id'  => $inventario ? $inventario->id : null,
+                    'stock_ideal'    => $inventario ? $inventario->stock_ideal : null,
+                    'store_id'       => $inventario && $inventario->store ? $inventario->store->id : null,
+                    'store_name'     => $inventario && $inventario->store ? $inventario->store->name : null,
+                    'barcode'        => $prod->barcode,
+                ];
+            }
+        }
+
+        return response()->json($results);
+    }
+
+
     public function create_reg_pago($id)
     {
         $forma_pago_tarjeta = Formapago::Where('tipoformapago', '=', 'TARJETA')->get();
@@ -1003,52 +1080,23 @@ class saleController extends Controller
         }
     }
 
-    public function buscarPorCodigoBarras(Request $request)
-    {
-        $codigoBarras = $request->input('codigoBarras');
-        $centrocostoId = $request->input('centrocosto');
-        $clienteId = $request->input('cliente');
-
-        $cliente = Third::find($clienteId);
-
-        $producto = Listapreciodetalle::join('products as prod', 'listapreciodetalles.product_id', '=', 'prod.id')
-            ->join('thirds as t', 'listapreciodetalles.listaprecio_id', '=', 't.id')
-            ->where('prod.barcode', $codigoBarras) // Buscar por el código de barras escaneado
-            ->where('t.id', $cliente->listaprecio_genericid)
-            ->select('listapreciodetalles.precio', 'prod.iva', 'otro_impuesto', 'listapreciodetalles.porc_descuento')
-            ->first();
-
-        if ($producto) {
-            return response()->json([
-                'precio' => $producto->precio,
-                'iva' => $producto->iva,
-                'otro_impuesto' => $producto->otro_impuesto,
-                'porc_descuento' => $producto->porc_descuento
-            ]);
-        } else {
-            return response()->json([
-                'error' => 'Product not found'
-            ], 404);
-        }
-    }
-
-
-    public function storeVentaMostrador(Request $request) // POS
+   
+    public function storeVentaMostrador(Request $request) // POS-Mostrador
     {
         try {
             $currentDateTime = Carbon::now();
             $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
             $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
             $current_date->modify('next monday'); // Move to the next Monday
-            $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
+            $dateNextMonday = $current_date->format('Y-m-d'); 
             $id_user = Auth::user()->id;
 
             $venta = new Sale();
             $venta->user_id = $id_user;
-            $venta->centrocosto_id = 1; // Valor estático para el campo centrocosto
-            $venta->subcentrocostos_id = 2; // Valor estático para el campo Subcentrocosto PUNTO DE VENTA GUAD
-            $venta->third_id = 52; // Valor estático para el campo third_id
-            $venta->vendedor_id = 52; // Valor estático para el campo vendedor_id
+            $venta->centrocosto_id = 1;
+            $venta->subcentrocostos_id = 2;
+            $venta->third_id = 1;
+            $venta->vendedor_id = 1;
 
             $venta->fecha_venta = $currentDateFormat;
             $venta->fecha_cierre = $dateNextMonday;

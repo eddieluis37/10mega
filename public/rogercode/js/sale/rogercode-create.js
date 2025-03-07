@@ -131,6 +131,27 @@ $(document).ready(function () {
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,
+        ajax: {
+            url: "/products/search",
+            dataType: "json",
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // El término de búsqueda (puede ser nombre o código de barras)
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data,
+                };
+            },
+            cache: true,
+        },
+        placeholder: "Seleccione un producto o escanee el código de barras",
+        minimumInputLength: 1,
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
     });
 
     $("#store").change(function () {
@@ -250,15 +271,15 @@ const showData = (data) => {
                 <td>${element.nameprod}</td>
                 <td>${element.quantity}</td>
                 <td>$${formatCantidadSinCero(element.price)}</td> 
-                <td>${formatCantidad(element.porc_desc)}%</td>                 
+                <td>${formatCantidadSinCero(element.porc_desc)}</td>                 
                 <td>$${formatCantidadSinCero(element.descuento)}</td> 
                 <td>$${formatCantidadSinCero(element.descuento_cliente)}</td>
                 <td>$${formatCantidadSinCero(element.total_bruto)}</td>   
-                <td>${formatCantidad(element.porc_iva)}%</td> 
+                <td>${formatCantidadSinCero(element.porc_iva)}</td> 
                 <td>$${formatCantidadSinCero(element.iva)}</td> 
-                <td>${element.porc_otro_impuesto}%</td>     
+                <td>${formatCantidadSinCero(element.porc_otro_impuesto)}</td>     
                 <td>$${formatCantidadSinCero(element.otro_impuesto)}</td>   
-                <td>${element.porc_impoconsumo}%</td> 
+                <td>${formatCantidadSinCero(element.porc_impoconsumo)}</td> 
                 <td>$${formatCantidadSinCero(
                     element.impoconsumo
                 )}</td>               
