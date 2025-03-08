@@ -233,5 +233,21 @@ class PermissionsSeeder extends Seeder
         if ($user) {
             $user->assignRole($comercial);          
         }
+
+        User::updateOrCreate(
+            ['email' => 'subgerente@carnesfriasmega.com'], // Condición para identificar el usuario
+            [
+                'name' => 'BRAYAN GONZALEZ',
+                'phone' => '3014154625',
+                'profile' => 'Comercial',
+                'status' => 'Active',
+                'password' => bcrypt('SubG3r3nt3M@*.')
+            ]
+        );
+
+        $user = User::where('name', 'BRAYAN GONZALEZ')->first();
+        if ($user) {
+            $user->assignRole($comercial);          
+        }
     }
 }
