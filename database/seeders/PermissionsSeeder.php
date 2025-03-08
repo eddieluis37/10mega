@@ -241,7 +241,7 @@ class PermissionsSeeder extends Seeder
                 'phone' => '3014154625',
                 'profile' => 'Comercial',
                 'status' => 'Active',
-                'password' => bcrypt('SubG3r3nt3M@*.')
+                'password' => bcrypt('SubG3r3nt3M@*')
             ]
         );
 
