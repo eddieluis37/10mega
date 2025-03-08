@@ -16,17 +16,34 @@ class Product extends Model
 
 
 	public function inventarios()
-    {
+	{
 		return $this->hasMany(Inventario::class, 'product_id');
-    }
+	}
 
-    public function lotesPorVencer() // Nueva relación con lotes a través de lote_products
+	/* public function lotesPorVencer() // Nueva relación con lotes a través de lote_products
     {
         return $this->belongsToMany(Lote::class, 'lote_products')
             ->whereDate('fecha_vencimiento', '>=', now()) // Solo lotes no vencidos
             ->orderBy('fecha_vencimiento', 'asc') // Ordenar por fecha más próxima
 			->limit(1); // Solo trae el lote más próximo
-    }
+    } */
+
+
+	public function lotesPorVencer()
+	{
+		return $this->hasManyThrough(
+			Lote::class,
+			Inventario::class,
+			'product_id',   // FK en Inventarios que referencia al Product
+			'id',           // Llave primaria en Lote (Inventario.lote_id se relaciona con Lote.id)
+			'id',           // Llave primaria en Product
+			'lote_id'       // Campo en Inventarios que contiene el id del Lote
+		)
+			->whereDate('lotes.fecha_vencimiento', '>=', now())
+			->orderBy('lotes.fecha_vencimiento', 'asc')
+			->limit(1); // Solo trae el lote más próximo
+	}
+
 	/**
 	 * Relación muchos a muchos con el modelo Lote.
 	 */
@@ -133,6 +150,4 @@ class Product extends Model
 	{
 		return $this->belongsToMany(Store::class, 'product_store');
 	}
-
-
 }
