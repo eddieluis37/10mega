@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
   //  $this->call(BeneficioreSeeder::class);
     //  $this->call(InventarioSeeder::class);
     //  $this->call(Movimiento_inventarioSeeder::class);
-    $this->call(LoteProductSeeder::class);
+   // $this->call(LoteProductSeeder::class);
     $this->call(StoreUserSeeder::class);
   }
 }
