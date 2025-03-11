@@ -284,7 +284,11 @@ class saleController extends Controller
 
         //  $storeId = [10];
 */
-        $storeIds = [1, 4, 5, 6, 8, 9, 10, 22];
+        //$storeIds = [1, 4, 5, 6, 8, 9, 10];
+        $storeIds = \DB::table('store_user')
+        ->where('user_id', auth()->id())
+        ->pluck('store_id')
+        ->toArray();
 
         // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery = Product::query();
@@ -397,7 +401,12 @@ class saleController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('q');
-        $storeIds = [1, 4, 5, 6, 8, 9, 10, 22];
+        // $storeIds = [1, 4, 5, 6, 8, 9, 10];
+        $storeIds = \DB::table('store_user')
+        ->where('user_id', auth()->id())
+        ->pluck('store_id')
+        ->toArray();
+
 
         // Consulta de productos. Se busca por barcode o por nombre o por el código del lote (mediante la relación "lotes")
         $productsQuery = Product::query();
