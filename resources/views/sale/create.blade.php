@@ -120,7 +120,7 @@
 												<option value="">Seleccione el producto</option>
 												@foreach ($results as $result)
 												<option value="{{ $result['inventario_id'] }}"
-													data-product-id="{{ $result['id'] }}"
+													data-product-id="{{ $result['product_id'] }}"
 													data-lote-id="{{ $result['lote_id'] }}"
 													data-inventario-id="{{ $result['inventario_id'] }}"
 													data-stock-ideal="{{ $result['stock_ideal'] }}"
@@ -136,7 +136,6 @@
 										</div>
 									</div>
 								</div>
-
 								<div class="col-md-2">
 									<div class="form-group">
 										<label for="" class="form-label">KG|QT</label>

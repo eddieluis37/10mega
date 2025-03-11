@@ -29,68 +29,8 @@ console.log("centro " + centrocosto);
 var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
 
-/* $(document).ready(function () {
-    // Inicializa el select2 con plantillas para mantener la misma presentación en la lista y en la selección
-    $(".select2Prod").select2({
-        placeholder: "Seleccione un producto o escanee el código de barras",
-        theme: "bootstrap-5",
-        width: "100%",
-        allowClear: true,
-        templateResult: function (item) {
-            // Si la opción está en proceso de carga, se muestra el texto sin modificar
-            if (item.loading) return item.text;
-            // Se utiliza el atributo data-info para mostrar la información formateada
-            var info = $(item.element).data("info") || item.text;
-            return info;
-        },
-        templateSelection: function (item) {
-            // Para la opción seleccionada se muestra el mismo formato utilizando data-info
-            if (!item.id) return item.text;
-            var info = $(item.element).data("info") || item.text;
-            return info;
-        },
-        escapeMarkup: function (markup) { return markup; } // Permite renderizar HTML en las plantillas
-    });
-
-    // Captura la selección utilizando el evento select2:select
-    $("#producto").on("select2:select", function (e) {
-        var productId = $(this).val();
-        var data = e.params.data;
-        // Se extraen los datos directamente del atributo data-* de la opción seleccionada
-        var $selectedOption = $(data.element);
-        var loteId = $selectedOption.data("lote-id");
-        var inventarioId = $selectedOption.data("inventario-id");
-        var stockIdeal = $selectedOption.data("stock-ideal");
-        var storeId = $selectedOption.data("store-id");
-        var storeName = $selectedOption.data("store-name");
-
-        // Mostrar en consola para verificación
-        console.log("Lote ID:", loteId);
-        console.log("Inventario ID:", inventarioId);
-        console.log("Stock Ideal:", stockIdeal);
-        console.log("Store ID:", storeId);
-        console.log("Store Name:", storeName);
-
-        // Asignar los valores a los campos ocultos del formulario
-        $("#lote_id").val(loteId);
-        $("#inventario_id").val(inventarioId);
-        $("#stock_ideal").val(stockIdeal);
-        $("#store_id").val(storeId);
-        $("#store_name").val(storeName);
-
-        // Opcional: si requieres actualizar otros valores relacionados con el producto
-        actualizarValoresProducto(productId, loteId);
-    });
-
-    // Evento para limpiar mensajes de error al modificar el input de cantidad
-    $("#quantity").on("input", function () {
-        $(this).closest(".form-group").find(".error-message").text("");
-    });
-});
- */
-
 $(document).ready(function () {
-    // Inicializar el select2 usando AJAX para buscar productos
+    // Inicializar select2 usando AJAX para buscar productos
     $(".select2Prod").select2({
         placeholder: "Seleccione un producto o escanee el código de barras",
         theme: "bootstrap-5",
@@ -103,47 +43,45 @@ $(document).ready(function () {
             delay: 250,
             data: function (params) {
                 return {
-                    q: params.term // Término de búsqueda
+                    q: params.term, // Término de búsqueda
                 };
             },
             processResults: function (data) {
-                // Se asume que cada objeto devuelto ya tiene:
-                // id, text, lote_id, inventario_id, stock_ideal, store_id, store_name
+                // Como el controlador retorna un id único (inventario_id) en el campo "id",
+                // simplemente se pasan los resultados al select2
                 return {
-                    results: data
+                    results: data,
                 };
             },
             cache: true,
         },
         templateResult: function (item) {
             if (item.loading) return item.text;
-            // Se usa 'data_info' si está disponible o se usa el campo 'text'
-            return item.data_info || item.text;
+            // Aquí se puede personalizar la plantilla de cada opción si es necesario
+            return item.text;
         },
         templateSelection: function (item) {
             if (!item.id) return item.text;
-            // Se asegura que la opción seleccionada muestre el mismo formato
-            return item.data_info || item.text;
+            return item.text;
         },
         escapeMarkup: function (markup) {
             return markup; // Permite renderizar HTML en las plantillas
-        }
+        },
     });
 
     // Al seleccionar una opción se extraen y asignan los valores a los campos ocultos
     $("#producto").on("select2:select", function (e) {
         var data = e.params.data;
         console.log("Opción seleccionada:", data);
-        
-        // Asignar los valores a los campos ocultos, asegurándose que no sean nulos
+
         $("#lote_id").val(data.lote_id || "");
         $("#inventario_id").val(data.inventario_id || "");
         $("#stock_ideal").val(data.stock_ideal || "");
         $("#store_id").val(data.store_id || "");
         $("#store_name").val(data.store_name || "");
 
-        // Si se requiere actualizar otros valores relacionados con el producto, se puede llamar a la función:
-        actualizarValoresProducto(data.id, data.lote_id);
+        // Se utiliza el id del producto (product_id) para actualizar otros valores relacionados
+        actualizarValoresProducto(data.product_id, data.lote_id);
     });
 
     // Limpia el mensaje de error al modificar el input de cantidad
@@ -151,7 +89,6 @@ $(document).ready(function () {
         $(this).closest(".form-group").find(".error-message").text("");
     });
 });
-
 
 function actualizarValoresProducto(productId, loteId) {
     $.ajax({
@@ -182,7 +119,7 @@ function actualizarValoresProducto(productId, loteId) {
 }
 
 $(document).ready(function () {
-      $(".select2Prod").select2({
+    $(".select2Prod").select2({
         placeholder: "Seleccione un producto",
         width: "100%",
         theme: "bootstrap-5",
@@ -209,7 +146,6 @@ $(document).ready(function () {
         theme: "bootstrap-5",
         allowClear: true,
     });
-   
 });
 
 tbodyTable.addEventListener("click", (e) => {
@@ -301,13 +237,17 @@ const showData = (data) => {
                 <td>${element.nameprod}</td>
                 <td>${element.quantity}</td>
                 <td>$${formatCantidadSinCero(element.price)}</td> 
-                <td>${formatCantidadSinCero(element.porc_desc)}</td>                 
+                <td>${formatCantidadSinCero(
+                    element.porc_desc
+                )}</td>                 
                 <td>$${formatCantidadSinCero(element.descuento)}</td> 
                 <td>$${formatCantidadSinCero(element.descuento_cliente)}</td>
                 <td>$${formatCantidadSinCero(element.total_bruto)}</td>   
                 <td>${formatCantidadSinCero(element.porc_iva)}</td> 
                 <td>$${formatCantidadSinCero(element.iva)}</td> 
-                <td>${formatCantidadSinCero(element.porc_otro_impuesto)}</td>     
+                <td>${formatCantidadSinCero(
+                    element.porc_otro_impuesto
+                )}</td>     
                 <td>$${formatCantidadSinCero(element.otro_impuesto)}</td>   
                 <td>${formatCantidadSinCero(element.porc_impoconsumo)}</td> 
                 <td>$${formatCantidadSinCero(

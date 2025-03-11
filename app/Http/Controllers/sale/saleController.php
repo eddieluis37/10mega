@@ -307,9 +307,8 @@ class saleController extends Controller
             $inventariosProducto = $inventarios->where('product_id', $prod->id);
 
             foreach ($inventariosProducto as $inventario) {
-                // Validar que exista un lote y que la fecha de vencimiento sea vigente (>= hoy)
+                // Validar la fecha de vencimiento del lote
                 if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
-                    // Lógica de concatenación, igual que en search:
                     $text = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
                         . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
                         . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
@@ -317,7 +316,8 @@ class saleController extends Controller
                         . " - Stk: " . $inventario->stock_ideal;
 
                     $results[] = [
-                        'id'             => $prod->id,
+                        // Se utiliza el id del inventario para que cada registro sea único
+                        'id'             => $inventario->id,
                         'text'           => $text,
                         'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
                         'inventario_id'  => $inventario->id,
@@ -325,6 +325,8 @@ class saleController extends Controller
                         'store_id'       => $inventario->store ? $inventario->store->id : null,
                         'store_name'     => $inventario->store ? $inventario->store->name : null,
                         'barcode'        => $prod->barcode,
+                        // Se conserva el id del producto en otra propiedad para otros usos
+                        'product_id'     => $prod->id,
                     ];
                 }
             }
@@ -434,7 +436,7 @@ class saleController extends Controller
             $inventariosProducto = $inventarios->where('product_id', $prod->id);
 
             foreach ($inventariosProducto as $inventario) {
-                // Procesas cada inventario (por ejemplo, validas la fecha de vencimiento)
+                // Validar la fecha de vencimiento del lote
                 if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
                     $text = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
                         . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
@@ -443,7 +445,8 @@ class saleController extends Controller
                         . " - Stk: " . $inventario->stock_ideal;
 
                     $results[] = [
-                        'id'             => $prod->id,
+                        // Se utiliza el id del inventario para que cada registro sea único
+                        'id'             => $inventario->id,
                         'text'           => $text,
                         'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
                         'inventario_id'  => $inventario->id,
@@ -451,14 +454,16 @@ class saleController extends Controller
                         'store_id'       => $inventario->store ? $inventario->store->id : null,
                         'store_name'     => $inventario->store ? $inventario->store->name : null,
                         'barcode'        => $prod->barcode,
+                        // Se conserva el id del producto en otra propiedad para otros usos
+                        'product_id'     => $prod->id,
                     ];
                 }
             }
         }
 
-
         return response()->json($results);
     }
+
 
 
 
@@ -541,29 +546,38 @@ class saleController extends Controller
         try {
             Log::info('Iniciando proceso de guardado de detalle de venta', [
                 'ventaId'  => $request->ventaId,
-                'producto' => $request->producto,
+                // Ahora "producto" contiene el id del inventario
+                'inventario_id' => $request->producto,
                 'lote_id'  => $request->lote_id,
                 'store'    => $request->store,
             ]);
 
-            // Obtener el stock_ideal del producto en la bodega y lote seleccionados
-            $stockDisponible = Inventario::where('product_id', $request->producto)
-                ->where('store_id', $request->store)
-                ->where('lote_id', $request->lote_id)
-                ->value('stock_ideal');
+            // Se obtiene el registro de inventario mediante el identificador único
+            $inventario = Inventario::with('lote')->find($request->producto);
+            if (!$inventario) {
+                Log::warning('Inventario no encontrado', [
+                    'inventario_id' => $request->producto
+                ]);
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'No se encontró el inventario seleccionado.'
+                ], 422);
+            }
 
+            // Se usa el stock disponible del inventario obtenido
+            $stockDisponible = $inventario->stock_ideal;
             Log::info('Stock disponible recuperado', [
-                'product_id'  => $request->producto,
-                'store_id'    => $request->store,
-                'lote_id'     => $request->lote_id,
+                'product_id'  => $inventario->product_id,
+                'store_id'    => $inventario->store_id,
+                'lote_id'     => $inventario->lote_id,
                 'stock_ideal' => $stockDisponible,
             ]);
 
             if (is_null($stockDisponible)) {
                 Log::warning('Stock disponible no encontrado para producto en bodega y lote', [
-                    'producto' => $request->producto,
-                    'store'    => $request->store,
-                    'lote_id'  => $request->lote_id,
+                    'producto' => $inventario->product_id,
+                    'store'    => $inventario->store_id,
+                    'lote_id'  => $inventario->lote_id,
                 ]);
                 return response()->json([
                     'status'  => 0,
@@ -574,7 +588,7 @@ class saleController extends Controller
             // Validación de datos
             $rules = [
                 'ventaId'  => 'required',
-                'producto' => 'required',
+                'producto' => 'required', // ahora es el id de inventario
                 'price'    => 'required',
                 'lote_id'  => 'required',
                 'store'    => 'required',
@@ -613,7 +627,6 @@ class saleController extends Controller
 
             Log::info('Validación de datos exitosa', ['data' => $request->all()]);
 
-            // Validación manual adicional
             if ($request->quantity > $stockDisponible) {
                 Log::warning('La cantidad ingresada supera el stock disponible', [
                     'quantity'        => $request->quantity,
@@ -663,11 +676,12 @@ class saleController extends Controller
             // Preparar datos a almacenar en el detalle de venta
             $dataDetail = [
                 'sale_id'            => $request->ventaId,
-                'store_id'           => $request->store,
-                'product_id'         => $request->producto,
+                // Se utiliza la información del inventario recuperado
+                'store_id'           => $inventario->store_id,
+                'product_id'         => $inventario->product_id,
                 'price'              => $price,
                 'quantity'           => $quantity,
-                'lote_id'            => $request->lote_id,
+                'lote_id'            => $inventario->lote_id,
                 'porc_desc'          => $porcDescuento,
                 'descuento'          => $descuentoProducto,
                 'descuento_cliente'  => $descuentoCliente,
@@ -717,13 +731,13 @@ class saleController extends Controller
             $sale->save();
 
             Log::info('Venta actualizada', [
-                'sale_id'                => $sale->id,
-                'items'                  => $sale->items,
-                'total_bruto'            => $totalBruto,
-                'descuentos'             => $totalDesc,
-                'total_valor_a_pagar'    => $totalValor,
-                'total_iva'              => $iva,
-                'total_otros_impuestos'  => $sale->total_otros_impuestos,
+                'sale_id'               => $sale->id,
+                'items'                 => $sale->items,
+                'total_bruto'           => $totalBruto,
+                'descuentos'            => $totalDesc,
+                'total_valor_a_pagar'   => $totalValor,
+                'total_iva'             => $iva,
+                'total_otros_impuestos' => $sale->total_otros_impuestos,
             ]);
 
             // Obtener arrays para la respuesta (detalles y totales)
@@ -751,6 +765,7 @@ class saleController extends Controller
             ]);
         }
     }
+
 
 
 
