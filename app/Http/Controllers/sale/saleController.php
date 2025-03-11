@@ -216,173 +216,7 @@ class saleController extends Controller
         }
     }
 
-    public function cargarInventariocr($ventaId)
-    {
-        DB::beginTransaction();
-        try {
-            // Obtener la venta con sus detalles (usando eager loading)
-            $sale = \App\Models\Sale::with('saleDetails')->where('id', $ventaId)
-                ->where('status', '0')
-                ->first();
 
-            Log::debug('Venta obtenida', ['ventaId' => $ventaId, 'compensadores' => $sale]);
-
-            if (!$sale) {
-                Log::debug('Venta no encontrada o cerrada', ['ventaId' => $ventaId]);
-                return response()->json([
-                    'status'  => 1,
-                    'message' => 'Venta no encontrada o cerrada.'
-                ], 404);
-            }
-
-            // Filtrar los detalles activos de la venta
-            $saleDetails = $sale->saleDetails->where('status', '1');
-
-            Log::debug('Detalles de venta obtenidos', [
-                'ventaId'       => $ventaId,
-                'detalle_count' => $saleDetails->count()
-            ]);
-
-            if ($saleDetails->isEmpty()) {
-                Log::debug('No hay detalles de venta activos', ['ventaId' => $ventaId]);
-                return response()->json([
-                    'status'  => 0,
-                    'message' => 'No hay detalles de venta activos.'
-                ], 404);
-            }
-
-            // Agrupar los detalles de venta por producto y tienda para evitar duplicados
-            $groupedDetails = $saleDetails->groupBy(function ($detail) {
-                return $detail->product_id . '-' . $detail->store_id;
-            });
-
-            foreach ($groupedDetails as $key => $detailsGroup) {
-                list($productId, $storeId) = explode('-', $key);
-
-                // Calcular los acumulados para el grupo
-                $accumulatedQuantity   = $detailsGroup->sum('quantity');
-                $accumulatedTotalBruto = $detailsGroup->sum('total_bruto');
-
-                Log::debug('Acumulados calculados para producto y tienda', [
-                    'product_id'            => $productId,
-                    'store_id'              => $storeId,
-                    'accumulatedQuantity'   => $accumulatedQuantity,
-                    'accumulatedTotalBruto' => $accumulatedTotalBruto
-                ]);
-
-                // Obtener el producto y su lote próximo a vencer
-                $product = \App\Models\Product::find($productId);
-                if (!$product) {
-                    Log::debug('Producto no encontrado', ['product_id' => $productId]);
-                    continue;
-                }
-
-                $lote = $product->lotesPorVencer()->orderBy('fecha_vencimiento', 'asc')->first();
-                if (!$lote) {
-                    Log::debug('No se encontró lote próximo a vencer para producto', ['product_id' => $productId]);
-                    continue;
-                }
-                $lote_id = $lote->id;
-
-                // Buscar el registro de inventario específico para producto, tienda y lote
-                $inventario = \App\Models\Inventario::where('product_id', $productId)
-                    ->where('store_id', $storeId)
-                    ->where('lote_id', $lote_id)
-                    ->first();
-
-                if (!$inventario) {
-                    Log::debug('No se encontró inventario para producto, tienda y lote', [
-                        'product_id' => $productId,
-                        'store_id'   => $storeId,
-                        'lote_id'    => $lote_id
-                    ]);
-                    continue;
-                }
-
-                // Verificar si ya existe un movimiento para esta venta, producto y tienda
-                $existingMovimiento = \App\Models\MovimientoInventario::where('sale_id', $ventaId)
-                    ->where('product_id', $productId)
-                    ->where('store_origen_id', $storeId)
-                    ->where('tipo', 'venta')
-                    ->first();
-
-                if ($existingMovimiento) {
-                    Log::debug('Movimiento de inventario ya existe para esta venta', [
-                        'movimiento_id' => $existingMovimiento->id
-                    ]);
-                    continue;
-                }
-
-                // Crear el movimiento de inventario
-                $movimiento = \App\Models\MovimientoInventario::create([
-                    'product_id'       => $productId,
-                    'lote_id'          => $lote_id,
-                    'store_origen_id'  => $storeId,
-                    'store_destino_id' => null, // Para tipo venta, no hay tienda destino
-                    'tipo'             => 'venta',
-                    'sale_id'          => $ventaId,
-                    'cantidad'         => $accumulatedQuantity,
-                    'costo_unitario'   => $accumulatedTotalBruto,
-                ]);
-                Log::debug('Movimiento de inventario creado', ['movimiento' => $movimiento->toArray()]);
-
-                // Actualizar el inventario: incrementar la cantidad de venta y el costo unitario
-                $inventario->cantidad_venta += $accumulatedQuantity;
-                $inventario->costo_unitario += $accumulatedTotalBruto;
-                $inventario->save();
-
-                Log::debug('Inventario actualizado', [
-                    'inventario_id'       => $inventario->id,
-                    'store_id'            => $storeId,
-                    'incremento_cantidad' => $accumulatedQuantity,
-                    'incremento_costo'    => $accumulatedTotalBruto
-                ]);
-            }
-
-            // Si hay valor a pagar en crédito, invocar el proceso correspondiente
-            if ($sale->valor_a_pagar_credito > 0) {
-                Log::debug('Venta tiene valor a pagar en crédito, se debe invocar cuentasPorCobrar', [
-                    'valor_a_pagar_credito' => $sale->valor_a_pagar_credito
-                ]);
-                // Ejemplo: $this->cuentasPorCobrar($sale);
-            }
-
-            // Marcar la venta como cerrada y asignar la fecha de cierre
-            $sale->status = '1';
-            $sale->fecha_cierre = now();
-            $sale->save();
-
-            Log::debug('Venta actualizada a cerrada', ['ventaId' => $ventaId]);
-
-            DB::commit();
-            Log::debug('Transacción commit exitosa para venta', ['ventaId' => $ventaId]);
-
-            return redirect()->route('sale.index')
-                ->with('success', 'Cargado al inventario exitosamente');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al cargar inventario', [
-                'error'   => $e->getMessage(),
-                'ventaId' => $ventaId
-            ]);
-            return redirect()->route('sale.index')
-                ->with('error', 'Error al cargar inventario: ' . $e->getMessage());
-        }
-    }
-
-
-
-    public function cargarInventarioMasivo()
-    {
-        for ($ventaId = 484; $ventaId <= 592; $ventaId++) {
-            $this->cargarInventariocr($ventaId);
-        }
-
-        return response()->json([
-            'status' => 1,
-            'message' => 'Cargado al inventario masivamente desde el ID 672 hasta el ID 1127'
-        ]);
-    }
 
     public function cuentasPorCobrar($ventaId)
     {
@@ -446,30 +280,58 @@ class saleController extends Controller
             ->orderBy('category_id', 'asc')
             ->orderBy('name', 'asc')
             ->get();
- */
+ 
 
         //  $storeId = [10];
+*/
+        $storeIds = [1, 4, 5, 6, 8, 9, 10, 22];
 
-        $storeIds = [1, 4, 5, 6, 8, 9, 10];
-
-        $prod = Product::whereHas('inventarios', function ($query) use ($storeIds) {
-            $query->whereIn('store_id', $storeIds)
+        // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
+        $productsQuery = Product::query();
+        $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
+            $q->whereIn('store_id', $storeIds)
                 ->where('stock_ideal', '>', 0);
-        })
-            ->with(['inventarios' => function ($query) use ($storeIds) {
-                $query->whereIn('store_id', $storeIds);
-            }])
-            ->whereHas('lotesPorVencer')
+        });
+        $products = $productsQuery->get();
+
+        // Se obtienen todos los inventarios que cumplan la condición, cargando las relaciones 'store' y 'lote'
+        $inventarios = Inventario::with('store', 'lote')
+            ->whereIn('store_id', $storeIds)
+            ->where('stock_ideal', '>', 0)
             ->get();
 
-        $prod->transform(function ($prod) {
-            $prod->lotesPorVencer->transform(function ($lote) use ($prod) {
-                $lote->producto_lote_vencimiento = "{$prod->name} - {$lote->codigo} - "
-                    . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y');
-                return $lote;
-            });
-            return $prod;
-        });
+        $results = [];
+
+        foreach ($products as $prod) {
+            // Filtrar todos los inventarios que correspondan al producto actual
+            $inventariosProducto = $inventarios->where('product_id', $prod->id);
+
+            foreach ($inventariosProducto as $inventario) {
+                // Validar que exista un lote y que la fecha de vencimiento sea vigente (>= hoy)
+                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
+                    // Lógica de concatenación, igual que en search:
+                    $text = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
+                        . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
+                        . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
+                        . " - " . $prod->name
+                        . " - Stk: " . $inventario->stock_ideal;
+
+                    $results[] = [
+                        'id'             => $prod->id,
+                        'text'           => $text,
+                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
+                        'inventario_id'  => $inventario->id,
+                        'stock_ideal'    => $inventario->stock_ideal,
+                        'store_id'       => $inventario->store ? $inventario->store->id : null,
+                        'store_name'     => $inventario->store ? $inventario->store->name : null,
+                        'barcode'        => $prod->barcode,
+                    ];
+                }
+            }
+        }
+
+
+
 
         $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
         $arrayTotales = $this->sumTotales($id);
@@ -511,7 +373,7 @@ class saleController extends Controller
         $detalleVenta = $this->getventasdetail($id);
 
 
-        return view('sale.create', compact('datacompensado', 'stores', 'id', 'prod', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('sale.create', compact('datacompensado', 'results', 'stores', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
 
     public function getventasdetalle($ventaId, $centrocostoId)
@@ -533,78 +395,72 @@ class saleController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('q');
-        $storeIds = [1, 4, 5, 6, 8, 9, 10];
+        $storeIds = [1, 4, 5, 6, 8, 9, 10, 22];
 
-        // Iniciamos la consulta de productos
+        // Consulta de productos. Se busca por barcode o por nombre o por el código del lote (mediante la relación "lotes")
         $productsQuery = Product::query();
 
-        // Filtrar por barcode si el término es numérico y tiene 13 dígitos,
-        // de lo contrario se busca por nombre.
         if ($query) {
             if (preg_match('/^\d{13}$/', $query)) {
                 $productsQuery->where('barcode', $query);
             } else {
                 $productsQuery->where(function ($q) use ($query) {
                     $q->where('name', 'LIKE', "%{$query}%")
-                        ->orWhereHas('lotesPorVencer', function ($q2) use ($query) {
+                        ->orWhereHas('lotes', function ($q2) use ($query) {
                             $q2->where('codigo', 'LIKE', "%{$query}%");
                         });
                 });
             }
         }
 
-        // Aplicar los filtros de inventarios y lotes por vencer
+        // Se filtran los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
             $q->whereIn('store_id', $storeIds)
                 ->where('stock_ideal', '>', 0);
-        })
-            ->with(['inventarios' => function ($q) use ($storeIds) {
-                $q->whereIn('store_id', $storeIds);
-            }])
-            ->whereHas('lotesPorVencer');
+        });
 
         $products = $productsQuery->get();
 
-        // Transformamos los productos para incluir en cada lote un campo que muestre
-        // "nombre - código del lote - fecha de vencimiento formateada"
-        $products->transform(function ($prod) {
-            $prod->lotesPorVencer->transform(function ($lote) use ($prod) {
-                $lote->producto_lote_vencimiento = "{$prod->name} - {$lote->codigo} - "
-                    . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y');
-                return $lote;
-            });
-            return $prod;
-        });
+        // Se obtienen todos los inventarios que cumplan la condición, cargando además la relación "lote" y "store"
+        $inventarios = Inventario::with('store', 'lote')
+            ->whereIn('store_id', $storeIds)
+            ->where('stock_ideal', '>', 0)
+            ->get();
 
-        // Armar las opciones para el select2: se creará una opción por cada combinación
-        // producto - lote. Así se envían los datos de inventario asociados (stock_ideal, store, etc.)
         $results = [];
-        foreach ($products as $prod) {
-            // Se obtiene el primer registro de inventario para obtener los datos de bodega y stock
-            $inventario = $prod->inventarios->first();
-            foreach ($prod->lotesPorVencer as $lote) {
-                // Se arma el texto que se mostrará en el select
-                $text = "Bg: " . ($inventario && $inventario->store ? $inventario->store->name : 'N/A')
-                    . " - " . $lote->codigo
-                    . " - " . \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y')
-                    . " - " . $prod->name
-                    . " - Stk: " . ($inventario ? $inventario->stock_ideal : 'N/A');
 
-                $results[] = [
-                    'id'             => $prod->id,  // Identificador del producto
-                    'text'           => $text,
-                    'lote_id'        => $lote->id,
-                    'inventario_id'  => $inventario ? $inventario->id : null,
-                    'stock_ideal'    => $inventario ? $inventario->stock_ideal : null,
-                    'store_id'       => $inventario && $inventario->store ? $inventario->store->id : null,
-                    'store_name'     => $inventario && $inventario->store ? $inventario->store->name : null,
-                    'barcode'        => $prod->barcode,
-                ];
+        foreach ($products as $prod) {
+            // Filtrar todos los inventarios que correspondan al producto actual
+            $inventariosProducto = $inventarios->where('product_id', $prod->id);
+
+            foreach ($inventariosProducto as $inventario) {
+                // Procesas cada inventario (por ejemplo, validas la fecha de vencimiento)
+                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
+                    $text = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
+                        . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
+                        . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
+                        . " - " . $prod->name
+                        . " - Stk: " . $inventario->stock_ideal;
+
+                    $results[] = [
+                        'id'             => $prod->id,
+                        'text'           => $text,
+                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
+                        'inventario_id'  => $inventario->id,
+                        'stock_ideal'    => $inventario->stock_ideal,
+                        'store_id'       => $inventario->store ? $inventario->store->id : null,
+                        'store_name'     => $inventario->store ? $inventario->store->name : null,
+                        'barcode'        => $prod->barcode,
+                    ];
+                }
             }
         }
 
+
         return response()->json($results);
     }
+
+
 
 
     public function create_reg_pago($id)
@@ -683,7 +539,6 @@ class saleController extends Controller
     public function savedetail(Request $request)
     {
         try {
-            // Registrar inicio del proceso de guardado del detalle de venta
             Log::info('Iniciando proceso de guardado de detalle de venta', [
                 'ventaId'  => $request->ventaId,
                 'producto' => $request->producto,
@@ -691,7 +546,7 @@ class saleController extends Controller
                 'store'    => $request->store,
             ]);
 
-            // Obtener el stock_ideal del producto en la bodega y lote
+            // Obtener el stock_ideal del producto en la bodega y lote seleccionados
             $stockDisponible = Inventario::where('product_id', $request->producto)
                 ->where('store_id', $request->store)
                 ->where('lote_id', $request->lote_id)
@@ -805,7 +660,7 @@ class saleController extends Controller
                 'valorApagar'         => $valorApagar
             ]);
 
-            // Preparar datos a almacenar
+            // Preparar datos a almacenar en el detalle de venta
             $dataDetail = [
                 'sale_id'            => $request->ventaId,
                 'store_id'           => $request->store,
@@ -871,7 +726,7 @@ class saleController extends Controller
                 'total_otros_impuestos'  => $sale->total_otros_impuestos,
             ]);
 
-            // Se obtienen los arrays para la respuesta
+            // Obtener arrays para la respuesta (detalles y totales)
             $arraydetail = $this->getventasdetail($request->ventaId);
             $arrayTotales = $this->sumTotales($request->ventaId);
 
@@ -1246,6 +1101,165 @@ class saleController extends Controller
         } else {
             return "Venta no encontrada";
         }
+    }
+
+    public function cargarInventariocr($ventaId)
+    {
+        DB::beginTransaction();
+        try {
+            // Obtener la venta con sus detalles (usando eager loading)
+            $sale = \App\Models\Sale::with('saleDetails')
+                ->where('id', $ventaId)
+                ->where('status', '0')
+                ->first();
+
+            Log::debug('Venta obtenida', ['ventaId' => $ventaId, 'compensadores' => $sale]);
+
+            if (!$sale) {
+                Log::debug('Venta no encontrada o cerrada', ['ventaId' => $ventaId]);
+                return response()->json([
+                    'status'  => 1,
+                    'message' => 'Venta no encontrada o cerrada.'
+                ], 404);
+            }
+
+            // Filtrar los detalles activos de la venta
+            $saleDetails = $sale->saleDetails->where('status', '1');
+
+            Log::debug('Detalles de venta obtenidos', [
+                'ventaId'       => $ventaId,
+                'detalle_count' => $saleDetails->count()
+            ]);
+
+            if ($saleDetails->isEmpty()) {
+                Log::debug('No hay detalles de venta activos', ['ventaId' => $ventaId]);
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'No hay detalles de venta activos.'
+                ], 404);
+            }
+
+            // Agrupar los detalles de venta por producto, tienda y lote
+            $groupedDetails = $saleDetails->groupBy(function ($detail) {
+                return $detail->product_id . '-' . $detail->store_id . '-' . $detail->lote_id;
+            });
+
+            foreach ($groupedDetails as $key => $detailsGroup) {
+                // Descomponer la llave en product_id, store_id y lote_id
+                list($productId, $storeId, $lote_id) = explode('-', $key);
+
+                // Calcular los acumulados para el grupo
+                $accumulatedQuantity   = $detailsGroup->sum('quantity');
+                $accumulatedTotalBruto = $detailsGroup->sum('total_bruto');
+
+                Log::debug('Acumulados calculados para producto, tienda y lote', [
+                    'product_id'            => $productId,
+                    'store_id'              => $storeId,
+                    'lote_id'               => $lote_id,
+                    'accumulatedQuantity'   => $accumulatedQuantity,
+                    'accumulatedTotalBruto' => $accumulatedTotalBruto
+                ]);
+
+                // Buscar el registro de inventario específico para producto, tienda y lote
+                $inventario = \App\Models\Inventario::where('product_id', $productId)
+                    ->where('store_id', $storeId)
+                    ->where('lote_id', $lote_id)
+                    ->first();
+
+                if (!$inventario) {
+                    Log::debug('No se encontró inventario para producto, tienda y lote', [
+                        'product_id' => $productId,
+                        'store_id'   => $storeId,
+                        'lote_id'    => $lote_id
+                    ]);
+                    continue;
+                }
+
+                // Verificar si ya existe un movimiento para esta venta, producto, tienda y lote
+                $existingMovimiento = \App\Models\MovimientoInventario::where('sale_id', $ventaId)
+                    ->where('product_id', $productId)
+                    ->where('store_origen_id', $storeId)
+                    ->where('tipo', 'venta')
+                    ->where('lote_id', $lote_id)
+                    ->first();
+
+                if ($existingMovimiento) {
+                    Log::debug('Movimiento de inventario ya existe para esta venta', [
+                        'movimiento_id' => $existingMovimiento->id
+                    ]);
+                    continue;
+                }
+
+                // Crear el movimiento de inventario usando el lote_id obtenido de los detalles
+                $movimiento = \App\Models\MovimientoInventario::create([
+                    'product_id'       => $productId,
+                    'lote_id'          => $lote_id,
+                    'store_origen_id'  => $storeId,
+                    'store_destino_id' => null, // Para tipo venta, no hay tienda destino
+                    'tipo'             => 'venta',
+                    'sale_id'          => $ventaId,
+                    'cantidad'         => $accumulatedQuantity,
+                    'costo_unitario'   => $accumulatedTotalBruto,
+                ]);
+                Log::debug('Movimiento de inventario creado', ['movimiento' => $movimiento->toArray()]);
+
+                // Actualizar el inventario: incrementar la cantidad de venta y el costo unitario
+                $inventario->cantidad_venta += $accumulatedQuantity;
+                $inventario->costo_unitario += $accumulatedTotalBruto;
+                $inventario->save();
+
+                Log::debug('Inventario actualizado', [
+                    'inventario_id'       => $inventario->id,
+                    'store_id'            => $storeId,
+                    'incremento_cantidad' => $accumulatedQuantity,
+                    'incremento_costo'    => $accumulatedTotalBruto
+                ]);
+            }
+
+            // Si hay valor a pagar en crédito, invocar el proceso correspondiente
+            if ($sale->valor_a_pagar_credito > 0) {
+                Log::debug('Venta tiene valor a pagar en crédito, se debe invocar cuentasPorCobrar', [
+                    'valor_a_pagar_credito' => $sale->valor_a_pagar_credito
+                ]);
+                // Ejemplo: $this->cuentasPorCobrar($sale);
+            }
+
+            // Marcar la venta como cerrada y asignar la fecha de cierre
+            $sale->status = '1';
+            $sale->fecha_cierre = now();
+            $sale->save();
+
+            Log::debug('Venta actualizada a cerrada', ['ventaId' => $ventaId]);
+
+            DB::commit();
+            Log::debug('Transacción commit exitosa para venta', ['ventaId' => $ventaId]);
+
+            return redirect()->route('sale.index')
+                ->with('success', 'Cargado al inventario exitosamente');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al cargar inventario', [
+                'error'   => $e->getMessage(),
+                'ventaId' => $ventaId
+            ]);
+            return redirect()->route('sale.index')
+                ->with('error', 'Error al cargar inventario: ' . $e->getMessage());
+        }
+    }
+
+
+
+
+    public function cargarInventarioMasivo()
+    {
+        for ($ventaId = 484; $ventaId <= 592; $ventaId++) {
+            $this->cargarInventariocr($ventaId);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Cargado al inventario masivamente desde el ID 672 hasta el ID 1127'
+        ]);
     }
 
     /*  // Opcion 2 sin Eloquent

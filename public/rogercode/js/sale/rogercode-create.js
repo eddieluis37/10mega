@@ -29,66 +29,129 @@ console.log("centro " + centrocosto);
 var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
 
-/* $(".select2Prod").select2({
-    placeholder: "Busca un producto",
-    width: "100%",
-    theme: "bootstrap-5",
-    allowClear: true,
-});
- */
-/* 
-$(document).ready(function () {
-    $("#producto").change(function () {
-        var productId = $(this).val();
-        // Extrae el atributo data-lote-id de la opción seleccionada
-        var loteId = $(this).find(":selected").data("lote-id");
-        console.log("loteId seleccionado:", loteId); // Para verificar en consola
-        // Asigna el valor al campo oculto, si lo utilizas en el formulario
-        $("#lote_id").val(loteId);
-        
-        // Llama a la función para actualizar los valores del producto y enviar loteId
-        actualizarValoresProducto(productId, loteId);
+/* $(document).ready(function () {
+    // Inicializa el select2 con plantillas para mantener la misma presentación en la lista y en la selección
+    $(".select2Prod").select2({
+        placeholder: "Seleccione un producto o escanee el código de barras",
+        theme: "bootstrap-5",
+        width: "100%",
+        allowClear: true,
+        templateResult: function (item) {
+            // Si la opción está en proceso de carga, se muestra el texto sin modificar
+            if (item.loading) return item.text;
+            // Se utiliza el atributo data-info para mostrar la información formateada
+            var info = $(item.element).data("info") || item.text;
+            return info;
+        },
+        templateSelection: function (item) {
+            // Para la opción seleccionada se muestra el mismo formato utilizando data-info
+            if (!item.id) return item.text;
+            var info = $(item.element).data("info") || item.text;
+            return info;
+        },
+        escapeMarkup: function (markup) { return markup; } // Permite renderizar HTML en las plantillas
     });
-}); */
 
-$(document).ready(function () {
-    $("#producto").on("change", function () {
+    // Captura la selección utilizando el evento select2:select
+    $("#producto").on("select2:select", function (e) {
         var productId = $(this).val();
-        var selectedOption = $(this).find("option:selected");
-        var loteId = selectedOption.data("lote-id");
-        var inventarioId = selectedOption.data("inventario-id");
-        var stockIdeal = selectedOption.data("stock-ideal");
-        var storeId = selectedOption.data("store-id");
-        var storeName = selectedOption.data("store-name");
+        var data = e.params.data;
+        // Se extraen los datos directamente del atributo data-* de la opción seleccionada
+        var $selectedOption = $(data.element);
+        var loteId = $selectedOption.data("lote-id");
+        var inventarioId = $selectedOption.data("inventario-id");
+        var stockIdeal = $selectedOption.data("stock-ideal");
+        var storeId = $selectedOption.data("store-id");
+        var storeName = $selectedOption.data("store-name");
 
-        // Mostrar en consola para verificar
+        // Mostrar en consola para verificación
         console.log("Lote ID:", loteId);
         console.log("Inventario ID:", inventarioId);
         console.log("Stock Ideal:", stockIdeal);
         console.log("Store ID:", storeId);
         console.log("Store Name:", storeName);
 
-        // Asignar los valores a los campos ocultos
+        // Asignar los valores a los campos ocultos del formulario
         $("#lote_id").val(loteId);
         $("#inventario_id").val(inventarioId);
         $("#stock_ideal").val(stockIdeal);
         $("#store_id").val(storeId);
         $("#store_name").val(storeName);
 
-        $(this).siblings(".error-message").text(""); // Limpiar mensaje de error
-
-        // Llama a la función para actualizar los valores del producto y enviar loteId
+        // Opcional: si requieres actualizar otros valores relacionados con el producto
         actualizarValoresProducto(productId, loteId);
     });
 
-    document.getElementById("quantity").addEventListener("input", function () {
-        let errorMessage =
-            this.closest(".form-group").querySelector(".error-message");
-        if (errorMessage) {
-            errorMessage.textContent = ""; // Borra el mensaje de error
-        }
+    // Evento para limpiar mensajes de error al modificar el input de cantidad
+    $("#quantity").on("input", function () {
+        $(this).closest(".form-group").find(".error-message").text("");
     });
 });
+ */
+
+$(document).ready(function () {
+    // Inicializar el select2 usando AJAX para buscar productos
+    $(".select2Prod").select2({
+        placeholder: "Seleccione un producto o escanee el código de barras",
+        theme: "bootstrap-5",
+        width: "100%",
+        allowClear: true,
+        minimumInputLength: 1,
+        ajax: {
+            url: "/products/search",
+            dataType: "json",
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term // Término de búsqueda
+                };
+            },
+            processResults: function (data) {
+                // Se asume que cada objeto devuelto ya tiene:
+                // id, text, lote_id, inventario_id, stock_ideal, store_id, store_name
+                return {
+                    results: data
+                };
+            },
+            cache: true,
+        },
+        templateResult: function (item) {
+            if (item.loading) return item.text;
+            // Se usa 'data_info' si está disponible o se usa el campo 'text'
+            return item.data_info || item.text;
+        },
+        templateSelection: function (item) {
+            if (!item.id) return item.text;
+            // Se asegura que la opción seleccionada muestre el mismo formato
+            return item.data_info || item.text;
+        },
+        escapeMarkup: function (markup) {
+            return markup; // Permite renderizar HTML en las plantillas
+        }
+    });
+
+    // Al seleccionar una opción se extraen y asignan los valores a los campos ocultos
+    $("#producto").on("select2:select", function (e) {
+        var data = e.params.data;
+        console.log("Opción seleccionada:", data);
+        
+        // Asignar los valores a los campos ocultos, asegurándose que no sean nulos
+        $("#lote_id").val(data.lote_id || "");
+        $("#inventario_id").val(data.inventario_id || "");
+        $("#stock_ideal").val(data.stock_ideal || "");
+        $("#store_id").val(data.store_id || "");
+        $("#store_name").val(data.store_name || "");
+
+        // Si se requiere actualizar otros valores relacionados con el producto, se puede llamar a la función:
+        actualizarValoresProducto(data.id, data.lote_id);
+    });
+
+    // Limpia el mensaje de error al modificar el input de cantidad
+    $("#quantity").on("input", function () {
+        $(this).closest(".form-group").find(".error-message").text("");
+    });
+});
+
 
 function actualizarValoresProducto(productId, loteId) {
     $.ajax({
@@ -119,14 +182,7 @@ function actualizarValoresProducto(productId, loteId) {
 }
 
 $(document).ready(function () {
-    $(".select2Store").select2({
-        placeholder: "Seleccione una bodega",
-        width: "100%",
-        theme: "bootstrap-5",
-        allowClear: true,
-    });
-
-    $(".select2Prod").select2({
+      $(".select2Prod").select2({
         placeholder: "Seleccione un producto",
         width: "100%",
         theme: "bootstrap-5",
@@ -153,33 +209,7 @@ $(document).ready(function () {
         theme: "bootstrap-5",
         allowClear: true,
     });
-
-    $("#store").change(function () {
-        var storeId = $(this).val();
-        // $("#producto").empty().trigger("change"); // Limpiar productos
-
-        if (storeId) {
-            $.ajax({
-                url: "/get-products-by-store",
-                type: "GET",
-                data: { store_id: storeId },
-                success: function (data) {
-                    var newOptions = [
-                        { id: "", text: "Seleccione un producto" },
-                    ].concat(data);
-                    $("#producto").select2({
-                        data: newOptions,
-                        width: "100%",
-                        theme: "bootstrap-5",
-                        allowClear: true,
-                    });
-                },
-                error: function () {
-                    console.log("Error al obtener los productos");
-                },
-            });
-        }
-    });
+   
 });
 
 tbodyTable.addEventListener("click", (e) => {
@@ -372,32 +402,3 @@ btnRemove.addEventListener("click", (e) => {
         alert("Contraseña incorrecta");
     }
 });
-
-const codigoBarrasInput = document.querySelector("#codigoBarras");
-codigoBarrasInput.addEventListener("input", function () {
-    const codigoBarras = codigoBarrasInput.value;
-    console.log("Código de barras escaneado:", codigoBarras); // Imprimir el código de barras en la consola
-    if (codigoBarras.length === 13) {
-        // Longitud típica de un código de barras EAN-13
-        // Realiza una solicitud AJAX para buscar el producto por el código de barras
-        buscarProductoPorCodigoBarras(codigoBarras);
-    }
-});
-
-function buscarProductoPorCodigoBarras(codigoBarras) {
-    $.ajax({
-        url: "/buscar-producto-por-codigo-barras",
-        type: "GET",
-        data: {
-            codigoBarras: codigoBarras,
-        },
-        success: function (response) {
-            // Actualiza los valores en el formulario con la información del producto encontrado
-            $("#producto").val(response.producto_id).trigger("change");
-            // Otras actualizaciones de campos según la respuesta
-        },
-        error: function (xhr, status, error) {
-            console.log(error);
-        },
-    });
-}

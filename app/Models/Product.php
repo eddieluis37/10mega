@@ -40,8 +40,8 @@ class Product extends Model
 			'lote_id'       // Campo en Inventarios que contiene el id del Lote
 		)
 			->whereDate('lotes.fecha_vencimiento', '>=', now())
-			->orderBy('lotes.fecha_vencimiento', 'asc')
-			->limit(1); // Solo trae el lote más próximo
+			->orderBy('lotes.fecha_vencimiento', 'asc');
+		//	->limit(1); // Solo trae el lote más próximo
 	}
 
 	/**

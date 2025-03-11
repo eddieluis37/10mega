@@ -118,29 +118,25 @@
 
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
-												@foreach ($prod as $producto)
-												@foreach ($producto->lotesPorVencer as $lote)
-												@php
-												// Se asume que se realizó eager loading de la relación inventarios filtrada por store
-												$inventario = $producto->inventarios->first();
-												@endphp
-												<option value="{{ $producto->id }}"
-													data-lote-id="{{ $lote->id }}"
-													data-inventario-id="{{ $inventario ? $inventario->id : '' }}"
-													data-stock-ideal="{{ $inventario ? $inventario->stock_ideal : '' }}"
-													data-store-id="{{ ($inventario && $inventario->store) ? $inventario->store->id : '' }}"
-													data-store-name="{{ ($inventario && $inventario->store) ? $inventario->store->name : '' }}"
-													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - Stock Ideal: {{ $inventario ? $inventario->stock_ideal : 'N/A' }} - Inventario ID: {{ $inventario ? $inventario->id : 'N/A' }} - Bodega: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }}">
-													Bg: {{ ($inventario && $inventario->store) ? $inventario->store->name : 'N/A' }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }} - {{ $producto->name }} - Stk: {{ $inventario ? $inventario->stock_ideal : 'N/A' }}
+												@foreach ($results as $result)
+												<option value="{{ $result['inventario_id'] }}"
+													data-product-id="{{ $result['id'] }}"
+													data-lote-id="{{ $result['lote_id'] }}"
+													data-inventario-id="{{ $result['inventario_id'] }}"
+													data-stock-ideal="{{ $result['stock_ideal'] }}"
+													data-store-id="{{ $result['store_id'] }}"
+													data-store-name="{{ $result['store_name'] }}"
+													data-info="{{ $result['text'] }}">
+													{{ $result['text'] }}
 												</option>
 												@endforeach
-												@endforeach
 											</select>
+
 											<span class="text-danger error-message"></span>
 										</div>
-
 									</div>
 								</div>
+
 								<div class="col-md-2">
 									<div class="form-group">
 										<label for="" class="form-label">KG|QT</label>
@@ -280,15 +276,15 @@
 								<!--td>{{$proddetail->id}}</td-->
 								<td>{{$proddetail->nameprod}}</td>
 								<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
-								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>								
+								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
 								<td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
 								<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>								
+								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
 								<td>{{ number_format($proddetail->porc_otro_impuesto, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>								
+								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
 								<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>

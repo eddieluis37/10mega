@@ -131,7 +131,7 @@ class inventarioController extends Controller
                     'notacredito'           => 0,
                     'notadebito'            => 0,
                     'venta_real'            => 0,
-                    'StockIdeal'            => $stockIdeal,
+                    'StockIdeal'            => $inventario->stock_ideal,
                     'stock'                 => 0,
                     'fisico'                => 0,
                 ];

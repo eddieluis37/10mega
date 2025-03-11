@@ -25,6 +25,10 @@ class Inventario extends Model
         'costo_total'
     ];
 
+    protected $casts = [
+        'stock_ideal' => 'decimal:2',
+    ];
+
     /**
      * Relación con la tabla `Lotes`. codigoLote: Utiliza $inventario->lote->codigo para obtener el código del lote.
      */
