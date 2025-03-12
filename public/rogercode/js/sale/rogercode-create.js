@@ -180,18 +180,35 @@ tbodyTable.addEventListener("click", (e) => {
     if (element.name === "btnEdit") {
         console.log(element);
         let id = element.getAttribute("data-id");
-        console.log(id);
         const dataform = new FormData();
         dataform.append("id", Number(id));
         sendData("/saleById", dataform, token).then((result) => {
             console.log(result);
             let editReg = result.reg;
             console.log(editReg);
+            // Asignar datos a los campos del formulario
             regDetail.value = editReg.id;
             price.value = formatCantidadSinCero(editReg.price);
             quantity.value = editReg.quantity;
 
-            $(".select2Prod").val(editReg.product_id).trigger("change");
+            // Usar inventario_id en el select2, no product_id
+            let select = $(".select2Prod");
+            if (
+                select.find("option[value='" + editReg.inventario_id + "']")
+                    .length
+            ) {
+                // Si la opción ya existe, se asigna el valor y se dispara el cambio
+                select.val(editReg.inventario_id).trigger("change");
+            } else {
+                // Si no existe, se crea la opción usando el texto del registro o un valor por defecto
+                let newOption = new Option(
+                    editReg.text || "Producto editado",
+                    editReg.inventario_id,
+                    true,
+                    true
+                );
+                select.append(newOption).trigger("change");
+            }
         });
     }
 });

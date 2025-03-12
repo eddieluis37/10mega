@@ -286,9 +286,9 @@ class saleController extends Controller
 */
         //$storeIds = [1, 4, 5, 6, 8, 9, 10];
         $storeIds = \DB::table('store_user')
-        ->where('user_id', auth()->id())
-        ->pluck('store_id')
-        ->toArray();
+            ->where('user_id', auth()->id())
+            ->pluck('store_id')
+            ->toArray();
 
         // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery = Product::query();
@@ -403,9 +403,9 @@ class saleController extends Controller
         $query = $request->input('q');
         // $storeIds = [1, 4, 5, 6, 8, 9, 10];
         $storeIds = \DB::table('store_user')
-        ->where('user_id', auth()->id())
-        ->pluck('store_id')
-        ->toArray();
+            ->where('user_id', auth()->id())
+            ->pluck('store_id')
+            ->toArray();
 
 
         // Consulta de productos. Se busca por barcode o por nombre o por el código del lote (mediante la relación "lotes")
@@ -685,7 +685,7 @@ class saleController extends Controller
             // Preparar datos a almacenar en el detalle de venta
             $dataDetail = [
                 'sale_id'            => $request->ventaId,
-                // Se utiliza la información del inventario recuperado
+                'inventario_id' => $request->producto, // Aquí se almacena el id único del inventario información del inventario recuperado
                 'store_id'           => $inventario->store_id,
                 'product_id'         => $inventario->product_id,
                 'price'              => $price,
@@ -917,12 +917,14 @@ class saleController extends Controller
 
     public function editCompensado(Request $request)
     {
-        $reg = SaleDetail::where('id', $request->id)->first();
+        $reg = SaleDetail::find($request->id);
+        // Asegúrate de que el modelo SaleDetail tenga en su $fillable el campo 'inventario_id'
         return response()->json([
             'status' => 1,
             'reg' => $reg
         ]);
     }
+
 
     /**
      * Update the specified resource in storage.
