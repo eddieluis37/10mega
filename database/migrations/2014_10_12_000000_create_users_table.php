@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('phone', 10)->nullable();
             $table->string('email', 100)->unique();
-            $table->enum('profile', ['Admin', 'RecibidoPlanta', 'AnalistaCostos', 'AdminCentralGuad', 'AdminCerdoGuad', 'AdminGuadCalle', 'AdminPaloquemao', 'AdminGalan', 'AdminSuba', 'AdminSoacha', 'AdminLechoneria', 'SupervisorPuntosDeVenta', 'LiderAuditoria', 'Cajero', 'Comprador', 'Produccion', 'Costos', 'Tesoreria', 'Comercial', 'Erp'])->default('Cajero');
+            $table->enum('profile', ['Admin', 'RecibidoPlanta', 'Causacion', 'Costos', 'AnalistaCostos', 'AdminCentroCosto', 'AdminBodega', 'SupervisorPuntosDeVenta', 'LiderAuditoria', 'Cajero', 'Comprador', 'Produccion', 'Tesoreria', 'Comercial', 'Erp'])->default('Cajero');
             $table->enum('status', ['Active', 'Locked'])->default('Active');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
