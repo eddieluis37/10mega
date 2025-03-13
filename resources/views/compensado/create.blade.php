@@ -23,15 +23,6 @@
 				<div class="card">
 					<div class="card-body">
 						<div class="row g-3">
-							<!-- <div class="col-md-3">
-								<div class="task-header">
-									<div class="form-group">
-										<label for="date1" class="form-label">Fecha</label>
-										<input type="date" class="form-control" name="fecha" id="fecha" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
-									</div>
-								</div>
-							</div> -->
-
 							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
@@ -76,11 +67,12 @@
 										<div class="form-group">
 											<label for="" class="form-label">Buscar lote</label>
 											<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required="">
-												<option value="">Seleccione el producto</option>
+												<option value="">Seleccione el lote</option>
 												@foreach ($lotes as $l)
 												<option value="{{$l->id}}">{{$l->codigo}}</option>
 												@endforeach
 											</select>
+											<span class="text-danger error-message"></span>
 										</div>
 									</div>
 								</div>
@@ -94,35 +86,38 @@
 												<option value="{{$p->id}}">{{$p->name}}</option>
 												@endforeach
 											</select>
+											<span class="text-danger error-message"></span>
 										</div>
 									</div>
 								</div>
 								<div class="col-md-3">
-									<label for="" class="form-label">Precio de compra</label>
-									<div class="input-group flex-nowrap">
-										<span class="input-group-text" id="addon-wrapping">$</span>
-										<input type="text" id="pcompra" name="pcompra" class="form-control input" placeholder="EJ: 20.500">
+									<div class="form-group">
+										<label for="" class="form-label">Precio de compra</label>
+										<div class="input-group flex-nowrap">
+											<span class="input-group-text" id="addon-wrapping">$</span>
+											<input type="text" id="pcompra" name="pcompra" class="form-control input" placeholder="EJ: 20.500">
+										</div>
+										<span class="text-danger error-message"></span>
 									</div>
 								</div>
 								<div class="col-md-3">
-									<label for="" class="form-label">KG|UND</label>
-									<div class="input-group flex-nowrap">
-										<input type="text" id="pesokg" name="pesokg" class="form-control input" placeholder="EJ: 10.00">
-										<span class="input-group-text" id="addon-wrapping">QT</span>
-									</div>
-								</div>
-								<!--div class="col-md-2">
-								<div class="task-header">
 									<div class="form-group">
-                                        <label for="" class="form-label">Sub Total</label>
-                                        <input type="text" class="form-control input" placeholder="EJ: 10.00">
+										<label for="" class="form-label">KG|UND</label>
+										<div class="input-group flex-nowrap">
+											<input type="text" id="pesokg" name="pesokg" class="form-control input" placeholder="EJ: 10.00">
+											<span class="input-group-text" id="addon-wrapping">QT</span>
+										</div>
+										<span class="text-danger error-message"></span>
 									</div>
 								</div>
-							</div>-->
-								<div class="col-md-12 text-center">
-									<div class="" style="margin-top:10px;">
-										<div class="d-grid gap-2">
-											<button id="btnAdd" class="btn btn-primary">Añadir</button>
+								<div class="container">
+									<div class="row justify-content-end">
+										<div class="col-md-3 text-center">
+											<div class="" style="margin-top:10px;">
+												<div class="d-grid gap-2">
+													<button id="btnAdd" class="btn btn-primary btn-block">Añadir</button>
+												</div>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -139,8 +134,6 @@
 							<table id="tableDespostere" class="table table-sm table-striped table-bordered">
 								<thead class="text-white" style="background: #3B3F5C">
 									<tr>
-										<!--th class="table-th text-white">Item</th>-->
-										<!-- <th class="table-th text-white">Fecha compra</th> -->
 										<th class="table-th text-white">Lote</th>
 										<th class="table-th text-white">Productos</th>
 										<th class="table-th text-white">PrecioCompra</th>
@@ -153,8 +146,6 @@
 								<tbody id="tbodyDetail">
 									@foreach($detail as $proddetail)
 									<tr>
-										<!--td>{{$proddetail->id}}</td-->
-										<!-- 	<td>{{ date('m-d-Y', strtotime($proddetail->created_at))}}</td> -->
 										<td>{{$proddetail->codigo}}</td>
 										<td>{{$proddetail->nameprod}}</td>
 										<td>${{ number_format($proddetail->pcompra, 0, ',', '.')}}</td>
@@ -203,9 +194,51 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 </div>
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		const costoInput = document.getElementById("pcompra");
+
+		// Función para formatear el número con puntos
+		function formatCurrency(value) {
+			return value
+				.replace(/\D/g, "") // Elimina caracteres que no sean dígitos
+				.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos como separadores de miles
+		}
+
+		costoInput.addEventListener("input", function(e) {
+			const value = e.target.value;
+			e.target.value = formatCurrency(value);
+		});
+
+		costoInput.addEventListener("blur", function(e) {
+			// Opcional: Agrega un "0" si el campo está vacío al salir
+			if (!e.target.value) {
+				e.target.value = "0";
+			}
+		});
+		// Limpia el mensaje de error al modificar el input de cantidad
+		$("#lote").on("input", function() {
+			$(this).closest(".form-group").find(".error-message").text("");
+		});
+
+		// Limpia el mensaje de error al modificar el input de cantidad
+		$("#producto").on("input", function() {
+			$(this).closest(".form-group").find(".error-message").text("");
+		});
+
+		// Limpia el mensaje de error al modificar el input de cantidad
+		$("#pcompra").on("input", function() {
+			$(this).closest(".form-group").find(".error-message").text("");
+		});
+
+		$("#pesokg").on("input", function() {
+			$(this).closest(".form-group").find(".error-message").text("");
+		});
+
+	});
+</script>
 @endsection
 @section('script')
 <script src="{{asset('rogercode/js/compensado/rogercode-create.js')}}" type="module"></script>

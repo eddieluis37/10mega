@@ -90,41 +90,63 @@ tbodyTable.addEventListener("click", (e) => {
             console.log(editReg);
             regDetail.value = editReg.id;
             pcompra.value = formatCantidadSinCero(editReg.pcompra);
-            pesokg.value = formatCantidad(editReg.peso);
+            pesokg.value = (editReg.peso);
             $(".select2Prod").val(editReg.products_id).trigger("change");
             $(".select2Lote").val(editReg.lote_id).trigger("change");
         });
     }
 });
 
+// Bandera para controlar el estado de envío
+let isSubmitting = false;
+
 btnAdd.addEventListener("click", (e) => {
     e.preventDefault();
+
+    // Si ya se está procesando un envío, se cancela el siguiente
+    if (isSubmitting) return;
+
+    // Marcar como en proceso y deshabilitar el botón para prevenir nuevos clicks
+    isSubmitting = true;
+    btnAdd.disabled = true;
+
     const dataform = new FormData(formDetail);
-    sendData("/compensadosavedetail", dataform, token).then((result) => {
-        console.log(result);
-        if (result.status === 1) {
-            // Reiniciar el valor de regdetailId para que en la próxima acción se cree un nuevo detalle
-            $("#regdetailId").val("0");
-            $("#producto").val("").trigger("change");
-            $("#lote").val("").trigger("change");
-            formDetail.reset();
-            showData(result);
-        }
-        if (result.status === 0) {
-            let errors = result.errors;
-            console.log(errors);
-            $.each(errors, function (field, messages) {
-                console.log(field, messages);
-                let $input = $('[name="' + field + '"]');
-                let $errorContainer = $input
-                    .closest(".form-group")
-                    .find(".error-message");
-                $errorContainer.html(messages[0]);
-                $errorContainer.show();
-            });
-        }
-    });
+
+    sendData("/compensadosavedetail", dataform, token)
+        .then((result) => {
+            console.log(result);
+            if (result.status === 1) {
+                // Reiniciar el valor de regdetailId para que en la próxima acción se cree un nuevo detalle
+                $("#regdetailId").val("0");
+                $("#producto").val("").trigger("change");
+                $("#lote").val("").trigger("change");
+                formDetail.reset();
+                showData(result);
+            }
+            if (result.status === 0) {
+                let errors = result.errors;
+                console.log(errors);
+                $.each(errors, function (field, messages) {
+                    console.log(field, messages);
+                    let $input = $('[name="' + field + '"]');
+                    let $errorContainer = $input
+                        .closest(".form-group")
+                        .find(".error-message");
+                    $errorContainer.html(messages[0]);
+                    $errorContainer.show();
+                });
+            }
+        })
+        .catch((error) => {
+            console.error("Error en la petición:", error);
+        })
+        .finally(() => {
+            // Una vez finalizada la petición, se habilita nuevamente el botón y se resetea la bandera
+            isSubmitting = false;
+            btnAdd.disabled = false;
+        });
 });
+
 //<td>${formatDate(element.created_at)}</td>
 
 const showData = (data) => {
@@ -159,7 +181,7 @@ const showData = (data) => {
             <th>Totales</th>
             <td></td>
             <td></td>           
-            <th>${formatCantidad(arrayTotales.pesoTotalGlobal)}</td>
+            <th>${(arrayTotales.pesoTotalGlobal)}</td>
             <th>$${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
             <td></td>
             <td class="text-center">
@@ -224,9 +246,10 @@ pcompra.addEventListener("change", function () {
     console.log("Entered value: " + enteredValue);
     pcompra.value = formatCantidadSinCero(enteredValue);
 });
-
+/* 
 pesokg.addEventListener("change", function () {
     const enteredValue = formatCantidad(pesokg.value);
     console.log("Entered value: " + enteredValue);
     pesokg.value = enteredValue;
 });
+ */

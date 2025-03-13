@@ -140,43 +140,52 @@ class compensadoController extends Controller
                 'lote' => 'required',
                 'producto' => 'required',
                 'pcompra' => 'required',
-                'pesokg' => 'required',
+                'pesokg' => [
+                    'required',
+                    'numeric',
+                    'regex:/^\d+(\.\d{1,2})?$/',
+                    'min:0.1',
+                ],
             ], [
                 'compensadoId.required' => 'El compensado es requerido',
                 'lote.required' => 'El lote es requerido',
                 'producto.required' => 'El producto es requerido',
                 'pcompra.required' => 'El precio de compra es requerido',
                 'pesokg.required' => 'El peso es requerido',
+                'pesokg.numeric'  => 'La cantidad debe ser un número.',
+                'pesokg.min'      => 'La cantidad debe ser mayor a 0.1.',
+                'pesokg.regex'     => 'La cantidad debe tener hasta dos decimales.',
             ]);
-    
+
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 0,
                     'errors' => $validator->errors()
                 ], 422);
             }
-    
+
             $formatCantidad = new metodosrogercodeController();
             $formatPcompra = $formatCantidad->MoneyToNumber($request->pcompra);
-            $formatPesoKg = $formatCantidad->MoneyToNumber($request->pesokg);
-            $subtotal = $formatPcompra * $formatPesoKg;
-    
+           // $formatPesoKg = $formatCantidad->MoneyToNumber($request->pesokg);
+            $pesokg = $request->pesokg;
+            $subtotal = $formatPcompra * $pesokg;
+
             $data = [
                 'compensadores_id' => $request->compensadoId,
                 'lote_id' => $request->lote,
                 'products_id' => $request->producto,
                 'pcompra' => $formatPcompra,
-                'peso' => $formatPesoKg,
+                'peso' => $pesokg,
                 'iva' => 0,
                 'subtotal' => $subtotal,
             ];
-    
+
             // Actualiza si existe, crea si no
             Compensadores_detail::updateOrCreate(
                 ['id' => $request->regdetailId], // Busca por ID si existe
                 $data // Asigna datos
             );
-    
+
             return response()->json([
                 'status' => 1,
                 'message' => "Agregado correctamente",
@@ -190,7 +199,7 @@ class compensadoController extends Controller
             ], 500);
         }
     }
-    
+
     public function sumTotales($id)
     {
 
