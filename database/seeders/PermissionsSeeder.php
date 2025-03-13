@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_dom', 'orders', 'bodegas', 'ventas']; // Agrega los módulos necesarios
+        $modules = ['usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_dom', 'venta_bar', 'orders', 'bodegas', 'ventas']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -237,26 +237,8 @@ class PermissionsSeeder extends Seeder
         // 1. Crear o actualizar el rol "AdminBodega"
         $adminBodega = Role::updateOrCreate(['name' => 'AdminBodega']);
 
-        User::updateOrCreate(
-            ['email' => 'galanmegabar@carnesfriasmega.co'], // Condición para identificar el usuario
-            [
-                'name' => 'BAR GALAN',
-                'phone' => '3214154625',
-                'profile' => 'AdminBodega',
-                'status' => 'Active',
-                'password' => bcrypt('01Galanmegabar2025*.')
-            ]
-        );
-        User::updateOrCreate(
-            ['email' => 'subamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
-            [
-                'name' => 'BAR SUBA',
-                'phone' => '3214154625',
-                'profile' => 'AdminBodega',
-                'status' => 'Active',
-                'password' => bcrypt('02Subamegabar2025*.')
-            ]
-        );
+
+
         User::updateOrCreate(
             ['email' => 'soachamega1@carnesfriasmega.co'], // Condición para identificar el usuario
             [
@@ -295,16 +277,6 @@ class PermissionsSeeder extends Seeder
                 'profile' => 'AdminBodega',
                 'status' => 'Active',
                 'password' => bcrypt('Cajero04Soacha.*')
-            ]
-        );
-        User::updateOrCreate(
-            ['email' => 'soachamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
-            [
-                'name' => 'BAR SOACHA',
-                'phone' => '3214154625',
-                'profile' => 'AdminBodega',
-                'status' => 'Active',
-                'password' => bcrypt('Bar05Soacha.*')
             ]
         );
 
@@ -444,7 +416,7 @@ class PermissionsSeeder extends Seeder
             'acceder_traslado',
             'crear_traslado',
             'editar_traslado',
-            'eliminar_traslado',            
+            'eliminar_traslado',
 
             'ver_inventario',
             'acceder_inventario',
@@ -465,6 +437,108 @@ class PermissionsSeeder extends Seeder
 
         foreach ($user as $usuario) {
             $usuario->assignRole($comprador);
+        }
+
+        /* ******************** BAR ***************** */
+
+        User::updateOrCreate(
+            ['email' => 'soachamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'BAR SOACHA',
+                'phone' => '3214154625',
+                'profile' => 'AdminBodega',
+                'status' => 'Active',
+                'password' => bcrypt('Bar05Soacha.*')
+            ]
+        );
+        User::updateOrCreate(
+            ['email' => 'galanmegabar@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'BAR GALAN',
+                'phone' => '3214154625',
+                'profile' => 'AdminBodega',
+                'status' => 'Active',
+                'password' => bcrypt('01Galanmegabar2025*.')
+            ]
+        );
+        User::updateOrCreate(
+            ['email' => 'subamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'BAR SUBA',
+                'phone' => '3214154625',
+                'profile' => 'AdminBodega',
+                'status' => 'Active',
+                'password' => bcrypt('02Subamegabar2025*.')
+            ]
+        );
+
+        $usuarios = User::where('name', 'like', '%BAR%')
+            // ->orWhere('name', 'like', '%CAJERO%')
+            //  ->orWhereIn('id', $idsUsuarios)
+            ->get();
+
+        foreach ($usuarios as $usuario) {
+            $usuario->assignRole($adminBodega);
+        }
+
+        // 3. Definir el listado de permisos a sincronizar
+        $permisos = [
+            'ver_ventas',
+            'ver_venta_bar',
+            
+            'Pos_Create',
+            'ver_compras',
+            'ver_compra_productos',
+            'acceder_compra_productos',
+            'crear_compra_productos',
+            'editar_compra_productos',       
+
+            'acceder_venta_pos',
+            'crear_venta_pos',
+            'editar_venta_pos',
+            'ver_venta_dom',
+            'acceder_venta_dom',
+            'crear_venta_dom',
+            'editar_venta_dom',
+            
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+            
+            'ver_orders',
+            'acceder_orders',
+            'crear_orders',
+            'editar_orders',
+            'eliminar_orders',
+        ];
+
+        // 4. Crear o actualizar cada permiso (esto asegura que, si ya existen, se mantengan actualizados)
+        foreach ($permisos as $permiso) {
+            Permission::updateOrCreate(['name' => $permiso]);
+        }
+
+        // 5. Definir roles para asignar a usuarios específicos.
+        // La llave es el nombre del rol y el valor es el nombre del usuario al que se le asignará.
+        $rolesUsuarios = [
+            'AdminBodega' => 'ADMINISTRADOR CENTRO COSTO',
+        ];
+
+        // 6. Para cada rol definido, se crea o actualiza y se sincronizan los permisos,
+        //    luego se asigna al usuario correspondiente si existe.
+        foreach ($rolesUsuarios as $roleName => $userName) {
+            // Crear o actualizar el rol
+            $role = Role::updateOrCreate(['name' => $roleName]);
+
+            // Sincronizar los permisos con el rol
+            $role->syncPermissions($permisos);
+
+            // Buscar el usuario por nombre y asignarle el rol
+            $user = User::where('name', $userName)->first();
+            if ($user) {
+                $user->assignRole($role);
+            }
         }
     }
 }

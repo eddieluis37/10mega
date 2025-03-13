@@ -161,8 +161,8 @@
             </li>
             @endcan
 
-            @can('Pos_Create')
-            <li class="">
+           
+           <!--  <li class="">
                 <a href="{{url('caja')}}" class="menu-toggle" data-active="false">
                     <div class="base-menu">
                         <div class="base-icons">
@@ -175,8 +175,8 @@
                         <span>Logistica</span>
                     </div>
                 </a>
-            </li>
-            @endcan
+            </li> -->
+        
 
             @can('ver_traslado')
             <li class="">
@@ -308,6 +308,7 @@
 
         <div class="submenu" id="sales">
             <ul class="submenu-list" data-parent-element="#sales">
+                @can('ver_venta_autoservicio')
                 <li class="sub-submenu">
                     <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenuauto" aria-expanded="false">
                         <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
@@ -337,6 +338,8 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
+                @can('ver_venta_bar')
                 <li class="sub-submenu">
                     <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenubar" aria-expanded="false">
                         <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
@@ -366,6 +369,8 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
+                @can('ver_venta_domicilio')
                 <li class="sub-submenu">
                     <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenudomicilio" aria-expanded="false">
                         <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
@@ -395,6 +400,8 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
+                @can('ver_venta_parrilla')
                 <li class="sub-submenu">
                     <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenuparrilla" aria-expanded="false">
                         <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
@@ -424,8 +431,7 @@
                         </li>
                     </ul>
                 </li>
-
-
+                @endcan
         </div>
 
 
