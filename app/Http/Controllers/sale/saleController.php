@@ -743,7 +743,7 @@ class saleController extends Controller
                 'sale_id'               => $sale->id,
                 'items'                 => $sale->items,
                 'total_bruto'           => $totalBruto,
-                'descuentos'            => $totalDesc,
+                'descuento'            => $totalDesc,
                 'total_valor_a_pagar'   => $totalValor,
                 'total_iva'             => $iva,
                 'total_otros_impuestos' => $sale->total_otros_impuestos,

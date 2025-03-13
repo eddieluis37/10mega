@@ -190,6 +190,7 @@ tbodyTable.addEventListener("click", (e) => {
             regDetail.value = editReg.id;
             price.value = formatCantidadSinCero(editReg.price);
             quantity.value = editReg.quantity;
+            porc_iva.value = editReg.porc_iva;          
 
             // Usar inventario_id en el select2, no product_id
             let select = $(".select2Prod");

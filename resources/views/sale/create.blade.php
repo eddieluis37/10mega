@@ -85,17 +85,7 @@
 							<input type="hidden" id="codigoBarras" name="codigoBarras" value="999999999">
 							<div class="row g-3">
 
-								<div class="col-md-3" id="storeDiv">
-									<div class="form-group">
-										<label for="store" class="form-label">Seleccionar Bodega</label>
-										<select class="form-control form-control-sm select2Store" name="store" id="store">
-											<option value="">Seleccione una bodega</option>
-											@foreach ($stores as $store)
-											<option value="{{ $store->id }}">{{ $store->name }}</option>
-											@endforeach
-										</select>
-									</div>
-								</div>
+								
 								<script>
 									$(document).ready(function() {
 
