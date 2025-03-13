@@ -133,7 +133,13 @@ class cajaController extends Controller
     public function index()
     {
         $category = Category::WhereIn('id', [1, 2, 3])->get();
-        $usuario = User::WhereIn('id', [9, 11, 12])->get();
+        // Obtener el usuario autenticado
+        $authUser = Auth::user();
+
+        // En este ejemplo, encapsulamos el usuario autenticado en un array para poder iterarlo en la vista.
+        // Si en el futuro se requieren varios usuarios, el arreglo podrá contener más elementos.
+        $usuario = [$authUser];
+
 
 
         $user = auth()->user(); // Obtener el usuario autenticado        
@@ -146,9 +152,28 @@ class cajaController extends Controller
             ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
             ->orderBy('name', 'asc')
             ->get();
-     
-       
-        return view("caja.index", compact('usuario', 'category', 'bodegaUser'));
+
+        // Obtener el usuario autenticado
+        $user = Auth::user();
+
+        // Definir el id del centro de costo a excluir (puede venir del request o estar definido estáticamente)
+        $excludeCentroCostoId = 3; // Ejemplo: excluir el centro de costo con id 3
+
+        // Obtener los IDs de centro de costo asociados a las tiendas del usuario
+        $centroCostoIds = $user->stores->pluck('centrocosto_id')->unique();
+
+        // Consultar los centros de costo, excluyendo el id indicado
+        $centroCostoUser = CentroCosto::whereIn('id', $centroCostoIds)
+            ->when($excludeCentroCostoId, function ($query, $excludeCentroCostoId) {
+                return $query->where('id', '<>', $excludeCentroCostoId);
+            })
+            ->get();
+
+        // Seleccionar de forma predeterminada el primer centro de costo (si existe)
+        $defaultCentroCostoId = $centroCostoUser->first() ? $centroCostoUser->first()->id : null;
+
+
+        return view("caja.index", compact('usuario', 'category', 'centroCostoUser', 'defaultCentroCostoId'));
     }
 
     /**
@@ -258,8 +283,8 @@ class cajaController extends Controller
      */
     public function store(Request $request)
     {
-           // Limpia el campo "base" (elimina puntos y otros caracteres no numéricos)
-           $cleanBase = str_replace('.', '', $request->base);
+        // Limpia el campo "base" (elimina puntos y otros caracteres no numéricos)
+        $cleanBase = str_replace('.', '', $request->base);
 
         try {
             $rules = [
@@ -341,7 +366,7 @@ class cajaController extends Controller
     public function show()
     {
         $data = DB::table('cajas as c')
-            ->join('users as u', 'c.cajero_id', '=', 'u.id')           
+            ->join('users as u', 'c.cajero_id', '=', 'u.id')
             ->join('stores as s', 'c.store_id', '=', 's.id')
             ->select('c.*', 's.name as namecentrocosto', 'u.name as namecajero')
             /*  ->where('c.status', 1) */
@@ -367,7 +392,7 @@ class cajaController extends Controller
                 return $statusInventory;
             })
 
-       /*      <div class="text-center">
+            /*      <div class="text-center">
             <a href="caja/create/' . $data->id . '" class="btn btn-dark" title="RetiroDinero" >
                 <i class="fas fa-money-bill-alt"></i>
             </a>
@@ -437,7 +462,7 @@ class cajaController extends Controller
                 return $btn;
             })
 
-          
+
             ->rawColumns(['fecha1', 'fecha2', 'inventory', 'action'])
             ->make(true);
     }

@@ -107,6 +107,7 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $permisos = [
+            'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
@@ -321,6 +322,7 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $permisos = [
+            'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
