@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
 
     $this->call(StoreSeeder::class);
 
-    $this->call(CajaSeeder::class);
+   // $this->call(CajaSeeder::class);
     $this->call(SalesSeeder::class);
     $this->call(Sales_detailSeeder::class);
     // $this->call(SaleFormaPagosSeederSeeder::class);
