@@ -28,12 +28,12 @@ class StoreUserSeeder extends Seeder
                 'stores' => Store::whereIn('id', [20])->pluck('id')->toArray(), // Bodegas específicas
             ],
             'BarSoacha' => [
-                'users' => [32],
-                'stores' => Store::whereIn('id', [29])->pluck('id')->toArray(), // Bodegas específicas
+                'users' => [33],
+                'stores' => Store::whereIn('id', [29])->pluck('id')->toArray(), // Bar soacha
             ],
             'Causacion' => [
-                'users' => [33],
-                'stores' => Store::whereIn('id', [1, 4, 5, 6,])->pluck('id')->toArray(), // Bodegas específicas
+                'users' => [30],
+                'stores' => Store::whereIn('id', [10,])->pluck('id')->toArray(), // causacion
             ], 
             'rec_planta' => [
                 'users' => [3],

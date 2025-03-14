@@ -49,12 +49,21 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    
-     /**
+
+    /**
      * Relación muchos a muchos con Store.
      */
     public function stores()
     {
         return $this->belongsToMany(Store::class, 'store_user', 'user_id', 'store_id');
+    }
+
+    /**
+     * Método auxiliar para obtener los centros de costo asociados a las tiendas del usuario.
+     */
+    public function centrosCosto()
+    {
+        // Obtiene las tiendas con su centro de costo y luego extrae el centro de costo
+        return $this->stores->pluck('centroCosto')->unique('id');
     }
 }

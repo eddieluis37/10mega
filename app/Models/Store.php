@@ -27,7 +27,7 @@ class Store extends Model
      */
     public function centroCosto()
     {
-        return $this->belongsTo(CentroCosto::class, 'centrocosto_id');
+        return $this->belongsTo(Centrocosto::class, 'centrocosto_id');
     }
 
     /* public function users(): BelongsToMany

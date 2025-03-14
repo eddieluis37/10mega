@@ -46,12 +46,14 @@ class saleController extends Controller
 
     public function show()
     {
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
+
         $data = DB::table('sales as sa')
-            /*   ->join('categories as cat', 'sa.categoria_id', '=', 'cat.id') */
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
             ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto')
-            /*  ->where('sa.status', 1) */
+            ->whereIn('c.id', $userCentrocostos) // Filtra por los centros de costo del usuario
             ->get();
 
         //  $data = Sale::orderBy('id','desc');
@@ -774,11 +776,6 @@ class saleController extends Controller
             ]);
         }
     }
-
-
-
-
-
 
 
     public function store(Request $request) // Guardar venta por domicilio
