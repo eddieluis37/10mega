@@ -167,7 +167,7 @@
 									<label for="" class="form-label">I.A.C</label>
 									<div class="input-group flex-nowrap">
 
-										<input type="text" id="impoconsumo" name="impoconsumo" class="form-control input" readonly placeholder="">
+										<input type="text" id="porc_impoconsumo" name="porc_impoconsumo" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
@@ -176,7 +176,7 @@
 									<label for="" class="form-label">Descuento</label>
 									<div class="input-group flex-nowrap">
 
-										<input type="text" id="porc_descuento" name="porc_descuento" class="form-control input" readonly placeholder="">
+										<input type="text" id="porc_desc" name="porc_desc" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>

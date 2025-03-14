@@ -108,8 +108,8 @@ function actualizarValoresProducto(productId, loteId) {
             $("#price").val(formattedPrice);
             $("#porc_iva").val(response.iva);
             $("#porc_otro_impuesto").val(response.otro_impuesto);
-            $("#impoconsumo").val(response.impoconsumo);
-            $("#porc_descuento").val(response.porc_descuento);
+            $("#porc_impoconsumo").val(response.impoconsumo);
+            $("#porc_desc").val(response.porc_descuento);
         },
         error: function (xhr, status, error) {
             // Maneja el error si la solicitud AJAX falla
@@ -190,7 +190,10 @@ tbodyTable.addEventListener("click", (e) => {
             regDetail.value = editReg.id;
             price.value = formatCantidadSinCero(editReg.price);
             quantity.value = editReg.quantity;
-            porc_iva.value = editReg.porc_iva;          
+            porc_iva.value = editReg.porc_iva;
+            porc_otro_impuesto.value = editReg.porc_otro_impuesto;
+            porc_impoconsumo.value = editReg.porc_impoconsumo;
+            porc_desc.value = editReg.porc_desc;            
 
             // Usar inventario_id en el select2, no product_id
             let select = $(".select2Prod");

@@ -653,7 +653,7 @@ class saleController extends Controller
             $quantity = $request->quantity;
 
             $precioUnitarioBruto = $price * $quantity;
-            $porcDescuento = $request->get('porc_descuento');
+            $porcDescuento = $request->get('porc_desc');
             $descuentoProducto = $precioUnitarioBruto * ($porcDescuento / 100);
             $porc_descuento_cliente = $request->get('porc_descuento_cliente');
             $descuentoCliente = $precioUnitarioBruto * ($porc_descuento_cliente / 100);
@@ -662,7 +662,7 @@ class saleController extends Controller
 
             $porcIva = $request->get('porc_iva');
             $porcOtroImpuesto = $request->get('porc_otro_impuesto');
-            $porcImpoconsumo = $request->get('impoconsumo');
+            $porcImpoconsumo = $request->get('porc_impoconsumo');
             $iva = $netoSinImpuesto * ($porcIva / 100);
             $otroImpuesto = $netoSinImpuesto * ($porcOtroImpuesto / 100);
             $impoconsumo = $netoSinImpuesto * ($porcImpoconsumo / 100);
@@ -1021,7 +1021,7 @@ class saleController extends Controller
             ->join('thirds as t', 'listapreciodetalles.listaprecio_id', '=', 't.id')
             ->where('prod.id', $request->productId)
             ->where('t.id', $cliente->listaprecio_genericid)
-            ->select('listapreciodetalles.precio', 'prod.iva', 'otro_impuesto', 'prod.impoconsumo', 'listapreciodetalles.porc_descuento') // Select only the
+            ->select('listapreciodetalles.precio', 'prod.iva', 'prod.otro_impuesto', 'prod.impoconsumo', 'listapreciodetalles.porc_descuento') // Select only the
             ->first();
         if ($producto) {
             return response()->json([

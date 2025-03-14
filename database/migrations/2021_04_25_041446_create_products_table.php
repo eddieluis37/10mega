@@ -20,8 +20,8 @@ class CreateProductsTable extends Migration
             $table->string('barcode',50)->nullable();
             $table->decimal('cost',10,2)->default(0)->nullable();
             $table->decimal('iva',10)->default(0);
-            $table->decimal('otro_impuesto',10)->default(0)->nullable();
-            $table->decimal('impoconsumo',10)->default(0)->nullable();
+            $table->decimal('otro_impuesto',10)->default(0);
+            $table->decimal('impoconsumo',10)->default(0);
 
             $table->decimal('price_fama',10,0)->default(1)->nullable(); // precio minimo en la linea de las famas
             $table->unsignedBigInteger('category_id'); 
