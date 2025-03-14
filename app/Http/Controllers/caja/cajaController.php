@@ -40,8 +40,8 @@ class cajaController extends Controller
         $caja = Caja::findOrFail($id)
             ->join('users as u', 'cajas.cajero_id', '=', 'u.id')
             /*   ->join('meatcuts as cut', 'cajas.meatcut_id', '=', 'cut.id')*/
-            ->join('store as s', 'cajas.store_id', '=', 's.id')
-            ->select('cajas.*', 's.name as namecentrocosto', 'u.name as namecajero')
+            ->join('centro_costo as c', 'cajas.centrocosto_id', '=', 'c.id')
+            ->select('cajas.*', 'c.name as namecentrocosto', 'u.name as namecajero')
             ->where('cajas.status', 1)
             ->where('cajas.id', $id)
             ->get();
@@ -201,7 +201,7 @@ class cajaController extends Controller
                 $join->on('ca.cajero_id', '=', 'sa.user_id');
             })
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('store as s', 'ca.store_id', '=', 's.id')
+            ->join('centro_costo as s', 'ca.centrocosto_id', '=', 's.id')
             ->select('ca.*', 's.name as namecentrocosto', 'u.name as namecajero')
             ->where('ca.id', $id)
             ->get();
@@ -224,7 +224,7 @@ class cajaController extends Controller
         $valorApagarEfectivo = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -233,7 +233,7 @@ class cajaController extends Controller
         $valorCambio = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -244,7 +244,7 @@ class cajaController extends Controller
         $valorApagarTarjeta = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -253,7 +253,7 @@ class cajaController extends Controller
         $valorApagarOtros = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
             ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
+            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
             ->where('sa.tipo', '0')
@@ -335,7 +335,7 @@ class cajaController extends Controller
                 $id_user = Auth::user()->id;
                 $alist = new Caja();
                 $alist->user_id = $id_user;
-                $alist->store_id = $request->centrocosto;
+                $alist->centrocosto_id = $request->centrocosto;
                 $alist->cajero_id = $request->cajero;
                 $alist->base = $cleanBase;
                 //$alist->fecha_alistamiento = $currentDateFormat;
@@ -367,7 +367,7 @@ class cajaController extends Controller
     {
         $data = DB::table('cajas as c')
             ->join('users as u', 'c.cajero_id', '=', 'u.id')
-            ->join('stores as s', 'c.store_id', '=', 's.id')
+            ->join('centro_costo as s', 'c.centrocosto_id', '=', 's.id')
             ->select('c.*', 's.name as namecentrocosto', 'u.name as namecajero')
             /*  ->where('c.status', 1) */
             ->get();

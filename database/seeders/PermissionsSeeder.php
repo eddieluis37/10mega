@@ -181,7 +181,6 @@ class PermissionsSeeder extends Seeder
             'eliminar_inventario',
 
             'ver_ventas',
-            'ver_venta_pos',
             'acceder_venta_pos',
             'crear_venta_pos',
             'editar_venta_pos',

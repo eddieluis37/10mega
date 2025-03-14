@@ -268,6 +268,35 @@
     </div>
     <!--  <td colspan="2">$ {{number_format($dataVenta[0]->total_valor_a_pagar, 0, ',', '.')}}</td> -->
 </div>
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		const costoInput = document.getElementById("valor_a_pagar_efectivo");
+
+		// Función para formatear el número con puntos
+		function formatCurrency(value) {
+			return value
+				.replace(/\D/g, "") // Elimina caracteres que no sean dígitos
+				.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos como separadores de miles
+		}
+
+		costoInput.addEventListener("input", function(e) {
+			const value = e.target.value;
+			e.target.value = formatCurrency(value);
+		});
+
+		costoInput.addEventListener("blur", function(e) {
+			// Opcional: Agrega un "0" si el campo está vacío al salir
+			if (!e.target.value) {
+				e.target.value = "0";
+			}
+		});
+		
+		$("#pesokg").on("input", function() {
+			$(this).closest(".form-group").find(".error-message").text("");
+		});
+
+	});
+</script>
 @endsection
 @section('script')
 <script src="{{asset('rogercode/js/sale/code-app-index.js')}}"></script>

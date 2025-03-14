@@ -19,8 +19,8 @@ class CreateCajasTable extends Migration
             $table->unsignedBigInteger('user_id');           
             $table->foreign('user_id')->references('id')->on('users');
 
-            $table->unsignedBigInteger('store_id')->nullable();
-            $table->foreign('store_id')->references('id')->on('stores');
+            $table->unsignedBigInteger('centrocosto_id')->nullable();
+            $table->foreign('centrocosto_id')->references('id')->on('centro_costo');
 
             $table->unsignedBigInteger('cajero_id');           
             $table->foreign('cajero_id')->references('id')->on('users');

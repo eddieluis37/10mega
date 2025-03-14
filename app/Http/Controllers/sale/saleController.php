@@ -509,7 +509,7 @@ class saleController extends Controller
 
         $venta = Sale::find($id);
         $producto = Product::get();
-        /*   $ventasdetalle = $this->getventasdetalle($id, $venta->store_id); */
+        
         $arrayTotales = $this->sumTotales($id);
 
         $descuento = $dataVenta[0]->porc_descuento / 100 * $arrayTotales['TotalValorAPagar'];
