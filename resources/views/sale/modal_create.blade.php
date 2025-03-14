@@ -19,7 +19,9 @@
 						<select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
 							<option value="">Seleccione el centro de costo</option>
 							@foreach($centros as $cencosto)
-							<option value="{{$cencosto->id}}" {{ $cencosto->id == 1 ? 'selected' : '' }}>{{$cencosto->name}}</option>
+							<option value="{{ $cencosto->id }}" {{ (isset($defaultCentro) && $defaultCentro->id == $cencosto->id) ? 'selected' : '' }}>
+								{{ $cencosto->name }}
+							</option>
 							@endforeach
 						</select>
 						<span class="text-danger error-message"></span>
@@ -87,28 +89,28 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Limpiar mensajes de error al cerrar el modal
-        $('#modal-create-sale').on('hidden.bs.modal', function() {
-            $(this).find('.error-message').text(''); // Limpiar mensaje de error
-			$('#centrocosto').val('');			
-            $('#cliente').val('');
-            $('#vendedor').val('');
-            $('#subcentrodecosto').val('');          ;
-        });
+	$(document).ready(function() {
+		// Limpiar mensajes de error al cerrar el modal
+		$('#modal-create-sale').on('hidden.bs.modal', function() {
+			$(this).find('.error-message').text(''); // Limpiar mensaje de error
+			$('#centrocosto').val('');
+			$('#cliente').val('');
+			$('#vendedor').val('');
+			$('#subcentrodecosto').val('');;
+		});
 
-        // Limpiar mensajes de error al seleccionar un campo
+		// Limpiar mensajes de error al seleccionar un campo
 		$('#centrocosto').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#cliente').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });       
-        $('#vendedor').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });
-        $('#subcentrodecosto').change(function() {
-            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
-        });      
-    });
+			$(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+		});
+		$('#cliente').change(function() {
+			$(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+		});
+		$('#vendedor').change(function() {
+			$(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+		});
+		$('#subcentrodecosto').change(function() {
+			$(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+		});
+	});
 </script>

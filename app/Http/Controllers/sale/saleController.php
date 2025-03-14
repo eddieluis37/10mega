@@ -35,13 +35,22 @@ class saleController extends Controller
     public function index()
     {
         $ventas = Sale::get();
-        $centros = Centrocosto::WhereIn('id', [1])->get();
+        //   $centros = Centrocosto::WhereIn('id', [1])->get();
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
+
+        // Obtiene los modelos de centros de costo usando los IDs obtenidos
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
+        // Selecciona el primer centro de costo como valor por defecto (si existe)
+        $defaultCentro = $centros->first();
+
         $clientes = Third::Where('cliente', 1)->get();
         $vendedores = Third::Where('vendedor', 1)->get();
         $domiciliarios = Third::Where('domiciliario', 1)->get();
         $subcentrodecostos = Subcentrocosto::get();
 
-        return view('sale.index', compact('ventas', 'centros', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
+        return view('sale.index', compact('ventas', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
     }
 
     public function show()

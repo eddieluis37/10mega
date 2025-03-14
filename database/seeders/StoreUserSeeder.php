@@ -19,18 +19,12 @@ class StoreUserSeeder extends Seeder
                 'users' => [1, 2, 8, 13, 23, 24, 25, 34, 35],
                 'stores' => Store::all()->pluck('id')->toArray(), // Todas las bodegas
             ],
-            'BarGalan' => [
-                'users' => [26],
-                'stores' => Store::whereIn('id', [16])->pluck('id')->toArray(), // Bodegas específicas
-            ],
+            
             'BarSuba' => [
                 'users' => [27],
                 'stores' => Store::whereIn('id', [20])->pluck('id')->toArray(), // Bodegas específicas
             ],
-            'BarSoacha' => [
-                'users' => [33],
-                'stores' => Store::whereIn('id', [29])->pluck('id')->toArray(), // Bar soacha
-            ],
+            
             'Causacion' => [
                 'users' => [30],
                 'stores' => Store::whereIn('id', [10,])->pluck('id')->toArray(), // causacion
@@ -55,18 +49,51 @@ class StoreUserSeeder extends Seeder
                 'users' => [17],
                 'stores' => Store::whereIn('id', [17])->pluck('id')->toArray(), // Bodegas específicas
             ],
+
             'AdminGalan' => [
                 'users' => [18],
-                'stores' => Store::whereIn('id', [14, 15, 16])->pluck('id')->toArray(), // Bodegas específicas
+                'stores' => Store::whereIn('id', [14, 15])->pluck('id')->toArray(), // Bodegas específicas
             ],
+            'BarGalan' => [
+                'users' => [34],
+                'stores' => Store::whereIn('id', [16])->pluck('id')->toArray(), // Bodegas específicas
+            ],
+
+
             'AdminSuba' => [
                 'users' => [19],
-                'stores' => Store::whereIn('id', [18, 19, 20])->pluck('id')->toArray(), // Bodegas específicas
+                'stores' => Store::whereIn('id', [18, 19])->pluck('id')->toArray(), // Bodegas específicas
             ],
+            'BarSuba' => [
+                'users' => [35],
+                'stores' => Store::whereIn('id', [20])->pluck('id')->toArray(), // Bodegas específicas
+            ],
+
             'AdminSoacha' => [
                 'users' => [20],
                 'stores' => Store::whereIn('id', [27, 28, 29])->pluck('id')->toArray(), // Bodegas específicas
+            ],                      
+            'CajeroSoacha1' => [
+                'users' => [26],
+                'stores' => Store::whereIn('id', [27, 28])->pluck('id')->toArray(), // Bar soacha
             ],
+            'CajeroSoacha2' => [
+                'users' => [27],
+                'stores' => Store::whereIn('id', [27, 28])->pluck('id')->toArray(), // Bar soacha
+            ],
+            'CajeroSoacha3' => [
+                'users' => [28],
+                'stores' => Store::whereIn('id', [27, 28])->pluck('id')->toArray(), // Bar soacha
+            ],
+            'CajeroSoacha4' => [
+                'users' => [29],
+                'stores' => Store::whereIn('id', [27, 28])->pluck('id')->toArray(), // Bar soacha
+            ],
+            'BarSoacha' => [
+                'users' => [33],
+                'stores' => Store::whereIn('id', [29])->pluck('id')->toArray(), // Bar soacha
+            ], 
+
             'AdminLechoneria' => [
                 'users' => [21],
                 'stores' => Store::whereIn('id', [24, 25, 26])->pluck('id')->toArray(), // Bodegas específicas
