@@ -1,62 +1,72 @@
+// Variables globales (se pueden definir si se requieren en otros contextos)
 var valorA_Pagar = 0;
 var valorPagado = 0;
 var valorCambio = 0;
 
-document.getElementById("valor_pagado").value = valorPagado;
+// Inicializa el campo de valor pagado
+$("#valor_pagado").val(0);
 
-// Al modificar el valor del pago en efectivo se calcula automáticamente el pago con tarjeta
-document.getElementById("valor_a_pagar_efectivo").addEventListener("change", function () {
-    // Formateamos y actualizamos el valor ingresado en efectivo
-    let valorEfectivo = formatMoneyNumber($("#valor_a_pagar_efectivo").val());
-    $("#valor_a_pagar_efectivo").val(formatCantidadSinCero(valorEfectivo));
+// Evento: Cambio en el valor de efectivo
+$("#valor_a_pagar_efectivo").on("change", function () {
+    let valorEfectivo = formatMoneyNumber($(this).val());
+    $(this).val(formatCantidadSinCero(valorEfectivo));
 
-    // Obtenemos el total a pagar (valor leído de la vista, input readonly)
+    // Cálculo automático del valor a pagar con tarjeta:
+    // Se obtiene el total a pagar (desde el input readonly) y se le resta el efectivo ingresado.
     let totalAPagar = formatMoneyNumber($("#valor_a_pagar").val());
+    let valorTarjetaCalculado = totalAPagar - valorEfectivo;
+    $("#valor_a_pagar_tarjeta").val(formatCantidadSinCero(valorTarjetaCalculado));
 
-    // Calculamos el valor a pagar con tarjeta restando el efectivo del total
-    let valorTarjeta = totalAPagar - valorEfectivo;
-    $("#valor_a_pagar_tarjeta").val(formatCantidadSinCero(valorTarjeta));
-
-    // Se vuelve a calcular el total pagado y el cambio
+    // Se recalculan totales y cambio
     calculavalorapagar();
 });
 
-// Si existen otros inputs que el usuario pueda modificar se mantiene su lógica
-document.getElementById("valor_a_pagar_otros").addEventListener("change", function () {
-    let valorOtros = formatMoneyNumber($("#valor_a_pagar_otros").val());
-    $("#valor_a_pagar_otros").val(formatCantidadSinCero(valorOtros));
+// Evento: Cambio en el valor de tarjeta (entrada manual)
+$("#valor_a_pagar_tarjeta").on("change", function () {
+    let valorTarjetaManual = formatMoneyNumber($(this).val());
+    $(this).val(formatCantidadSinCero(valorTarjetaManual));
+
+    // Se recalculan totales y cambio (manteniendo el valor ingresado manualmente)
     calculavalorapagar();
 });
 
-document.getElementById("valor_a_pagar_credito").addEventListener("change", function () {
-    let valorCredito = formatMoneyNumber($("#valor_a_pagar_credito").val());
-    $("#valor_a_pagar_credito").val(formatCantidadSinCero(valorCredito));
+// Eventos para otros métodos de pago
+$("#valor_a_pagar_otros").on("change", function () {
+    let valorOtros = formatMoneyNumber($(this).val());
+    $(this).val(formatCantidadSinCero(valorOtros));
     calculavalorapagar();
 });
 
-// Función para calcular el total pagado sumando todos los métodos de pago y luego calcular el cambio
-const calculavalorapagar = () => {
+$("#valor_a_pagar_credito").on("change", function () {
+    let valorCredito = formatMoneyNumber($(this).val());
+    $(this).val(formatCantidadSinCero(valorCredito));
+    calculavalorapagar();
+});
+
+// Función para calcular el total pagado sumando todos los métodos de pago
+function calculavalorapagar() {
     let efectivo = formatMoneyNumber($("#valor_a_pagar_efectivo").val());
-    let tarjeta = formatMoneyNumber($("#valor_a_pagar_tarjeta").val());
-    let otros   = formatMoneyNumber($("#valor_a_pagar_otros").val());
-    let credito = formatMoneyNumber($("#valor_a_pagar_credito").val());
-
+    let tarjeta  = formatMoneyNumber($("#valor_a_pagar_tarjeta").val());
+    let otros    = formatMoneyNumber($("#valor_a_pagar_otros").val());
+    let credito  = formatMoneyNumber($("#valor_a_pagar_credito").val());
+    
     let totalPagado = efectivo + tarjeta + otros + credito;
     $("#valor_pagado").val(formatCantidadSinCero(totalPagado));
     calcularCambio();
-};
+}
 
+// Función para calcular el cambio
 function calcularCambio() {
-    let valorPagado = formatMoneyNumber($("#valor_pagado").val());
-    let valorAbonado = formatMoneyNumber($("#valor_a_pagar").val());
-    let cambio = valorPagado - valorAbonado;
+    let totalPagado = formatMoneyNumber($("#valor_pagado").val());
+    let totalAPagar = formatMoneyNumber($("#valor_a_pagar").val());
+    let cambio = totalPagado - totalAPagar;
     $("#cambio").val(formatCantidadSinCero(cambio));
-    
-    // Habilita o deshabilita el botón de guardar según el cambio calculado
+
+    // Se habilita o deshabilita el botón guardar según si el cambio es negativo o no
     $("#btnGuardar").prop("disabled", cambio < 0);
 }
 
-// Si el cliente es "Cliente Mostrador" se deshabilitan ciertos campos
+// Al cargar la vista se verifica el nombre del cliente y se deshabilitan campos en caso de "Cliente Mostrador"
 $(document).ready(function () {
     let clienteMostrador = "Cliente Mostrador";
     let thirdName = $("#name_cliente").val();
