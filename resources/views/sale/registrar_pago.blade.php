@@ -51,7 +51,7 @@
                                         <span class="input-group-text" id="addon-wrapping">$</span>
                                         <input class="form-control form-control-sm" type="text" name="valor_a_pagar_efectivo" id="valor_a_pagar_efectivo" value="0">
                                     </div>
-<!-- 
+                                    <!-- 
                                     <div class="widget-content mt-3">
                                         <label for="" class="form-label">Valores sugeridos</label>
                                         <div></div>
@@ -253,7 +253,7 @@
                                 </th>-->
                                 <th colspan="2">
                                     <div class="form-group">
-                                   
+
                                         <button type="submit" class="btn btn-success" id="btnGuardar" disabled target="_blank">Guardar e imprimir</button>
                                         <button type="button" class="btn btn-primary" onclick="history.back()">Volver</button>
                                     </div>
@@ -269,33 +269,45 @@
     <!--  <td colspan="2">$ {{number_format($dataVenta[0]->total_valor_a_pagar, 0, ',', '.')}}</td> -->
 </div>
 <script>
-	document.addEventListener("DOMContentLoaded", function() {
-		const costoInput = document.getElementById("valor_a_pagar_efectivo");
+    document.addEventListener("DOMContentLoaded", function() {
+        // Array con los IDs de los campos que requieren el formateo
+        const inputIds = [
+            "valor_a_pagar_efectivo",
+            "valor_a_pagar_tarjeta",
+            "valor_a_pagar_otros",
+            "valor_a_pagar_credito"
+        ];
 
-		// Función para formatear el número con puntos
-		function formatCurrency(value) {
-			return value
-				.replace(/\D/g, "") // Elimina caracteres que no sean dígitos
-				.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos como separadores de miles
-		}
+        // Función para formatear el número con puntos como separadores de miles
+        function formatCurrency(value) {
+            return value
+                .replace(/\D/g, "") // Elimina cualquier caracter que no sea dígito
+                .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos cada tres dígitos
+        }
 
-		costoInput.addEventListener("input", function(e) {
-			const value = e.target.value;
-			e.target.value = formatCurrency(value);
-		});
+        // Función para asignar los event listeners a cada campo del array
+        inputIds.forEach(id => {
+            const inputElement = document.getElementById(id);
+            if (inputElement) {
+                // Al ingresar datos se aplica el formateo en tiempo real
+                inputElement.addEventListener("input", function(e) {
+                    e.target.value = formatCurrency(e.target.value);
+                });
+                // Al salir del campo, si está vacío se asigna "0"
+                inputElement.addEventListener("blur", function(e) {
+                    if (!e.target.value) {
+                        e.target.value = "0";
+                    }
+                });
+            }
+        });
 
-		costoInput.addEventListener("blur", function(e) {
-			// Opcional: Agrega un "0" si el campo está vacío al salir
-			if (!e.target.value) {
-				e.target.value = "0";
-			}
-		});
-		
-		$("#pesokg").on("input", function() {
-			$(this).closest(".form-group").find(".error-message").text("");
-		});
 
-	});
+        $("#pesokg").on("input", function() {
+            $(this).closest(".form-group").find(".error-message").text("");
+        });
+
+    });
 </script>
 @endsection
 @section('script')
