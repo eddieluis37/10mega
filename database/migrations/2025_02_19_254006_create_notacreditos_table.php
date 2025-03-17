@@ -20,7 +20,8 @@ class CreateNotacreditosTable extends Migration
 
             $table->unsignedBigInteger('user_id')->nullable();           
             $table->foreign('user_id')->references('id')->on('users');
-
+            
+            $table->decimal('total',10,2)->default(0)->nullable();
             
             $table->enum('status',['0','1','2','3','4','5'])->default('0');
             

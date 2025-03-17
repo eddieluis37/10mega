@@ -23,9 +23,9 @@ class MovimientoInventario extends Model
         'store_destino_id',
         'lote_id',
         'product_id',
-        'cantidad',
-        'costo_unitario',
-        'total',
+        'cantidad',         // Cantidad afectada
+        'costo_unitario',   // Costo unitario
+        'total',            // Valor total del movimiento
         'fecha'
     ];
 

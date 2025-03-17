@@ -11,7 +11,22 @@ class Sale extends Model
     use HasFactory;
 
     protected $fillable = [
-        'valor_a_pagar_efectivo', 'total', 'total_iva', 'items', 'cash', 'cambio', 'status', 'fecha', 'consecutivo', 'resol', 'user_id', 'store_id', 'third_id', 'vendedor_id', 'domiciliario_id', 'centrocosto_id'
+        'valor_a_pagar_efectivo',
+        'total',
+        'total_iva',
+        'items',
+        'cash',
+        'cambio',
+        'status',
+        'fecha',
+        'consecutivo',
+        'resol',
+        'user_id',
+        'store_id',
+        'third_id',
+        'vendedor_id',
+        'domiciliario_id',
+        'centrocosto_id'
     ];
 
     public function user()
@@ -45,6 +60,15 @@ class Sale extends Model
     {
         return $this->belongsTo(Subcentrocosto::class, 'subcentrocostos_id', 'id');
     }
+
+    /**
+     * Relación con los detalles de la venta.
+     */
+    public function details()
+    {
+        return $this->hasMany(SaleDetail::class, 'sale_id');
+    }
+
 
     // MUTATORS
     /*

@@ -21,6 +21,9 @@ use App\Models\Cuentas_por_cobrar;
 use App\Models\Formapago;
 use App\Models\Inventario;
 use App\Models\Listapreciodetalle;
+use App\Models\MovimientoInventario;
+use App\Models\NotaCredito;
+use App\Models\NotaCreditoDetalle;
 use App\Models\Sale;
 use App\Models\SaleCaja;
 use App\Models\SaleDetail;
@@ -65,69 +68,61 @@ class saleController extends Controller
             ->whereIn('c.id', $userCentrocostos) // Filtra por los centros de costo del usuario
             ->get();
 
-        //  $data = Sale::orderBy('id','desc');
-
         return Datatables::of($data)->addIndexColumn()
             ->addColumn('status', function ($data) {
-                if ($data->status == 1) {
-                    $status = '<span class="badge bg-success">Close</span>';
-                } else {
-                    $status = '<span class="badge bg-danger">Open</span>';
+                switch ($data->status) {
+                    case 0:
+                        return '<span class="badge bg-info">Open</span>';
+                    case 1:
+                        return '<span class="badge bg-success">Close</span>';
+                    case 2:
+                        return '<span class="badge bg-danger">Cancelled</span>';
+                    case 3:
+                        return '<span class="badge bg-warning">Returned</span>';
+                    default:
+                        return '<span class="badge bg-secondary">Unknown</span>';
                 }
-                return $status;
             })
             ->addColumn('date', function ($data) {
                 $date = Carbon::parse($data->created_at);
-                $formattedDate = $date->format('M-d. H:i');
-                return $formattedDate;
+                return $date->format('M-d. H:i');
             })
             ->addColumn('action', function ($data) {
-                $currentDateTime = Carbon::now();
-
-                if (Carbon::parse($currentDateTime->format('Y-m-d'))->gt(Carbon::parse($data->fecha_cierre))) {
-                    $btn = '
-                        <div class="text-center">
-					    
-                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFactura" target="_blank">
+                $btn = '<div class="text-center">';
+                // Botón para ver la factura (siempre visible)
+                $btn .= '<a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="Ver Factura" target="_blank">
                         <i class="far fa-file-pdf"></i>
-					    </a>				
-					    <button class="btn btn-dark" title="Borrar venta" disabled>
-						    <i class="fas fa-trash"></i>
-					    </button>
-                        </div>
-                        ';
-                } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
-                    $btn = '
-                        <div class="text-center">
-					    <a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
-						    <i class="fas fa-directions"></i>
-					    </a>
-					   
-                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFacturaPendiente" target="_blank">
-                        <i class="far fa-file-pdf"></i>
-					    </a>
-					  
-                        </div>
-                        ';
-                    //ESTADO Cerrada
-                } else {
-                    $btn = '
-                        <div class="text-center">
-                        <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFacturaCerrada" target="_blank">
-                        <i class="far fa-file-pdf"></i>
-					    </a>
-					    <button class="btn btn-dark" title="Borra la venta" disabled>
-						    <i class="fas fa-trash"></i>
-					    </button>
-					  
-                        </div>
-                        ';
+                     </a>';
+                // Dependiendo del estado de la venta se muestran otras acciones:
+                if ($data->status == 0) {
+                    // Venta abierta: se permite editar o ver detalles.
+                    $btn .= '<a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
+                            <i class="fas fa-directions"></i>
+                         </a>';
+                } elseif ($data->status == 1) {
+                    // Venta cerrada: se permite la devolución parcial.
+                    $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial" onclick="confirmPartialReturn(' . $data->id . ')">
+                            <i class="fas fa-undo-alt"></i>
+                         </a>';
+                } elseif ($data->status == 2) {
+                    // Venta cancelada: opción inactiva.
+                    $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
+                            <i class="fas fa-ban"></i>
+                         </button>';
+                } elseif ($data->status == 3) {
+                    // Venta devuelta: opción inactiva.
+                    $btn .= '<button class="btn btn-dark" title="Venta devuelta" disabled>
+                            <i class="fas fa-undo"></i>
+                         </button>';
                 }
+                $btn .= '</div>';
                 return $btn;
             })
             ->rawColumns(['status', 'date', 'action'])
             ->make(true);
     }
+
+
 
     public $valorCambio;
 
@@ -509,7 +504,7 @@ class saleController extends Controller
 
         $venta = Sale::find($id);
         $producto = Product::get();
-        
+
         $arrayTotales = $this->sumTotales($id);
 
         $descuento = $dataVenta[0]->porc_descuento / 100 * $arrayTotales['TotalValorAPagar'];
@@ -1294,244 +1289,68 @@ class saleController extends Controller
         ]);
     }
 
-    /*  // Opcion 2 sin Eloquent
-    public function cargarInventariocrOriginal($ventaId)
+    public function annulSale($saleId)
     {
+        // Se obtiene la venta junto con sus detalles (relación 'details')
+        $sale = Sale::with('details')->findOrFail($saleId);
 
-        $compensadores = DB::table('sales')
-            ->where('id', $ventaId)
-            ->where('status', '1')
-            ->get();
-
-
-        $ventadetalle = DB::table('sale_details')
-            ->where('sale_id', $ventaId)
-            ->where('status', '1')
-            ->get();
-
-        $product_ids = $ventadetalle->pluck('product_id');
-        $store_id = '1';
-        $centroCostoProducts = DB::table('centro_costo_products')
-            ->whereIn('products_id', $product_ids)
-            ->where('store_id', $store_id)
-            ->get();
-
-        // Calculate accumulated values and insert into temporary table
-        foreach ($centroCostoProducts as $centroCostoProduct) {
-            $accumulatedQuantity = DB::table('sale_details')
-                ->where('sale_id', $ventaId)
-                ->where('status', '1')
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('quantity');
-            //   ->value('quantity');
-
-            $accumulatedTotalBruto = DB::table('sale_details')
-                ->where('sale_id', $ventaId)
-                ->where('status', '1')
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('total_bruto');
-
-            DB::table('table_temporary_accumulated_sales')->insert([
-                'product_id' => $centroCostoProduct->products_id,
-                'accumulated_quantity' => $accumulatedQuantity,
-                'accumulated_total_bruto' => $accumulatedTotalBruto
-            ]);
-
-            // Update Centro_costo_product records
-            $centroCostoProduct = DB::table('centro_costo_products')
-                ->where('products_id', $centroCostoProduct->products_id)
-                ->first();
-
-            $centroCostoProduct->venta += $accumulatedQuantity;
-            $centroCostoProduct->cto_venta_total += $accumulatedTotalBruto;
-
-            DB::table('centro_costo_products')
-                ->where('products_id', $centroCostoProduct->products_id)
-                ->update([
-                    'venta' => $centroCostoProduct->venta,
-                    'cto_venta_total' => $centroCostoProduct->cto_venta_total
-                ]);
+        // Verificar que la venta esté en estado '1' 'closed' (o el estado que permita anulación)
+        if ($sale->status !== '1') {
+            return response()->json(['error' => 'La venta no puede ser anulada.'], 422);
         }
 
-        // Clear the temporary table
-        DB::table('table_temporary_accumulated_sales')->truncate();
-
-        // Check and call cuentasPorCobrar function
-        if (($compensadores[0]->valor_a_pagar_credito) > 0) {
-            // Call cuentasPorCobrar function
-        }
-
-        return response()->json([
-            'status' => 1,
-            'message' => 'Cargado al inventario exitosamente',
-            'compensadores' => $compensadores
-        ]);
-    } */
-}
-
-
- /* public function cargarInventariocr($ventaId)
-    {
-        $currentDateTime = Carbon::now();
-        $formattedDate = $currentDateTime->format('Y-m-d');
-        $compensadores = Sale::where('id', $ventaId)->get();
-        $ventadetalle = SaleDetail::where('sale_id', $ventaId)->get();
-        $product_ids = $ventadetalle->pluck('product_id');
-
-        $store_id = 1;
-
-        $centroCostoProducts = Centro_costo_product::whereIn('products_id', $product_ids)
-            ->where('store_id', $store_id)
-            ->get();
-
-        foreach ($centroCostoProducts as $centroCostoProduct) {
-            $accumulatedQuantity = SaleDetail::where('sale_id', '=', $ventaId)
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('quantity');
-
-            $accumulatedTotalBruto = 0;
-
-            $accumulatedTotalBruto += SaleDetail::where('sale_id', '=', $ventaId)
-                ->where('product_id', $centroCostoProduct->products_id)
-                ->sum('total_bruto');
-
-            DB::table('table_temporary_accumulated_sales')->insert([
-                'product_id' => $centroCostoProduct->products_id,
-                'accumulated_quantity' => $accumulatedQuantity,
-                'accumulated_total_bruto' => $accumulatedTotalBruto
-            ]);
-        }
-        // Recuperar los registros de la tabla table_temporary_accumulated_sales
-        $accumulatedQuantitys = DB::table('table_temporary_accumulated_sales')->get();
-
-        foreach ($accumulatedQuantitys as $accumulatedQuantity) {
-            $centroCostoProduct = Centro_costo_product::find($accumulatedQuantity->product_id);
-
-            $centroCostoProduct->venta += $accumulatedQuantity->accumulated_quantity;
-            $centroCostoProduct->cto_venta_total += $accumulatedQuantity->accumulated_total_bruto;
-            $centroCostoProduct->save();
-
-            // Limpiar la tabla table_temporary_accumulated_sales
-            DB::table('table_temporary_accumulated_sales')->truncate();
-        }
-
-        if (($compensadores[0]->valor_a_pagar_credito) > 0) {
-            $this->cuentasPorCobrar($ventaId);
-        }
-
-        return response()->json([
-            'status' => 1,
-            'message' => 'Cargado al inventario exitosamente',
-            'compensadores' => $compensadores
-        ]);
-    } */
-
-        /*    public function storeVentaMostrador()
-    {
+        DB::beginTransaction();
         try {
-
-
-            // Validación para que solo permita crear la instancia Sale, solo si existe algun nuevo registro en la tabla cajas donde en esa tabla cajas corresponan el campo user_id con cajero_id, fecha_hora_inicio sea igual a la fecha actual, y el campo estado sea igual a open.
-            $id_user = Auth::user()->id;
-            $caja = Caja::where('user_id', $id_user)
-                //  ->where('fecha_hora_inicio', $currentDateTime) 
-                ->where('estado', 'open')
-                ->first();
-
-
-            if ($caja) {
-                $venta = new Sale();
-                $venta->save();
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Inicio de venta por mostrador',
-                    'registroId' => $venta->id
-
-                ]);
-
-                $currentDateTime = Carbon::now();
-                $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date->modify('next monday'); // Move to the next Monday
-                $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
-
-                $venta = new Sale();
-                $venta->user_id = $id_user;
-                $venta->centrocosto_id = 1; // Valor estático para el campo centrocosto
-                $venta->third_id = 33; // Valor estático para el campo third_id
-                $venta->vendedor_id = 33; // Valor estático para el campo vendedor_id
-                $venta->fecha_venta = $currentDateFormat;
-                $venta->fecha_cierre = $dateNextMonday;
-                $venta->total_bruto = 0;
-                $venta->descuentos = 0;
-                $venta->subtotal = 0;
-                $venta->total = 0;
-                $venta->total_otros_descuentos = 0;
-                $venta->valor_a_pagar_efectivo = 0;
-                $venta->valor_a_pagar_tarjeta = 0;
-                $venta->valor_a_pagar_otros = 0;
-                $venta->valor_a_pagar_credito = 0;
-                $venta->valor_pagado = 0;
-                $venta->cambio = 0;
-                $venta->items = 0;
-                $venta->valor_pagado = 0;
-                $venta->cambio = 0;
-                $venta->save();
-
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'venta por mostrador',
-                    'registroId' => $venta->id
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'No se puede iniciar una nueva venta por mostrador, ya que no existe una caja abierta.'
-                ]);
-            }
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 0,
-                'array' => (array) $th
+            // Crear la cabecera de la nota de crédito
+            $notaCredito = NotaCredito::create([
+                'sale_id' => $sale->id,
+                'user_id' => auth()->id(),
+                'total'   => $sale->total, // O bien, sumar los totales de cada detalle
+                'status'  => '1',
             ]);
-        }
-    }
- */
-/*   public function getProductsByStore(Request $request)
-    {
-        $storeId = $request->store_id;
 
-        // Obtiene los productos que tienen inventario en la bodega seleccionada y stock_ideal > 0.
-        // Se hace _eager loading_ de la relación inventarios filtrada por store_id.
-        $productos = Product::whereHas('inventarios', function ($query) use ($storeId) {
-            $query->where('store_id', $storeId)
-                ->where('stock_ideal', '>', 0);
-        })
-            ->with(['inventarios' => function ($query) use ($storeId) {
-                $query->where('store_id', $storeId);
-            }])
-            ->with('lotesPorVencer') // Se asume que usas esta relación para mostrar los lotes.
-            ->get();
+            foreach ($sale->details as $detail) {
+                // Crear el detalle de la nota de crédito
+                NotaCreditoDetalle::create([
+                    'notacredito_id' => $notaCredito->id,
+                    'product_id'     => $detail->product_id,
+                    'quantity'       => $detail->quantity,
+                    'price'          => $detail->price,
+                ]);
 
-        // Prepara las opciones para el select (en este ejemplo se hace desde el controlador y se envía vía JSON).
-        $options = [];
-        foreach ($productos as $producto) {
-            // Obtiene el inventario para la tienda (suponiendo que solo hay un registro por producto y tienda)
-            $inventario = $producto->inventarios->first();
-            foreach ($producto->lotesPorVencer as $lote) {
-                $options[] = [
-                    'id'               => $producto->id,
-                    'text'             => "{$producto->name} - {$lote->codigo} - " .
-                        \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') .
-                        " - Stock Ideal: " . ($inventario ? $inventario->stock_ideal : 'N/A') .
-                        " - Inventario ID: " . ($inventario ? $inventario->id : 'N/A'),
-                    'lote_id'          => $lote->id,
-                    'inventario_id'    => $inventario ? $inventario->id : '',
-                    'stock_ideal'      => $inventario ? $inventario->stock_ideal : '',
-                ];
+                // Registrar el movimiento en inventario con el tipo 'notacredito'
+                MovimientoInventario::create([
+                    'tipo'           => 'notacredito', // Asegúrate de que este valor esté permitido
+                    'sale_id'        => $sale->id,
+                    'lote_id'        => $detail->lote_id, // Suponiendo que el detalle incluya este campo
+                    'product_id'     => $detail->product_id,
+                    'cantidad'       => $detail->quantity,
+                    'costo_unitario' => $detail->price, // O el costo real del producto
+                    'total'          => $detail->quantity * $detail->price,
+                    'fecha'          => now(),
+                ]);
+
+                // Actualizar el inventario: incrementar 'cantidad_notacredito'
+                $inventario = Inventario::where('product_id', $detail->product_id)
+                    ->where('lote_id', $detail->lote_id)
+                    ->where('store_id', $sale->store_id) // Se asume que la venta tiene store_id
+                    ->first();
+
+                if ($inventario) {
+                    $inventario->cantidad_notacredito += $detail->quantity;
+                    $inventario->save();
+                }
             }
-        }
 
-        return response()->json($options);
+            // Cambiar el estado de la venta a cancelada
+            $sale->status = '2';
+            $sale->save();
+
+            DB::commit();
+            return response()->json(['message' => 'Venta anulada y nota de crédito generada correctamente.']);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
- */
+}

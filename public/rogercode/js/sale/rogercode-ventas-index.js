@@ -50,7 +50,7 @@ $(document).ready(function () {
                             return data;
                         }
                     },
-                },                             
+                },
                 { data: "status", name: "status" },
                 {
                     data: 'total_valor_a_pagar',
@@ -61,7 +61,7 @@ $(document).ready(function () {
                             maximumFractionDigits: 0
                         });
                     }
-                },                      
+                },
                 { data: "date", name: "date" },
                 { data: "consecutivo", name: "consecutivo" },
                 { data: "resolucion", name: "resolucion" },
@@ -114,6 +114,7 @@ const refresh_table = () => {
     let table = $("#tableCompensado").dataTable();
     table.fnDraw(false);
 };
+
 const showModalcreate = () => {
     if (contentform.hasAttribute("disabled")) {
         contentform.removeAttribute("disabled");
@@ -188,3 +189,29 @@ const downCompensado = (id) => {
     });
 };
 
+// Función para confirmar la anulación de una venta usando SweetAlert
+const confirmAnulacion = (id) => {
+    swal({
+        title: "CONFIRMAR",
+        text: "¿CONFIRMAS ANULAR LA VENTA?",
+        type: "warning",
+        showCancelButton: true,
+        cancelButtonText: "Cancelar",
+        cancelButtonColor: "#fff",
+        confirmButtonColor: "#dc3545", // Color rojo para anulación
+        confirmButtonText: "Sí, anularla",
+    }).then(function (result) {
+        if (result.value) {
+            console.log("Anulando venta con id:", id);
+            const dataform = new FormData();
+            dataform.append("id", id);
+            send(dataform, `/sale/${id}/annul`).then((resp) => {
+                console.log(resp);
+                refresh_table();
+                swal("Anulada", "La venta ha sido anulada", "success");
+            }).catch(error => {
+                swal("Error", "Hubo un error al anular la venta", "error");
+            });
+        }
+    });
+};

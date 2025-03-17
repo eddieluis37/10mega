@@ -319,7 +319,9 @@ Route::middleware(['auth', 'can:acceder_venta_pos'])->group(function () {
 
     Route::get('/products/search', [SaleController::class, 'search'])->name('products.search');
 
-   // Route::get('/get-products-by-store', [SaleController::class, 'getProductsByStore']);
+    Route::post('/sale/{saleId}/annul', [SaleController::class, 'annulSale']);
+    Route::post('/sale/detail/{saleDetailId}/return', [SaleController::class, 'partialReturn']);
+    
 
 
     Route::get('sales', [saleController::class, 'index'])->name('sale.index');
@@ -340,8 +342,7 @@ Route::middleware(['auth', 'can:acceder_venta_pos'])->group(function () {
     Route::get('sale/showFactura/{id}', [exportFacturaController::class, 'showFactura'])->name('sale.showFactura');
 
     Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
-
-    Route::get('/buscar-producto-por-codigo-barras', 'saleController@buscarPorCodigoBarras');
+   
 });
 
 /*****************************ORDENES DE PEDIDOS******************************************/

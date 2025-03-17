@@ -29,13 +29,14 @@ return new class extends Migration
             $table->decimal('cantidad_prod_term', 10, 2)->default(0)->nullable();
 
             $table->decimal('cantidad_traslado', 10, 2)->default(0)->nullable();
-           // $table->decimal('cantidad_traslado_salida', 18, 2)->default(0)->nullable();
+        
 
            $table->decimal('cantidad_venta', 10, 2)->default(0)->nullable();
+           $table->decimal('cantidad_notacredito', 10, 2)->default(0)->nullable();
             
 
 
-            $table->decimal('stock_ideal', 10, 2)->default(0)->nullable()->comment('Cálculo de la suma de la compra compensada + inventario_inicial.');
+            $table->decimal('stock_ideal', 10, 2)->default(0)->nullable()->comment('Cálculo de la suma de la compra compensada + inventario_inicial...');
 
             $table->decimal('costo_unitario', 18, 2)->default(0)->nullable(); // Costo unitario promedio.
             $table->decimal('costo_total', 18, 2)->default(0)->nullable(); // Costo total del inventario final.
