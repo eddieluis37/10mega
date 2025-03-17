@@ -31,12 +31,12 @@
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale->namecentrocosto}}</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Bogotá - Tels: 01-3178302986</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Resolución DIAN 18764064061708</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Autorizada el: 2024/01/20 :</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Autorizada el: 2025/01/20 :</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Prefijo ERPC Del 1 AL 10000</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Vigencia: 6</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Responsable de IVA</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Actividad Economica 4620 Tartifa</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina carnicossv@gmail.com</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina contamegachorizos@gmail.com </span>
 					<img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
 				</td>
 			</tr>
