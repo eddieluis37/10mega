@@ -24,6 +24,7 @@ class PermissionsSeeder extends Seeder
             Permission::updateOrCreate(['name' => "crear_{$module}"]);
             Permission::updateOrCreate(['name' => "editar_{$module}"]);
             Permission::updateOrCreate(['name' => "eliminar_{$module}"]);
+            Permission::updateOrCreate(['name' => "Pos_Create"]);
         }
 
         // Obtener todos los permisos

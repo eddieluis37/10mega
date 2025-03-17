@@ -76,7 +76,7 @@ class saleController extends Controller
                     case 1:
                         return '<span class="badge bg-success">Close</span>';
                     case 2:
-                        return '<span class="badge bg-danger">Cancelled</span>';
+                        return '<span class="badge bg-danger">Annulled</span>';
                     case 3:
                         return '<span class="badge bg-warning">Returned</span>';
                     default:
@@ -104,6 +104,9 @@ class saleController extends Controller
                     $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial" onclick="confirmPartialReturn(' . $data->id . ')">
                             <i class="fas fa-undo-alt"></i>
                          </a>';
+                    $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
+                            <i class="fas fa-trash"></i>
+                        </a>';
                 } elseif ($data->status == 2) {
                     // Venta cancelada: opción inactiva.
                     $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
@@ -1321,7 +1324,8 @@ class saleController extends Controller
                 // Registrar el movimiento en inventario con el tipo 'notacredito'
                 MovimientoInventario::create([
                     'tipo'           => 'notacredito', // Asegúrate de que este valor esté permitido
-                    'sale_id'        => $sale->id,
+                    'store_origen_id' => $sale->id,
+                    'sale_id'        => $sale->store_id,
                     'lote_id'        => $detail->lote_id, // Suponiendo que el detalle incluya este campo
                     'product_id'     => $detail->product_id,
                     'cantidad'       => $detail->quantity,
