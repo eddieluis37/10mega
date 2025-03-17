@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Compra compensada</title>
+  <title>Compra de productos</title>
 
   <!-- cargar a través de la url del sistema -->
 
@@ -28,13 +28,13 @@
     <table cellpadding="0" cellspacing="0" width="100%">
       <tr>
         <td colspan="2" class="text-center">
-          <img src="{{ public_path('assets/img/logo65.png') }}" alt="" class="invoice-logo" width="20%" style="vertical-align: top; padding-top: -100px; position: relative">
-          <span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">PURACARNES SAS</span>
-          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Nit 901.531.807-3</span>
-          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">AUTOPISTA SUR 66 78 LC B 22 FRIGORIFICO GUADALUPE</span>
+          <img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="9%" style="vertical-align: top; padding-top: -100px; position: relative">
+          <span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
+          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Nit 900.490.684-3</span>
+          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">CL 35 SUR # 70B - 79</span>
           <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Bogotá - Tel. (601) 9502998</span>
-          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">contabilidad@puracarnes.com</span>
-          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">www.puracarnes.com</span>
+          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">contamegachorizos@gmail.com</span>
+          <span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">www.megachorizos.co</span>
         </td>
 
       </tr>
