@@ -107,7 +107,7 @@ class inventarioController extends Controller
                     + $enlistments
                     + $compensadores
                     + $inventario->cantidad_prod_term
-                    + $trasladoIngreso) - $trasladoSalida - $totalVenta;
+                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
 
                 // Actualizar el inventario con el stock ideal calculado
                 $inventario->update([

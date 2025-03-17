@@ -1,4 +1,5 @@
 console.log("Starting");
+
 const btnAddVentaDomicilio = document.querySelector("#btnAddVentaDomicilio");
 const formCompensadoRes = document.querySelector("#form-compensado-res");
 const token = document
@@ -215,3 +216,23 @@ const confirmAnulacion = (id) => {
         }
     });
 };
+
+
+// Asegúrate de incluir la librería SweetAlert en la página
+// Ejemplo para SweetAlert: <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+function confirmPartialReturn(saleId) {
+    swal({
+        title: "Devolución Parcial",
+        text: "¿Deseas proceder con la devolución parcial de esta venta?",
+        icon: "warning",
+        buttons: ["Cancelar", "Sí, proceder"],
+        dangerMode: true,
+    }).then((willProceed) => {
+        if (willProceed) {
+            // Redirige a la vista/formulario de devolución parcial
+            window.location.href = "/sale/partial-return-form/" + saleId;
+        }
+    });
+}
+

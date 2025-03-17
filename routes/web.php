@@ -311,7 +311,7 @@ Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function
 
 // Proteger todas las rutas dentro del modulo de ventas
 /*****************************VENTAS******************************************/
-Route::middleware(['auth', 'can:acceder_venta_pos'])->group(function () {
+Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('sale{saleId}/delete', [SaleController::class, 'delete'])->name('sale.delete');
     Route::get('sale{ventaId}/edit', [SaleController::class, 'edit'])->name('sale.edit');
     Route::post('sale/{ventaId}', [SaleController::class, 'update'])->name('sale.update');
@@ -321,7 +321,15 @@ Route::middleware(['auth', 'can:acceder_venta_pos'])->group(function () {
 
     Route::post('/sale/{saleId}/annul', [SaleController::class, 'annulSale']);
     Route::post('/sale/detail/{saleDetailId}/return', [SaleController::class, 'partialReturn']);
-    
+
+    // Ruta para cargar la vista del formulario de devolución parcial
+    // Esta ruta redirige a una vista donde se muestra el detalle de la venta
+    // y permite digitar la cantidad a devolver para cada producto.
+    Route::get('/sale/partial-return-form/{id}', [SaleController::class, 'partialReturnForm'])->name('sales.partialReturnForm');
+
+    // Ruta para procesar la devolución parcial (se envían los datos mediante AJAX)
+    Route::post('/sale/partial-return', [SaleController::class, 'partialReturnSaleDetails'])->name('sales.partialReturn');
+
 
 
     Route::get('sales', [saleController::class, 'index'])->name('sale.index');

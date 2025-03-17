@@ -91,32 +91,29 @@ class saleController extends Controller
                 $btn = '<div class="text-center">';
                 // Botón para ver la factura (siempre visible)
                 $btn .= '<a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="Ver Factura" target="_blank">
-                        <i class="far fa-file-pdf"></i>
-                     </a>';
-                // Dependiendo del estado de la venta se muestran otras acciones:
+                            <i class="far fa-file-pdf"></i>
+                         </a>';
+                // Según el estado de la venta se muestran otras acciones:
                 if ($data->status == 0) {
-                    // Venta abierta: se permite editar o ver detalles.
                     $btn .= '<a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
-                            <i class="fas fa-directions"></i>
-                         </a>';
+                                <i class="fas fa-directions"></i>
+                             </a>';
                 } elseif ($data->status == 1) {
-                    // Venta cerrada: se permite la devolución parcial.
+                    // Venta cerrada: mostrar botón de devolución parcial y anulación total.
                     $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial" onclick="confirmPartialReturn(' . $data->id . ')">
-                            <i class="fas fa-undo-alt"></i>
-                         </a>';
+                                <i class="fas fa-undo-alt"></i>
+                             </a>';
                     $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
-                            <i class="fas fa-trash"></i>
-                        </a>';
+                                <i class="fas fa-trash"></i>
+                            </a>';
                 } elseif ($data->status == 2) {
-                    // Venta cancelada: opción inactiva.
                     $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
-                            <i class="fas fa-ban"></i>
-                         </button>';
+                                <i class="fas fa-ban"></i>
+                             </button>';
                 } elseif ($data->status == 3) {
-                    // Venta devuelta: opción inactiva.
                     $btn .= '<button class="btn btn-dark" title="Venta devuelta" disabled>
-                            <i class="fas fa-undo"></i>
-                         </button>';
+                                <i class="fas fa-undo"></i>
+                             </button>';
                 }
                 $btn .= '</div>';
                 return $btn;
@@ -124,6 +121,7 @@ class saleController extends Controller
             ->rawColumns(['status', 'date', 'action'])
             ->make(true);
     }
+
 
 
 
@@ -1354,6 +1352,137 @@ class saleController extends Controller
             return response()->json(['message' => 'Venta anulada y nota de crédito generada correctamente.']);
         } catch (\Exception $e) {
             DB::rollback();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Muestra el formulario de devolución parcial para una venta.
+     *
+     * @param int $id
+     * @return \Illuminate\View\View
+     */
+    public function partialReturnForm($id)
+    {
+        // Obtener la venta, o abortar con 404 si no se encuentra
+        $sale = Sale::findOrFail($id);
+
+        // Obtener los detalles de la venta
+        $saleDetails = SaleDetail::where('sale_id', $id)->get();
+
+        // Retornar la vista con la información necesaria
+        return view('sale.partial_return', compact('sale', 'saleDetails'));
+    }
+
+    public function partialReturnSaleDetails(Request $request)
+    {
+        // Deshabilitar Laravel Debugbar para esta respuesta (además de deshabilitarlo en .env si es necesario)
+        if (app()->bound('debugbar')) {
+            app('debugbar')->disable();
+        }
+
+        Log::info('partialReturnSaleDetails called', $request->all());
+
+        DB::beginTransaction();
+        try {
+            $saleId = $request->input('ventaId');
+            $returns = $request->input('returns'); // Arreglo: [ sale_detail_id => cantidad_a_devolver, ... ]
+            Log::info("Processing sale ID: {$saleId}", ['returns' => $returns]);
+
+            if (empty($returns)) {
+                Log::error('No returns provided.');
+                // Limpia el búfer de salida para evitar caracteres extra
+                if (ob_get_length()) {
+                    ob_clean();
+                }
+                return response()->json(['error' => 'No se ha indicado ninguna cantidad a devolver.'], 422);
+            }
+
+            $totalNota = 0;
+            foreach ($returns as $saleDetailId => $returnQuantity) {
+                if ($returnQuantity > 0) {
+                    $detail = SaleDetail::findOrFail($saleDetailId);
+                    Log::info("Processing detail ID: {$saleDetailId}", [
+                        'returnQuantity'   => $returnQuantity,
+                        'availableQuantity' => $detail->quantity
+                    ]);
+
+                    if ($returnQuantity > $detail->quantity) {
+                        throw new \Exception("La cantidad a devolver para el producto {$detail->nameprod} supera la cantidad vendida.");
+                    }
+                    $totalNota += $detail->price * $returnQuantity;
+                }
+            }
+            Log::info("Total Nota Calculated", ['totalNota' => $totalNota]);
+
+            // Crear la cabecera de la Nota de Crédito
+            $notaCredito = NotaCredito::create([
+                'sale_id' => $saleId,
+                'user_id' => auth()->id(),
+                'total'   => $totalNota,
+                'status'  => 'active',
+            ]);
+            Log::info("Nota de Crédito creada", ['notaCreditoId' => $notaCredito->id]);
+
+            foreach ($returns as $saleDetailId => $returnQuantity) {
+                if ($returnQuantity > 0) {
+                    $detail = SaleDetail::findOrFail($saleDetailId);
+
+                    // Crear el detalle de la Nota de Crédito
+                    NotaCreditoDetalle::create([
+                        'notacredito_id' => $notaCredito->id,
+                        'product_id'     => $detail->product_id,
+                        'quantity'       => $returnQuantity,
+                        'price'          => $detail->price,
+                    ]);
+
+                    // Registrar el movimiento en inventario (tipo 'notacredito')
+                    MovimientoInventario::create([
+                        'tipo'           => 'notacredito',
+                        'sale_id'        => $saleId,
+                        'lote_id'        => $detail->lote_id,
+                        'product_id'     => $detail->product_id,
+                        'cantidad'       => $returnQuantity,
+                        'costo_unitario' => $detail->price,
+                        'total'          => $detail->price * $returnQuantity,
+                        'fecha'          => now(),
+                    ]);
+
+                    // Actualizar el inventario: incrementar 'cantidad_notacredito'
+                    $inventario = Inventario::where('product_id', $detail->product_id)
+                        ->where('lote_id', $detail->lote_id)
+                        ->where('store_id', $request->input('store_id')) // Se asume que se envía store_id
+                        ->first();
+                    if ($inventario) {
+                        $inventario->cantidad_notacredito += $returnQuantity;
+                        $inventario->save();
+                    }
+
+                    // Actualizar el detalle de venta (restar la cantidad devuelta)
+                    $detail->quantity -= $returnQuantity;
+                    $detail->save();
+                    Log::info("Processed detail", ['saleDetailId' => $saleDetailId, 'newQuantity' => $detail->quantity]);
+                }
+            }
+
+            // Opcional: Actualizar el estado de la venta a "devuelta" (3)
+            $sale = Sale::findOrFail($saleId);
+            $sale->status = 3;
+            $sale->save();
+
+            DB::commit();
+            Log::info("partialReturnSaleDetails completed successfully for saleId " . $saleId);
+
+            if (ob_get_length()) {
+                ob_clean();
+            }
+            return response()->json(['message' => 'Devolución parcial procesada correctamente.']);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error("Error in partialReturnSaleDetails", ['error' => $e->getMessage()]);
+            if (ob_get_length()) {
+                ob_clean();
+            }
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
