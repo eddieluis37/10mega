@@ -1324,8 +1324,8 @@ class saleController extends Controller
                 // Registrar el movimiento en inventario con el tipo 'notacredito'
                 MovimientoInventario::create([
                     'tipo'           => 'notacredito', // Asegúrate de que este valor esté permitido
-                    'store_origen_id' => $sale->id,
-                    'sale_id'        => $sale->store_id,
+                    'store_origen_id' => $detail->store_id,
+                    'sale_id'        => $sale->id,
                     'lote_id'        => $detail->lote_id, // Suponiendo que el detalle incluya este campo
                     'product_id'     => $detail->product_id,
                     'cantidad'       => $detail->quantity,
@@ -1337,7 +1337,7 @@ class saleController extends Controller
                 // Actualizar el inventario: incrementar 'cantidad_notacredito'
                 $inventario = Inventario::where('product_id', $detail->product_id)
                     ->where('lote_id', $detail->lote_id)
-                    ->where('store_id', $sale->store_id) // Se asume que la venta tiene store_id
+                    ->where('store_id', $detail->store_id) // Se asume que la venta tiene store_id
                     ->first();
 
                 if ($inventario) {

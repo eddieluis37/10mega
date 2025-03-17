@@ -28,7 +28,7 @@
 					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
 					<!-- <span style="font-size: 11px; font-weight: bold; display: block; margin: 2;">900.490.684-3</span> -->
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">CL 35 SUR # 70B - 79</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale[0]->namecentrocosto}}</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale->namecentrocosto}}</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Bogotá - Tels: 01-3178302986</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Resolución DIAN 18764064061708</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Autorizada el: 2024/01/20 :</span>
@@ -36,8 +36,8 @@
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Vigencia: 6</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Responsable de IVA</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Actividad Economica 4620 Tartifa</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina carnicossv@gmail.com</span>					
-					<img src="{{ public_path('assets/img/logocopy.png') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina carnicossv@gmail.com</span>
+					<img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
 				</td>
 			</tr>
 			<tr>
@@ -45,21 +45,32 @@
 			</tr>
 			<tr>
 				<td colspan=" 2" class="">
-					<span style="font-size: 13px; font-weight: bold; display: block; margin-top: 3;">Sistema POS: {{$sale[0]->resolucion}}</span>
+					<span style="font-size: 13px; font-weight: bold; display: block; margin-top: 3;">Sistema POS: {{$sale->resolucion}}</span>
 				</td>
 			</tr>
 			<tr>
 				<td width="100%" class="text-left text-company" style="vertical-align: top; padding-top: 7px">
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Fecha y hora:<strong> {{\Carbon\Carbon::now()->format('Y-m-d H:i')}}</strong></span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cajero:<strong> {{$sale[0]->nameuser}}</strong></span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cliente:<strong> {{$sale[0]->namethird}}</strong></span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Nit / C.C.:<strong> {{ number_format($sale[0]->identification,0, ',', '.')}}</strong></span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Dirección:<strong> {{$sale[0]->direccion}}</strong></span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Factura interna:<strong> {{$sale[0]->consecutivo}}</strong></span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Estado_Factura:
-						{{-- Display "Cerrada" if status is 1 --}}
-						{{-- Display "Pendiente" if status is 0 --}}
-						<strong>{{ $sale[0]->status == 1 ? 'Cerrada' : 'Pendiente' }}</strong>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cajero:<strong> {{$sale->nameuser}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cliente:<strong> {{$sale->namethird}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Nit / C.C.:<strong> {{ number_format($sale->identification,0, ',', '.')}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Dirección:<strong> {{$sale->direccion}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Factura interna:<strong> {{$sale->consecutivo}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">
+						Estado_Factura:
+						<strong>
+							@if($sale->status == 0)
+							Abierta
+							@elseif($sale->status == 1)
+							Cerrada
+							@elseif($sale->status == 2)
+							Cancelada
+							@elseif($sale->status == 3)
+							Devuelta
+							@else
+							Desconocido
+							@endif
+						</strong>
 					</span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Items:<strong>{{$sale->sum('items')}}</strong></span>
 				</td>
@@ -68,10 +79,10 @@
 	</section>
 	<hr>
 
-	<table>
+	<table align="left">
 		<thead>
 			<tr>
-				<th width="83%">Descripción</th>
+				<th width="70%">Descripción</th>
 				<th width="7%">Cant.</th>
 				<th width="10%">Vr.unit</th>
 				<th width="10%">Vr.Total</th>
@@ -83,49 +94,75 @@
 				<td align="left">
 					<strong>{{$item->nameprod}}</strong>
 					@if($item->lote_codigo)
-					Lote:{{$item->lote_codigo}}
-					Vence:{{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}
+					Lt:{{$item->lote_codigo}}<br>
+					Fv:{{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}
 					@endif
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
-				<td align="center"><strong>{{number_format($item->price ,0, ',', '.' )}}</strong></td>
-				<td align="right"><strong>{{number_format($item->total ,0, ',', '.' )}}</strong></td>
+				<td align="center"><strong>{{ number_format($item->price, 0, ',', '.') }}</strong></td>
+				<td align="left"><strong>{{ number_format($item->total, 0, ',', '.') }}</strong></td>
 			</tr>
 			@endforeach
 		</tbody>
 		<tfoot>
 			<tr>
-				<td class="">
-					<span><b>TOTALES</b></span>
+				<td>
+					<span><b>TOTAL</b></span>
 				</td>
-				<td align="right">
-					<span><strong>{{ $quantity = $item->where('sale_id', '=', $item->sale_id)->sum('quantity')}}</strong></span>
+				<td align="left">
+					<span><strong>{{ $quantity = $item->where('sale_id', '=', $item->sale_id)->sum('quantity') }}</strong></span>
 				</td>
 				<td></td>
-				<td align="right">
-					<span><strong>{{ number_format($sale->sum('total_valor_a_pagar'),0, ',', '.' )}}</strong></span>
+				<td align="left">
+					<span><strong>{{ number_format($sale->sum('total_valor_a_pagar'), 0, ',', '.') }}</strong></span>
 				</td>
 			</tr>
 		</tfoot>
 	</table>
+
 	<hr>******************
 	<p class="text-center" style="font-size: 12px;">
 		<span><strong>Forma de pago</strong></span>
 	</p>
+
+	@if($sale->valor_a_pagar_efectivo != 0)
 	<p class="text-right" style="font-size: 12px;">
-		<strong><span>EFECTIVO: </span><span>{{ number_format($sale[0]->valor_a_pagar_efectivo,0, ',', '.')}}</strong></span>
+		<strong>
+			<span>EFECTIVO: </span>
+			<span>{{ number_format($sale->valor_a_pagar_efectivo, 0, ',', '.') }}</span>
+		</strong>
 	</p>
+	@endif
+
+	@if($sale->valor_a_pagar_tarjeta != 0)
 	<p class="text-right" style="font-size: 12px;">
-		<strong><span>{{$sale[0]->formapago1}}: </span><span>{{ number_format($sale[0]->valor_a_pagar_tarjeta,0, ',', '.')}}</></span>
+		<strong>
+			<span>{{ $sale->formapago1 }}: </span>
+			<span>{{ number_format($sale->valor_a_pagar_tarjeta, 0, ',', '.') }}</span>
+		</strong>
 	</p>
+	@endif
+
+	@if($sale->valor_a_pagar_otros != 0)
 	<p class="text-right" style="font-size: 12px;">
-		<strong><span>{{$sale[0]->formapago2}}: </span><span>{{ number_format($sale[0]->valor_a_pagar_otros,0, ',', '.')}}</strong></span>
+		<strong>
+			<span>{{ $sale->formapago2 }}: </span>
+			<span>{{ number_format($sale->valor_a_pagar_otros, 0, ',', '.') }}</span>
+		</strong>
 	</p>
+	@endif
+
+	@if($sale->valor_a_pagar_credito != 0)
 	<p class="text-right" style="font-size: 12px;">
-		<strong><span>{{$sale[0]->formapago3}}: </span><span>{{ number_format($sale[0]->valor_a_pagar_credito,0, ',', '.')}}</strong></span>
+		<strong>
+			<span>{{ $sale->formapago3 }}: </span>
+			<span>{{ number_format($sale->valor_a_pagar_credito, 0, ',', '.') }}</span>
+		</strong>
 	</p>
+	@endif
+
 	<p class="text-right" style="font-size: 12px;">
-		<span><strong>Cambio: {{ number_format($sale[0]->cambio,0, ',', '.')}}</strong></span>
+		<span><strong>Cambio: {{ number_format($sale->cambio,0, ',', '.')}}</strong></span>
 	</p>
 	<hr width="60mm" color="black" size="3">
 	<p align="center" style="font-size: 11px; margin-top: 8px;"><strong>A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las mercancías o prestación de servicios descritos en este título - Valor. Número Autorización 18764064061708 aprobado en 20240120 prefijo ERPC desde el número 1 al 10000, del dia 20 de enero de 2024, Vigencia: 6 Meses</strong></p>
