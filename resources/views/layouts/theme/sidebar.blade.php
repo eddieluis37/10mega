@@ -45,7 +45,7 @@
             </li>
             @endcan
 
-            @can('Product_View')
+            @can('ver_productos')
 
             <li class="menu {{ Request::is('producto*') ? 'active' : '' }}">
                 <a href="#products" data-active="{{ Request::is('producto*') ? 'true' : 'false' }}" class="menu-toggle">
