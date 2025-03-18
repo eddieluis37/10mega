@@ -348,8 +348,6 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
 
     // Ruta para procesar la devolución parcial (se envían los datos mediante AJAX)
     Route::post('/sale/partial-return', [saleController::class, 'partialReturnSaleDetails'])->name('sales.partialReturn');
-
-   
 });
 
 /*****************************ORDENES DE PEDIDOS******************************************/
@@ -404,6 +402,17 @@ Route::middleware(['auth', 'can:acceder_terceros'])->group(function () {
     Route::get('thirds', ThirdsController::class);
 });
 
+Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
+    /**PRODUCTOS SIN LIVEWIRE**/
+    Route::get('producto', [productoController::class, 'index'])->name('producto.index');
+    Route::post('productosave', [productoController::class, 'store'])->name('producto.save');
+    Route::get('showproducto', [productoController::class, 'show'])->name('producto.showproducto');
+    Route::get('producto/create/{id}', [productoController::class, 'create'])->name('producto.create');
+    Route::post('producto/create/{id}', [productoController::class, 'storeCierreCaja'])->name('producto.cierre');
+    Route::get('producto/showReciboCaja/{id}', [productoController::class, 'showReciboCaja'])->name('producto.showReciboProducto');
+    Route::get('/producto-edit/{id}', [productoController::class, 'edit'])->name('producto.edit');
+});
+
 Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('/profile', [App\Http\Controllers\UserController::class, 'profile'])
@@ -425,7 +434,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('report_sales_x_prod', ReportsSalesXProdController::class);
     Route::get('cashout', CashoutController::class);
     Route::get('dash', Dash::class)->name('dash');
-  
+
     Route::get('precio_agreements', PrecioAgreementsController::class);
     //Route::get('beneficiores', BeneficioresController::class);
     Route::get('beneficiopollos', BeneficiopollosController::class);
@@ -536,14 +545,6 @@ Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
 
-    /**PRODUCTOS SIN LIVEWIRE**/
-    Route::get('producto', [productoController::class, 'index'])->name('producto.index');
-    Route::post('productosave', [productoController::class, 'store'])->name('producto.save');
-    Route::get('showproducto', [productoController::class, 'show'])->name('producto.showproducto');
-    Route::get('producto/create/{id}', [productoController::class, 'create'])->name('producto.create');
-    Route::post('producto/create/{id}', [productoController::class, 'storeCierreCaja'])->name('producto.cierre');
-    Route::get('producto/showReciboCaja/{id}', [productoController::class, 'showReciboCaja'])->name('producto.showReciboProducto');
-    Route::get('/producto-edit/{id}', [productoController::class, 'edit'])->name('producto.edit');
 
 
 

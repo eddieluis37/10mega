@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['administracion', 'terceros', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_autoservicio', 'venta_bar', 'venta_domicilio', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'terceros', 'productos', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_autoservicio', 'venta_bar', 'venta_domicilio', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -124,13 +124,13 @@ class PermissionsSeeder extends Seeder
             'acceder_venta_pos',
             'crear_venta_pos',
             'editar_venta_pos',
-            
+
             'ver_venta_dom',
             'acceder_venta_dom',
             'crear_venta_dom',
             'editar_venta_dom',
             'ver_traslado',
-            
+
             'acceder_traslado',
             'crear_traslado',
             'editar_traslado',
@@ -200,6 +200,7 @@ class PermissionsSeeder extends Seeder
         $user = User::where('name', 'SUPERVISOR PUNTOS DE VENTA')->first();
         if ($user) {
             $user->assignRole($supervisorPuntosDeVenta);
+            $user->syncPermissions($allPermissions); // Asigna todos los permisos
         }
 
         $user = User::where('name', 'LIDER AUDITORIA')->first();
@@ -225,8 +226,8 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($comercial);
         }
         $user->syncPermissions($allPermissions); // Asigna todos los permisos
-       
-       
+
+
         User::updateOrCreate(
             ['email' => 'subgerente@carnesfriasmega.co'], // Condición para identificar el usuario
             [
@@ -309,15 +310,15 @@ class PermissionsSeeder extends Seeder
             'acceder_compra_productos',
             'crear_compra_productos',
             'editar_compra_productos',
-           
+
             'ver_ventas',
             'ver_venta_autoservicio',
             'ver_venta_bar',
-            
+
             'acceder_venta_pos',
             'crear_venta_pos',
             'editar_venta_pos',
-            
+
             'acceder_venta_dom',
             'crear_venta_dom',
             'editar_venta_dom',
@@ -501,13 +502,13 @@ class PermissionsSeeder extends Seeder
         $permisos = [
             'ver_ventas',
             'ver_venta_bar',
-            
+
             'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
             'crear_compra_productos',
-            'editar_compra_productos',       
+            'editar_compra_productos',
 
             'acceder_venta_pos',
             'crear_venta_pos',
@@ -516,13 +517,13 @@ class PermissionsSeeder extends Seeder
             'acceder_venta_dom',
             'crear_venta_dom',
             'editar_venta_dom',
-            
+
             'ver_traslado',
             'acceder_traslado',
             'crear_traslado',
             'editar_traslado',
             'eliminar_traslado',
-            
+
             'ver_orders',
             'acceder_orders',
             'crear_orders',
