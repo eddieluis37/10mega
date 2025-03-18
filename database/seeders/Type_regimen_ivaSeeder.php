@@ -29,5 +29,8 @@ class Type_regimen_ivaSeeder extends Seeder
         Type_regimen_iva::create([
             'name' => 'Autorretenedor'
         ]);
+        Type_regimen_iva::create([
+            'name' => 'Regimen comun'
+        ]);
     }
 }
