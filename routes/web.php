@@ -400,6 +400,10 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
 });
 
+Route::middleware(['auth', 'can:acceder_terceros'])->group(function () {
+    Route::get('thirds', ThirdsController::class);
+});
+
 Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('/profile', [App\Http\Controllers\UserController::class, 'profile'])
@@ -421,7 +425,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('report_sales_x_prod', ReportsSalesXProdController::class);
     Route::get('cashout', CashoutController::class);
     Route::get('dash', Dash::class)->name('dash');
-    Route::get('thirds', ThirdsController::class);
+  
     Route::get('precio_agreements', PrecioAgreementsController::class);
     //Route::get('beneficiores', BeneficioresController::class);
     Route::get('beneficiopollos', BeneficiopollosController::class);

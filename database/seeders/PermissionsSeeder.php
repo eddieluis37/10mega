@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['administracion', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_autoservicio', 'venta_bar', 'venta_domicilio', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'terceros', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_autoservicio', 'venta_bar', 'venta_domicilio', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -406,10 +406,14 @@ class PermissionsSeeder extends Seeder
         );
         $comprador = Role::updateOrCreate(['name' => 'Comprador']);
         $comprador->syncPermissions([
+            'ver_administracion',
+            'ver_terceros',
             'ver_compras',
 
             'ver_compra_lote',
             'acceder_compra_lote',
+            'acceder_terceros',
+
             'crear_compra_lote',
             'editar_compra_lote',
 
