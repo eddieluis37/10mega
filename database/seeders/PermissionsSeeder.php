@@ -200,7 +200,7 @@ class PermissionsSeeder extends Seeder
         $user = User::where('name', 'SUPERVISOR PUNTOS DE VENTA')->first();
         if ($user) {
             $user->assignRole($supervisorPuntosDeVenta);
-            $user->syncPermissions($allPermissions); // Asigna todos los permisos
+            
         }
 
         $user = User::where('name', 'LIDER AUDITORIA')->first();
@@ -208,6 +208,7 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($recibidoPlanta);
             $user->assignRole($analistaCostos);
             $user->assignRole($supervisorPuntosDeVenta);
+            $user->syncPermissions($allPermissions); // Asigna todos los permisos
         }
 
         User::updateOrCreate(
