@@ -39,7 +39,26 @@
 </div>
 @endsection
 <script>
-    // Función que solicita confirmación para procesar la devolución parcial
+    // Función send para enviar el FormData usando fetch
+    const send = async (dataform, ruta) => {
+        try {
+            let response = await fetch(ruta, {
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                },
+                method: "POST",
+                body: dataform,
+            });
+            // Intenta parsear la respuesta a JSON
+            let data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error en send:", error);
+            throw error;
+        }
+    };
+
+    // Función para confirmar y enviar el formulario de devolución parcial
     function confirmPartialReturnSubmit() {
         swal({
             title: "Confirmar Devolución Parcial",
@@ -53,27 +72,21 @@
         }).then((willProcess) => {
             if (willProcess) {
                 let form = document.getElementById('partialReturnForm');
-                let formData = new FormData(form);
+                let dataform = new FormData(form);
 
-                fetch('/sale/partial-return', { // Ruta que procesa la devolución parcial
-                        method: 'POST',
-                        headers: {
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
+                send(dataform, '/sale/partial-return')
                     .then(data => {
+                        console.log("Respuesta del servidor:", data);
                         if (data.message) {
                             swal("Éxito", data.message, "success").then(() => {
-                                window.location.href = "/sales"; // O redirige a donde desees
+                                window.location.href = "/sales";
                             });
                         } else if (data.error) {
                             swal("Error", data.error, "error");
                         }
                     })
                     .catch(error => {
-                        console.error(error);
+                        console.error("Error al procesar la devolución parcial:", error);
                         swal("Error", "Ocurrió un error al procesar la devolución.", "error");
                     });
             }

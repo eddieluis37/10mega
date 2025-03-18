@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_autoservicio', 'venta_bar', 'venta_domicilio', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_autoservicio', 'venta_bar', 'venta_domicilio', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
