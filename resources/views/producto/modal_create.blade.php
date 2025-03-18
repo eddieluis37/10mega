@@ -41,8 +41,8 @@
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Nivel</label>
-                                    <select class="form-control selectPieles" name="nivel" id="nivel" required="">
-                                        <option value="">Buscar un nivel</option>
+                                    <select class="form-control selectPieles" name="nivel" id="nivel">
+                                        <option value="2">No aplica</option>
                                         @foreach ($niveles as $p)
                                         <option value="{{$p->id}}">{{$p->name}}</option>
                                         @endforeach

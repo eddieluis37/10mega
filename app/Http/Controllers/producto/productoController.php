@@ -375,8 +375,7 @@ class productoController extends Controller
             $rules = [
                 'productoId' => 'required',
                 'categoria' => 'required',
-                'marca' => 'required',
-                'nivel' => 'required',
+                'marca' => 'required',            
                 'familia' => 'required',
                 'subfamilia' => 'required',                
                 'impuestoiva' => 'required|numeric',
@@ -387,8 +386,7 @@ class productoController extends Controller
             $messages = [
                 'productoId.required' => 'El es requerido',
                 'categoria.required' => 'El cajero es requerido',
-                'marca.required' => 'La marca proveedora es requerida',
-                'nivel.required' => 'Nivel es requerido',
+                'marca.required' => 'La marca proveedora es requerida',               
                 'familia.required' => 'Nombre de familia es requerido',
                 'subfamilia.required' => 'Nombre de producto requerido',               
                 'impuestoiva.required' => 'El IVA es requerido',
