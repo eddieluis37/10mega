@@ -105,12 +105,12 @@ class productoController extends Controller
                     $btn = '
                          <div class="text-center">   
                          
-                         <button class="btn btn-dark" title="Editar CabezaOrden" onclick="edit(' . $data->id . ');">
+                         <button class="btn btn-dark" title="Editar producto" onclick="edit(' . $data->id . ');">
 						    <i class="fas fa-edit"></i>
 					    </button>
                       
                          				
-                         <button class="btn btn-dark" title="Borrar" disabled>
+                         <button class="btn btn-dark" title="Borrar">
                              <i class="fas fa-trash"></i>
                          </button>
                          
@@ -421,6 +421,7 @@ class productoController extends Controller
                 $prod->otro_impuesto = $request->isa;
                 $prod->impoconsumo = $request->impoconsumo;
                 $prod->status = '1'; // Activo
+                $prod->alerts = '10';
                 $prod->save();
                 $this->CrearProductoEnCentroCosto();
                 $this->CrearProductoEnListapreciodetalle();

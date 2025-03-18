@@ -135,7 +135,8 @@
                                     <div>
                                         <select class="form-control form-control-sm" name="impuestoiva" id="impuestoiva" required="">
                                             <option value="">Seleccione</option>
-                                            <option value="0">0%</option>                                           
+                                            <option value="0">0%</option>   
+                                            <option value="5">5%</option>                                              
                                             <option value="19">19%</option>
                                         </select>
                                         <span class="text-danger error-message"></span>
