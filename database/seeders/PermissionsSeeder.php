@@ -51,6 +51,9 @@ class PermissionsSeeder extends Seeder
             'acceder_compra_productos',
             'crear_compra_productos',
             'editar_compra_productos',
+
+            'acceder_cargue_productos_term',
+
         ]);
 
         // Asignar rol "RecibidoPlanta" a un usuario con el nombre "Recibido Planta"
