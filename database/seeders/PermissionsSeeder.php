@@ -221,7 +221,9 @@ class PermissionsSeeder extends Seeder
         if ($user) {
             $user->assignRole($comercial);
         }
-
+        $user->syncPermissions($allPermissions); // Asigna todos los permisos
+       
+       
         User::updateOrCreate(
             ['email' => 'subgerente@carnesfriasmega.co'], // Condición para identificar el usuario
             [
