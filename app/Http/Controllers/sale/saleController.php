@@ -100,10 +100,9 @@ class saleController extends Controller
                              </a>';
                 } elseif ($data->status == 1) {
                     // Venta cerrada: mostrar botón de devolución parcial y anulación total.
-                    $btn .= '<a href="' . route('sales.partialReturnForm', $data->id) . '" class="btn btn-info" title="Devolución parcial">
-            <i class="fas fa-undo-alt"></i>
-         </a>';
-
+                    $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial" onclick="confirmPartialReturn(' . $data->id . ')">
+                                   <i class="fas fa-undo-alt"></i>
+                             </a>';
                     $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                 <i class="fas fa-trash"></i>
                             </a>';
