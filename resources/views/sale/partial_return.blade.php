@@ -38,58 +38,62 @@
     </form>
 </div>
 @endsection
+
+@section('script')
 <script>
-    // Función send para enviar el FormData usando fetch
-    const send = async (dataform, ruta) => {
-        try {
+    // Espera a que el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtenemos el token CSRF
+        var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+
+        const sendDataForm = async (dataform, ruta) => {
             let response = await fetch(ruta, {
                 headers: {
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    "X-CSRF-TOKEN": token,
                 },
                 method: "POST",
                 body: dataform,
             });
-            // Intenta parsear la respuesta a JSON
             let data = await response.json();
+            //console.log(data);
             return data;
-        } catch (error) {
-            console.error("Error en send:", error);
-            throw error;
-        }
-    };
+        };
 
-    // Función para confirmar y enviar el formulario de devolución parcial
-    function confirmPartialReturnSubmit() {
-        swal({
-            title: "Confirmar Devolución Parcial",
-            text: "¿Estás seguro de procesar la devolución parcial?",
-            icon: "warning",
-            buttons: {
-                cancel: "Cancelar",
-                confirm: "Sí, procesar"
-            },
-            dangerMode: true,
-        }).then((willProcess) => {
-            if (willProcess) {
-                let form = document.getElementById('partialReturnForm');
-                let dataform = new FormData(form);
+        // Definimos confirmPartialReturnSubmit y la asignamos a window para que esté disponible globalmente
+        window.confirmPartialReturnSubmit = function() {
+            swal({
+                title: "Confirmar Devolución Parcial",
+                text: "¿Estás seguro de procesar la devolución parcial?",
+                icon: "warning",
+                buttons: {
+                    cancel: "Cancelar",
+                    confirm: "Sí, procesar"
+                },
+                dangerMode: true,
+            }).then(function(willProcess) {
+                if (willProcess) {
+                    var form = document.getElementById('partialReturnForm');
+                    var dataform = new FormData(form);
 
-                send(dataform, '/sale/partial-return')
-                    .then(data => {
-                        console.log("Respuesta del servidor:", data);
-                        if (data.message) {
-                            swal("Éxito", data.message, "success").then(() => {
-                                window.location.href = "/sales";
-                            });
-                        } else if (data.error) {
-                            swal("Error", data.error, "error");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error al procesar la devolución parcial:", error);
-                        swal("Error", "Ocurrió un error al procesar la devolución.", "error");
-                    });
-            }
-        });
-    }
+                    sendDataForm(dataform, '/sale/partial-return', token)
+                        .then(function(data) {
+                            console.log("Respuesta del servidor:", data);
+                            if (data.message) {
+                                swal("Éxito", data.message, "success").then(function() {
+                                    window.location.href = "/sales";
+                                });
+                            } else if (data.error) {
+                                swal("Error", data.error, "error");
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error("Error al procesar la devolución parcial:", error);
+                            swal("Error", "Ocurrió un error al procesar la devolución.", "error");
+                        });
+                }
+            });
+        };
+    });
 </script>
+@endsection

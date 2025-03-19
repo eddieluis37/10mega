@@ -100,9 +100,10 @@ class saleController extends Controller
                              </a>';
                 } elseif ($data->status == 1) {
                     // Venta cerrada: mostrar botón de devolución parcial y anulación total.
-                    $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial" onclick="confirmPartialReturn(' . $data->id . ')">
-                                <i class="fas fa-undo-alt"></i>
-                             </a>';
+                    $btn .= '<a href="' . route('sales.partialReturnForm', $data->id) . '" class="btn btn-info" title="Devolución parcial">
+            <i class="fas fa-undo-alt"></i>
+         </a>';
+
                     $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                 <i class="fas fa-trash"></i>
                             </a>';
@@ -1382,6 +1383,8 @@ class saleController extends Controller
         if (ob_get_length()) {
             ob_end_clean();
         }
-        return response()->json(['message' => 'Test response']);
+
+        return response()->json(['message' => 'Test response'])
+            ->header('Content-Type', 'application/json');
     }
 }

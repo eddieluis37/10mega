@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
     return view('welcome');
 }); */
 
+use App\Http\Livewire\PartialReturn;
 use App\Http\Controllers\Panel\ReportesController;
 
 use App\Http\Controllers\AdminController;
@@ -339,15 +340,21 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('/products/search', [saleController::class, 'search'])->name('products.search');
 
     Route::post('/sale/{saleId}/annul', [saleController::class, 'annulSale']);
-    Route::post('/sale/detail/{saleDetailId}/return', [saleController::class, 'partialReturn']);
+ //   Route::post('/sale/detail/{saleDetailId}/return', [saleController::class, 'partialReturn']);
 
     // Ruta para cargar la vista del formulario de devolución parcial
     // Esta ruta redirige a una vista donde se muestra el detalle de la venta
     // y permite digitar la cantidad a devolver para cada producto.
-    Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialReturnForm'])->name('sales.partialReturnForm');
+  //  Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialReturnForm'])->name('sales.partialReturnForm');
 
     // Ruta para procesar la devolución parcial (se envían los datos mediante AJAX)
-    Route::post('/sale/partial-return', [saleController::class, 'partialReturnSaleDetails'])->name('sales.partialReturn');
+   
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Ruta para la devolución parcial vía Livewire
+    Route::get('/sale/partial-return-form/{saleId}', PartialReturn::class)
+         ->name('sales.partialReturnForm');
 });
 
 /*****************************ORDENES DE PEDIDOS******************************************/
