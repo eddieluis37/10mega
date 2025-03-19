@@ -68,6 +68,8 @@ class PermissionsSeeder extends Seeder
             'ver_compra_lote',
             'acceder_compra_lote',
 
+            'ver_productos',
+
             'ver_alistamiento',
             'acceder_alistamiento',
             'crear_alistamiento',
