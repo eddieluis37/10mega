@@ -419,6 +419,18 @@ Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
     Route::get('/producto-edit/{id}', [productoController::class, 'edit'])->name('producto.edit');
 });
 
+Route::middleware(['auth', 'can:acceder_lista_de_precio'])->group(function () {    
+    /*****************************LISTA_DE_PRECIO******************************************/
+    Route::get('lista_de_precio', [listaPrecioController::class, 'index'])->name('lista_de_precio.index');
+    Route::get('showListaPrecio', [listaPrecioController::class, 'show'])->name('lista_de_precio.showListaPrecio');
+
+    Route::post('lista_de_preciosave', [listaPrecioController::class, 'store'])->name('lista_de_precio.save');
+    Route::get('lista_de_precio/create/{id}', [listaPrecioController::class, 'create'])->name('lista_de_precio.create');
+    Route::get('lista_de_precio{lista_de_precioId}/delete', [listaPrecioController::class, 'delete'])->name('lista_de_precio.delete');
+    Route::get('lista_de_precio{lista_de_precioId}/edit', [listaPrecioController::class, 'edit'])->name('lista_de_precio.edit');
+    Route::post('lista_de_precio/{lista_de_precioId}', [listaPrecioController::class, 'update'])->name('lista_de_precio.update');    
+});
+
 Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('/profile', [App\Http\Controllers\UserController::class, 'profile'])
@@ -662,16 +674,6 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('notadebito/showNotacredito/{id}', [pdfNotadebitoController::class, 'showNotadebito']);
 
 
-    /*****************************LISTA_DE_PRECIO******************************************/
-
-    Route::get('lista_de_precio', [listaPrecioController::class, 'index'])->name('lista_de_precio.index');
-    Route::get('showListaPrecio', [listaPrecioController::class, 'show'])->name('lista_de_precio.showListaPrecio');
-
-    Route::post('lista_de_preciosave', [listaPrecioController::class, 'store'])->name('lista_de_precio.save');
-    Route::get('lista_de_precio/create/{id}', [listaPrecioController::class, 'create'])->name('lista_de_precio.create');
-    Route::get('lista_de_precio{lista_de_precioId}/delete', [listaPrecioController::class, 'delete'])->name('lista_de_precio.delete');
-    Route::get('lista_de_precio{lista_de_precioId}/edit', [listaPrecioController::class, 'edit'])->name('lista_de_precio.edit');
-    Route::post('lista_de_precio/{lista_de_precioId}', [listaPrecioController::class, 'update'])->name('lista_de_precio.update');
 
     Route::post('/drag-drop', [DragDropController::class, 'handleDragDrop'])->name('drag-drop.handleDragDrop');
     Route::get('/drag', [DragDropController::class, 'showDragView'])->name('drag.showDragView');
