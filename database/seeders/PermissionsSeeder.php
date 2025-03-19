@@ -298,9 +298,8 @@ class PermissionsSeeder extends Seeder
             //  ->orWhereIn('id', $idsUsuarios)
             ->get();
 
-        foreach ($usuarios as $usuario) {
-            // Esto remueve cualquier otro rol y asigna solo el rol Cajero
-            $usuario->syncRoles($Cajero);
+        foreach ($usuarios as $usuario) {           
+            $usuario->assignRole($Cajero);
         }
 
         // 3. Definir el listado de permisos a sincronizar
@@ -354,6 +353,14 @@ class PermissionsSeeder extends Seeder
                 $user->assignRole($role);
             }
         }
+
+        $usuarios = User::where('name', 'like', '%CAJERO%')->get();
+
+        foreach ($usuarios as $usuario) {
+            // Esto remueve cualquier otro rol y asigna solo el rol Cajero
+            $usuario->syncRoles([$Cajero]);
+        }
+
 
         /* ************************ */
 
