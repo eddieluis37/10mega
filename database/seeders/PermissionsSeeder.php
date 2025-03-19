@@ -311,6 +311,7 @@ class PermissionsSeeder extends Seeder
             'crear_compra_productos',
             'editar_compra_productos',
             'ver_ventas',
+            'ver_venta_dom',
             'ver_venta_autoservicio',
             'ver_venta_parrilla',
             'acceder_ventas',
