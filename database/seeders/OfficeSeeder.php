@@ -16,16 +16,52 @@ class OfficeSeeder extends Seeder
     public function run()
     {
         Office::create([
-            'name' =>'BOSA',
-       ]);
+            'name' => 'PLANTA',
+        ]);
         Office::create([
-            'name' =>'GUADALUPE',
-       ]);
+            'name' => 'CARVAJAL',
+        ]);
         Office::create([
-            'name' =>'LA NACIONAL',
-       ]);
+            'name' => 'GUADALUPE CALLE',
+        ]);
         Office::create([
-            'name' =>'MINUTO DE DIOS',
-       ]);
+            'name' => 'CENTRAL GUADALUPE CERDO',
+        ]);
+        Office::create([
+            'name' => 'GALAN',
+        ]);
+        Office::create([
+            'name' => 'PALOQUEMAO',
+        ]);
+        Office::create([
+            'name' => 'SUBAZAR',
+        ]);
+        Office::create([
+            'name' => 'CERDO CENTRAL',
+        ]);
+        Office::create([
+            'name' => 'LECHONERIA',
+        ]);
+        Office::create([
+            'name' => 'SOACHA',
+        ]);
+        Office::create([
+            'name' => 'GRANJA',
+        ]);
+        Office::create([
+            'name' => 'GASTOS Y MANTENIMIENTO VEHICULOS',
+        ]);
+        Office::create([
+            'name' => 'GASTOS Y MANTENIMIENTO MAQUINARIA',
+        ]);
+        Office::create([
+            'name' => 'PLANTA2',
+        ]);
+        Office::create([
+            'name' => 'CARNES FRIAS MEGA',
+        ]);
+        Office::create([
+            'name' => 'MEGACENTRAL',
+        ]);
     }
 }
