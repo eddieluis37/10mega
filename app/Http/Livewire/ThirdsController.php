@@ -38,7 +38,7 @@ class ThirdsController extends Component
 		$this->componentName = 'Terceros';
 		$this->type_identificationid = 'Elegir';
 		$this->digito_verificacion = 0;
-		$this->officeid = 'Elegir';
+		$this->officeid = '1';
 		$this->porc_descuento = 0;
 		$this->type_regimen_ivaid = 'Elegir';
 		$this->provinceid = 'Elegir';
