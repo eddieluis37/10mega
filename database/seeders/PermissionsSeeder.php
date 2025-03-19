@@ -310,15 +310,12 @@ class PermissionsSeeder extends Seeder
             'acceder_compra_productos',
             'crear_compra_productos',
             'editar_compra_productos',
-
             'ver_ventas',
             'ver_venta_autoservicio',
             'ver_venta_parrilla',
-
             'acceder_ventas',
             'crear_venta_pos',
             'editar_venta_pos',
-
             'crear_venta_dom',
             'editar_venta_dom',
             'ver_traslado',
@@ -326,7 +323,6 @@ class PermissionsSeeder extends Seeder
             'crear_traslado',
             'editar_traslado',
             'eliminar_traslado',
-
             'ver_orders',
             'acceder_orders',
             'crear_orders',
