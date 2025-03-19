@@ -16,7 +16,7 @@ class SacrificiocerdoSeeder extends Seeder
     {
         Sacrificiocerdo::create([
             'name' => '1 FRIGORIFICO GUADALUPE PLANTA CERDO',
-            'dni' => 199145893,
+            'dni' => 1991458,
             'address' => 'CALLE 124B #17A-37SUR BOGOTA',
             'phone' => 3132623896,
             'email' => 'Frigorificoguada@gmail.com',
@@ -43,7 +43,7 @@ class SacrificiocerdoSeeder extends Seeder
         ]);
         Sacrificiocerdo::create([
             'name' => '3 FRIGORIFICO GUADALUPE PLANTA CERDA',
-            'dni' => 299145893,
+            'dni' => 299145894,
             'address' => 'CALLE 124B #17A-37SUR BOGOTA',
             'phone' => 3132623896,
             'email' => 'Frigorificoguada@gmail.com',
@@ -56,7 +56,7 @@ class SacrificiocerdoSeeder extends Seeder
         ]);
         Sacrificiocerdo::create([
             'name' => '2 FRIGORIFICO GUADALUPE PLANTA CERDA',
-            'dni' => 299145893,
+            'dni' => 299145895,
             'address' => 'CALLE 124B #17A-37SUR BOGOTA',
             'phone' => 3132623896,
             'email' => 'Frigorificoguada@gmail.com',
