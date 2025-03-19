@@ -302,9 +302,10 @@ class PermissionsSeeder extends Seeder
             $usuario->assignRole($Cajero);
         }
 
-        // 3. Definir el listado de permisos a sincronizar
-        $permisos = [
-            'Pos_Create',
+        $cajero = Role::updateOrCreate(['name' => 'Cajero']);
+        $cajero->syncPermissions([
+
+        'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
@@ -329,35 +330,10 @@ class PermissionsSeeder extends Seeder
             'crear_orders',
             'editar_orders',
             'eliminar_orders',
-        ];
+            
+        ]);
 
-        // 4. Crear o actualizar cada permiso (sin eliminar los registros globales)
-        foreach ($permisos as $permiso) {
-            Permission::updateOrCreate(['name' => $permiso]);
-        }
-
-        // 6. Para cada rol definido, sincronizar los permisos
-        foreach ($rolesUsuarios as $roleName => $userName) {
-            // Crear o actualizar el rol
-            $role = Role::updateOrCreate(['name' => $roleName]);
-
-            // Sincronizar los permisos: asigna los del arreglo y quita los que no están en él
-            $role->syncPermissions($permisos);
-
-            // Buscar el usuario por nombre y asignarle el rol, si existe
-            $user = User::where('name', $userName)->first();
-            if ($user) {
-                $user->assignRole($role);
-            }
-        }
-
-        $usuarios = User::where('name', 'like', '%CAJERO%')->get();
-
-        foreach ($usuarios as $usuario) {
-            // Esto remueve cualquier otro rol y asigna solo el rol Cajero
-            $usuario->syncRoles([$Cajero]);
-        }
-
+      
 
         /* ************************ */
 
