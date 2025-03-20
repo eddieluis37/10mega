@@ -55,7 +55,7 @@ class SacrificiocerdoSeeder extends Seeder
 
         ]);
         Sacrificiocerdo::create([
-            'name' => '2 FRIGORIFICO GUADALUPE PLANTA CERDA',
+            'name' => '4 FRIGORIFICO GUADALUPE PLANTA CERDA',
             'dni' => 299145895,
             'address' => 'CALLE 124B #17A-37SUR BOGOTA',
             'phone' => 3132623896,
@@ -66,6 +66,18 @@ class SacrificiocerdoSeeder extends Seeder
             'bascula' => 0,
             'transporte' => 4450
 
+        ]);
+        Sacrificiocerdo::create([
+            'name' => '5 LOCAL',
+            'dni' => 2911111111,
+            'address' => 'CALLE 124B #17A-37SUR BOGOTA',
+            'phone' => 3132623896,
+            'email' => 'Frigorificoguada@gmail.com',
+            'sacrificio' => 0,
+            'fomento' => 0,           
+            'deguello' => 0,
+            'bascula' => 0,
+            'transporte' => 0
         ]);
 
     }
