@@ -91,7 +91,7 @@ use App\Http\Controllers\inventory\inventoryController;
 
 use App\Http\Controllers\inventory\diaryController;
 use App\Http\Controllers\inventory\mensualController;
-use App\Http\Controllers\listaprecio\listaPrecioController;
+use App\Http\Controllers\listaprecio\listaprecioController;
 
 use App\Http\Controllers\ReportController;
 
@@ -421,14 +421,14 @@ Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
 
 Route::middleware(['auth', 'can:acceder_lista_de_precio'])->group(function () {    
     /*****************************LISTA_DE_PRECIO******************************************/
-    Route::get('lista_de_precio', [listaPrecioController::class, 'index'])->name('lista_de_precio.index');
-    Route::get('showListaPrecio', [listaPrecioController::class, 'show'])->name('lista_de_precio.showListaPrecio');
+    Route::get('lista_de_precio', [listaprecioController::class, 'index'])->name('lista_de_precio.index');
+    Route::get('showListaPrecio', [listaprecioController::class, 'show'])->name('lista_de_precio.showListaPrecio');
 
-    Route::post('lista_de_preciosave', [listaPrecioController::class, 'store'])->name('lista_de_precio.save');
-    Route::get('lista_de_precio/create/{id}', [listaPrecioController::class, 'create'])->name('lista_de_precio.create');
-    Route::get('lista_de_precio{lista_de_precioId}/delete', [listaPrecioController::class, 'delete'])->name('lista_de_precio.delete');
-    Route::get('lista_de_precio{lista_de_precioId}/edit', [listaPrecioController::class, 'edit'])->name('lista_de_precio.edit');
-    Route::post('lista_de_precio/{lista_de_precioId}', [listaPrecioController::class, 'update'])->name('lista_de_precio.update');    
+    Route::post('lista_de_preciosave', [listaprecioController::class, 'store'])->name('lista_de_precio.save');
+    Route::get('lista_de_precio/create/{id}', [listaprecioController::class, 'create'])->name('lista_de_precio.create');
+    Route::get('lista_de_precio{lista_de_precioId}/delete', [listaprecioController::class, 'delete'])->name('lista_de_precio.delete');
+    Route::get('lista_de_precio{lista_de_precioId}/edit', [listaprecioController::class, 'edit'])->name('lista_de_precio.edit');
+    Route::post('lista_de_precio/{lista_de_precioId}', [listaprecioController::class, 'update'])->name('lista_de_precio.update');    
 });
 
 Route::group(['middleware' => [('auth')]], function () {
