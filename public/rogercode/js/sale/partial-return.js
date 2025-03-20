@@ -1,5 +1,5 @@
 console.log("Comienza Devolucion parcial Starting");
-
+import {sendData} from '../exportModule/core/rogercode-core.js';
 import {
     successToastMessage,
     errorMessage,
@@ -8,24 +8,12 @@ import {
     loadingStart,
     loadingEnd,
 } from "../exportModule/core/rogercode-core.js";
+
+
 const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-
-    const sendData = async (dataform, ruta) => {
-        let response = await fetch(ruta, {
-          headers: {
-            "X-CSRF-TOKEN": token,
-          },
-          method: "POST",
-          body: dataform,
-        });
-        let data = await response.json();
-        return data;
-      };
-
-      
 // Espera a que el DOM esté listo
 document.addEventListener("DOMContentLoaded", function () {
     // Define la función en el ámbito global para que pueda ser llamada desde el botón
@@ -35,12 +23,13 @@ document.addEventListener("DOMContentLoaded", function () {
             let form = document.getElementById("partialReturnForm");
             let dataform = new FormData(form);
 
-            sendData("/sale/partial-return",dataform,token).then((data) => {
-                    if (data.message) {
-                        alert("Éxito: " + data.message);
+            sendData("/sale/partialreturn",dataform,token)
+                .then((data) => {
+                    if (dataform.message) {
+                        alert("Éxito: " + dataform.message);
                         window.location.href = "/sales";
-                    } else if (data.error) {
-                        alert("Error: " + data.error);
+                    } else if (dataform.error) {
+                        alert("Error: " + dataform.error);
                     }
                 })
                 .catch((error) => {

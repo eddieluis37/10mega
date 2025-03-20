@@ -1,12 +1,11 @@
 @extends('layouts.theme.app')
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container mt-4">
     <h4>Devolución Parcial de Venta #{{ $sale->id }}</h4>
-    <form id="partialReturnForm">
+    <!-- El formulario envía la información a la ruta definida -->
+    <form action="{{ route('sale.partial-return') }}" method="POST">
         @csrf
         <input type="hidden" name="ventaId" value="{{ $sale->id }}">
-        <!-- En caso de requerir store_id para el inventario -->
         <input type="hidden" name="store_id" value="{{ $sale->store_id }}">
         <table class="table table-bordered">
             <thead>
@@ -22,23 +21,18 @@
                     <td>{{ $detail->nameprod }}</td>
                     <td class="text-center">{{ number_format($detail->quantity, 2) }}</td>
                     <td class="text-center">
-                        <!-- El input se llama "returns[detalle_id]" para formar un arreglo -->
+                        <!-- Se crea un arreglo de retornos, uno por detalle -->
                         <input type="number" step="0.01" min="0" max="{{ $detail->quantity }}"
-                            name="returns[{{ $detail->id }}]" class="form-control" placeholder="0">
+                            name="returns[{{ $detail->id }}]" class="form-control" placeholder="0" required>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
         <div class="text-right">
-            <button type="button" class="btn btn-primary" onclick="confirmPartialReturnSubmit()">
-                Procesar Devolución Parcial
-            </button>
+            <!-- Sin JavaScript, el botón simplemente envía el formulario -->
+            <button type="submit" class="btn btn-primary">Procesar Devolución Parcial</button>
         </div>
     </form>
 </div>
-@endsection
-
-@section('script')
-<script src="{{asset('rogercode/js/sale/partial-return.js')}}" type="module"></script>
 @endsection

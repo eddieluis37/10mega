@@ -1362,7 +1362,7 @@ class saleController extends Controller
      * @param int $id
      * @return \Illuminate\View\View
      */
-    public function partialReturnForm($id)
+    public function partialreturnform($id)
     {
         // Obtener la venta, o abortar con 404 si no se encuentra
         $sale = Sale::findOrFail($id);
@@ -1373,6 +1373,8 @@ class saleController extends Controller
         // Retornar la vista con la información necesaria
         return view('sale.partial_return', compact('sale', 'saleDetails'));
     }
+
+
 
     public function partialreturnsaledetails(Request $request)
     {
@@ -1484,5 +1486,45 @@ class saleController extends Controller
             }
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function partialReturn(Request $request)
+    {
+        dd($request->all());
+        // Validar los datos recibidos
+        $validated = $request->validate([
+            'ventaId' => 'required|integer|exists:sales,id',
+            'store_id' => 'required|integer',
+            'returns' => 'required|array',
+            'returns.*' => 'numeric|min:0',
+        ]);
+
+        // Obtener la venta a través del ID
+        $sale = Sale::findOrFail($validated['ventaId']);
+
+        // Procesar cada detalle de devolución
+        foreach ($validated['returns'] as $detailId => $returnQuantity) {
+            if ($returnQuantity > 0) {
+                // Se asume que existe un registro en sale_details para este ID
+                $saleDetail = SaleDetail::findOrFail($detailId);
+
+                // Valida que la cantidad a devolver no exceda la cantidad vendida
+                if ($returnQuantity > $saleDetail->quantity) {
+                    return redirect()->back()->with('error', 'La cantidad a devolver supera la cantidad vendida para el producto ' . $saleDetail->nameprod);
+                }
+
+                // Lógica de devolución:
+                // 1. Actualizar la cantidad vendida, o registrar la devolución en una tabla separada.
+                // 2. Actualizar el inventario (sumar la cantidad devuelta).
+                // 3. Registrar la transacción de devolución.
+
+                // Ejemplo: Actualizar la venta (esto dependerá de tu lógica de negocio)
+                $saleDetail->quantity = $saleDetail->quantity - $returnQuantity;
+                $saleDetail->save();
+            }
+        }
+
+        // Redirige a la lista de ventas con mensaje de éxito
+        return redirect()->route('sales.index')->with('success', 'Devolución parcial procesada exitosamente.');
     }
 }
