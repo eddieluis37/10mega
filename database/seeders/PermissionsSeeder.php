@@ -298,20 +298,20 @@ class PermissionsSeeder extends Seeder
             //  ->orWhereIn('id', $idsUsuarios)
             ->get();
 
-        foreach ($usuarios as $usuario) {           
+        foreach ($usuarios as $usuario) {
             $usuario->assignRole($Cajero);
         }
 
         $cajero = Role::updateOrCreate(['name' => 'Cajero']);
         $cajero->syncPermissions([
 
-        'Pos_Create',
+            'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
             'crear_compra_productos',
             'editar_compra_productos',
-            'ver_ventas',          
+            'ver_ventas',
             'ver_venta_autoservicio',
             'ver_venta_parrilla',
             'acceder_ventas',
@@ -328,10 +328,10 @@ class PermissionsSeeder extends Seeder
             'acceder_orders',
             'crear_orders',
             'editar_orders',
-            'eliminar_orders',            
+            'eliminar_orders',
         ]);
 
-      
+
 
         /* ************************ */
 
@@ -384,6 +384,8 @@ class PermissionsSeeder extends Seeder
             'ver_administracion',
             'ver_terceros',
             'ver_compras',
+
+            'acceder_terceros',
 
             'ver_compra_lote',
             'acceder_compra_lote',

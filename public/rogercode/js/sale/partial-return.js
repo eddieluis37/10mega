@@ -1,61 +1,52 @@
 console.log("Comienza Devolucion parcial Starting");
+
 import {
-    sendData
+    successToastMessage,
+    errorMessage,
+} from "../exportModule/message/rogercode-message.js";
+import {
+    loadingStart,
+    loadingEnd,
 } from "../exportModule/core/rogercode-core.js";
+const token = document
+    .querySelector('meta[name="csrf-token"]')
+    .getAttribute("content");
 
 
-// Espera a que el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    // Obtenemos el token CSRF
-    var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
-
-
-  /*   const sendData = async (dataform, ruta) => {
+    const sendData = async (dataform, ruta) => {
         let response = await fetch(ruta, {
-            headers: {
-                "X-CSRF-TOKEN": token,
-            },
-            method: "POST",
-            body: dataform,
+          headers: {
+            "X-CSRF-TOKEN": token,
+          },
+          method: "POST",
+          body: dataform,
         });
         let data = await response.json();
-        //console.log(data);
         return data;
-    }; */
+      };
 
-    function confirmPartialReturnSubmit() {
-        swal({
-            title: "Confirmar Devolución Parcial",
-            text: "¿Estás seguro de procesar la devolución parcial?",
-            icon: "warning",
-            buttons: {
-                cancel: "Cancelar",
-                confirm: "Sí, procesar"
-            },
-            dangerMode: true,
-        }).then((willProcess) => {
-            if (willProcess) {
-                let form = document.getElementById('partialReturnForm');
-                let dataform = new FormData(form);
+      
+// Espera a que el DOM esté listo
+document.addEventListener("DOMContentLoaded", function () {
+    // Define la función en el ámbito global para que pueda ser llamada desde el botón
+    window.confirmPartialReturnSubmit = function () {
+        // Usamos el diálogo de confirmación nativo de JavaScript
+        if (confirm("¿Estás seguro de procesar la devolución parcial?")) {
+            let form = document.getElementById("partialReturnForm");
+            let dataform = new FormData(form);
 
-                // En lugar de usar fetch, utilizamos la función sendData:
-                sendData(dataform, '/sale/partial-return')
-                    .then(data => {
-                        if (data.message) {
-                            swal("Éxito", data.message, "success").then(() => {
-                                window.location.href = "/sales";
-                            });
-                        } else if (data.error) {
-                            swal("Error", data.error, "error");
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        swal("Error", "Ocurrió un error al procesar la devolución.", "error");
-                    });
-            }
-        });
-    }
-
-
+            sendData("/sale/partial-return",dataform,token).then((data) => {
+                    if (data.message) {
+                        alert("Éxito: " + data.message);
+                        window.location.href = "/sales";
+                    } else if (data.error) {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    alert("Ocurrió un error al procesar la devolución.");
+                });
+        }
+    };
 });

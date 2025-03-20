@@ -1374,16 +1374,115 @@ class saleController extends Controller
         return view('sale.partial_return', compact('sale', 'saleDetails'));
     }
 
-    public function partialReturnSaleDetails(Request $request)
+    public function partialreturnsaledetails(Request $request)
     {
+        // Deshabilitar Debugbar (y verificar que no inyecte salida extra)
         if (app()->bound('debugbar')) {
             app('debugbar')->disable();
         }
-        if (ob_get_length()) {
-            ob_end_clean();
-        }
 
-        return response()->json(['message' => 'Test response'])
-            ->header('Content-Type', 'application/json');
+        Log::info('partialReturnSaleDetails called', $request->all());
+
+        DB::beginTransaction();
+        try {
+            $saleId = $request->input('ventaId');
+            $returns = $request->input('returns'); // Arreglo: [ sale_detail_id => cantidad_a_devolver, ... ]
+            Log::info("Processing sale ID: {$saleId}", ['returns' => $returns]);
+
+            if (empty($returns)) {
+                Log::error('No returns provided.');
+                if (ob_get_length()) {
+                    ob_end_clean();
+                }
+                return response()->json(['error' => 'No se ha indicado ninguna cantidad a devolver.'], 422);
+            }
+
+            $totalNota = 0;
+            foreach ($returns as $saleDetailId => $returnQuantity) {
+                if ($returnQuantity > 0) {
+                    $detail = SaleDetail::findOrFail($saleDetailId);
+                    Log::info("Processing detail ID: {$saleDetailId}", [
+                        'returnQuantity'   => $returnQuantity,
+                        'availableQuantity' => $detail->quantity
+                    ]);
+
+                    if ($returnQuantity > $detail->quantity) {
+                        throw new \Exception("La cantidad a devolver para el producto {$detail->nameprod} supera la cantidad vendida.");
+                    }
+                    $totalNota += $detail->price * $returnQuantity;
+                }
+            }
+            Log::info("Total Nota Calculated", ['totalNota' => $totalNota]);
+
+            // Crear la cabecera de la Nota de Crédito
+            $notaCredito = NotaCredito::create([
+                'sale_id' => $saleId,
+                'user_id' => auth()->id(),
+                'total'   => $totalNota,
+                'status'  => 'active',
+            ]);
+            Log::info("Nota de Crédito creada", ['notaCreditoId' => $notaCredito->id]);
+
+            foreach ($returns as $saleDetailId => $returnQuantity) {
+                if ($returnQuantity > 0) {
+                    $detail = SaleDetail::findOrFail($saleDetailId);
+
+                    // Crear el detalle de la Nota de Crédito
+                    NotaCreditoDetalle::create([
+                        'notacredito_id' => $notaCredito->id,
+                        'product_id'     => $detail->product_id,
+                        'quantity'       => $returnQuantity,
+                        'price'          => $detail->price,
+                    ]);
+
+                    // Registrar el movimiento en inventario (tipo 'notacredito')
+                    MovimientoInventario::create([
+                        'tipo'           => 'notacredito',
+                        'sale_id'        => $saleId,
+                        'lote_id'        => $detail->lote_id,
+                        'product_id'     => $detail->product_id,
+                        'cantidad'       => $returnQuantity,
+                        'costo_unitario' => $detail->price,
+                        'total'          => $detail->price * $returnQuantity,
+                        'fecha'          => now(),
+                    ]);
+
+                    // Actualizar el inventario: incrementar 'cantidad_notacredito'
+                    $inventario = Inventario::where('product_id', $detail->product_id)
+                        ->where('lote_id', $detail->lote_id)
+                        ->where('store_id', $request->input('store_id')) // Se asume que se envía store_id
+                        ->first();
+                    if ($inventario) {
+                        $inventario->cantidad_notacredito += $returnQuantity;
+                        $inventario->save();
+                    }
+
+                    // Actualizar el detalle de venta (restar la cantidad devuelta)
+                    $detail->quantity -= $returnQuantity;
+                    $detail->save();
+                    Log::info("Processed detail", ['saleDetailId' => $saleDetailId, 'newQuantity' => $detail->quantity]);
+                }
+            }
+
+            // Opcional: Actualizar el estado de la venta a "devuelta" (3)
+            $sale = Sale::findOrFail($saleId);
+            $sale->status = 3;
+            $sale->save();
+
+            DB::commit();
+            Log::info("partialReturnSaleDetails completed successfully for saleId " . $saleId);
+
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+            return response()->json(['message' => 'Devolución parcial procesada correctamente.']);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error("Error in partialReturnSaleDetails", ['error' => $e->getMessage()]);
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
