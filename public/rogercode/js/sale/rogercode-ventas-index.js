@@ -222,17 +222,23 @@ const confirmAnulacion = (id) => {
 // Ejemplo para SweetAlert: <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 function confirmPartialReturn(saleId) {
-    swal({
-        title: "Devolución Parcial",
-        text: "¿Deseas proceder con la devolución parcial de esta venta?",
-        icon: "warning",
-        buttons: ["Cancelar", "Sí, proceder"],
-        dangerMode: true,
-    }).then((willProceed) => {
-        if (willProceed) {
-            // Redirige a la vista/formulario de devolución parcial
-            window.location.href = "/sale/partial-return-form/" + saleId;
-        }
+    Swal.fire({
+      title: "Devolución Parcial",
+      text: `¿Deseas continuar con devolución parcial de la venta #:${saleId}`,
+      icon: "warning",           // En versiones anteriores era 'type'
+      showCancelButton: true,    
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#fff",
+      confirmButtonText: "Sí, Continuar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      // En SweetAlert2 v8, 'result.value' es 'true' cuando se confirma
+      if (result.value) {
+        // Redirige a la vista/formulario de devolución parcial
+        window.location.href = "/sale/partial-return-form/" + saleId;
+      }
+      // Si el usuario cancela, no hacemos nada
     });
-}
+  }
+  
 

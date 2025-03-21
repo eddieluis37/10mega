@@ -1647,10 +1647,10 @@ class saleController extends Controller
                 ]);
                 Log::info("Movimiento de inventario registrado para producto ID: {$detail->product_id}");
 
-                // Actualizar el detalle de la venta, restando la cantidad devuelta
+                /* // Actualizar el detalle de la venta, restando la cantidad devuelta
                 $detail->quantity -= $returnQuantity;
                 $detail->save();
-                Log::info("Detalle de venta ID: {$detail->id} actualizado. Nueva cantidad: {$detail->quantity}");
+                Log::info("Detalle de venta ID: {$detail->id} actualizado. Nueva cantidad: {$detail->quantity}"); */
 
                 // Actualizar el inventario: incrementar el campo 'cantidad_notacredito'
                 $inventario = Inventario::where('product_id', $detail->product_id)
@@ -1663,6 +1663,11 @@ class saleController extends Controller
                     Log::info("Inventario actualizado para producto ID: {$detail->product_id}");
                 }
             }
+
+            // Actualizar el estado de la venta a '3' indicando que la devolución parcial se procesó correctamente
+            $sale->status = '3';
+            $sale->save();
+            Log::info("Venta ID {$sale->id} actualizada a status '3'.");
 
             DB::commit();
             Log::info("Devolución parcial procesada exitosamente para la venta ID: {$sale->id}");
