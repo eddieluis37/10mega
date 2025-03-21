@@ -5,12 +5,9 @@ use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
+|--------------------------------------------------------------------------|
+| Ordenar las rutas dentro del grupo de middleware a veces puede afectar el comportamiento de redirección o el modo en que se carga la vista, 
+| especialmente si se aplican otras rutas que modifican el flujo de autenticación.|
 */
 
 /* Route::get('/', function () {
@@ -121,15 +118,11 @@ use App\Http\Controllers\ProductLoteController;
 /************************************************* */
 
 
+
+
 Route::post('/inventario/inicial', [InventarioController::class, 'registrarInicial'])->name('inventario.inicial');
 Route::get('/inventario/inicial', [InventarioController::class, 'showInventarioInicialForm'])->name('inventario.inicial.form');
 
-Route::group(['middleware' => ['auth', 'admin']], function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-});
-
-//Route::get('/post/{post}', 'HomeController@post')->name('post');
-Route::get('/post/{post}', [HomeController::class, 'post'])->name('post');
 
 //Route::get('/admin/posts', 'Admin\PostsController@index')->name('admin.posts.index');
 Route::get('/admin/posts', [App\Http\Controllers\Admin\PostsController::class, 'index'])->name('admin.posts.index');
@@ -170,7 +163,6 @@ Route::resource('books', BooksController::class);
 Route::get('/roles/{role}', 'RoleController@show');
 
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes.index');
-
 
 /*****************************BENEFICIO-RES*******************************************/
 
@@ -313,6 +305,7 @@ Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function
 // Proteger todas las rutas dentro del modulo de ventas
 /*****************************VENTAS******************************************/
 Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
+    Route::post('sale/partial_return', [App\Http\Controllers\sale\saleController::class, 'partialReturn'])->name('sale.partial_return');
     Route::get('sale{saleId}/delete', [SaleController::class, 'delete'])->name('sale.delete');
     Route::get('sale{ventaId}/edit', [SaleController::class, 'edit'])->name('sale.edit');
     Route::post('sale/{ventaId}', [SaleController::class, 'update'])->name('sale.update');
@@ -342,22 +335,12 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     // Ruta para cargar la vista del formulario de devolución parcial
     // Esta ruta redirige a una vista donde se muestra el detalle de la venta
     // y permite digitar la cantidad a devolver para cada producto.
-    Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialreturnform'])->name('sales.partialReturnForm');
-    
-    // Ruta para procesar la devolución parcial
-   // Route::post('/sale/partialreturn', [saleController::class, 'partialreturnsaledetails'])->name('sales.partialreturn');
-    
-    Route::post('/sale/partial-return', [saleController::class, 'partialReturn'])->name('sale.partial-return');
-
+    Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialreturnform'])->name('sales.partialReturnForm'); 
     // Ruta para procesar la devolución parcial (se envían los datos mediante AJAX)
     Route::post('/sale/{saleId}/annul', [saleController::class, 'annulSale']);
-
 });
 
-Route::middleware(['auth'])->group(function () {
-    // Ruta para la devolución parcial vía Livewire
-    //   Route::get('/sale/partial-return-form/{saleId}', PartialReturn::class)->name('sales.partialReturnForm');
-});
+
 
 /*****************************ORDENES DE PEDIDOS******************************************/
 Route::middleware(['auth', 'can:acceder_orders'])->group(function () {
@@ -434,8 +417,8 @@ Route::middleware(['auth', 'can:acceder_lista_de_precio'])->group(function () {
     Route::post('lista_de_precio/{lista_de_precioId}', [listaprecioController::class, 'update'])->name('lista_de_precio.update');    
 });
 
-Route::group(['middleware' => [('auth')]], function () {
-
+Route::group(['middleware' => [('auth')]], function () {   
+   
     Route::get('/profile', [App\Http\Controllers\UserController::class, 'profile'])
         ->name('users.profile')
         ->middleware('auth');

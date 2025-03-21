@@ -179,7 +179,8 @@ class PermissionsSeeder extends Seeder
             'crear_traslado',
             'editar_traslado',
             'eliminar_traslado',
-
+            'acceder_cargue_productos_term',
+            
             'ver_inventario',
             'acceder_inventario',
             'crear_inventario',
