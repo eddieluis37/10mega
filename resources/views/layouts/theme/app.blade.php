@@ -41,14 +41,47 @@
 
             <div class="layout-px-spacing">
 
+                <!-- Bloque de mensajes flash -->
+                @if(session('success'))
+                <div id="flash-message-success" class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div id="flash-message-error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                @endif
+
+                <script>
+                    // Utilizando vanilla JavaScript para ocultar los mensajes después de 15 segundos (15000 ms)
+                    setTimeout(function() {
+                        var flashSuccess = document.getElementById('flash-message-success');
+                        if (flashSuccess) {
+                            flashSuccess.style.display = 'none';
+                        }
+                        var flashError = document.getElementById('flash-message-error');
+                        if (flashError) {
+                            flashError.style.display = 'none';
+                        }
+                    }, 15000);
+                </script>
+
+
                 @yield('content')
-
             </div>
-
 
             @include('layouts.theme.footer')
         </div>
         <!--  END CONTENT AREA  -->
+
 
 
     </div>

@@ -234,7 +234,7 @@ class beneficioresController extends Controller
 
 				return response()->json([
 					"status" => 1,
-					"message" => "Guardado correctamente",
+					"message" => "Editado correctamente",
 					"registroId" => 0
 				]);
 			}

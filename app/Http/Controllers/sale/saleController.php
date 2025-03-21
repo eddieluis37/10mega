@@ -1490,8 +1490,8 @@ class saleController extends Controller
 
 
 
-    public function partialReturn(Request $request)
-    {  
+    public function partialReturnVersion1(Request $request)
+    {
         // Si es POST, procesa la devolución parcial
         if ($request->isMethod('post')) {
             // Registra los datos recibidos para debug
@@ -1546,14 +1546,131 @@ class saleController extends Controller
 
             return redirect()->route('sale.index')->with('success', 'Devolución parcial procesada exitosamente.');
         }
+    }
 
-        // Si es GET, muestra el formulario para procesar la devolución parcial
-        // Debes obtener la venta y sus detalles (por ejemplo, utilizando el ID enviado por query string o desde otra fuente)
-        // Aquí se asume que ya tienes $sale y $saleDetails disponibles
-        // Ejemplo:
-        $sale = Sale::findOrFail(4); // Cambia 4 por el ID correspondiente
-        $saleDetails = SaleDetail::where('sale_id', $sale->id)->with('product')->get();
+    public function partialReturn(Request $request)
+    {
+        Log::info('Recibiendo datos para devolución parcial', $request->all());
 
-        return view('sales.partial_return', compact('sale', 'saleDetails'));
+        // Validar que se reciba el arreglo "returns" y el ID de la venta
+        $validated = $request->validate([
+            'ventaId'    => 'required|integer|exists:sales,id',
+            'returns'    => 'required|array',
+            'returns.*'  => 'numeric|min:0',
+        ]);
+
+        // Obtener la venta junto con sus detalles
+        $sale = Sale::with('details')->findOrFail($validated['ventaId']);
+        Log::info("Venta encontrada", ['sale_id' => $sale->id]);
+
+        // Verificar que la venta esté en un estado que permita la devolución parcial
+        if ($sale->status !== '1') { // '1' podría representar ventas cerradas o elegibles para devolución
+            Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status})");
+            return redirect()->back()->with('error', 'La venta no puede ser devuelta parcialmente.');
+        }
+
+        // Preparar variables para calcular el total parcial a devolver y almacenar los detalles a procesar
+        $partialTotal = 0;
+        $returnedDetails = [];
+
+        // Recorrer cada retorno indicado en la solicitud
+        foreach ($validated['returns'] as $detailId => $returnQuantity) {
+            if ($returnQuantity > 0) {
+                // Buscar el detalle de venta correspondiente en la colección de detalles
+                $detail = $sale->details->where('id', $detailId)->first();
+                if (!$detail) {
+                    Log::warning("No se encontró el detalle de venta con ID: {$detailId}");
+                    continue;
+                }
+
+                // Validar que la cantidad a devolver no supere la cantidad vendida actual
+                if ($returnQuantity > $detail->quantity) {
+                    $msg = "La cantidad a devolver ({$returnQuantity}) supera la cantidad vendida para el producto ID {$detail->product_id}";
+                    Log::error($msg);
+                    return redirect()->back()->with('error', $msg);
+                }
+
+                // Acumular el total a devolver
+                $partialTotal += $returnQuantity * $detail->price;
+                $returnedDetails[] = [
+                    'detail' => $detail,
+                    'returnQuantity' => $returnQuantity,
+                ];
+            }
+        }
+
+        if (empty($returnedDetails)) {
+            Log::warning("No se especificó ninguna cantidad para devolución parcial en la venta ID {$sale->id}");
+            return redirect()->back()->with('error', 'No se especificaron devoluciones válidas.');
+        }
+
+        Log::info("Total parcial a devolver: {$partialTotal}");
+
+        // Procesar la devolución parcial mediante nota de crédito
+        DB::beginTransaction();
+        try {
+            // Crear la cabecera de la nota de crédito
+            $notaCredito = NotaCredito::create([
+                'sale_id' => $sale->id,
+                'user_id' => auth()->id(),
+                'total'   => $partialTotal,
+                'status'  => '1',
+            ]);
+            Log::info("Nota de crédito creada con ID: {$notaCredito->id}");
+
+            // Recorrer cada detalle a devolver
+            foreach ($returnedDetails as $returned) {
+                /** @var SaleDetail $detail */
+                $detail = $returned['detail'];
+                $returnQuantity = $returned['returnQuantity'];
+
+                // Crear el detalle de la nota de crédito para la devolución parcial
+                NotaCreditoDetalle::create([
+                    'notacredito_id' => $notaCredito->id,
+                    'product_id'     => $detail->product_id,
+                    'quantity'       => $returnQuantity,
+                    'price'          => $detail->price,
+                ]);
+                Log::info("Nota de crédito detalle creada para producto ID: {$detail->product_id}, cantidad: {$returnQuantity}");
+
+                // Registrar el movimiento en inventario para la devolución parcial
+                MovimientoInventario::create([
+                    'tipo'            => 'notacredito',
+                    'store_origen_id' => $detail->store_id,
+                    'sale_id'         => $sale->id,
+                    'lote_id'         => $detail->lote_id,
+                    'product_id'      => $detail->product_id,
+                    'cantidad'        => $returnQuantity,
+                    'costo_unitario'  => $detail->price,
+                    'total'           => $returnQuantity * $detail->price,
+                    'fecha'           => now(),
+                ]);
+                Log::info("Movimiento de inventario registrado para producto ID: {$detail->product_id}");
+
+                // Actualizar el detalle de la venta, restando la cantidad devuelta
+                $detail->quantity -= $returnQuantity;
+                $detail->save();
+                Log::info("Detalle de venta ID: {$detail->id} actualizado. Nueva cantidad: {$detail->quantity}");
+
+                // Actualizar el inventario: incrementar el campo 'cantidad_notacredito'
+                $inventario = Inventario::where('product_id', $detail->product_id)
+                    ->where('lote_id', $detail->lote_id)
+                    ->where('store_id', $detail->store_id)
+                    ->first();
+                if ($inventario) {
+                    $inventario->cantidad_notacredito += $returnQuantity;
+                    $inventario->save();
+                    Log::info("Inventario actualizado para producto ID: {$detail->product_id}");
+                }
+            }
+
+            DB::commit();
+            Log::info("Devolución parcial procesada exitosamente para la venta ID: {$sale->id}");
+            return redirect()->route('sale.index')->with('success', 'Devolución parcial procesada exitosamente.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error("Error en devolución parcial para venta ID {$sale->id}: " . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }
