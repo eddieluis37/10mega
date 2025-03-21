@@ -22,7 +22,7 @@ use App\Models\Formapago;
 use App\Models\Inventario;
 use App\Models\Listapreciodetalle;
 use App\Models\MovimientoInventario;
-use App\Models\NotaCredito;
+use App\Models\Notacredito;
 use App\Models\NotaCreditoDetalle;
 use App\Models\Sale;
 use App\Models\SaleCaja;
@@ -1303,7 +1303,7 @@ class saleController extends Controller
         DB::beginTransaction();
         try {
             // Crear la cabecera de la nota de crédito
-            $notaCredito = NotaCredito::create([
+            $notaCredito = Notacredito::create([
                 'sale_id' => $sale->id,
                 'user_id' => auth()->id(),
                 'total'   => $sale->total, // O bien, sumar los totales de cada detalle
@@ -1417,7 +1417,7 @@ class saleController extends Controller
             Log::info("Total Nota Calculated", ['totalNota' => $totalNota]);
 
             // Crear la cabecera de la Nota de Crédito
-            $notaCredito = NotaCredito::create([
+            $notaCredito = Notacredito::create([
                 'sale_id' => $saleId,
                 'user_id' => auth()->id(),
                 'total'   => $totalNota,
@@ -1610,7 +1610,7 @@ class saleController extends Controller
         DB::beginTransaction();
         try {
             // Crear la cabecera de la nota de crédito
-            $notaCredito = NotaCredito::create([
+            $notaCredito = Notacredito::create([
                 'sale_id' => $sale->id,
                 'user_id' => auth()->id(),
                 'total'   => $partialTotal,
