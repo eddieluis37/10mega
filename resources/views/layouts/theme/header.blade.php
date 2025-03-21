@@ -1,8 +1,12 @@
+<style>
+    .custom-dropdown-right {
+        right: 0 !important;
+        left: auto !important;
+    }
+</style>
 <div class="header-container fixed-top">
-    
-
     <header class="header navbar navbar-expand-sm">
-        <!-- Logo -->
+        <!-- Logo en la parte izquierda -->
         <ul class="navbar-item flex-row">
             <li class="nav-item theme-logo">
                 <a href="{{ route('login') }}">
@@ -25,25 +29,9 @@
             </svg>
         </a>
 
-        <!-- Search -->
-        <ul class="navbar-item flex-row search-ul">
-            <li class="nav-item align-self-center search-animated">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="feather feather-search toggle-search">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <form class="form-inline search-full form-inline search" role="search">
-                    <div class="search-bar">
-                        <input type="text" class="form-control search-form-control ml-lg-auto" placeholder="Search...">
-                    </div>
-                </form>
-            </li>
-        </ul>
-
-        <!-- Usuario y Dropdown -->
-        <ul class="navbar-item flex-row navbar-dropdown">
+        <!-- Aquí se ubica el bloque que queremos mover a la derecha.
+             Usamos "ml-auto" para empujar este <ul> al extremo derecho. -->
+        <ul class="navbar-item flex-row ml-auto">
             <li class="nav-item dropdown user-profile-dropdown order-lg-0 order-1">
                 <a href="javascript:void(0);" class="nav-link dropdown-toggle user d-flex align-items-center"
                     id="userProfileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -61,7 +49,9 @@
                             @if($centroCosto)
                             <div class="cost-center d-flex align-items-center mr-3">
                                 <!-- Ícono de tienda reducido -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-shopping-bag">
                                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                                     <line x1="3" y1="6" x2="21" y2="6"></line>
                                     <path d="M16 10a4 4 0 0 1-8 0"></path>
@@ -72,7 +62,9 @@
 
                             <div class="user-info d-flex align-items-center">
                                 <!-- Ícono de usuario reducido -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-user">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
@@ -81,7 +73,9 @@
                             @else
                             <div class="guest-info d-flex align-items-center">
                                 <!-- Ícono de usuario reducido -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-user">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
@@ -91,16 +85,17 @@
                         </div>
                     </div>
                     <!-- Imagen fija (mega-carnes-frias.svg) -->
-                    <img src="{{ asset('assets/img/mega-carnes-frias.svg') }}" alt="admin-profile" class="img-fluid">
+                    <!--  <img src="{{ asset('assets/img/mega-carnes-frias.svg') }}" alt="admin-profile" class="img-fluid"> -->
                 </a>
                 <!-- Dropdown -->
-                <div class="dropdown-menu position-absolute animated fadeInUp" aria-labelledby="userProfileDropdown">
+                <div class="dropdown-menu dropdown-menu-right custom-dropdown-right position-absolute animated fadeInUp"
+                    aria-labelledby="userProfileDropdown">
                     <div class="user-profile-section">
                         <div class="media mx-auto">
                             @if(Auth::check() && Auth::user()->foto_perfil)
-                            <img src="{{ asset('storage/' . Auth::user()->foto_perfil) }}" class="img-fluid mr-2" alt="{{ Auth::user()->name }}">
+                            <img src="{{ asset('assets/img/avartar/1avatar.png') }}" class="img-fluid mr-2" alt="{{ Auth::user()->name }}">
                             @else
-                            <img src="{{ asset('assets/img/default-avatar.png') }}" class="img-fluid mr-2" alt="avatar">
+                            <img src="{{ asset('assets/img/avatar/1avatar.png') }}" class="img-fluid mr-2" alt="">
                             @endif
                             <div class="media-body" style="font-size:0.75rem;">
                                 <h5 class="mb-0">@guest Usuario @else {{ Auth::user()->name }} @endguest</h5>
@@ -139,6 +134,5 @@
                 </div>
             </li>
         </ul>
-
     </header>
 </div>
