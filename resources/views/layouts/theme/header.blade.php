@@ -1,9 +1,5 @@
 <div class="header-container fixed-top">
-    @if (app()->environment('local', 'staging', 'testing'))
-    <div class="alert alert-warning text-center m-0 py-2" role="alert">
-        {{ config('app.env_label') }}
-    </div>
-    @endif
+    
 
     <header class="header navbar navbar-expand-sm">
         <!-- Logo -->
