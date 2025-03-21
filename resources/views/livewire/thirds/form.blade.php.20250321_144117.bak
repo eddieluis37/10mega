@@ -27,7 +27,7 @@
 	<div class="col-sm-12 col-md-4">
 		<div class="form-group">
 			<label>Identificación</label>
-			<input type="text" wire:model.lazy="identification" class="form-control" placeholder="ej: 1018478965">
+			<input type="text" wire:model.lazy="identification" class="form-control" {{ $selected_id > 0 ? 'disabled' : '' }} placeholder="ej: 1018478965">
 			@error('identification') <span class="text-danger er">{{ $message}}</span>@enderror
 		</div>
 	</div>
