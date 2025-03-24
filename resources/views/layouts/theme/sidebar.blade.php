@@ -334,7 +334,7 @@
                             <a href="{{ url('sales') }}"> REMISIONES </a>
                         </li>
                         <li>
-                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                            <a href="{{ url('notacredito') }}"> NOTAS CREDITOS </a>
                         </li>
                     </ul>
                 </li>
@@ -365,7 +365,7 @@
                             <a href="{{ url('sales') }}"> REMISIONES </a>
                         </li>
                         <li>
-                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                            <a href="{{ url('notacredito') }}"> NOTAS CREDITOS </a>
                         </li>
                     </ul>
                 </li>
@@ -396,7 +396,7 @@
                             <a href="{{ url('sales') }}"> REMISIONES </a>
                         </li>
                         <li>
-                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                            <a href="{{ url('notacredito') }}"> NOTAS CREDITOS </a>
                         </li>
                     </ul>
                 </li>
@@ -427,7 +427,7 @@
                             <a href="{{ url('sales') }}"> REMISIONES </a>
                         </li>
                         <li>
-                            <a href="{{ url('sales') }}"> NOTAS CREDITOS </a>
+                            <a href="{{ url('notacredito') }}"> NOTAS CREDITOS </a>
                         </li>
                     </ul>
                 </li>
