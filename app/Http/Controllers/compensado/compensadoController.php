@@ -76,7 +76,6 @@ class compensadoController extends Controller
         $lotes = Lote::orderBy('id', 'desc')->get();
 
         $prod = Product::Where([
-            /*  ['category_id',$datacompensado[0]->categoria_id], */
             ['status', 1]
         ])
             ->orderBy('category_id', 'asc')
@@ -129,6 +128,28 @@ class compensadoController extends Controller
             ['status', 1]
         ])->get();
         return response()->json(['products' => $prod]);
+    }
+    
+    public function searchProducts(Request $request)
+    {
+        $query = $request->get('q');
+        
+        $products = Product::where('status', 1)
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('code', 'LIKE', "%{$query}%");
+            })
+            ->orderBy('name', 'asc')
+            ->get();
+            
+        $formattedProducts = $products->map(function($product) {
+            return [
+                'id' => $product->id,
+                'text' => $product->code . ' - ' . $product->name
+            ];
+        });
+        
+        return response()->json($formattedProducts);
     }
 
 

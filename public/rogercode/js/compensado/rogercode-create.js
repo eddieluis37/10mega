@@ -32,10 +32,35 @@ $(".select2Lote").select2({
 });
 
 $(".select2Prod").select2({
-    placeholder: "Busca un producto",
+    placeholder: "Busca un producto por nombre o código",
     width: "100%",
     theme: "bootstrap-5",
     allowClear: true,
+    minimumInputLength: 1,
+    ajax: {
+        url: "/compensado/search-products",
+        dataType: "json",
+        delay: 250,
+        data: function (params) {
+            return {
+                q: params.term // Término de búsqueda
+            };
+        },
+        processResults: function (data) {
+            return {
+                results: data
+            };
+        },
+        cache: true
+    },
+    templateResult: function (item) {
+        if (item.loading) return item.text;
+        return item.text;
+    },
+    templateSelection: function (item) {
+        if (!item.id) return item.text;
+        return item.text;
+    }
 });
 
 function showConfirmationAlert(element) {

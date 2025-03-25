@@ -224,6 +224,7 @@ Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::get('compensado/create/{id}', [compensadoController::class, 'create'])->name('compensado.create');
     Route::get('showlistcompensado', [compensadoController::class, 'show'])->name('compensado.showlist');
     Route::post('getproductos', [compensadoController::class, 'getproducts'])->name('compensado.getproductos');
+    Route::get('/compensado/search-products', [compensadoController::class, 'searchProducts'])->name('compensado.search-products');
     Route::post('compensadosave', [compensadoController::class, 'store'])->name('compensado.save');
     Route::post('compensadosavedetail', [compensadoController::class, 'savedetail'])->name('compensado.savedetail');
     Route::post('compensadodown', [compensadoController::class, 'destroy'])->name('compensado.down');
