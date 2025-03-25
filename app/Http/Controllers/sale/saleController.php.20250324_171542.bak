@@ -70,29 +70,18 @@ class saleController extends Controller
 
         return Datatables::of($data)->addIndexColumn()
             ->addColumn('status', function ($data) {
-                $statusText = '';
                 switch ($data->status) {
                     case 0:
-                        $statusText = '<span class="badge bg-info">Open</span>';
-                        break;
+                        return '<span class="badge bg-info">Open</span>';
                     case 1:
-                        $statusText = '<span class="badge bg-success">Close</span>';
-                        break;
+                        return '<span class="badge bg-success">Close</span>';
                     case 2:
-                        $statusText = '<span class="badge bg-danger">Annulled</span>';
-                        break;
+                        return '<span class="badge bg-danger">Annulled</span>';
                     case 3:
-                        // Mostrar estado de devolución con el contador de notas de crédito
-                        $creditNotesInfo = isset($data->credit_notes_count) && $data->credit_notes_count > 0
-                            ? ' (' . $data->credit_notes_count . '/2)'
-                            : '';
-                        $statusText = '<span class="badge bg-warning">Returned' . $creditNotesInfo . '</span>';
-                        break;
+                        return '<span class="badge bg-warning">Returned</span>';
                     default:
-                        $statusText = '<span class="badge bg-secondary">Unknown</span>';
-                        break;
+                        return '<span class="badge bg-secondary">Unknown</span>';
                 }
-                return $statusText;
             })
             ->addColumn('date', function ($data) {
                 $date = Carbon::parse($data->created_at);
@@ -111,45 +100,20 @@ class saleController extends Controller
                              </a>';
                 } elseif ($data->status == 1) {
                     // Venta cerrada: mostrar botón de devolución parcial y anulación total.
-                    // Verificar si ya se alcanzó el límite de notas de crédito (máximo 2)
-                    $creditNotesCount = isset($data->credit_notes_count) ? $data->credit_notes_count : 0;
-                    if ($creditNotesCount < 2) {
-                        $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
+                    $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial" onclick="confirmPartialReturn(' . $data->id . ')">
                                    <i class="fas fa-undo-alt"></i>
                              </a>';
-                    }
-                    // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
-                    if ($creditNotesCount == 0 || $creditNotesCount == 1) {
-                        $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
+                    $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                 <i class="fas fa-trash"></i>
                             </a>';
-                    }
                 } elseif ($data->status == 2) {
                     $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
                                 <i class="fas fa-ban"></i>
                              </button>';
                 } elseif ($data->status == 3) {
-                    // Venta con devolución parcial: verificar si todavía se pueden hacer más devoluciones
-                    $creditNotesCount = isset($data->credit_notes_count) ? $data->credit_notes_count : 0;
-
-                    if ($creditNotesCount < 2) {
-                        // Todavía se pueden hacer más devoluciones parciales
-                        $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
-                                   <i class="fas fa-undo-alt"></i>
-                             </a>';
-                    } else {
-                        // Ya se alcanzó el límite de devoluciones
-                        $btn .= '<button class="btn btn-dark" title="Máximo de devoluciones alcanzado" disabled>
-                                    <i class="fas fa-undo"></i>
-                                 </button>';
-                    }
-
-                    // Si tiene exactamente 1 nota de crédito, permitir anulación
-                    if ($creditNotesCount == 1) {
-                        $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
-                                    <i class="fas fa-trash"></i>
-                                </a>';
-                    }
+                    $btn .= '<button class="btn btn-dark" title="Venta devuelta" disabled>
+                                <i class="fas fa-undo"></i>
+                             </button>';
                 }
                 $btn .= '</div>';
                 return $btn;
@@ -1331,30 +1295,10 @@ class saleController extends Controller
         // Se obtiene la venta junto con sus detalles (relación 'details')
         $sale = Sale::with('details')->findOrFail($saleId);
 
-       /*  // Verificar que la venta esté en estado '1' 'closed' (o el estado que permita anulación)
+        // Verificar que la venta esté en estado '1' 'closed' (o el estado que permita anulación)
         if ($sale->status !== '1') {
             return response()->json(['error' => 'La venta no puede ser anulada.'], 422);
-        } */
-
-         // Obtener la venta junto con sus detalles
-       
-         Log::info("Venta encontrada", ['sale_id' => $sale->id]);
- 
-         // Verificar que la venta esté en un estado que permita la devolución parcial
-         if ($sale->status === '1') {
-             // '1' representa ventas elegibles para devolución; se continúa el proceso.
-         } elseif ($sale->status === '3') {
-             // Para ventas en estado '3' se debe tener exactamente 1 nota de crédito asociada
-             if ($sale->credit_notes_count !== 1) {
-                 Log::warning("La venta ID {$sale->id} en estado '3' no tiene una única nota de crédito. Cantidad: {$sale->credit_notes_count}");
-                 return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
-             }
-             // Continuar el proceso para ventas en estado '3' que cumplen la condición
-         } else {
-             Log::warning("La venta ID {$sale->id} no se puede devolver totalmente por su estado ({$sale->status}).");
-             return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
-         }
-
+        }
 
         DB::beginTransaction();
         try {
@@ -1616,22 +1560,18 @@ class saleController extends Controller
         // Obtener la venta junto con sus detalles
         $sale = Sale::with('details')->findOrFail($validated['ventaId']);
         Log::info("Venta encontrada", ['sale_id' => $sale->id]);
-
         // Verificar que la venta esté en un estado que permita la devolución parcial
-        if ($sale->status === '1') {
-            // '1' representa ventas elegibles para devolución; se continúa el proceso.
-        } elseif ($sale->status === '3') {
-            // Para ventas en estado '3' se debe tener exactamente 1 nota de crédito asociada
-            if ($sale->credit_notes_count !== 1) {
-                Log::warning("La venta ID {$sale->id} en estado '3' no tiene una única nota de crédito. Cantidad: {$sale->credit_notes_count}");
-                return redirect()->back()->with('error', 'La venta no puede ser devuelta parcialmente.');
-            }
-            // Continuar el proceso para ventas en estado '3' que cumplen la condición
-        } else {
-            Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status}).");
+        if ($sale->status !== '1') { // '1' representa ventas elegibles para devolución
+            Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status})");
             return redirect()->back()->with('error', 'La venta no puede ser devuelta parcialmente.');
         }
-
+        
+        // Verificar si ya se alcanzó el límite de notas de crédito permitidas (máximo 2)
+        if ($sale->credit_notes_count >= 2) {
+            Log::warning("La venta ID {$sale->id} ya tiene el máximo de notas de crédito permitidas ({$sale->credit_notes_count})");
+            return redirect()->back()->with('error', 'Esta venta ya tiene el máximo de 2 notas de crédito permitidas.');
+        }
+        
         // Preparar variables para calcular el total parcial a devolver y almacenar los detalles a procesar
         $partialTotal = 0;
         $returnedDetails = [];
@@ -1668,12 +1608,12 @@ class saleController extends Controller
         try {
             // Incrementar el contador de notas de crédito
             $sale->credit_notes_count += 1;
-
+            
             // Determinar el estado de las notas de crédito
             // Si es la primera nota, establecer como 'partial'
             // Si es la segunda nota, mantener como 'partial' a menos que sea una devolución total
             $sale->credit_note_status = 'partial';
-
+            
             // Crear la cabecera de la nota de crédito
             $notaCredito = Notacredito::create([
                 'sale_id' => $sale->id,

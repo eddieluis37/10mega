@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('movimiento_inventarios', function (Blueprint $table) {
             $table->id();
+            
+            $table->unsignedBigInteger('inventory_cycle_id')->nullable();
+            
             $table->enum('tipo', ['desposteres', 'despostecerdos', 'enlistments', 'compensadores', 'products_terminados', 'traslado_ingreso', 'traslado_salida', 'venta', 'notacredito' ])->default('compensadores'); //Tipo de movimiento (compra, traslado, alistamiento, etc.).
 
             $table->foreignId('desposteres_id')->nullable()->constrained('desposteres')->onDelete('set null');

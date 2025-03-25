@@ -49,4 +49,10 @@ class Inventario extends Model
     {
         return $this->belongsTo(Store::class, 'store_id');
     }
+
+    public function movements()
+    {
+        return $this->hasMany(MovimientoInventario::class);
+    }
+
 }
