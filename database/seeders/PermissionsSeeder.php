@@ -349,6 +349,7 @@ class PermissionsSeeder extends Seeder
         $causacion = Role::updateOrCreate(['name' => 'Causacion']);
         $causacion->syncPermissions([
             'ver_inventario',
+            'acceder_inventario',
             'ver_cargue_productos_term',
             'acceder_cargue_productos_term',
             'crear_cargue_productos_term',
