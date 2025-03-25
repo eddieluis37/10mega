@@ -1,0 +1,107 @@
+<?php
+
+// This file is used to put the application in maintenance mode
+// When this file exists, Laravel will display the maintenance page
+// for all requests except those from IPs listed in the $allowedIPs array
+
+$allowedIPs = [
+    '127.0.0.1',
+    '::1',
+    // Add your IP address here to access the site during maintenance
+];
+
+if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'], $allowedIPs)) {
+    return false;
+}
+
+// Return the maintenance page
+http_response_code(503);
+header('Retry-After: 3600');
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mantenimiento en Curso</title>
+  <style>
+    /* Estilos globales */
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #f2f2f2 0%, #e6e6e6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+    
+    /* Contenedor central */
+    .container {
+      text-align: center;
+      padding: 2rem;
+      background: #fff;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      max-width: 500px;
+      margin: 0 1rem;
+    }
+    
+    /* Icono de mantenimiento con animación */
+    .maintenance-icon {
+      font-size: 4rem;
+      color: #e67e22;
+      animation: pulse 2s infinite;
+      margin-bottom: 1rem;
+      transition: transform 0.3s ease;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Título */
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+    
+    /* Mensaje descriptivo */
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      color: #7f8c8d;
+      line-height: 1.5;
+    }
+    
+    /* Botón para volver o redirigir en algún caso */
+    .action-button {
+      display: inline-block;
+      padding: 0.8rem 1.8rem;
+      text-decoration: none;
+      background-color: #2980b9;
+      color: #fff;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    
+    .action-button:hover {
+      background-color: #3498db;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="maintenance-icon">&#9888;</div> <!-- Icono: símbolo de advertencia -->
+    <h1>Mantenimiento en Curso</h1>
+    <p>Estamos actualizando y mejorando nuestra aplicación para brindarte una experiencia óptima. Por favor, vuelve en unos minutos.</p>
+    <a href="/" class="action-button">Volver al Inicio</a>
+  </div>
+</body>
+</html>
