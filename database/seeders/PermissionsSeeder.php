@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['administracion', 'lista_de_precio', 'terceros', 'productos', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'venta_domicilio', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'lista_de_precio', 'terceros', 'productos', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio','venta_autoservicio', 'venta_parrilla', 'venta_bar', 'venta_parrilla', 'orders', 'bodegas']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -127,10 +127,10 @@ class PermissionsSeeder extends Seeder
             'crear_venta_pos',
             'editar_venta_pos',
 
-            'ver_venta_dom',
-            'acceder_venta_dom',
-            'crear_venta_dom',
-            'editar_venta_dom',
+            'ver_venta_domicilio',
+            'acceder_venta_domicilio',
+            'crear_venta_domicilio',
+            'editar_venta_domicilio',
             'ver_traslado',
 
             'acceder_traslado',
@@ -180,7 +180,7 @@ class PermissionsSeeder extends Seeder
             'editar_traslado',
             'eliminar_traslado',
             'acceder_cargue_productos_term',
-            
+
             'ver_inventario',
             'acceder_inventario',
             'crear_inventario',
@@ -306,7 +306,6 @@ class PermissionsSeeder extends Seeder
 
         $cajero = Role::updateOrCreate(['name' => 'Cajero']);
         $cajero->syncPermissions([
-
             'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
@@ -319,8 +318,8 @@ class PermissionsSeeder extends Seeder
             'acceder_ventas',
             'crear_venta_pos',
             'editar_venta_pos',
-            'crear_venta_dom',
-            'editar_venta_dom',
+            'crear_venta_domicilio',
+            'editar_venta_domicilio',
             'ver_traslado',
             'acceder_traslado',
             'crear_traslado',
@@ -536,5 +535,151 @@ class PermissionsSeeder extends Seeder
                 $user->assignRole($role);
             }
         }
+
+        /* ******************** FACTURACION PLANTA ***************** */
+        // 1. Crear o actualizar el rol "FacturacionPlanta"
+
+        User::updateOrCreate(
+            ['email' => 'facturacionplanta1@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'FACTURACIÓN PLANTA 1',
+                'phone' => '3214154625',
+                'profile' => 'FacturacionPlanta',
+                'status' => 'Active',
+                'password' => bcrypt('Fact01Planta.*')
+            ]
+        );
+        User::updateOrCreate(
+            ['email' => 'facturacionplanta2@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'FACTURACIÓN PLANTA 2',
+                'phone' => '3214154625',
+                'profile' => 'FacturacionPlanta',
+                'status' => 'Active',
+                'password' => bcrypt('Fact02Planta.*')
+            ]
+        );
+
+        $facturacionPlanta = Role::updateOrCreate(['name' => 'FacturacionPlanta']);
+
+        $usuarios = User::where('name', 'like', '%FACTURACIÓN%')
+            // ->orWhere('name', 'like', '%CAJERO%')
+            //  ->orWhereIn('id', $idsUsuarios)
+            ->get();
+
+        foreach ($usuarios as $usuario) {
+            $usuario->assignRole($facturacionPlanta);
+        }
+
+        // 3. Definir el listado de permisos a sincronizar
+        $facturacionPlanta->syncPermissions([
+            'ver_ventas',
+            'ver_venta_domicilio',
+            'ver_venta_pos',    
+
+            'Pos_Create',      
+
+            'acceder_ventas',
+            'crear_venta_pos',
+            'editar_venta_pos',
+           
+            'acceder_venta_domicilio',
+            'crear_venta_domicilio',
+            'editar_venta_domicilio',
+
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+
+            'ver_orders',
+            'acceder_orders',
+            'crear_orders',
+            'editar_orders',
+            'eliminar_orders',
+
+            'ver_inventario',
+            'acceder_inventario',
+        ]);
+
+         /* ******************** DESPACHOS PLANTA ***************** */
+        // 1. Crear o actualizar el rol "FacturacionPlanta"
+
+        User::updateOrCreate(
+            ['email' => 'despachosplanta@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'DESPACHOS PLANTA ',
+                'phone' => '3214154625',
+                'profile' => 'DespachosPlanta',
+                'status' => 'Active',
+                'password' => bcrypt('Desp@8Planta.*')
+            ]
+        );
+        
+
+        $despachosPlanta = Role::updateOrCreate(['name' => 'DespachosPlanta']);
+
+        $usuarios = User::where('name', 'like', '%DESPACHOS%')
+            // ->orWhere('name', 'like', '%CAJERO%')
+            //  ->orWhereIn('id', $idsUsuarios)
+            ->get();
+
+        foreach ($usuarios as $usuario) {
+            $usuario->assignRole($despachosPlanta);
+        }
+
+        // 3. Definir el listado de permisos a sincronizar
+        $despachosPlanta->syncPermissions([
+            
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+
+            'ver_inventario',
+            'acceder_inventario',
+
+        ]);
+
+           /* ******************** CALIDAD PLANTA ***************** */
+        // 1. Crear o actualizar el rol "FacturacionPlanta"
+
+        User::updateOrCreate(
+            ['email' => 'calidadplanta@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'CALIDAD PLANTA ',
+                'phone' => '3214154625',
+                'profile' => 'CalidadPlanta',
+                'status' => 'Active',
+                'password' => bcrypt('C@l1d@Planta.*')
+            ]
+        );
+    
+        $calidadPlanta = Role::updateOrCreate(['name' => 'CalidadPlanta']);
+
+        $usuarios = User::where('name', 'like', '%CALIDAD%')
+            // ->orWhere('name', 'like', '%CAJERO%')
+            //  ->orWhereIn('id', $idsUsuarios)
+            ->get();
+
+        foreach ($usuarios as $usuario) {
+            $usuario->assignRole($calidadPlanta);
+        }
+
+        // 3. Definir el listado de permisos a sincronizar
+        $calidadPlanta->syncPermissions([
+            
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+
+            'ver_inventario',
+            'acceder_inventario',
+            
+        ]);
     }
 }
