@@ -5,8 +5,8 @@
 // for all requests except those from IPs listed in the $allowedIPs array
 
 $allowedIPs = [
-  //  '127.0.0.1',
-  //  '::1',
+   // '127.0.0.1',
+    '::1',
     // Add your IP address here to access the site during maintenance
 ];
 

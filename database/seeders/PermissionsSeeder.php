@@ -113,6 +113,10 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $permisos = [
+            'ver_administracion',
+            'ver_terceros',
+            'accceder_terceros',
+            'crear_terceros',
             'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
@@ -174,6 +178,10 @@ class PermissionsSeeder extends Seeder
 
         $supervisorPuntosDeVenta = Role::updateOrCreate(['name' => 'SupervisorPuntosDeVenta']);
         $supervisorPuntosDeVenta->syncPermissions([
+            'ver_administracion',
+            'ver_terceros',
+            'accceder_terceros',
+            'crear_terceros',
             'ver_traslado',
             'acceder_traslado',
             'crear_traslado',
@@ -306,6 +314,10 @@ class PermissionsSeeder extends Seeder
 
         $cajero = Role::updateOrCreate(['name' => 'Cajero']);
         $cajero->syncPermissions([
+            'ver_administracion',
+            'ver_terceros',
+            'accceder_terceros',
+            'crear_terceros',
             'Pos_Create',
             'ver_compras',
             'ver_compra_productos',
@@ -478,7 +490,7 @@ class PermissionsSeeder extends Seeder
         }
 
         // 3. Definir el listado de permisos a sincronizar
-        $permisos = [
+        $permisos = [            
             'ver_ventas',
             'ver_venta_bar',
 
@@ -492,10 +504,10 @@ class PermissionsSeeder extends Seeder
             'acceder_ventas',
             'crear_venta_pos',
             'editar_venta_pos',
-            'ver_venta_dom',
-            'acceder_venta_dom',
-            'crear_venta_dom',
-            'editar_venta_dom',
+            'ver_venta_domicilio',
+            'acceder_venta_domicilio',
+            'crear_venta_domicilio',
+            'editar_venta_domicilio',
 
             'ver_traslado',
             'acceder_traslado',
@@ -574,6 +586,11 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $facturacionPlanta->syncPermissions([
+            'ver_administracion',
+            'ver_terceros',
+            'acceder_terceros',
+            'crear_terceros',
+
             'ver_ventas',
             'ver_venta_domicilio',
             'ver_venta_pos',    
