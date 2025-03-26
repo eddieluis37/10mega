@@ -16,7 +16,7 @@ class StoreUserSeeder extends Seeder
         // Definir las asignaciones de usuarios a bodegas
         $assignments = [
             'admin' => [
-                'users' => [1, 2, 8, 13, 23, 24, 25, 34, 35, 38, 39],
+                'users' => [1, 2, 8, 13, 23, 24, 25, 31, 32, 34, 35, 38, 39],
                 'stores' => Store::all()->pluck('id')->toArray(), // Todas las bodegas
             ],
             
