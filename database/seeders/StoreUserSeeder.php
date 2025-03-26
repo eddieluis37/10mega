@@ -16,7 +16,7 @@ class StoreUserSeeder extends Seeder
         // Definir las asignaciones de usuarios a bodegas
         $assignments = [
             'admin' => [
-                'users' => [1, 2, 8, 13, 23, 24, 25, 31, 32, 38, 39],
+                'users' => [1, 2, 8, 13, 22, 23, 24, 25, 31, 32, 38, 39],
                 'stores' => Store::all()->pluck('id')->toArray(), // Todas las bodegas
             ],
             
@@ -97,11 +97,7 @@ class StoreUserSeeder extends Seeder
             'AdminLechoneria' => [
                 'users' => [21],
                 'stores' => Store::whereIn('id', [24, 25, 26])->pluck('id')->toArray(), // Bodegas específicas
-            ],
-            'SupervisorPuntosDeVenta' => [
-                'users' => [22],
-                'stores' => Store::whereIn('id', [22, 23])->pluck('id')->toArray(), // Bodegas específicas
-            ],   
+            ],             
             'CajeroPuntosDeVentaPrincipal' => [
                 'users' => [11],
                 'stores' => Store::whereIn('id', [1, 4, 5, 6, 8, 9, 10])->pluck('id')->toArray(), // Bodegas específicas
