@@ -5,6 +5,7 @@ namespace App\Http\Controllers\notacredito;
 use App\Http\Controllers\Controller;
 use App\Models\Notacredito;
 use App\Models\NotacreditoDetail;
+use App\Models\NotaCreditoDetalle;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
@@ -29,7 +30,7 @@ class pdfNotacreditoController extends Controller
 
         //  dd($sale);
 
-        $saleDetails = NotacreditoDetail::where('notacredito_id', $id)
+        $saleDetails = NotaCreditoDetalle::where('notacredito_id', $id)
             ->join('products as pro', 'notacredito_details.product_id', '=', 'pro.id')
             ->select('notacredito_details.*', 'pro.name as nameprod', 'pro.code', 'notacredito_details.porc_iva', 'notacredito_details.iva', 'notacredito_details.porc_otro_impuesto')
             ->where([

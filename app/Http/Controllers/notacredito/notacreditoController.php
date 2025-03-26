@@ -483,6 +483,9 @@ class notacreditoController extends Controller
                         <a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="VerFacturaSinNC" target="_blank">
                         <i class="far fa-file-pdf"></i>
 					    </a>
+                         <a href="notacredito/showNotacredito/' . $data->ncid . '" class="btn btn-dark" title="VerNotacredito" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>
 					  
                         </div>
                         ';
