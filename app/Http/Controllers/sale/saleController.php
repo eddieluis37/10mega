@@ -822,14 +822,12 @@ class saleController extends Controller
     public function store(Request $request) // Guardar venta por domicilio
     {
         try {
-
             $rules = [
                 'ventaId' => 'required',
                 'cliente' => 'required',
                 'vendedor' => 'required',
                 'centrocosto' => 'required',
                 'subcentrodecosto' => 'required',
-
             ];
             $messages = [
                 'ventaId.required' => 'El ventaId es requerido',
@@ -838,7 +836,6 @@ class saleController extends Controller
                 'centrocosto.required' => 'El centro costo es requerido',
                 'subcentrodecosto.required' => 'El subcentro de costo es requerido',
             ];
-
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
                 return response()->json([
@@ -847,18 +844,15 @@ class saleController extends Controller
                 ], 422);
             }
 
+            // Verificar si ya existe la venta con ventaId
             $getReg = Sale::firstWhere('id', $request->ventaId);
-
-
             if ($getReg == null) {
                 $currentDateTime = Carbon::now();
                 $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
                 $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date->modify('next monday'); // Move to the next Monday
-                $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
-
+                $current_date->modify('next monday'); // Mover al siguiente lunes
+                $dateNextMonday = $current_date->format('Y-m-d'); // Formato Y-m-d
                 $id_user = Auth::user()->id;
-                //    $idcc = $request->centrocosto;
 
                 $venta = new Sale();
                 $venta->user_id = $id_user;
@@ -867,10 +861,8 @@ class saleController extends Controller
                 $venta->vendedor_id = $request->vendedor;
                 $venta->domiciliario_id = $request->domiciliario;
                 $venta->subcentrocostos_id = $request->subcentrodecosto;
-
                 $venta->fecha_venta = $currentDateFormat;
-                // $venta->fecha_cierre = $dateNextMonday;
-
+                // $venta->fecha_cierre = $dateNextMonday;  // Puedes habilitar si es necesario
                 $venta->total_bruto = 0;
                 $venta->descuentos = 0;
                 $venta->subtotal = 0;
@@ -882,49 +874,50 @@ class saleController extends Controller
                 $venta->valor_a_pagar_credito = 0;
                 $venta->valor_pagado = 0;
                 $venta->cambio = 0;
-
                 $venta->items = 0;
-
-                $venta->valor_pagado = 0;
-                $venta->cambio = 0;
                 $venta->tipo = "1";
-                $venta->save();
 
-                //ACTUALIZA CONSECUTIVO 
-                $idcc = $request->centrocosto;
-                DB::update(
-                    "
-        UPDATE sales a,    
-        (
-            SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
-            @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
-        ) as tabla
-        SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
-            a.consec = @numeroConsecutivo
-        WHERE a.consecutivo is null",
-                    [
-                        'vcentrocosto1' => $idcc,
-                        'vcentrocosto2' => $idcc
-                    ]
-                );
+                // --- INICIO: Generación de consecutivo para la facturacion de venta ---
+                // Recuperar el centro de costo y su prefijo
+                $centroCosto = CentroCosto::find($request->centrocosto);
+                if (!$centroCosto) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Centro de costo no encontrado'
+                    ], 404);
+                }
+                $prefijo = $centroCosto->prefijo;
+                // Consultar la última venta creada para este centro de costo para determinar el consecutivo
+                $lastSale = Sale::where('centrocosto_id', $request->centrocosto)
+                    ->orderBy('consec', 'desc')
+                    ->first();
+                $consecutivo = $lastSale ? $lastSale->consec + 1 : 1;
+                // Generar la resolución con el formato {prefijo}-{consecutivo} (con 5 dígitos)
+                $generaConsecutivo = $prefijo . '-' . str_pad($consecutivo, 5, '0', STR_PAD_LEFT);
+
+                $venta->consecutivo = $generaConsecutivo;
+                $venta->consec = $consecutivo;     // Campo para llevar el número secuencial numérico
+                // --- FIN: Generación de consecutivo ---
+
+                $venta->save();
 
                 return response()->json([
                     'status' => 1,
                     'message' => 'Guardado correctamente',
-                    "registroId" => $venta->id
+                    'registroId' => $venta->id
                 ]);
             } else {
+                // En caso de que ya exista la venta se actualizan algunos campos
                 $getReg = Sale::firstWhere('id', $request->ventaId);
                 $getReg->third_id = $request->vendedor;
                 $getReg->centrocosto_id = $request->centrocosto;
                 $getReg->subcentrocostos_id = $request->subcentrodecosto;
                 $getReg->factura = $request->factura;
                 $getReg->save();
-
                 return response()->json([
                     'status' => 1,
                     'message' => 'Guardado correctamente',
-                    "registroId" => 0
+                    'registroId' => 0
                 ]);
             }
         } catch (\Throwable $th) {
@@ -1331,29 +1324,29 @@ class saleController extends Controller
         // Se obtiene la venta junto con sus detalles (relación 'details')
         $sale = Sale::with('details')->findOrFail($saleId);
 
-       /*  // Verificar que la venta esté en estado '1' 'closed' (o el estado que permita anulación)
+        /*  // Verificar que la venta esté en estado '1' 'closed' (o el estado que permita anulación)
         if ($sale->status !== '1') {
             return response()->json(['error' => 'La venta no puede ser anulada.'], 422);
         } */
 
-         // Obtener la venta junto con sus detalles
-       
-         Log::info("Venta encontrada", ['sale_id' => $sale->id]);
- 
-         // Verificar que la venta esté en un estado que permita la devolución parcial
-         if ($sale->status === '1') {
-             // '1' representa ventas elegibles para devolución; se continúa el proceso.
-         } elseif ($sale->status === '3') {
-             // Para ventas en estado '3' se debe tener exactamente 1 nota de crédito asociada
-             if ($sale->credit_notes_count !== 1) {
-                 Log::warning("La venta ID {$sale->id} en estado '3' no tiene una única nota de crédito. Cantidad: {$sale->credit_notes_count}");
-                 return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
-             }
-             // Continuar el proceso para ventas en estado '3' que cumplen la condición
-         } else {
-             Log::warning("La venta ID {$sale->id} no se puede devolver totalmente por su estado ({$sale->status}).");
-             return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
-         }
+        // Obtener la venta junto con sus detalles
+
+        Log::info("Venta encontrada", ['sale_id' => $sale->id]);
+
+        // Verificar que la venta esté en un estado que permita la devolución parcial
+        if ($sale->status === '1') {
+            // '1' representa ventas elegibles para devolución; se continúa el proceso.
+        } elseif ($sale->status === '3') {
+            // Para ventas en estado '3' se debe tener exactamente 1 nota de crédito asociada
+            if ($sale->credit_notes_count !== 1) {
+                Log::warning("La venta ID {$sale->id} en estado '3' no tiene una única nota de crédito. Cantidad: {$sale->credit_notes_count}");
+                return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
+            }
+            // Continuar el proceso para ventas en estado '3' que cumplen la condición
+        } else {
+            Log::warning("La venta ID {$sale->id} no se puede devolver totalmente por su estado ({$sale->status}).");
+            return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
+        }
 
 
         DB::beginTransaction();

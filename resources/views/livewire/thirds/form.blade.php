@@ -81,7 +81,7 @@
 
 	<div class="col-sm-12 col-md-4">
 		<div class="form-group">
-			<label>Tipo Regimen IVA</label>
+			<label>Regimen tributario</label>
 			<select wire:model='type_regimen_ivaid' class="form-control">
 				<option value="Elegir" disabled>Elegir</option>
 				@foreach($type_regimen_ivas as $type_regimen_iva)
