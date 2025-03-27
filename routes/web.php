@@ -71,6 +71,7 @@ use App\Http\Controllers\inventory\CentroCostoProductController;
 use App\Http\Controllers\inventory\CargueProductTerminadosController;
 use App\Http\Controllers\CentroCostoProdController;
 use App\Http\Controllers\AsignarPreciosProdController;
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\caja\pdfCierreCajaController;
 use App\Http\Controllers\producto\productoController;
 use App\Http\Controllers\compensado\pdfCompensadoController;
@@ -118,6 +119,9 @@ use App\Http\Controllers\ProductLoteController;
 /************************************************* */
 
 
+Route::resource('brands', BrandController::class)->parameters([
+    'brands' => 'brandThird'
+]);
 
 
 Route::post('/inventario/inicial', [InventarioController::class, 'registrarInicial'])->name('inventario.inicial');

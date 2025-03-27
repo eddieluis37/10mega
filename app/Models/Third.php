@@ -35,8 +35,17 @@ class Third extends Model
 		return $this->hasMany(Sale::class);
 	}
 
+	// Relación uno a muchos con la tabla pivote (BrandThird)
+	public function brandThirds()
+	{
+		return $this->hasMany(BrandThird::class);
+	}
+
+	// Relación muchos a muchos con Marcas (Brand) a través de la tabla intermedia 'brand_third'
 	public function brands()
 	{
-		return $this->belongsToMany(Brand::class, 'brand_third');
+		return $this->belongsToMany(Brand::class, 'brand_third', 'third_id', 'brand_id')
+			->withPivot('id', 'name')
+			->withTimestamps();
 	}
 }

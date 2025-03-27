@@ -9,10 +9,19 @@ class Brand extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'description', 'status'];
 
-    public function thirds()
+    // Relación uno a muchos con la tabla pivote (BrandThird)
+    public function brandThirds()
     {
-        return $this->belongsToMany(Third::class, 'brand_third');
+        return $this->hasMany(BrandThird::class);
+    }
+
+    // Relación muchos a muchos con Proveedores (Third) a través de la tabla intermedia 'brand_third'
+    public function providers()
+    {
+        return $this->belongsToMany(Third::class, 'brand_third', 'brand_id', 'third_id')
+            ->withPivot('id', 'name')
+            ->withTimestamps();
     }
 }
