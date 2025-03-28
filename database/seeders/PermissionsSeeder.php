@@ -215,10 +215,7 @@ class PermissionsSeeder extends Seeder
         }
 
         $user = User::where('name', 'LIDER AUDITORIA')->first();
-        if ($user) {
-            $user->assignRole($recibidoPlanta);
-            $user->assignRole($analistaCostos);
-            $user->assignRole($supervisorPuntosDeVenta);
+        if ($user) {           
             $user->syncPermissions($allPermissions); // Asigna todos los permisos
         }
 
