@@ -28,6 +28,7 @@ case "$1" in
             exit 1
         fi
         echo "Modo de mantenimiento activado. El sitio ahora muestra la página de mantenimiento."
+        ;;  # <-- Se agregó el cierre del bloque down
     up)
         echo "Desactivando el modo de mantenimiento..."
         if [ -f "$MAINTENANCE_FILE" ]; then
