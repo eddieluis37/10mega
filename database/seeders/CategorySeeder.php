@@ -74,5 +74,17 @@ class CategorySeeder extends Seeder
             'name' => 'POLLOS',
             'image' => 'https://dummyimage.com/200x150/5c5756/fff'
         ]);
+        Category::create([
+            'name' => 'MUESTRAS',
+            'image' => 'https://dummyimage.com/200x150/5c5756/fff'
+        ]);
+        Category::create([
+            'name' => 'ELECTRODOMESTICOS',
+            'image' => 'https://dummyimage.com/200x150/5c5756/fff'
+        ]);
+        Category::create([
+            'name' => 'FRUVER',
+            'image' => 'https://dummyimage.com/200x150/5c5756/fff'
+        ]);
     }
 }
