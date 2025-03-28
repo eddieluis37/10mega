@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\Products\Meatcut;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
+use App\Models\Brand;
 use App\Models\Brand_third;
 use App\Models\Levels_products;
 use App\Models\Listaprecio;
@@ -45,7 +46,7 @@ class productoController extends Controller
         $presentaciones = Unitofmeasure::Where('status', 1)->get();
         $familias = Meatcut::Where('status', 1)->get();
 
-        $brandsThirds = Brand_third::orderBy('id')->get();
+        $brandsThirds = Brand::orderBy('id')->get();
 
         $usuario = User::WhereIn('id', [9, 11, 12])->get();
 
@@ -410,7 +411,7 @@ class productoController extends Controller
             if ($getReg == null) {
                 $prod = new Product();
                 $prod->category_id = $request->categoria;
-                $prod->brand_third_id = $request->marca;
+                $prod->brand_id = $request->marca;
                 $prod->level_product_id = $request->nivel;
                 $prod->unitofmeasure_id = $request->presentacion;
                 $prod->meatcut_id = $request->familia;
@@ -433,7 +434,7 @@ class productoController extends Controller
             } else {
                 $updateProd = Product::firstWhere('id', $request->productoId);
                 $updateProd->category_id = $request->categoria;
-                $updateProd->brand_third_id = $request->marca;
+                $updateProd->brand_id = $request->marca;
                 $updateProd->level_product_id = $request->nivel;
                 $updateProd->unitofmeasure_id = $request->presentacion;
                 $updateProd->meatcut_id = $request->familia;
