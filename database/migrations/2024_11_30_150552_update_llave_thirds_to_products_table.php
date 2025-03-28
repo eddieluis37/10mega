@@ -15,8 +15,8 @@ return new class extends Migration
     {
         //Crear una nueva llave foránea
         Schema::table('products', function (Blueprint $table) {
-            $table->foreignId('brand_third_id')->nullable()
-            ->after('name')->constrained('brand_third')->onDelete('cascade');
+            $table->foreignId('brand_id')->nullable()
+            ->after('name')->constrained('brands')->onDelete('cascade');
         });
     }
 
@@ -29,8 +29,8 @@ return new class extends Migration
     {
         //Eliminar la nueva llave foránea
         Schema::table('products', function (Blueprint $table) {
-            $table->dropForeign(['brand_third_id']);
-            $table->dropColumn('brand_third_id');
+            $table->dropForeign(['brand_id']);
+            $table->dropColumn('brand_id');
         });
     }
 };

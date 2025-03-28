@@ -72,6 +72,7 @@ use App\Http\Controllers\inventory\CargueProductTerminadosController;
 use App\Http\Controllers\CentroCostoProdController;
 use App\Http\Controllers\AsignarPreciosProdController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\BrandCrudController;
 use App\Http\Controllers\caja\pdfCierreCajaController;
 use App\Http\Controllers\producto\productoController;
 use App\Http\Controllers\compensado\pdfCompensadoController;
@@ -118,7 +119,11 @@ use App\Http\Controllers\ProductLoteController;
 
 /************************************************* */
 
+// Rutas para el CRUD de marcas (sin relaciones)
+Route::resource('brand-crud', BrandCrudController::class)
+    ->parameters(['brand-crud' => 'brand']);
 
+// Rutas para el módulo que relaciona una marca con proveedores
 Route::resource('brands', BrandController::class)->parameters([
     'brands' => 'brandThird'
 ]);

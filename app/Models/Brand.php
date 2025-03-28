@@ -24,4 +24,10 @@ class Brand extends Model
             ->withPivot('id', 'name')
             ->withTimestamps();
     }
+
+    // Relación: una marca puede tener muchos productos
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

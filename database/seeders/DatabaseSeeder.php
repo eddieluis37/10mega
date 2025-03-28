@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
     $this->call(AgreementSeeder::class);
     $this->call(ThirdSeeder::class);
     $this->call(BrandSeeder::class);
-    $this->call(BrandThirdSeeder::class);
+   // $this->call(BrandThirdSeeder::class);
     $this->call(ProductSeeder::class);
     $this->call(Precio_agreementSeeder::class);
     $this->call(SacrificioSeeder::class);
@@ -43,11 +43,11 @@ class DatabaseSeeder extends Seeder
     $this->call(CentrocostoSeeder::class);
     $this->call(LoteSeeder::class);
 
-    $this->call(Centro_costo_productSeeder::class);
+  //  $this->call(Centro_costo_productSeeder::class);
 
     $this->call(Nicho_mercadoSeeder::class);
     // $this->call(Nicho_mercado_centro_costo_productSeeder::class);
-    $this->call(Nicho_mercado_productSeeder::class);
+ //   $this->call(Nicho_mercado_productSeeder::class);
     $this->call(FormapagoSeeder::class);
     $this->call(Categorias_contableSeeder::class);
     $this->call(Clases_contableSeeder::class);

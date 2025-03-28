@@ -11,17 +11,18 @@ class BrandThird extends Model
 
     protected $table = 'brand_third';
 
-    protected $fillable = ['name', 'third_id', 'brand_id'];
+    protected $fillable = ['name', 'brand_id'];
 
-    // Relación inversa: cada registro de BrandThird pertenece a una Marca
-    public function brand()
-    {
-        return $this->belongsTo(Brand::class);
-    }
-
-    // Relación inversa: cada registro de BrandThird pertenece a un Proveedor (Third)
-    public function provider()
-    {
-        return $this->belongsTo(Third::class, 'third_id');
-    }
+     // Relación: cada registro pertenece a una Marca
+     public function brand()
+     {
+         return $this->belongsTo(Brand::class);
+     }
+ 
+     // Relación muchos a muchos con proveedores (Third) a través de la tabla pivote 'brand_third_third'
+     public function thirds()
+     {
+         return $this->belongsToMany(Third::class, 'brand_third_third', 'brand_third_id', 'third_id')
+                     ->withTimestamps();
+     }
 }

@@ -9,10 +9,26 @@ use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $brandThirds = BrandThird::with('brand', 'third')->get();
-        return view('brands.index', compact('brandThirds'));
+        $search = $request->get('search');
+
+        // Se carga la marca y los proveedores asignados (relación many-to-many)
+        $query = BrandThird::with('brand', 'thirds');
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhereHas('brand', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('thirds', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+        }
+
+        $brandThirds = $query->get();
+
+        return view('brands.index', compact('brandThirds', 'search'));
     }
 
     public function create()
@@ -24,7 +40,7 @@ class BrandController extends Controller
 
     public function store(Request $request)
     {
-        // Validamos que 'third_id' sea un arreglo y cada elemento exista en la tabla 'thirds'
+        // Validamos que 'third_id' sea un arreglo y que cada elemento exista en la tabla 'thirds'
         $validatedData = $request->validate([
             'name'       => 'required|string|max:255',
             'brand_id'   => 'required|exists:brands,id',
@@ -32,13 +48,13 @@ class BrandController extends Controller
             'third_id.*' => 'exists:thirds,id',
         ]);
 
-        // Creamos el registro sin los proveedores
+        // Creamos el registro en brand_third sin los proveedores
         $brandThird = BrandThird::create([
             'name'     => $validatedData['name'],
             'brand_id' => $validatedData['brand_id'],
         ]);
 
-        // Asociamos los proveedores (muchos a muchos)
+        // Asociamos los proveedores mediante la tabla pivote
         $brandThird->thirds()->attach($validatedData['third_id']);
 
         return redirect()->route('brands.index')->with('success', 'Marca relacionada de forma exitosa.');
@@ -53,7 +69,7 @@ class BrandController extends Controller
 
     public function update(Request $request, BrandThird $brandThird)
     {
-        // Validamos los datos, incluyendo el arreglo de proveedores
+        // Validamos los datos, incluyendo que 'third_id' sea un arreglo
         $validatedData = $request->validate([
             'name'       => 'required|string|max:255',
             'brand_id'   => 'required|exists:brands,id',

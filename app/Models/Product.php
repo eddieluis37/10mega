@@ -150,4 +150,9 @@ class Product extends Model
 	{
 		return $this->belongsToMany(Store::class, 'product_store');
 	}
+	// Relación: un producto pertenece a una marca
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
 }

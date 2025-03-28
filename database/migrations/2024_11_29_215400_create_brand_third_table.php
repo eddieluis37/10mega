@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+        // Tabla para el registro de marca (BrandThird)
         Schema::create('brand_third', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('third_id')->constrained()->onDelete('cascade');            
             $table->foreignId('brand_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
