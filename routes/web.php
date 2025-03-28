@@ -119,15 +119,6 @@ use App\Http\Controllers\ProductLoteController;
 
 /************************************************* */
 
-// Rutas para el CRUD de marcas (sin relaciones)
-Route::resource('brand-crud', BrandCrudController::class)
-    ->parameters(['brand-crud' => 'brand']);
-
-// Rutas para el módulo que relaciona una marca con proveedores
-Route::resource('brands', BrandController::class)->parameters([
-    'brands' => 'brandThird'
-]);
-
 
 Route::post('/inventario/inicial', [InventarioController::class, 'registrarInicial'])->name('inventario.inicial');
 Route::get('/inventario/inicial', [InventarioController::class, 'showInventarioInicialForm'])->name('inventario.inicial.form');
@@ -172,6 +163,19 @@ Route::resource('books', BooksController::class);
 Route::get('/roles/{role}', 'RoleController@show');
 
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes.index');
+
+
+Route::middleware(['auth', 'can:acceder_brand'])->group(function () {
+// Rutas para el CRUD de marcas (sin relaciones)
+Route::resource('brand-crud', BrandCrudController::class)
+    ->parameters(['brand-crud' => 'brand']);
+
+// Rutas para el módulo que relaciona una marca con proveedores
+Route::resource('brands', BrandController::class)->parameters([
+    'brands' => 'brandThird'
+]);
+
+});    
 
 /*****************************BENEFICIO-RES*******************************************/
 
