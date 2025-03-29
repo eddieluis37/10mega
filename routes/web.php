@@ -352,6 +352,8 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialreturnform'])->name('sales.partialReturnForm'); 
     // Ruta para procesar la devolución parcial (se envían los datos mediante AJAX)
     Route::post('/sale/{saleId}/annul', [saleController::class, 'annulSale']);
+
+    Route::get('/getDireccionesByClienteSale/{cliente_id}', [saleController::class, 'getDireccionesByClienteSale'])->name('sale.getDireccionesByClienteSale');
 });
 
 

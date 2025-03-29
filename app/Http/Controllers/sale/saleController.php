@@ -35,8 +35,29 @@ use Illuminate\Support\Facades\Log;
 class saleController extends Controller
 {
 
+    public function getDireccionesByClienteSale($cliente_id)
+    {
+        $direcciones = Third::where('id', $cliente_id)->orderBy('id', 'desc')->get(); // despliega las mas reciente
+        return response()->json($direcciones);
+    }
+   
     public function index()
     {
+        $direccion = Third::where(function ($query) {
+            $query->whereNotNull('direccion')
+                ->orWhereNotNull('direccion1')
+                ->orWhereNotNull('direccion2')
+                ->orWhereNotNull('direccion3')
+                ->orWhereNotNull('direccion4')
+                ->orWhereNotNull('direccion5')
+                ->orWhereNotNull('direccion6')
+                ->orWhereNotNull('direccion7')
+                ->orWhereNotNull('direccion8')
+                ->orWhereNotNull('direccion9');
+        })
+            ->select('direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9')
+            ->get();
+        
         $ventas = Sale::get();
         //   $centros = Centrocosto::WhereIn('id', [1])->get();
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
@@ -53,7 +74,7 @@ class saleController extends Controller
         $domiciliarios = Third::Where('domiciliario', 1)->get();
         $subcentrodecostos = Subcentrocosto::get();
 
-        return view('sale.index', compact('ventas', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
+        return view('sale.index', compact('ventas', 'direccion', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
     }
 
     public function show()
@@ -826,6 +847,7 @@ class saleController extends Controller
                 'ventaId' => 'required',
                 'cliente' => 'required',
                 'vendedor' => 'required',
+                'direccion_envio' => 'required',
                 'centrocosto' => 'required',
                 'subcentrodecosto' => 'required',
             ];
@@ -833,6 +855,7 @@ class saleController extends Controller
                 'ventaId.required' => 'El ventaId es requerido',
                 'cliente.required' => 'El cliente es requerido',
                 'vendedor.required' => 'El proveedor es requerido',
+                'direccion_envio.required' => 'La dirección de envio es requerida',
                 'centrocosto.required' => 'El centro costo es requerido',
                 'subcentrodecosto.required' => 'El subcentro de costo es requerido',
             ];
@@ -858,6 +881,7 @@ class saleController extends Controller
                 $venta->user_id = $id_user;
                 $venta->centrocosto_id = $request->centrocosto;
                 $venta->third_id = $request->cliente;
+                $venta->direccion_envio = $request->direccion_envio;
                 $venta->vendedor_id = $request->vendedor;
                 $venta->domiciliario_id = $request->domiciliario;
                 $venta->subcentrocostos_id = $request->subcentrodecosto;
@@ -875,7 +899,7 @@ class saleController extends Controller
                 $venta->valor_pagado = 0;
                 $venta->cambio = 0;
                 $venta->items = 0;
-                $venta->tipo = "1";
+                $venta->tipo = "1"; // Domicilio
 
                 // --- INICIO: Generación de consecutivo para la facturacion de venta ---
                 // Recuperar el centro de costo y su prefijo

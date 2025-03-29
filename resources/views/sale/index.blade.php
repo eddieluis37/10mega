@@ -56,13 +56,14 @@
 	<!-- modal -->
 	<div class="modal fade" id="modal-create-sale" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
-			<div class="modal-content bg-default">
+			<div class="modal-content bg-dark text-white">
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
-						<div class="modal-header">
-							<h4 class="modal-title">Crear venta domicilio</h4>
+						<div class="modal-header bg-secondary">
+							<h4 class="modal-title" style="color: white; font-weight: bold;">CREAR VENTA DOMICILIO </h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span></button>
+								<span aria-hidden="true">&times;</span>
+							</button>
 						</div>
 						<div class="modal-body">
 							@include('sale.modal_create')

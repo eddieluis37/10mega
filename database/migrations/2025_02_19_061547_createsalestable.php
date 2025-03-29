@@ -34,7 +34,9 @@ class CreateSalesTable extends Migration
             $table->foreign('vendedor_id')->references('id')->on('thirds'); 
             
             $table->unsignedBigInteger('domiciliario_id')->nullable();           
-            $table->foreign('domiciliario_id')->references('id')->on('thirds');                   
+            $table->foreign('domiciliario_id')->references('id')->on('thirds');   
+            
+            $table->string('direccion_envio', 150, 0)->nullable();
                   
             $table->decimal('items',10,0);
             
