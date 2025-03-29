@@ -40,7 +40,7 @@ class saleController extends Controller
         $direcciones = Third::where('id', $cliente_id)->orderBy('id', 'desc')->get(); // despliega las mas reciente
         return response()->json($direcciones);
     }
-   
+
     public function index()
     {
         $direccion = Third::where(function ($query) {
@@ -57,7 +57,7 @@ class saleController extends Controller
         })
             ->select('direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9')
             ->get();
-        
+
         $ventas = Sale::get();
         //   $centros = Centrocosto::WhereIn('id', [1])->get();
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
@@ -121,10 +121,23 @@ class saleController extends Controller
             })
             ->addColumn('action', function ($data) {
                 $btn = '<div class="text-center">';
+                
+                // Si el campo tipo es '1', se muestran los botones de Despacho y Remisión
+                if ($data->tipo == '1') {
+                    $btn .= '<a href="sale/showDespacho/' . $data->id . '" class="btn btn-warning" title="Ver Despacho" target="_blank">
+                                D
+                             </a>';
+                    $btn .= '<a href="sale/showRemision/' . $data->id . '" class="btn btn-success" title="Ver Remisión" target="_blank">
+                                R
+                             </a>';
+                }
+
                 // Botón para ver la factura (siempre visible)
                 $btn .= '<a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="Ver Factura" target="_blank">
                             <i class="far fa-file-pdf"></i>
                          </a>';
+
+
                 // Según el estado de la venta se muestran otras acciones:
                 if ($data->status == 0) {
                     $btn .= '<a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
@@ -137,13 +150,13 @@ class saleController extends Controller
                     if ($creditNotesCount < 2) {
                         $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
                                    <i class="fas fa-undo-alt"></i>
-                             </a>';
+                                 </a>';
                     }
                     // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
                     if ($creditNotesCount == 0 || $creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
-                                <i class="fas fa-trash"></i>
-                            </a>';
+                                    <i class="fas fa-trash"></i>
+                                 </a>';
                     }
                 } elseif ($data->status == 2) {
                     $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
@@ -152,24 +165,19 @@ class saleController extends Controller
                 } elseif ($data->status == 3) {
                     // Venta con devolución parcial: verificar si todavía se pueden hacer más devoluciones
                     $creditNotesCount = isset($data->credit_notes_count) ? $data->credit_notes_count : 0;
-
                     if ($creditNotesCount < 2) {
-                        // Todavía se pueden hacer más devoluciones parciales
                         $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
                                    <i class="fas fa-undo-alt"></i>
-                             </a>';
+                                 </a>';
                     } else {
-                        // Ya se alcanzó el límite de devoluciones
                         $btn .= '<button class="btn btn-dark" title="Máximo de devoluciones alcanzado" disabled>
                                     <i class="fas fa-undo"></i>
                                  </button>';
                     }
-
-                    // Si tiene exactamente 1 nota de crédito, permitir anulación
                     if ($creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
-                                </a>';
+                                 </a>';
                     }
                 }
                 $btn .= '</div>';

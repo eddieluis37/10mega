@@ -17,9 +17,9 @@ use Maatwebsite\Excel\Facades\Excel;
                 $query->where('status', 1);
             })->findOrFail($id); */
 
-class exportFacturaController extends Controller
+class exportRemisionController extends Controller
 {
-    public function showFactura($id)
+    public function showRemision($id)
     {
         $sale = Sale::join('thirds as third', 'sales.third_id', '=', 'third.id')
             ->join('users as u', 'sales.user_id', '=', 'u.id')
@@ -66,8 +66,7 @@ class exportFacturaController extends Controller
         // Se calcula la cantidad de Peso o unidades del total de productos de la venta.
         $totalQuantity = $saleDetails->sum('quantity');
 
-
-        $pdf = PDF::loadView('sale.reporte', compact('sale', 'saleDetails', 'saleDetailCount', 'totalQuantity'));
+        $pdf = PDF::loadView('sale.remision', compact('sale', 'saleDetails', 'saleDetailCount', 'totalQuantity'));
         return $pdf->stream('sale.pdf');
     }
 }

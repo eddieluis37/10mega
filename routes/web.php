@@ -114,6 +114,9 @@ use App\Http\Controllers\reportes\reporteventaprodController;
 use App\Http\Controllers\reportes\reportecomprarequeridaController;
 use App\Http\Controllers\reportes\reporteasignarpreciosController;
 use App\Http\Controllers\ProductLoteController;
+use App\Http\Controllers\sale\exportDespachoController;
+use App\Http\Controllers\sale\exportRemisionController;
+
 //use App\Http\Controllers\InventarioController;
 
 
@@ -341,6 +344,8 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::post('sale/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
 
     Route::get('sale/showFactura/{id}', [exportFacturaController::class, 'showFactura'])->name('sale.showFactura');
+    Route::get('sale/showDespacho/{id}', [exportDespachoController::class, 'showDespacho'])->name('sale.showDespacho');
+    Route::get('sale/showRemision/{id}', [exportRemisionController::class, 'showRemision'])->name('sale.showRemision');
 
     Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
 

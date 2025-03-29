@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="Content-Type" content="application/pdf">
 
-	<title>Reporte de Ventas</title>
+	<title>Despacho de Ventas</title>
 
 	<!-- cargar a través de la url del sistema -->
 	<!--
@@ -26,17 +26,15 @@
 			<tr>
 				<td class="text-center">
 					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
-					<!-- <span style="font-size: 11px; font-weight: bold; display: block; margin: 2;">900.490.684-3</span> -->
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">CL 35 SUR # 70B - 79</span>
+					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">DESPACHO</span>
+
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale->namecentrocosto}}</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Bogotá - Tels: 01-3178302986</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Resolución DIAN 18764064061708</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Autorizada el: 2025/01/20 :</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Prefijo ERPC Del 1 AL 10000</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Vigencia: 6</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Responsable de IVA</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Actividad Economica 4620 Tartifa</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina contamegachorizos@gmail.com </span>
+
+
+
+
+
+
 					<img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
 				</td>
 			</tr>
@@ -71,11 +69,9 @@
 							Desconocido
 							@endif
 						</strong>
-					</span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">
-						Items: <strong>{{ $saleDetailCount }}</strong>
-					</span>
-
+						<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">
+							Items: <strong>{{ $saleDetailCount }}</strong>
+						</span>
 				</td>
 			</tr>
 		</table>
@@ -168,25 +164,24 @@
 		<span><strong>Cambio: {{ number_format($sale->cambio,0, ',', '.')}}</strong></span>
 	</p>
 	<hr width="60mm" color="black" size="3">
-	<p align="center" style="font-size: 11px; margin-top: 8px;"><strong>A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las mercancías o prestación de servicios descritos en este título - Valor. Número Autorización 18764064061708 aprobado en 20240120 prefijo ERPC desde el número 1 al 10000, del dia 20 de enero de 2024, Vigencia: 6 Meses</strong></p>
-	<p align="center" style="font-size: 11px; margin: -8px;"><strong>Responsable de IVA - Actividad Económica 4620 Comercio al por mayor de materias primas agropecuarias; animales vivos Tarifa 11.04</strong></p>
 
-	<!-- <section class="footer">
+
+	<section class="footer">
 		<table cellpadding="0" cellspacing="0" class="table-items" width="100%">
 			<tr>
 				<td width="20%">
-					<span>Sistema PuraCarnes v1</span>
+					<span>OBSERVACIONES: </span>
 				</td>
 				<td width="60%" class="text-center">
-					Admin@puracarnes.com
+					
 				</td>
 				<td class="text-center" width="20%">
-					página <span class="pagenum"></span>
+					
 				</td>
 
 			</tr>
 		</table>
-	</section> -->
+	</section>
 </body>
 
 </html>
