@@ -15,7 +15,15 @@ $("#valor_a_pagar_efectivo").on("change", function () {
     // Se obtiene el total a pagar (desde el input readonly) y se le resta el efectivo ingresado.
     let totalAPagar = formatMoneyNumber($("#valor_a_pagar").val());
     let valorTarjetaCalculado = totalAPagar - valorEfectivo;
-    $("#valor_a_pagar_tarjeta").val(formatCantidadSinCero(valorTarjetaCalculado));
+
+    // Si el cálculo resulta negativo, se asigna cero
+    if (valorTarjetaCalculado < 0) {
+        valorTarjetaCalculado = 0;
+    }
+
+    $("#valor_a_pagar_tarjeta").val(
+        formatCantidadSinCero(valorTarjetaCalculado)
+    );
 
     // Se recalculan totales y cambio
     calculavalorapagar();
@@ -46,10 +54,10 @@ $("#valor_a_pagar_credito").on("change", function () {
 // Función para calcular el total pagado sumando todos los métodos de pago
 function calculavalorapagar() {
     let efectivo = formatMoneyNumber($("#valor_a_pagar_efectivo").val());
-    let tarjeta  = formatMoneyNumber($("#valor_a_pagar_tarjeta").val());
-    let otros    = formatMoneyNumber($("#valor_a_pagar_otros").val());
-    let credito  = formatMoneyNumber($("#valor_a_pagar_credito").val());
-    
+    let tarjeta = formatMoneyNumber($("#valor_a_pagar_tarjeta").val());
+    let otros = formatMoneyNumber($("#valor_a_pagar_otros").val());
+    let credito = formatMoneyNumber($("#valor_a_pagar_credito").val());
+
     let totalPagado = efectivo + tarjeta + otros + credito;
     $("#valor_pagado").val(formatCantidadSinCero(totalPagado));
     calcularCambio();

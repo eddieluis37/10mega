@@ -71,8 +71,8 @@
                     <input type="hidden" id="saleId" name="saleId" value="{{$venta->id}}">
                     <div class="row">
                         <div class="col-md-4">
-                            <label for="" class="form-label">Tarjetas</label>
-                            <select class="form-control form-control-sm input" name="forma_pago_tarjeta_id" id="forma_pago_tarjeta_id">
+                            <label for="" class="form-label">Medios Electronicos</label>
+                            <select class="form-control form-control-sm input" name="forma_pago_tarjeta_id" id="forma_pago_tarjeta_id" required>
                                 <option value="">Seleccione medio de pago</option>
                                 @foreach($forma_pago_tarjeta as $formaPagoTarjeta)
                                 <option value="{{$formaPagoTarjeta->id}}" {{ $formaPagoTarjeta->id == 0 ? 'selected' : '' }}>{{$formaPagoTarjeta->nombre}}</option>
