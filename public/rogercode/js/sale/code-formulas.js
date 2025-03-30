@@ -76,7 +76,7 @@ function calcularCambio() {
 
 // Al cargar la vista se verifica el nombre del cliente y se deshabilitan campos en caso de "Cliente Mostrador"
 $(document).ready(function () {
-    let clienteMostrador = "CLIENTES VARIOS";
+    let clienteMostrador = "CONSUMIDOR FINAL";
     let thirdName = $("#name_cliente").val();
 
     if (thirdName === clienteMostrador) {

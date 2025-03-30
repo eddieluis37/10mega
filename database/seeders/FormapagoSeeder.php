@@ -24,8 +24,26 @@ class FormapagoSeeder extends Seeder
         $formapago->save();
 
         $formapago = new Formapago([
-            "codigo" => "DATAFONO",
-            "nombre" => "DATAFONO CTA CTE DAVIVIENDA",
+            "codigo" => "BANCOLOMBIA CORRIENTE",
+            "nombre" => "BANCOLOMBIA CORRIENTE",
+            "tipoformapago" => "TARJETA",
+            "diascredito" => null,
+            "cuenta" => "22050501"
+        ]);
+
+        $formapago = new Formapago([
+            "codigo" => "BBVA",
+            "nombre" => "BBVA",
+            "tipoformapago" => "TARJETA",
+            "diascredito" => null,
+            "cuenta" => "12050501"
+        ]);
+        $formapago->save();
+
+
+        $formapago = new Formapago([
+            "codigo" => "CODIGO QR",
+            "nombre" => "DCODIGO QR",
             "tipoformapago" => "TARJETA",
             "diascredito" => null,
             "cuenta" => "11050501"
@@ -33,20 +51,23 @@ class FormapagoSeeder extends Seeder
         $formapago->save();
 
         $formapago = new Formapago([
-            "codigo" => "DAVIVIENDA",
-            "nombre" => "DAVIVIENDA AHORROS",
+            "codigo" => "NEQUI",
+            "nombre" => "NEQUI",
             "tipoformapago" => "TARJETA",
             "diascredito" => null,
             "cuenta" => "22050501"
         ]);
         $formapago->save();
 
+       
+        $formapago->save();
+
         $formapago = new Formapago([
-            "codigo" => "BANCOLOMBIA",
-            "nombre" => "BANCOLOMBIA AHORROS",
+            "codigo" => "DAVIPLATA",
+            "nombre" => "DAVIPLATA",
             "tipoformapago" => "TARJETA",
             "diascredito" => null,
-            "cuenta" => "22050501"
+            "cuenta" => "32050501"
         ]);
         $formapago->save();
 
@@ -55,7 +76,7 @@ class FormapagoSeeder extends Seeder
             "nombre" => "WOMPI",
             "tipoformapago" => "TARJETA",
             "diascredito" => null,
-            "cuenta" => "32050501"
+            "cuenta" => "33050502"
         ]);
         $formapago->save();
 
