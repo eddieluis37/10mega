@@ -263,7 +263,7 @@ class saleController extends Controller
                     $count3 = DB::table('notadebitos')->where('status', '1')->count();
                     $count  = $count1 + $count2 + $count3;
                     $resolucion = 'ERPC ' . (1 + $count);
-                   // $venta->resolucion = $resolucion;
+                    // $venta->resolucion = $resolucion;
                 }
                 $venta->save();
 
@@ -273,8 +273,8 @@ class saleController extends Controller
                 // Regenerar la sesión si es necesario
                 session()->regenerate();
 
-                // Redirigir a la ruta sale.index con un mensaje de éxito
-                return redirect()->route('sale.index')
+                // Retornar la vista con el script que abre la factura y redirige
+                return view('sale.redirectAndInvoice', ['ventaId' => $ventaId])
                     ->with('success', 'Guardado correctamente y cargado al inventario.');
             } catch (\Throwable $th) {
                 // En caso de error al actualizar la venta
