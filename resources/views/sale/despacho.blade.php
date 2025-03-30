@@ -25,8 +25,8 @@
 		<table cellpadding="0" cellspacing="0" width="100%">
 			<tr>
 				<td class="text-center">
-					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
-					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">DESPACHO</span>
+					<span style="font-size: 29px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS</span>
+					<span style="font-size: 27px; font-weight: bold; display: block; margin: 0;">DESPACHO</span>
 
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale->namecentrocosto}}</span>
 
@@ -41,21 +41,17 @@
 			<tr>
 
 			</tr>
-			<tr>
-				<td colspan=" 2" class="">
-					<span style="font-size: 13px; font-weight: bold; display: block; margin-top: 3;">Sistema POS: {{$sale->resolucion}}</span>
-				</td>
-			</tr>
+			
 			<tr>
 				<td width="100%" class="text-left text-company" style="vertical-align: top; padding-top: 7px">
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Fecha y hora:<strong> {{\Carbon\Carbon::now()->format('Y-m-d H:i')}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cajero:<strong> {{$sale->nameuser}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cliente:<strong> {{$sale->namethird}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Nit / C.C.:<strong> {{ number_format($sale->identification,0, ',', '.')}}</strong></span>
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Dirección:<strong> {{$sale->direccion}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Dirección envio:<strong> {{$sale->direccion_envio}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Factura interna:<strong> {{$sale->consecutivo}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">
-						Estado_Factura:
+						Estado_Despacho:
 						<strong>
 							@if($sale->status == 0)
 							Abierta
@@ -82,9 +78,8 @@
 		<thead>
 			<tr>
 				<th width="70%">Descripción</th>
-				<th width="7%">Cant.</th>
-				<th width="10%">Vr.unit</th>
-				<th width="10%">Vr.Total</th>
+				<th width="7%">Cant.</th>				
+			
 			</tr>
 		</thead>
 		<tbody>
@@ -98,8 +93,8 @@
 					@endif
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
-				<td align="center"><strong>{{ number_format($item->price, 0, ',', '.') }}</strong></td>
-				<td align="left"><strong>{{ number_format($item->total, 0, ',', '.') }}</strong></td>
+			
+				
 			</tr>
 			@endforeach
 		</tbody>
@@ -119,51 +114,9 @@
 		</tfoot>
 	</table>
 
-	<hr>******************
-	<p class="text-center" style="font-size: 12px;">
-		<span><strong>Forma de pago</strong></span>
-	</p>
-
-	@if($sale->valor_a_pagar_efectivo != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>EFECTIVO: </span>
-			<span>{{ number_format($sale->valor_a_pagar_efectivo, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
-
-	@if($sale->valor_a_pagar_tarjeta != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>{{ $sale->formapago1 }}: </span>
-			<span>{{ number_format($sale->valor_a_pagar_tarjeta, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
-
-	@if($sale->valor_a_pagar_otros != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>{{ $sale->formapago2 }}: </span>
-			<span>{{ number_format($sale->valor_a_pagar_otros, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
-
-	@if($sale->valor_a_pagar_credito != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>{{ $sale->formapago3 }}: </span>
-			<span>{{ number_format($sale->valor_a_pagar_credito, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
-
-	<p class="text-right" style="font-size: 12px;">
-		<span><strong>Cambio: {{ number_format($sale->cambio,0, ',', '.')}}</strong></span>
-	</p>
-	<hr width="60mm" color="black" size="3">
+	<br>
+	<br>
+	
 
 
 	<section class="footer">
@@ -184,4 +137,4 @@
 	</section>
 </body>
 
-</html>
+</html
