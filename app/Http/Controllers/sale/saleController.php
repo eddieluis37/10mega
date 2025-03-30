@@ -121,7 +121,7 @@ class saleController extends Controller
             })
             ->addColumn('action', function ($data) {
                 $btn = '<div class="text-center">';
-                
+
                 // Si el campo tipo es '1', se muestran los botones de Despacho y Remisión
                 if ($data->tipo == '1') {
                     $btn .= '<a href="sale/showDespacho/' . $data->id . '" class="btn btn-warning" title="Ver Despacho" target="_blank">
@@ -263,7 +263,7 @@ class saleController extends Controller
                     $count3 = DB::table('notadebitos')->where('status', '1')->count();
                     $count  = $count1 + $count2 + $count3;
                     $resolucion = 'ERPC ' . (1 + $count);
-                    $venta->resolucion = $resolucion;
+                   // $venta->resolucion = $resolucion;
                 }
                 $venta->save();
 
@@ -586,6 +586,7 @@ class saleController extends Controller
         $TotalBruto = (float)SaleDetail::Where([['sale_id', $id]])->sum('total_bruto');
         $TotalIva = (float)SaleDetail::Where([['sale_id', $id]])->sum('iva');
         $TotalOtroImpuesto = (float)SaleDetail::Where([['sale_id', $id]])->sum('otro_impuesto');
+        $TotalImpAlConusmo = (float)SaleDetail::Where([['sale_id', $id]])->sum('impoconsumo');
         $TotalValorAPagar = (float)SaleDetail::Where([['sale_id', $id]])->sum('total');
 
         $array = [
@@ -595,6 +596,7 @@ class saleController extends Controller
             'TotalValorAPagar' => $TotalValorAPagar,
             'TotalIva' => $TotalIva,
             'TotalOtroImpuesto' => $TotalOtroImpuesto,
+            'TotalImpAlConusmo' => $TotalImpAlConusmo,
         ];
 
         return $array;
@@ -1139,33 +1141,29 @@ class saleController extends Controller
 
             $venta->save();
 
-            /*     if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
-                $count1 = DB::table('sales')->count();
-                $count2 = DB::table('notacreditos')->count();
-                $count3 = DB::table('notadebitos')->count();
-                $count = $count1 + $count2 + $count3;
-                $resolucion = 'ERPC ' . (1 + $count);
-              //  $venta->resolucion = $resolucion;
-                $venta->save();
-            }  */
+            // --- INICIO: Generación de consecutivo para la facturacion de venta ---
+            // Recuperar el centro de costo y su prefijo
+            $centroCosto = CentroCosto::find($request->centrocosto);
+            if (!$centroCosto) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Centro de costo no encontrado'
+                ], 404);
+            }
+            $prefijo = $centroCosto->prefijo;
+            // Consultar la última venta creada para este centro de costo para determinar el consecutivo
+            $lastSale = Sale::where('centrocosto_id', $request->centrocosto)
+                ->orderBy('consec', 'desc')
+                ->first();
+            $consecutivo = $lastSale ? $lastSale->consec + 1 : 1;
+            // Generar la resolución con el formato {prefijo}-{consecutivo} (con 5 dígitos)
+            $generaConsecutivo = $prefijo . '-' . str_pad($consecutivo, 5, '0', STR_PAD_LEFT);
 
-            //ACTUALIZA CONSECUTIVO 
-            $idcc = $request->centrocosto;
-            DB::update(
-                "
-     UPDATE sales a,    
-     (
-         SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
-         @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
-     ) as tabla
-     SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
-         a.consec = @numeroConsecutivo
-     WHERE a.consecutivo is null",
-                [
-                    'vcentrocosto1' => $idcc,
-                    'vcentrocosto2' => $idcc
-                ]
-            );
+            $venta->consecutivo = $generaConsecutivo;
+            $venta->consec = $consecutivo;     // Campo para llevar el número secuencial numérico
+            // --- FIN: Generación de consecutivo ---
+
+            $venta->save();
 
             return response()->json([
                 'status' => 1,

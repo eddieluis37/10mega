@@ -55,7 +55,7 @@
                                     <div class="widget-content mt-3">
                                         <label for="" class="form-label">Valores sugeridos</label>
                                         <div></div>
-                                        <button type="bFutton" class="btn btn-primary" onclick="sugerirValor(10000)">10.000</button>
+                                        <button type="button" class="btn btn-primary" onclick="sugerirValor(10000)">10.000</button>
                                         <button type="button" class="btn btn-primary" onclick="sugerirValor(20000)">20.000</button>
                                         <button type="button" class="btn btn-primary" onclick="sugerirValor(50000)">50.000</button>
                                         <button type="button" class="btn btn-primary" onclick="sugerirValor(100000)">100.000</button>
@@ -210,7 +210,7 @@
 
                             </tr>
                             <tr>
-                                <th scope="row" style="text-align: left">Total_IVA</th>
+                                <th scope="row" style="text-align: left">ImpIVA</th>
                                 <td colspan="2">$ {{number_format($arrayTotales['TotalIva'], 0, ',', '.')}}</td>
 
 
@@ -218,6 +218,11 @@
                             <tr>
                                 <th scope="row" style="text-align: left">ImpSaludable</th>
                                 <td colspan="2">$ {{number_format($arrayTotales['TotalOtroImpuesto'], 0, ',', '.')}}</td>
+
+                            </tr>
+                            <tr>
+                                <th scope="row" style="text-align: left">ImpAConsumo</th>
+                                <td colspan="2">$ {{number_format($arrayTotales['TotalImpAlConusmo'], 0, ',', '.')}}</td>
 
                             </tr>
                             <tr>
