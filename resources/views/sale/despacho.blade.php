@@ -113,7 +113,7 @@
 				</td>
 				<td></td>
 				<td align="left">
-					<span><strong>{{ number_format($sale->sum('total_valor_a_pagar'), 0, ',', '.') }}</strong></span>
+					
 				</td>
 			</tr>
 		</tfoot>

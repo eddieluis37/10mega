@@ -66,8 +66,10 @@ class exportFacturaController extends Controller
         // Se calcula la cantidad de Peso o unidades del total de productos de la venta.
         $totalQuantity = $saleDetails->sum('quantity');
 
+        $totalApagar = $saleDetails->sum('total');
 
-        $pdf = PDF::loadView('sale.reporte', compact('sale', 'saleDetails', 'saleDetailCount', 'totalQuantity'));
+
+        $pdf = PDF::loadView('sale.reporte', compact('sale', 'saleDetails', 'saleDetailCount', 'totalQuantity', 'totalApagar'));
         return $pdf->stream('sale.pdf');
     }
 }

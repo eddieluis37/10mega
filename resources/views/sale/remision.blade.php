@@ -106,7 +106,7 @@
 				</td>
 				<td></td>
 				<td align="left">
-					<span><strong>{{ number_format($sale->sum('total_valor_a_pagar'), 0, ',', '.') }}</strong></span>
+					<span><strong>{{ number_format($totalApagar, 0, '.', '.' )}}</strong></span>
 				</td>
 			</tr>
 		</tfoot>
@@ -157,7 +157,7 @@
 		<span><strong>Cambio: {{ number_format($sale->cambio,0, ',', '.')}}</strong></span>
 	</p>
 	<hr width="60mm" color="black" size="3">
-	
+
 
 	<section class="footer">
 		<table cellpadding="0" cellspacing="0" class="table-items" width="100%">
@@ -166,10 +166,10 @@
 					<span>OBSERVACIONES: </span>
 				</td>
 				<td width="60%" class="text-center">
-					
+
 				</td>
 				<td class="text-center" width="20%">
-					
+
 				</td>
 
 			</tr>
