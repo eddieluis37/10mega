@@ -115,28 +115,28 @@
 							<div class="col-sm-3">
 								<label for="pesoKgOrigen" class="form-label">TangibleOrigen</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesoKgOrigen" name="pesoKgOrigen" value="{{$arrayProductsOrigin[0]->fisico_origen}}" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="pesoKgOrigen" name="pesoKgOrigen" value="{{ $arrayProductsOrigin[0]->fisico_origen ?? '' }}" class="form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="stockOrigen" class="form-label">StockActualOrigen</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockOrigen" name="stockOrigen" value="" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="stockOrigen" name="stockOrigen" value="{{ $arrayProductsOrigin[0]->stock_origen ?? '' }}" class="form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="pesoKgDestino" class="form-label">TangibleDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="pesoKgDestino" name="pesoKgDestino" value="{{ $arrayProductsDestination[0]->fisico_destino ?? '' }}" class="form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="stockDestino" class="form-label">StockActualDestino</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="stockDestino" name="stockDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="stockDestino" name="stockDestino" value="{{ $arrayProductsDestination[0]->stock_destino ?? '' }}" class="form-control" placeholder="0.00" readonly>
 									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
@@ -146,34 +146,35 @@
 								<label for="costoOrigen" class="form-label">CostoOrigen</label>
 								<div class="input-group flex-nowrap">
 									<span class="input-group-text" id="addon-wrapping">$</span>
-									<input type="text" id="costoOrigen" name="costoOrigen" value="" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="costoOrigen" name="costoOrigen" value="{{ $arrayProductsOrigin[0]->costo_origen ?? '' }}" class="form-control" placeholder="0.00" readonly>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="costoTotalOrigen" class="form-label">CostoTotalOrigen</label>
 								<div class="input-group flex-nowrap">
 									<span class="input-group-text" id="addon-wrapping">$</span>
-									<input type="text" id="costoTotalOrigen" name="costoTotalOrigen" value="" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="costoTotalOrigen" name="costoTotalOrigen" value="{{ $arrayProductsOrigin[0]->costo_total_origen ?? '' }}" class="form-control" placeholder="0.00" readonly>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="costoDestino" class="form-label">CostoDestino</label>
 								<div class="input-group flex-nowrap">
 									<span class="input-group-text" id="addon-wrapping">$</span>
-									<input type="text" id="costoDestino" name="costoDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="costoDestino" name="costoDestino" value="{{ $arrayProductsDestination[0]->costo_destino ?? '' }}" class="form-control" placeholder="0.00" readonly>
 								</div>
 							</div>
 							<div class="col-sm-3">
 								<label for="costoTotalDestino" class="form-label">CostoTotalDestino</label>
 								<div class="input-group flex-nowrap">
 									<span class="input-group-text" id="addon-wrapping">$</span>
-									<input type="text" id="costoTotalDestino" name="costoTotalDestino" value="" class="form-control form-control" placeholder="0.00" readonly>
+									<input type="text" id="costoTotalDestino" name="costoTotalDestino" value="{{ $arrayProductsDestination[0]->costo_total_destino ?? '' }}" class="form-control" placeholder="0.00" readonly>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+
 			@php
 			// Verificamos si el usuario autenticado está asociado a la bodega de origen de la transferencia
 			$authorized = DB::table('store_user')
@@ -181,7 +182,7 @@
 			->where('store_id', $dataTransfer[0]->bodega_destino_id)
 			->exists();
 			@endphp
-			
+
 			<div class="widget-content mt-3">
 				<div class="card">
 					<div class="card-body">
@@ -264,13 +265,11 @@
 	</div>
 </div>
 <script>
-    // Definimos la variable en JavaScript
-    const isAuthorized = @json(
-        DB::table('store_user')
-            ->where('user_id', auth()->user()->id)
-            ->where('store_id', $dataTransfer[0]->bodega_destino_id) // Ajusta según corresponda
-            ->exists()
-    );
+	// Definimos la variable en JavaScript
+	const isAuthorized = @json(DB::table('store_user')
+	    ->where('user_id', auth()->user()->id)
+	    ->where('store_id', $dataTransfer[0]->bodega_destino_id)
+	    ->exists());
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

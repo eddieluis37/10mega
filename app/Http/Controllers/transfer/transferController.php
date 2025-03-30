@@ -195,6 +195,7 @@ class transferController extends Controller
         // $loteId = 99; //$request->lote_id;
         //  $lotes = Lote::orderBy('id', 'desc')->get();
         // dd($id);
+        // Consulta de lotes
         $lotes = Lote::select('lotes.id', 'lotes.codigo')
             ->join('inventarios', 'lotes.id', '=', 'inventarios.lote_id')
             ->join('transfers', 'inventarios.store_id', '=', 'transfers.bodega_origen_id')
@@ -203,78 +204,77 @@ class transferController extends Controller
             ->distinct()
             ->get();
 
-
+        // Consulta de la transferencia
         $dataTransfer = DB::table('transfers as tra')
             ->join('stores as storeOrigen', 'tra.bodega_origen_id', '=', 'storeOrigen.id')
             ->join('stores as storeDestino', 'tra.bodega_destino_id', '=', 'storeDestino.id')
             ->select('tra.*', 'storeOrigen.name as namecentrocostoOrigen', 'storeDestino.name as namecentrocostoDestino')
             ->where('tra.id', $id)
             ->get();
-        // dd($dataTransfer);
-        /**************************************** */
-        $arrayProductsOrigin = DB::table('lote_products as lp')
-            ->join('products as p', 'p.id', '=', 'lp.product_id')
+
+        // Validación para evitar error si $dataTransfer está vacío o indefinido
+        if ($dataTransfer->isEmpty()) {
+            // Puedes redireccionar o mostrar un mensaje de error
+            return redirect()->back()->with('error', 'No se encontró la transferencia');
+        }
+
+        // Ahora ya podemos usar $dataTransfer[0] con la seguridad de que existe.
+        $storeOrigenId = $dataTransfer[0]->bodega_origen_id;
+        $storeDestinoId = $dataTransfer[0]->bodega_destino_id;
+
+        // Consulta para productos de origen
+        $arrayProductsOrigin = DB::table('products as p')
             ->join('inventarios as i', 'i.product_id', '=', 'p.id')
             ->select('p.id', 'p.name', 'i.stock_ideal as stock_origen', 'i.stock_ideal as fisico_origen')
             ->where([
-                [
-                    'p.status',
-                    '1'
-                ],
-                ['i.store_id', $dataTransfer[0]->bodega_origen_id],
+                ['p.status', '1'],
+                ['i.store_id', $storeOrigenId],
             ])
             ->orderBy('p.category_id', 'asc')
             ->orderBy('p.name', 'asc')
             ->get();
-        //dd($arrayProductsOrigin);
-        /**************************************** */
-        $arrayProductsDestination = DB::table('lote_products as lp')
-            ->join('products as p', 'p.id', '=', 'lp.product_id')
+
+        // Consulta para productos de destino
+        $arrayProductsDestination = DB::table('products as p')
             ->join('inventarios as i', 'i.product_id', '=', 'p.id')
             ->select('p.id', 'p.name', 'i.stock_ideal as stock_destino', 'i.stock_ideal as fisico_destino')
             ->where([
-                [
-                    'p.status',
-                    '1'
-                ],
-                ['i.store_id', $dataTransfer[0]->bodega_destino_id],
-            ])->get();
-        // dd($arrayProductsDestination);
-        /**************************************** */
+                ['p.status', '1'],
+                ['i.store_id', $storeDestinoId],
+            ])
+            ->get();
+
+        // Continuas con el resto de tu lógica, por ejemplo:
         $status = '';
         $fechaTransferCierre = Carbon::parse($dataTransfer[0]->fecha_cierre);
-        $date = Carbon::now();
-        $currentDate = Carbon::parse($date->format('Y-m-d'));
+        $currentDate = Carbon::now()->startOfDay();
+
         if ($currentDate->gt($fechaTransferCierre)) {
-            //'Date 1 is greater than Date 2';
             $status = 'false';
         } elseif ($currentDate->lt($fechaTransferCierre)) {
-            //'Date 1 is less than Date 2';
             $status = 'true';
         } else {
-            //'Date 1 and Date 2 are equal';
             $status = 'false';
         }
-        /**************************************** */
-        $statusInventory = "";
-        if ($dataTransfer[0]->inventario == "added") {
-            $statusInventory = "true";
-        } else {
-            $statusInventory = "false";
-        }
-        /**************************************** */
-        //dd($tt = [$status, $statusInventory]);
 
-        $display = "";
-        if ($status == "false" || $statusInventory == "true") {
-            $display = "display:none;";
-        }
+        $statusInventory = $dataTransfer[0]->inventario == "added" ? "true" : "false";
 
-        $transfers = $this->gettransferdetail($id, $dataTransfer[0]->bodega_origen_id);
+        $display = ($status == "false" || $statusInventory == "true") ? "display:none;" : "";
 
+        $transfers = $this->gettransferdetail($id, $storeOrigenId);
         $arrayTotales = $this->sumTotales($id);
 
-        return view('transfer.create', compact('lotes', 'dataTransfer', 'transfers', 'arrayProductsOrigin', 'arrayProductsDestination', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('transfer.create', compact(
+            'lotes',
+            'dataTransfer',
+            'transfers',
+            'arrayProductsOrigin',
+            'arrayProductsDestination',
+            'arrayTotales',
+            'status',
+            'statusInventory',
+            'display'
+        ));
     }
 
     public function getProductsByLote(Request $request)
