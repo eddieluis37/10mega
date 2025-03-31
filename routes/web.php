@@ -123,9 +123,6 @@ use App\Http\Controllers\sale\exportRemisionController;
 /************************************************* */
 
 
-Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
-Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');
-
 Route::post('/inventario/inicial', [InventarioController::class, 'registrarInicial'])->name('inventario.inicial');
 Route::get('/inventario/inicial', [InventarioController::class, 'showInventarioInicialForm'])->name('inventario.inicial.form');
 
@@ -278,6 +275,9 @@ Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
 // Proteger todas las rutas dentro del modulo de traslados
 Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     /***** TRANSFER ******** */
+    Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
+    Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');
+
     Route::get('transfer', [transferController::class, 'index'])->name('transfer.index');
     Route::post('transfersave', [transferController::class, 'store'])->name('transfer.save');
     Route::get('showtransfer', [transferController::class, 'show'])->name('transfer.showlist');
@@ -287,9 +287,7 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
 
     Route::post('getproductos', [transferController::class, 'getproducts'])->name('transfer.getproductos');
     Route::post('productsbycostcenterdest', [transferController::class, 'ProductsByCostcenterDest'])->name('transfer.productsbycostcenterdest');
-    Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin');
-
-  
+    Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin'); 
 
     Route::post('transfersavedetail', [transferController::class, 'savedetail'])->name('transfer.savedetail');
     Route::post('/transferUpdate', [transferController::class, 'updatedetail'])->name('transfer.update');
