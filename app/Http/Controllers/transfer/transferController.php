@@ -309,14 +309,11 @@ class transferController extends Controller
 
         $producto = DB::table('inventarios as i')
             ->join('products as p', 'i.product_id', '=', 'p.id')
-            ->join('lote_products as lp', function ($join) use ($loteId) {
-                $join->on('p.id', '=', 'lp.product_id')
-                    ->where('i.lote_id', $loteId);
-            })
             ->where('i.store_id', $bodegaOrigenId)
+            ->where('i.lote_id', $loteId)
             ->where('p.status', '1')
             ->where('p.id', $productId)
-            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'costo_unitario', 'costo_total')
+            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
             ->first();
 
         if ($producto) {
@@ -348,14 +345,11 @@ class transferController extends Controller
 
         $producto = DB::table('inventarios as i')
             ->join('products as p', 'i.product_id', '=', 'p.id')
-            ->join('lote_products as lp', function ($join) use ($loteId) {
-                $join->on('p.id', '=', 'lp.product_id')
-                    ->where('i.lote_id', $loteId);
-            })
             ->where('i.store_id', $bodegaDestinoId)
+            ->where('i.lote_id', $loteId)
             ->where('p.status', '1')
             ->where('p.id', $productId)
-            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'costo_unitario', 'costo_total')
+            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
             ->first();
 
         if ($producto) {
@@ -371,6 +365,7 @@ class transferController extends Controller
             ], 404);
         }
     }
+
 
     public function savedetailOriginal(Request $request)
     {

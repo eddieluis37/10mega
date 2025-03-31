@@ -123,6 +123,9 @@ use App\Http\Controllers\sale\exportRemisionController;
 /************************************************* */
 
 
+Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
+Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');
+
 Route::post('/inventario/inicial', [InventarioController::class, 'registrarInicial'])->name('inventario.inicial');
 Route::get('/inventario/inicial', [InventarioController::class, 'showInventarioInicialForm'])->name('inventario.inicial.form');
 
@@ -286,8 +289,7 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     Route::post('productsbycostcenterdest', [transferController::class, 'ProductsByCostcenterDest'])->name('transfer.productsbycostcenterdest');
     Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin');
 
-    Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
-    Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');
+  
 
     Route::post('transfersavedetail', [transferController::class, 'savedetail'])->name('transfer.savedetail');
     Route::post('/transferUpdate', [transferController::class, 'updatedetail'])->name('transfer.update');
