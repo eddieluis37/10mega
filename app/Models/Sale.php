@@ -11,6 +11,8 @@ class Sale extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'consecutivo',
         'valor_a_pagar_efectivo',
         'total',
         'total_iva',
@@ -19,7 +21,6 @@ class Sale extends Model
         'cambio',
         'status',
         'fecha',
-        'consecutivo',
         'resol',
         'user_id',
         'store_id',
@@ -69,16 +70,14 @@ class Sale extends Model
         return $this->hasMany(SaleDetail::class, 'sale_id');
     }
 
-
-    // MUTATORS
-    /*
-    public function setTotalAttribute($value)
+    /**
+     * Scope para filtrar las ventas del turno vigente.
+     * Este scope se debe ajustar a la lógica de tu negocio, por ejemplo,
+     * comparando el created_at con el inicio y fin del turno.
+     */
+    public function scopeTurnoVigente($query)
     {
-        $priceBeforeSave = $this->attributes['total'];
-
-        $priceFilter  = filter_var($priceBeforeSave, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-
-        $this->attributes['total'] = $priceFilter;
+        // Ejemplo: suponiendo que el turno es del día actual
+        return $query->whereDate('created_at', today());
     }
-    */
 }

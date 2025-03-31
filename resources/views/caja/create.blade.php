@@ -23,77 +23,148 @@
 	}
 </style>
 <meta name="csrf-token" content="{{ csrf_token() }}">
+
 <div class="row sales layout-top-spacing">
 	<div class="col-sm-12">
+		<br>
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b> Caja | Cuadre </b>
+					<b>Caja | Cuadre</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<li>
-						<a href="javascript:void(0)" onclick="window.location.href = '../../caja'" class="tabmenu bg-dark" data-toggle="modal" data-target="" title="Regresa al listado">Volver</a>
+						<a href="{{ url('/caja') }}" class="tabmenu bg-dark" title="Regresa al listado">Volver</a>
 					</li>
 				</ul>
 			</div>
 
+			<!-- Asegúrate de incluir Bootstrap en tu layout o en este archivo -->
+			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+			<style>
+				/* Estilos personalizados para el widget de caja */
+				.widget-content {
+					margin-top: 1.5rem;
+				}
+
+				.card {
+					border: none;
+					border-radius: 10px;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+				}
+
+				.task-header {
+					padding: 1rem;
+					background-color: #f8f9fa;
+					border-radius: 5px;
+					transition: background-color 0.3s ease;
+				}
+
+				.task-header:hover {
+					background-color: #e9ecef;
+				}
+
+				.form-label {
+					font-weight: 600;
+					color: #6c757d;
+				}
+
+				.task-header p {
+					font-size: 1rem;
+					margin: 0;
+					color: #343a40;
+				}
+
+				/* Ajustes para dispositivos pequeños */
+				@media (max-width: 768px) {
+					.task-header {
+						margin-bottom: 1rem;
+					}
+				}
+			</style>
 
 			<div class="widget-content mt-3">
 				<div class="card">
 					<div class="card-body">
 						<div class="row g-3">
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Fecha hora inicio turno</label>
-										<p>{{$dataAlistamiento[0]->fecha_hora_inicio}}</p>
+										<label class="form-label">Fecha hora inicio turno</label>
+										<p>{{ $caja->fecha_hora_inicio }}</p>
 									</div>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Turno</label>
-										<p>{{$dataAlistamiento[0]->id}}</p>
+										<label class="form-label">Turno</label>
+										<p>{{ $caja->id }}</p>
 									</div>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Centro de costo</label>
-										<p>{{$dataAlistamiento[0]->namecentrocosto}}</p>
+										<label class="form-label">Centro de costo</label>
+										<p>{{ $caja->namecentrocosto }}</p>
 									</div>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<!-- <div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Fecha hora cierre turno</label>
-										<p>{{$dataAlistamiento[0]->fecha_hora_cierre}}</p>
+										<label class="form-label">Fecha hora cierre turno</label>
+										<p>{{ $caja->fecha_hora_cierre }}</p>
+									</div>
+								</div>
+							</div> -->
+							<div class="col-md-3">
+								<div class="task-header">
+									<div class="form-group">
+										<label class="form-label">Cajero</label>
+										<p>{{ $caja->namecajero }}</p>
 									</div>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Cajero</label>
-										<p>{{$dataAlistamiento[0]->namecajero}}</p>
+										<label class="form-label">Estado</label>
+										<p>{{ $caja->estado }}</p>
 									</div>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Estado</label>
-										<p>{{$dataAlistamiento[0]->estado}}</p>
+										<label class="form-label">N° Facturas</label>
+										<p>{{ $caja->cantidad_facturas }}</p>
 									</div>
 								</div>
 							</div>
-						</div>
+							<div class="col-md-3">
+								<div class="task-header">
+									<div class="form-group">
+										<label class="form-label">Factura Inicial</label>
+										<p>{{ $caja->factura_inicial }}</p>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="task-header">
+									<div class="form-group">
+										<label class="form-label">Factura Final</label>
+										<p>{{ $caja->factura_final }}</p>
+									</div>
+								</div>
+							</div>
+						</div><!-- /.row -->
 					</div>
 				</div>
 			</div>
+
 
 			<div class="row justify-content-center mt-2">
 				<div class="col-md-6">
@@ -101,8 +172,8 @@
 						<div class="widget-content mt-0">
 							<div class="card-body">
 								<form action="" method="POST" enctype="multipart/form-data">
-									<input type="hidden" id="ventaId" name="ventaId" value="{{$dataAlistamiento[0]->id}}">
 									@csrf
+									<input type="hidden" id="ventaId" name="ventaId" value="{{ $caja->id }}">
 									<div class="table-responsive">
 										<table class="table">
 											<thead>
@@ -114,54 +185,49 @@
 											<tbody>
 												<tr>
 													<th scope="row" style="text-align: left">Total tarjetas</th>
-													<td colspan="2">
-														<input type="text" id="valor_a_pagar_tarjeta" name="valor_a_pagar_tarjeta" value="$ {{number_format($arrayTotales['valorApagarTarjeta'], 0, ',', '.')}}" data-id="" style="text-align: right; font-weight: bold; color: black" readonly>
+													<td>
+														<input type="text" id="valor_a_pagar_tarjeta" name="valor_a_pagar_tarjeta"
+															value="$ {{ number_format($arrayTotales['valorApagarTarjeta'], 0, ',', '.') }}"
+															style="text-align: right; font-weight: bold; color: black" readonly>
 													</td>
 												</tr>
 												<tr>
 													<th scope="row" style="text-align: left">Otros</th>
-													<td colspan="2">
-														<input type="text" id="valor_a_pagar_otros" name="valor_a_pagar_otros" value="$ {{number_format($arrayTotales['valorApagarOtros'], 0, ',', '.')}}" data-id="" style="text-align: right; font-weight: bold; color: black" readonly>
+													<td>
+														<input type="text" id="valor_a_pagar_otros" name="valor_a_pagar_otros"
+															value="$ {{ number_format($arrayTotales['valorApagarOtros'], 0, ',', '.') }}"
+															style="text-align: right; font-weight: bold; color: black" readonly>
+													</td>
+												</tr>
+												<tr>
+													<th scope="row" style="text-align: left">Crédito</th>
+													<td>
+														<input type="text" id="valor_a_pagar_credito" name="valor_a_pagar_credito"
+															value="$ {{ number_format($arrayTotales['valorApagarCredito'], 0, ',', '.') }}"
+															style="text-align: right; font-weight: bold; color: black" readonly>
 													</td>
 												</tr>
 												<tr>
 													<th scope="row" style="text-align: left">Total</th>
-													<td colspan="2">
-														<input type="text" id="" name="" value="$ {{number_format($arrayTotales['valorTotal'], 0, ',', '.')}}" data-id="" style="text-align: right; font-weight: bold; color: black" readonly>
+													<td>
+														<input type="text" name="valorTotal"
+															value="$ {{ number_format($arrayTotales['valorTotal'], 0, ',', '.') }}"
+															style="text-align: right; font-weight: bold; color: black" readonly>
 													</td>
 												</tr>
-
-												<tr>
-
-
-												</tr>
-												<tr>
-
-
-												</tr>
 											</tbody>
-											<tfoot>
-												<tr>
-													<th colspan="2">
-														<div class="form-group">
-
-
-														</div>
-													</th>
-												</tr>
-											</tfoot>
 										</table>
-									</div>
+									</div><!-- /.table-responsive -->
 							</div>
 						</div>
 					</div>
 				</div>
+
 				<div class="col-md-6">
 					<div class="widget widget-chart-one">
 						<div class="widget-content mt-0">
 							<div class="card-body">
-
-								<input type="hidden" id="ventaId" name="ventaId" value="{{$dataAlistamiento[0]->id}}">
+								<input type="hidden" id="ventaId" name="ventaId" value="{{ $caja->id }}">
 								@csrf
 								<div class="table-responsive">
 									<table class="table">
@@ -174,75 +240,78 @@
 										<tbody>
 											<tr>
 												<th scope="row" style="text-align: left">Base inicial</th>
-												<td colspan="2">
-													<input type="text" id="base" name="base" value="$ {{number_format($dataAlistamiento[0]->base, 0, ',', '.')}}" data-id="" style="text-align: right; font-weight: bold; color: black" readonly>
+												<td>
+													<input type="text" id="base" name="base"
+														value="$ {{ number_format($caja->base, 0, ',', '.') }}"
+														style="text-align: right; font-weight: bold; color: black" readonly>
 												</td>
 											</tr>
 											<tr>
 												<th scope="row" style="text-align: left">Efectivo</th>
-												<td colspan="2">
-													<input type="text" id="efectivo" name="efectivo" value="$ {{number_format($arrayTotales['valorEfectivo'], 0, ',', '.')}}" data-id="" style="text-align: right; font-weight: bold; color: black" readonly>
+												<td>
+													<input type="text" id="efectivo" name="efectivo"
+														value="$ {{ number_format($arrayTotales['valorEfectivo'], 0, ',', '.') }}"
+														style="text-align: right; font-weight: bold; color: black" readonly>
 												</td>
 											</tr>
 											<tr>
 												<th scope="row" style="text-align: left">Retiro de caja</th>
-
+												<td>
+													<!-- Se puede agregar el input correspondiente -->
+												</td>
 											</tr>
 											<tr>
 												<th scope="row" style="text-align: left">Total</th>
-												<td colspan="2">
-													<input type="text" id="total" name="total" value="" data-id="" style="text-align: right; font-weight: bold; color: black" readonly>
+												<td>
+													<input type="text" id="total" name="total"
+														value=""
+														style="text-align: right; font-weight: bold; color: black" readonly>
 												</td>
 											</tr>
-
 											<tr>
-												<th scope="row" style="text-align: left">Valor_real_ingresado</th>
-												<td colspan="2">
-													<input type="text" id="valor_real" name="valor_real" value="" data-id="" style="text-align: right; font-weight: bold; color: black">
+												<th scope="row" style="text-align: left">Valor real ingresado</th>
+												<td>
+													<input type="text" id="valor_real" name="valor_real"
+														value=""
+														style="text-align: right; font-weight: bold; color: black">
 												</td>
-
 											</tr>
 											<tr>
 												<th scope="row" style="text-align: left">Diferencia</th>
-												<td colspan="2">
-													<input type="text" id="diferencia" name="diferencia" value="" data-id="" style="text-align: right; font-weight: bold; color: black" readonly>
+												<td>
+													<input type="text" id="diferencia" name="diferencia"
+														value=""
+														style="text-align: right; font-weight: bold; color: black" readonly>
 												</td>
-
 											</tr>
 										</tbody>
 										<tfoot>
 											<tr>
 												<th colspan="2">
 													<div class="form-group">
-														@php
-														use App\Models\caja\Caja;
-														$caja = Caja::find($dataAlistamiento[0]->id);
-														@endphp
-
 														@if($caja->status == 0)
-														<button type="submit" class="btn btn-success" id="btnGuardar" disabled>Guardar e imprimir</button>
+														<button type="submit" class="btn btn-success btn-block" id="btnGuardar" disabled>Guardar e imprimir</button>
 														@endif
-														<button type="button" class="btn btn-primary" onclick="history.back()">Volver</button>
+														<button type="button" class="btn btn-primary btn-block" onclick="history.back()">Volver</button>
 													</div>
 												</th>
 											</tr>
 										</tfoot>
 									</table>
-								</div>
+								</div><!-- /.table-responsive -->
 								</form>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			</div><!-- /.row justify-content-center -->
+		</div><!-- /.widget -->
+	</div><!-- /.col-sm-12 -->
+</div><!-- /.row -->
 
-
-		</div>
-
-	</div>
-</div>
 @endsection
+
 @section('script')
-<script src="{{asset('rogercode/js/caja/rogercode-create.js')}}" type="module"></script>
-<script src="{{asset('rogercode/js/caja/code-formulas.js')}}"></script>
+<script src="{{ asset('rogercode/js/caja/rogercode-create.js') }}" type="module"></script>
+<script src="{{ asset('rogercode/js/caja/code-formulas.js') }}"></script>
 @endsection

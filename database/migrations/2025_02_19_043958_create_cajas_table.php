@@ -25,6 +25,12 @@ class CreateCajasTable extends Migration
             $table->unsignedBigInteger('cajero_id');           
             $table->foreign('cajero_id')->references('id')->on('users');
 
+            $table->integer('cantidad_facturas')->nullable();
+            
+            $table->string('factura_inicial', 50, 0)->nullable();
+            
+            $table->string('factura_final', 50, 0)->nullable();
+
             $table->decimal('base',10,0)->nullable();
             
             $table->decimal('efectivo',10,0)->nullable();

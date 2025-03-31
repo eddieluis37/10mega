@@ -177,101 +177,99 @@ class cajaController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *    ->whereDate('sa.fecha_venta', now())
+     * Muestra la vista de cuadre de caja.
+     *
+     * @param  int  $id
      * @return \Illuminate\Http\Response
-     * 
-     * /*   $valorApagarEfectivo = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.store_id', '=', 'centro.id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->where('sa.third_id', 33)
-            ->sum('sa.cambio');
-
-        dd($valorApagarEfectivo); 
      */
-
     public function create($id)
     {
-        // Validar si el cajero_id de la tabla cajas es igual al user_id de la tabla sales
-        $dataAlistamiento = DB::table('cajas as ca')
-            ->join('sales as sa', function ($join) {
-                $join->on('ca.cajero_id', '=', 'sa.user_id');
-            })
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as s', 'ca.centrocosto_id', '=', 's.id')
-            ->select('ca.*', 's.name as namecentrocosto', 'u.name as namecajero')
-            ->where('ca.id', $id)
-            ->get();
+        // Obtener la caja junto con las ventas del turno vigente
+        $caja = Caja::with(['sales' => function ($query) {
+            $query->turnoVigente();
+        }])->find($id);
 
-        if ($dataAlistamiento->isEmpty()) {
+        if (!$caja) {
+            return redirect()->back()->with('error', 'Caja no encontrada.');
+        }
+
+        if ($caja->sales->isEmpty()) {
             return redirect()->back()->with('warning', 'El cajero no tiene ventas asociadas en la tabla sales.');
         }
 
-        $status = '';
-        $estadoVenta = $dataAlistamiento[0]->status ? 'true' : 'false';
+        // Ordenar las ventas por fecha de creación (ascendente)
+        $salesOrdenadas = $caja->sales->sortBy('created_at');
 
-        //Suma el total de efectivo, totalTarjetas, totalOtros de la venta del día de ese cajero.
+        // Calcular la cantidad de facturas y determinar la factura inicial y final
+        $cantidadFacturas = $salesOrdenadas->count();
+        $facturaInicial   = $salesOrdenadas->first()->consecutivo;
+        $facturaFinal     = $salesOrdenadas->last()->consecutivo;
+
+        // Actualizar los campos en la caja
+        $caja->update([
+            'cantidad_facturas' => $cantidadFacturas,
+            'factura_inicial'   => $facturaInicial,
+            'factura_final'     => $facturaFinal,
+        ]);
+
+        // Calcular totales (efectivo, tarjetas, otros, crédito, etc.)
         $arrayTotales = $this->sumTotales($id);
 
-        return view('caja.create', compact('dataAlistamiento', 'status', 'arrayTotales'));
+        // Pasar la caja actualizada y los totales a la vista
+        return view('caja.create', compact('caja', 'arrayTotales'));
     }
 
-    public function sumTotales($id)
+    /**
+     * Calcula los totales de ventas en efectivo, tarjetas, otros y crédito para la caja.
+     *
+     * @param  int  $id
+     * @return array
+     */
+    protected function sumTotales($id)
     {
         $valorApagarEfectivo = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
             ->sum('sa.valor_a_pagar_efectivo');
 
         $valorCambio = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
             ->sum('sa.cambio');
 
         $valorEfectivo = $valorApagarEfectivo - $valorCambio;
 
         $valorApagarTarjeta = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
             ->sum('sa.valor_a_pagar_tarjeta');
 
         $valorApagarOtros = DB::table('cajas as ca')
             ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
             ->where('ca.id', $id)
             ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
             ->sum('sa.valor_a_pagar_otros');
 
-        $valorTotal = $valorApagarTarjeta + $valorApagarOtros;
+        $valorApagarCredito = DB::table('cajas as ca')
+            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
+            ->where('ca.id', $id)
+            ->whereDate('sa.fecha_venta', now())
+            ->sum('sa.valor_a_pagar_credito');
 
+        $valorTotal = $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito;
 
-        $array = [
+        return [
             'valorApagarEfectivo' => $valorApagarEfectivo,
-            'valorCambio' => $valorCambio,
-            'valorEfectivo' => $valorEfectivo,
-            'valorApagarTarjeta' => $valorApagarTarjeta,
-            'valorApagarOtros' => $valorApagarOtros,
-            'valorTotal' => $valorTotal,
+            'valorCambio'         => $valorCambio,
+            'valorEfectivo'       => $valorEfectivo,
+            'valorApagarTarjeta'  => $valorApagarTarjeta,
+            'valorApagarOtros'    => $valorApagarOtros,
+            'valorApagarCredito'  => $valorApagarCredito,
+            'valorTotal'          => $valorTotal,
         ];
-
-        return $array;
     }
 
 
@@ -392,19 +390,6 @@ class cajaController extends Controller
                 return $statusInventory;
             })
 
-            /*      <div class="text-center">
-            <a href="caja/create/' . $data->id . '" class="btn btn-dark" title="RetiroDinero" >
-                <i class="fas fa-money-bill-alt"></i>
-            </a>
-            <a href="caja/create/' . $data->id . '" class="btn btn-dark" title="CuadreCaja" ' . $status . '>
-                <i class="fas fa-money-check-alt"></i>
-            </a>					
-            <a href="caja/showReciboCaja/' . $data->id . '" class="btn btn-dark" title="VerReciboCaja">
-                <i class="fas fa-eye"></i>
-            </a> 
-             <a href="javascript:void(0)" data-toggle="tooltip"  data-id="' . $data->id . '" data-original-title="Delete" class="btn btn-danger btn-sm deleteBook">E</a>
-            */
-
             ->addColumn('action', function ($data) {
                 $currentDateTime = Carbon::now();
 
@@ -462,42 +447,7 @@ class cajaController extends Controller
                 return $btn;
             })
 
-
             ->rawColumns(['fecha1', 'fecha2', 'inventory', 'action'])
             ->make(true);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Caja  $caja
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Caja $caja)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Caja  $caja
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Caja $caja)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Caja  $caja
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Caja $caja)
-    {
-        //
     }
 }

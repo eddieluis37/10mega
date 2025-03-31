@@ -27,7 +27,7 @@
 				<td class="text-center">
 					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">CIERRE DE CAJA</span>
 
-					<img src="{{ asset('assets/img/logo65.png') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
+					<img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
 				</td>
 			</tr>
 			<tr>
