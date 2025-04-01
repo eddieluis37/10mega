@@ -17,7 +17,12 @@ class CreateTableCentroCosto extends Migration
             $table->id();
             $table->string('name');
             $table->boolean('status')->parent_select()->default(true)->nullable();
-            $table->string('prefijo', 50, 0)->nullable();            
+            $table->string('prefijo', 50, 0)->nullable();
+            $table->string('resolucion_dian', 50, 0)->nullable();            
+            $table->integer('desde')->nullable();
+            $table->integer('hasta')->nullable();
+            $table->dateTime('fecha_inicial')->nullable();
+            $table->dateTime('fecha_final')->nullable();
             $table->timestamps();
         });
     }
