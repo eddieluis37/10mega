@@ -101,7 +101,7 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($analistaCostos);
         }
 
-        // 1. Crear o actualizar el rol "AdminCentroCosto"
+        /* // 1. Crear o actualizar el rol "AdminCentroCosto"
         $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
 
         // 2. Asignar el rol "AdminCentroCosto" a los usuarios que contengan 'ADMINISTRADOR' en su nombre o cuyos IDs estén en el arreglo
@@ -178,7 +178,7 @@ class PermissionsSeeder extends Seeder
                 $user->assignRole($role);
             }
         }
-
+ */
 
         $supervisorPuntosDeVenta = Role::updateOrCreate(['name' => 'SupervisorPuntosDeVenta']);
         $supervisorPuntosDeVenta->syncPermissions([
