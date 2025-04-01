@@ -14,7 +14,7 @@ class ProvinceSeeder extends Seeder
      */
     public function run()
     {
-       Province::create([
+        Province::create([
             'name' => 'Arauca',
 
         ]);
@@ -185,7 +185,10 @@ class ProvinceSeeder extends Seeder
         Province::create([
             'name' => 'Yopal',
 
-        ]); 
-       
+        ]);
+        Province::create([
+            'name' => 'Soacha',
+
+        ]);
     }
 }
