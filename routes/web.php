@@ -171,6 +171,12 @@ Route::get('/roles/{role}', 'RoleController@show');
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes.index');
 
 
+/* TERCEROS */
+
+Route::middleware(['auth', 'can:acceder_terceros'])->group(function () {
+    Route::get('thirds', ThirdsController::class);
+});
+
 Route::middleware(['auth', 'can:acceder_brand'])->group(function () {
 // Rutas para el CRUD de marcas (sin relaciones)
 Route::resource('brand-crud', BrandCrudController::class)
@@ -413,9 +419,7 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
 });
 
-Route::middleware(['auth', 'can:acceder_terceros'])->group(function () {
-    Route::get('thirds', ThirdsController::class);
-});
+
 
 Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
     /**PRODUCTOS SIN LIVEWIRE**/
