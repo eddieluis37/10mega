@@ -34,6 +34,10 @@ class PermissionsSeeder extends Seeder
         $admin = Role::updateOrCreate(['name' => 'Admin']);
         $admin->syncPermissions($allPermissions); // Asigna todos los permisos
 
+         // Crear o actualizar roles
+         $adminCentroCosto= Role::updateOrCreate(['name' => 'AdminCentroCosto']);
+         $adminCentroCosto->syncPermissions($allPermissions); // Asigna todos los permisos
+
         // Crear o actualizar roles
         $comercial = Role::updateOrCreate(['name' => 'Comercial']);
         $comercial->syncPermissions($allPermissions); // Asigna todos los permisos
