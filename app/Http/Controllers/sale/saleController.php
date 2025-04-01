@@ -1129,7 +1129,7 @@ class saleController extends Controller
             $venta->user_id = $id_user;
             $venta->centrocosto_id = $defaultCentro->id;
             $venta->subcentrocostos_id = 2;
-            $venta->third_id = 1;
+            $venta->third_id = ($defaultCentro->id == 8) ? 157 : 1;
             $venta->vendedor_id = 1;
 
             $venta->fecha_venta = $currentDateFormat;
