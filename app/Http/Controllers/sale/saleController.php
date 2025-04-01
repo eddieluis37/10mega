@@ -1107,6 +1107,16 @@ class saleController extends Controller
 
     public function storeVentaMostrador(Request $request) // POS-Mostrador
     {
+        //   $centros = Centrocosto::WhereIn('id', [1])->get();
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
+
+        // Obtiene los modelos de centros de costo usando los IDs obtenidos
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
+        // Selecciona el primer centro de costo como valor por defecto (si existe)
+        $defaultCentro = $centros->first();
+
         try {
             $currentDateTime = Carbon::now();
             $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
@@ -1117,7 +1127,7 @@ class saleController extends Controller
 
             $venta = new Sale();
             $venta->user_id = $id_user;
-            $venta->centrocosto_id = 1;
+            $venta->centrocosto_id = $defaultCentro->id;
             $venta->subcentrocostos_id = 2;
             $venta->third_id = 1;
             $venta->vendedor_id = 1;
