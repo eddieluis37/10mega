@@ -30,10 +30,10 @@
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">CL 35 SUR # 70B - 79</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale->namecentrocosto}}</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Bogotá - Tels: 01-3178302986</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Resolución DIAN 18764064061708</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Autorizada el: 2025/01/20 :</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Prefijo ERPC Del 1 AL 10000</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Vigencia: 6</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Resolución DIAN 18764079442727</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Autorizada el: 2024/06/20 :</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Prefijo GUAA Del 1 AL 6000</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Vigencia: 12</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Responsable de IVA</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Actividad Economica 4620 Tartifa</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina contamegachorizos@gmail.com </span>
@@ -168,7 +168,7 @@
 		<span><strong>Cambio: {{ number_format($sale->cambio,0, ',', '.')}}</strong></span>
 	</p>
 	<hr width="60mm" color="black" size="3">
-	<p align="center" style="font-size: 11px; margin-top: 8px;"><strong>A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las mercancías o prestación de servicios descritos en este título - Valor. Número Autorización 18764064061708 aprobado en 20240120 prefijo ERPC desde el número 1 al 10000, del dia 20 de enero de 2024, Vigencia: 6 Meses</strong></p>
+	<p align="center" style="font-size: 11px; margin-top: 8px;"><strong>A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las mercancías o prestación de servicios descritos en este título - Valor. Número Autorización 18764073449011 aprobado en GUAA prefijo  desde el número 1 al 6000, del dia 20 de Junio de 2024, Vigencia: 12 Meses</strong></p>
 	<p align="center" style="font-size: 11px; margin: -8px;"><strong>Responsable de IVA - Actividad Económica 4620 Comercio al por mayor de materias primas agropecuarias; animales vivos Tarifa 11.04</strong></p>
 
 	<!-- <section class="footer">
