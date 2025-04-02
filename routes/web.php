@@ -455,7 +455,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('roles', RolesController::class);
     Route::get('permisos', PermisosController::class);
     Route::get('asignar', AsignarController::class);
-    Route::get('products', ProductsController::class);
+   // Route::get('products', ProductsController::class);
     Route::get('meatcuts', MeatcutsController::class);
     Route::get('pos', PosController::class);
     Route::get('coins', CoinsController::class);
