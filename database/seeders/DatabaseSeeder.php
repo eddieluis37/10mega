@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
     $this->call(ThirdSeeder::class);
     $this->call(BrandSeeder::class);
    // $this->call(BrandThirdSeeder::class);
-    $this->call(ProductSeeder::class);
+ //   $this->call(ProductSeeder::class);
     $this->call(Precio_agreementSeeder::class);
     $this->call(SacrificioSeeder::class);
 

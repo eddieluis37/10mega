@@ -373,29 +373,40 @@ class productoController extends Controller
     public function store(Request $request)
     {
         try {
+            // Si se envía productoId significa que se trata de una actualización, 
+            // en ese caso se ignora el producto actual en la validación de unicidad.
+            if ($request->productoId) {
+                $codeRule = 'required|unique:products,code,' . $request->productoId;
+            } else {
+                $codeRule = 'required|unique:products,code';
+            }
+
             $rules = [
-                'productoId' => 'required',
-                'categoria' => 'required',
-                'marca' => 'required',            
-                'familia' => 'required',
-                'subfamilia' => 'required',                
-                'impuestoiva' => 'required|numeric',
-                'isa' => 'required|numeric',
-                'impoconsumo' => 'required|numeric',
+                'productoId'    => 'required',
+                'categoria'     => 'required',
+                'marca'         => 'required',
+                'familia'       => 'required',
+                'subfamilia'    => 'required',
+                'code'          => $codeRule,
+                'impuestoiva'   => 'required|numeric',
+                'isa'           => 'required|numeric',
+                'impoconsumo'   => 'required|numeric',
             ];
 
             $messages = [
-                'productoId.required' => 'El es requerido',
-                'categoria.required' => 'El cajero es requerido',
-                'marca.required' => 'La marca proveedora es requerida',               
-                'familia.required' => 'Nombre de familia es requerido',
-                'subfamilia.required' => 'Nombre de producto requerido',               
-                'impuestoiva.required' => 'El IVA es requerido',
-                'impuestoiva.numeric' => 'El IVA debe ser un numero',
-                'isa.required' => 'El Imp Saludable es requerido',
-                'isa.numeric' => 'El ISA debe ser un numero',
-                'impoconsumo.required' => 'Impoconsumo es requerido',
-                'impoconsumo.numeric' => 'Impoconsumo debe ser un numero',
+                'productoId.required'    => 'El producto es requerido',
+                'categoria.required'     => 'La categoría es requerida',
+                'marca.required'         => 'La marca proveedora es requerida',
+                'familia.required'       => 'El nombre de la familia es requerido',
+                'subfamilia.required'    => 'El nombre del producto es requerido',
+                'code.required'          => 'El código es requerido',
+                'code.unique'            => 'El código ya existe, por favor ingrese uno diferente',
+                'impuestoiva.required'   => 'El IVA es requerido',
+                'impuestoiva.numeric'    => 'El IVA debe ser un número',
+                'isa.required'           => 'El Imp. Saludable es requerido',
+                'isa.numeric'            => 'El ISA debe ser un número',
+                'impoconsumo.required'   => 'El Impoconsumo es requerido',
+                'impoconsumo.numeric'    => 'El Impoconsumo debe ser un número',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -407,58 +418,66 @@ class productoController extends Controller
                 ], 422);
             }
 
+            // Se busca si existe un producto con el id proporcionado
             $getReg = Product::firstWhere('id', $request->productoId);
+
             if ($getReg == null) {
+                // Creación de un nuevo producto
                 $prod = new Product();
-                $prod->category_id = $request->categoria;
-                $prod->brand_id = $request->marca;
-                $prod->level_product_id = $request->nivel;
-                $prod->unitofmeasure_id = $request->presentacion;
-                $prod->meatcut_id = $request->familia;
-                $prod->name = $request->subfamilia;
-                $prod->code = $request->code;
-                $prod->barcode = $request->codigobarra;               
-                $prod->iva = $request->impuestoiva;
-                $prod->otro_impuesto = $request->isa;
-                $prod->impoconsumo = $request->impoconsumo;
-                $prod->status = '1'; // Activo
-                $prod->alerts = '10';
+                $prod->category_id       = $request->categoria;
+                $prod->brand_id          = $request->marca;
+                $prod->level_product_id  = $request->nivel;
+                $prod->unitofmeasure_id  = $request->presentacion;
+                $prod->meatcut_id        = $request->familia;
+                $prod->name              = $request->subfamilia;
+                $prod->code              = $request->code;
+                $prod->barcode           = $request->codigobarra;
+                $prod->iva               = $request->impuestoiva;
+                $prod->otro_impuesto     = $request->isa;
+                $prod->impoconsumo       = $request->impoconsumo;
+                $prod->status            = '1'; // Activo
+                $prod->alerts            = '10';
                 $prod->save();
+
+                // Llamadas a métodos para registrar el producto en otros módulos
                 $this->CrearProductoEnCentroCosto();
                 $this->CrearProductoEnListapreciodetalle();
+
                 return response()->json([
-                    'status' => 1,
-                    'message' => "Producto: " . $prod->name . ' ' . 'Creado con ID: ' . $prod->id,
-                    "registroId" => $prod->id
+                    'status'      => 1,
+                    'message'     => "Producto: " . $prod->name . ' ' . 'Creado con ID: ' . $prod->id,
+                    "registroId"  => $prod->id
                 ]);
             } else {
-                $updateProd = Product::firstWhere('id', $request->productoId);
-                $updateProd->category_id = $request->categoria;
-                $updateProd->brand_id = $request->marca;
-                $updateProd->level_product_id = $request->nivel;
-                $updateProd->unitofmeasure_id = $request->presentacion;
-                $updateProd->meatcut_id = $request->familia;
-                $updateProd->name = $request->subfamilia;
-                $updateProd->code = $request->code;
-                $updateProd->barcode = $request->codigobarra;                
-                $updateProd->iva = $request->impuestoiva;
-                $updateProd->otro_impuesto = $request->isa;
-                $updateProd->impoconsumo = $request->impoconsumo;
+                // Actualización del producto existente
+                $updateProd = $getReg;
+                $updateProd->category_id       = $request->categoria;
+                $updateProd->brand_id          = $request->marca;
+                $updateProd->level_product_id  = $request->nivel;
+                $updateProd->unitofmeasure_id  = $request->presentacion;
+                $updateProd->meatcut_id        = $request->familia;
+                $updateProd->name              = $request->subfamilia;
+                $updateProd->code              = $request->code;
+                $updateProd->barcode           = $request->codigobarra;
+                $updateProd->iva               = $request->impuestoiva;
+                $updateProd->otro_impuesto     = $request->isa;
+                $updateProd->impoconsumo       = $request->impoconsumo;
                 $updateProd->save();
 
                 return response()->json([
-                    "status" => 1,
-                    "message" => "Producto: " . $updateProd->name . ' ' . 'Editado con ID: ' . $updateProd->id,
-                    "registroId" => 0
+                    "status"      => 1,
+                    "message"     => "Producto: " . $updateProd->name . ' ' . 'Editado con ID: ' . $updateProd->id,
+                    "registroId"  => 0
                 ]);
             }
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 0,
-                'array' => (array) $th
+                'array'  => (array) $th
             ]);
         }
     }
+
 
     /**
      * Display the specified resource.
