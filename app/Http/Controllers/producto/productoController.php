@@ -373,12 +373,18 @@ class productoController extends Controller
     public function store(Request $request)
     {
         try {
-            // Si se envía productoId significa que se trata de una actualización, 
-            // en ese caso se ignora el producto actual en la validación de unicidad.
+            // Regla para el campo code
             if ($request->productoId) {
                 $codeRule = 'required|unique:products,code,' . $request->productoId;
             } else {
                 $codeRule = 'required|unique:products,code';
+            }
+
+            // Regla para el campo name (subfamilia)
+            if ($request->productoId) {
+                $nameRule = 'required|unique:products,name,' . $request->productoId;
+            } else {
+                $nameRule = 'required|unique:products,name';
             }
 
             $rules = [
@@ -386,7 +392,7 @@ class productoController extends Controller
                 'categoria'     => 'required',
                 'marca'         => 'required',
                 'familia'       => 'required',
-                'subfamilia'    => 'required',
+                'subfamilia'    => $nameRule,
                 'code'          => $codeRule,
                 'impuestoiva'   => 'required|numeric',
                 'isa'           => 'required|numeric',
@@ -399,6 +405,7 @@ class productoController extends Controller
                 'marca.required'         => 'La marca proveedora es requerida',
                 'familia.required'       => 'El nombre de la familia es requerido',
                 'subfamilia.required'    => 'El nombre del producto es requerido',
+                'subfamilia.unique'      => 'El nombre del producto ya existe, por favor ingrese uno diferente',
                 'code.required'          => 'El código es requerido',
                 'code.unique'            => 'El código ya existe, por favor ingrese uno diferente',
                 'impuestoiva.required'   => 'El IVA es requerido',
@@ -477,6 +484,7 @@ class productoController extends Controller
             ]);
         }
     }
+
 
 
     /**
