@@ -18,7 +18,7 @@ class CentrocostoSeeder extends Seeder
     {
         Centrocosto::create([
             'name' => 'PLANTA',
-            'prefijo' => 'PLA',
+            'prefijo' => 'PL1',
         ]);
         Centrocosto::create([
             'name' => 'CARVAJAL',
@@ -31,48 +31,48 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'CENTRAL GUADALUPE CERDO',
-            'prefijo' => 'CC',
+            'prefijo' => 'CGC',
         ]);
         Centrocosto::create([
             'name' => 'GALAN',
-            'prefijo' => 'GA',
+            'prefijo' => 'GAL',
         ]);
         Centrocosto::create([
             'name' => 'PALOQUEMAO',
-            'prefijo' => 'PA',
+            'prefijo' => 'PAL',
         ]);
 
         Centrocosto::create([
             'name' => 'SUBAZAR',
-            'prefijo' => '',
+            'prefijo' => 'SUB',
         ]);
         Centrocosto::create([
             'name' => 'CERDO CENTRAL',
-            'prefijo' => 'CC',
+            'prefijo' => 'CCC',
         ]);
         Centrocosto::create([
             'name' => 'LECHONERIA',
-            'prefijo' => 'LE',
+            'prefijo' => 'LEC',
         ]);
         Centrocosto::create([
             'name' => 'SOACHA',
-            'prefijo' => 'SO',
+            'prefijo' => 'SOA',
         ]);
         Centrocosto::create([
             'name' => 'GRANJA',
-            'prefijo' => 'GR',
+            'prefijo' => 'GRA',
         ]);       
         Centrocosto::create([
             'name' => 'GASTOS Y MANTENIMIENTO VEHICULOS',
-            'prefijo' => 'GV',
+            'prefijo' => 'GMV',
         ]);
         Centrocosto::create([
             'name' => 'GASTOS Y MANTENIMIENTO MAQUINARIA',
-            'prefijo' => 'GM',
+            'prefijo' => 'GMM',
         ]);
         Centrocosto::create([
             'name' => 'PLANTA2',
-            'prefijo' => '',
+            'prefijo' => 'PL2',
         ]);
         Centrocosto::create([
             'name' => 'CARNES FRIAS MEGA',
@@ -80,7 +80,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'MEGACENTRAL',
-            'prefijo' => 'MC',
+            'prefijo' => 'CMC',
         ]);
     }
 }
