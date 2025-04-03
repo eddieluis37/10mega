@@ -103,11 +103,47 @@
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
 				<td align="center"><strong>{{ number_format($item->price, 0, ',', '.') }}</strong></td>
-				<td align="left"><strong>{{ number_format($item->total, 0, ',', '.') }}</strong></td>
+				<td align="left"><strong>{{ number_format($item->total_bruto, 0, ',', '.') }}</strong></td>
 			</tr>
 			@endforeach
 		</tbody>
 		<tfoot>
+			@if($totalIva != 0)
+			<tr>
+				<td>
+					<span><b>IVA</b></span>
+				</td>
+				<td></td>
+				<td></td>
+				<td align="right">
+					<span><strong>{{ number_format($totalIva, 0, '.', '.' )}}</strong></span>
+				</td>
+			</tr>
+			@endif
+			@if($totalOtroImp != 0)
+			<tr>
+				<td>
+					<span><b>UP</b></span>
+				</td>
+				<td></td>
+				<td></td>
+				<td align="right">
+					<span><strong>{{ number_format($totalOtroImp, 0, '.', '.' )}}</strong></span>
+				</td>
+			</tr>
+			@endif
+			@if($totalIC != 0)
+			<tr>
+				<td>
+					<span><b>IC</b></span>
+				</td>
+				<td></td>
+				<td></td>
+				<td align="right">
+					<span><strong>{{ number_format($totalIC, 0, '.', '.' )}}</strong></span>
+				</td>
+			</tr>
+			@endif
 			<tr>
 				<td>
 					<span><b>TOTAL</b></span>
@@ -116,7 +152,7 @@
 					<span><strong>{{ $totalQuantity }}</strong></span>
 				</td>
 				<td></td>
-				<td align="left">
+				<td align="right">
 					<span><strong>{{ number_format($totalApagar, 0, '.', '.' )}}</strong></span>
 				</td>
 			</tr>
@@ -168,7 +204,7 @@
 		<span><strong>Cambio: {{ number_format($sale->cambio,0, ',', '.')}}</strong></span>
 	</p>
 	<hr width="60mm" color="black" size="3">
-	<p align="center" style="font-size: 11px; margin-top: 8px;"><strong>A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las mercancías o prestación de servicios descritos en este título - Valor. Número Autorización 18764073449011 aprobado en GUAA prefijo  desde el número 1 al 6000, del dia 20 de Junio de 2024, Vigencia: 12 Meses</strong></p>
+	<p align="center" style="font-size: 11px; margin-top: 8px;"><strong>A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las mercancías o prestación de servicios descritos en este título - Valor. Número Autorización 18764073449011 aprobado en GUAA prefijo desde el número 1 al 6000, del dia 20 de Junio de 2024, Vigencia: 12 Meses</strong></p>
 	<p align="center" style="font-size: 11px; margin: -8px;"><strong>Responsable de IVA - Actividad Económica 4620 Comercio al por mayor de materias primas agropecuarias; animales vivos Tarifa 11.04</strong></p>
 
 	<!-- <section class="footer">

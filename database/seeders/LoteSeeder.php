@@ -5,59 +5,45 @@ namespace Database\Seeders;
 use App\Models\Lote;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
 
 class LoteSeeder extends Seeder
 {
 
-    public function run(): void
+    public function run()
     {
-        Lote::create([       	
-            'category_id' => 1,
-            'codigo' => '010125T1',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
-        Lote::create([
-            'category_id' => 1,
-            'codigo' => '020125T2',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
-        Lote::create([        
-            'category_id' => 2,
-            'codigo' => '030125T3',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
-        Lote::create([            
-        	'codigo' => '040125T4',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
-        Lote::create([            
-        	'codigo' => '050125T5',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
-        Lote::create([
-          
-        	'codigo' => '060125T6',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
-        Lote::create([
-            
-        	'codigo' => '070125T7',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
+        $file = database_path('data/lotes.csv');
+        $data = [];
 
+        if (($handle = fopen($file, 'r')) !== false) {
+            // Se asume que la primera fila es el encabezado
+            $header = fgetcsv($handle, 1000, ',');
+            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                // Verificar que la cantidad de columnas de la fila coincide con la del encabezado
+                if (count($row) !== count($header)) {
+                    // Puedes registrar un log o simplemente saltar la fila
+                    continue;
+                }
+                
+                $record = array_combine($header, $row);
+                
+                $data[] = [
+                    'codigo' => $record['codigo'] ?? null,
+                    'fecha_vencimiento'  => $record['fecha_vencimiento'] ?? null,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),                                     
+                ];
+            }
+            fclose($handle);
+        }
 
-        Lote::create([
-            
-        	'codigo' => '080125T8',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
+        // Inserción masiva de registros en una transacción
+        DB::transaction(function () use ($data) {
+            DB::table('lotes')->insert($data);
+        });
 
-        Lote::create([
-          
-        	'codigo' => '090125T9',
-            'fecha_vencimiento' => Carbon::now()->addMonths(6), 
-        ]); 
+        $this->command->info('¡Datos de lotes importados desde CSV correctamente!');
     }
 }
