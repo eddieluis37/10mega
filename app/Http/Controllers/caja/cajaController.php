@@ -272,6 +272,43 @@ class cajaController extends Controller
         ];
     }
 
+    public function reportecierre($id)
+    {
+        // Obtener la caja junto con las ventas del turno vigente
+        $caja = Caja::with(['sales' => function ($query) {
+            $query->turnoVigente();
+        }])->find($id);
+
+        if (!$caja) {
+            return redirect()->back()->with('error', 'Caja no encontrada.');
+        }
+
+        if ($caja->sales->isEmpty()) {
+            return redirect()->back()->with('warning', 'El cajero no tiene ventas asociadas en la tabla sales.');
+        }
+
+        // Ordenar las ventas por fecha de creación (ascendente)
+        $salesOrdenadas = $caja->sales->sortBy('created_at');
+
+        // Calcular la cantidad de facturas y determinar la factura inicial y final
+        $cantidadFacturas = $salesOrdenadas->count();
+        $facturaInicial   = $salesOrdenadas->first()->consecutivo;
+        $facturaFinal     = $salesOrdenadas->last()->consecutivo;
+
+        // Actualizar los campos en la caja
+        $caja->update([
+            'cantidad_facturas' => $cantidadFacturas,
+            'factura_inicial'   => $facturaInicial,
+            'factura_final'     => $facturaFinal,
+        ]);
+
+        // Calcular totales (efectivo, tarjetas, otros, crédito, etc.)
+        $arrayTotales = $this->sumTotales($id);
+
+        // Pasar la caja actualizada y los totales a la vista
+        return view('caja.reporte_cierre', compact('caja', 'arrayTotales'));
+    }
+
 
     /**
      * Store a newly created resource in storage.

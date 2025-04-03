@@ -103,7 +103,7 @@
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
 				<td align="center"><strong>{{ number_format($item->price, 0, ',', '.') }}</strong></td>
-				<td align="left"><strong>{{ number_format($item->total_bruto, 0, ',', '.') }}</strong></td>
+				<td align="right"><strong>{{ number_format($item->total_bruto, 0, ',', '.') }}</strong></td>
 			</tr>
 			@endforeach
 		</tbody>

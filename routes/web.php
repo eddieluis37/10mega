@@ -576,6 +576,8 @@ Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
 
+    Route::get('caja/reportecierre/{id}', [cajaController::class, 'reportecierre'])->name('caja.reportecierre');
+
 
 
 
