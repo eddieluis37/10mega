@@ -159,50 +159,52 @@
 		</tfoot>
 	</table>
 
-	<hr>******************
-	<p class="text-center" style="font-size: 12px;">
-		<span><strong>Forma de pago</strong></span>
-	</p>
+	
+	<table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+		<thead>
+			<tr>
+				<th colspan="2" style="text-align: center; border-bottom: 1px solid #000;">
+					<strong>Forma de pago</strong>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			@if($sale->valor_a_pagar_efectivo != 0)
+			<tr>
+				<td style="text-align: right; padding: 5px;"><strong>EFECTIVO:</strong></td>
+				<td style="text-align: right; padding: 5px;"><strong>{{ number_format($sale->valor_a_pagar_efectivo, 0, ',', '.') }}</strong></td>
+			</tr>
+			@endif
 
-	@if($sale->valor_a_pagar_efectivo != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>EFECTIVO: </span>
-			<span>{{ number_format($sale->valor_a_pagar_efectivo, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
+			@if($sale->valor_a_pagar_tarjeta != 0)
+			<tr>
+				<td style="text-align: right; padding: 5px;"><strong>{{ $sale->formapago1 }}:</strong></td>
+				<td style="text-align: right; padding: 5px;"><strong>{{ number_format($sale->valor_a_pagar_tarjeta, 0, ',', '.') }}</strong></td>
+			</tr>
+			@endif
 
-	@if($sale->valor_a_pagar_tarjeta != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>{{ $sale->formapago1 }}: </span>
-			<span>{{ number_format($sale->valor_a_pagar_tarjeta, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
+			@if($sale->valor_a_pagar_otros != 0)
+			<tr>
+				<td style="text-align: right; padding: 5px;"><strong>{{ $sale->formapago2 }}:</strong></td>
+				<td style="text-align: right; padding: 5px;"><strong>{{ number_format($sale->valor_a_pagar_otros, 0, ',', '.') }}</strong></td>
+			</tr>
+			@endif
 
-	@if($sale->valor_a_pagar_otros != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>{{ $sale->formapago2 }}: </span>
-			<span>{{ number_format($sale->valor_a_pagar_otros, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
+			@if($sale->valor_a_pagar_credito != 0)
+			<tr>
+				<td style="text-align: right; padding: 5px;"><strong>{{ $sale->formapago3 }}:</strong></td>
+				<td style="text-align: right; padding: 5px;"><strong>{{ number_format($sale->valor_a_pagar_credito, 0, ',', '.') }}</strong></td>
+			</tr>
+			@endif
 
-	@if($sale->valor_a_pagar_credito != 0)
-	<p class="text-right" style="font-size: 12px;">
-		<strong>
-			<span>{{ $sale->formapago3 }}: </span>
-			<span>{{ number_format($sale->valor_a_pagar_credito, 0, ',', '.') }}</span>
-		</strong>
-	</p>
-	@endif
+			<tr>
+				<td style="text-align: right; padding: 5px;"><strong>Cambio:</strong></td>
+				<td style="text-align: right; padding: 5px;"><strong>{{ number_format($sale->cambio, 0, ',', '.') }}</strong></td>
+			</tr>
+		</tbody>
+	</table>
 
-	<p class="text-right" style="font-size: 12px;">
-		<span><strong>Cambio: {{ number_format($sale->cambio,0, ',', '.')}}</strong></span>
-	</p>
+
 	<hr width="60mm" color="black" size="3">
 	<p align="center" style="font-size: 11px; margin-top: 8px;"><strong>A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las mercancías o prestación de servicios descritos en este título - Valor. Número Autorización 18764073449011 aprobado en GUAA prefijo desde el número 1 al 6000, del dia 20 de Junio de 2024, Vigencia: 12 Meses</strong></p>
 	<p align="center" style="font-size: 11px; margin: -8px;"><strong>Responsable de IVA - Actividad Económica 4620 Comercio al por mayor de materias primas agropecuarias; animales vivos Tarifa 11.04</strong></p>
