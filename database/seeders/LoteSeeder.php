@@ -14,7 +14,7 @@ class LoteSeeder extends Seeder
 
     public function run()
     {
-        $file = database_path('data/lotes3.csv');
+        $file = database_path('data/lotes4.csv');
         $data = [];
 
         if (($handle = fopen($file, 'r')) !== false) {
