@@ -71,6 +71,7 @@ class PermissionsSeeder extends Seeder
             'ver_compras',
             'ver_compra_lote',
             'acceder_compra_lote',
+            'acceder_cargue_productos_term',
 
             'ver_productos',
 
@@ -323,6 +324,7 @@ class PermissionsSeeder extends Seeder
             'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
+            'acceder_cargue_productos_term',
             'crear_compra_productos',
             'editar_compra_productos',
             'ver_ventas',
@@ -499,6 +501,7 @@ class PermissionsSeeder extends Seeder
             'ver_compras',
             'ver_compra_productos',
             'acceder_compra_productos',
+            'acceder_cargue_productos_term',
             'crear_compra_productos',
             'editar_compra_productos',
 
@@ -603,6 +606,7 @@ class PermissionsSeeder extends Seeder
             'editar_venta_pos',
            
             'acceder_venta_domicilio',
+            'acceder_cargue_productos_term', 
             'crear_venta_domicilio',
             'editar_venta_domicilio',
 
