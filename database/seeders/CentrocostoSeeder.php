@@ -19,7 +19,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'PLANTA',
             'prefijo' => 'PLAN',
-            'resolucion_dian' => 'PLAN - 187640',
+            'resolucion_dian' => '187640',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -29,7 +29,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'CARVAJAL',
             'prefijo' => 'CARV',
-            'resolucion_dian' => 'CARV - 18764073452255',
+            'resolucion_dian' => '18764073452255',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -39,7 +39,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'GUADALUPE CALLE',
             'prefijo' => 'GUAA',
-            'resolucion_dian' => 'GUAA - 18764073442727',
+            'resolucion_dian' => '18764073442727',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -47,8 +47,8 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'CENTRAL GUADALUPE CERDO',
-            'prefijo' => 'CGC',
-            'resolucion_dian' => 'CGC - 187640',
+            'prefijo' => 'CEGC',
+            'resolucion_dian' => '187640',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -57,7 +57,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'GALAN',
             'prefijo' => 'GALA',
-            'resolucion_dian' => 'GALA - 18764073449011',
+            'resolucion_dian' => '18764073449011',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -66,7 +66,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'PALOQUEMAO',
             'prefijo' => 'PALO',
-            'resolucion_dian' => 'PALO - 18764074158248',
+            'resolucion_dian' => '18764074158248',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-07-01',
@@ -76,7 +76,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'SUBAZAR',
             'prefijo' => 'SUBA',
-            'resolucion_dian' => 'SUBA - 18764073453207',
+            'resolucion_dian' => '18764073453207',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -85,7 +85,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'CERDO CENTRAL',
             'prefijo' => 'CCC',
-            'resolucion_dian' => 'CCC - 18764074699610',
+            'resolucion_dian' => '18764074699610',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-07-08',
@@ -94,7 +94,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'LECHONERIA',
             'prefijo' => 'LECH',
-            'resolucion_dian' => 'LECH - 187640',
+            'resolucion_dian' => '187640',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -103,7 +103,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'SOACHA',
             'prefijo' => 'SOAC',
-            'resolucion_dian' => 'SOAC - 18764084628567',
+            'resolucion_dian' => '18764084628567',
             'desde' => '1',
             'hasta' => '10000',
             'fecha_inicial' => '2024-12-02',
@@ -112,7 +112,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'GRANJA',
             'prefijo' => 'GRAN',
-            'resolucion_dian' => 'GRAN - 187640',
+            'resolucion_dian' => '187640',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -153,7 +153,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'MEGACENTRAL',
             'prefijo' => 'MEGA',
-            'resolucion_dian' => 'MEGA - 18764073445065',
+            'resolucion_dian' => '18764073445065',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
