@@ -39,7 +39,13 @@ class exportFacturaController extends Controller
                 'c.name as namecentrocosto',
                 'third.porc_descuento',
                 'sales.total_iva',
-                'sales.vendedor_id'
+                'sales.vendedor_id',
+                'c.prefijo',
+                'c.resolucion_dian',
+                'c.desde',
+                'c.hasta',
+                'c.fecha_inicial',
+                'c.fecha_final'
             )
             ->where('sales.id', $id)
             ->first();

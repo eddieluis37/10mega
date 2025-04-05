@@ -142,9 +142,11 @@
           <th>NEQUI</th>
           <th>DAVIPLATA</th>
           <th>CODIGO QR</th>
-          <th>BANCOLOMBIA</th>
+          <th>BANCO LOMBIA</th>
           <th>BBVA</th>
           <th>WOMPI</th>
+          <th>DATAFONO</th>
+          <th>BOLD</th>
           <th>CREDITO</th>
         </tr>
       </thead>
@@ -155,6 +157,8 @@
           <td>$2,500.00</td>
           <td>$1,000.00</td>
           <td>$500.00</td>
+          <td>$0</td>
+          <td>$0</td>
           <td>$0</td>
           <td>$0</td>
           <td>$0</td>
@@ -173,6 +177,8 @@
           <td>$0</td>
           <td>$0</td>
           <td>$0</td>
+          <td>$0</td>
+          <td>$0</td>
           <td>$500.00</td>
         </tr>
       </tbody>
@@ -182,6 +188,8 @@
           <td>$4,000.00</td>
           <td>$1,000.00</td>
           <td>$500.00</td>
+          <td>$0</td>
+          <td>$0</td>
           <td>$0</td>
           <td>$0</td>
           <td>$0</td>

@@ -574,9 +574,11 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::post('caja/create/{id}', [cajaController::class, 'storeCierreCaja'])->name('caja.cierre');
     Route::get('caja/showReciboCaja/{id}', [cajaController::class, 'showReciboCaja'])->name('caja.showReciboCaja');
 
+    Route::get('caja/reportecierre/{id}', [cajaController::class, 'reportecierre'])->name('caja.reportecierre');
+
     Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
 
-    Route::get('caja/reportecierre/{id}', [cajaController::class, 'reportecierre'])->name('caja.reportecierre');
+  
 
 
 
