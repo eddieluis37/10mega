@@ -18,6 +18,7 @@ class CentrocostoSeeder extends Seeder
     {
         Centrocosto::create([
             'name' => 'PLANTA',
+            'direccion' => 'Autopista Sur # 62A - 16',
             'prefijo' => 'PLAN',
             'resolucion_dian' => '187640',
             'desde' => '1',
@@ -28,6 +29,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'CARVAJAL',
+            'direccion' => 'Calle 35 sur # 70B - 79 ',
             'prefijo' => 'CARV',
             'resolucion_dian' => '18764073452255',
             'desde' => '1',
@@ -39,6 +41,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'GUADALUPE CALLE',
             'prefijo' => 'GUAA',
+            'direccion' => 'Autopista Sur # 62A - 16',
             'resolucion_dian' => '18764073442727',
             'desde' => '1',
             'hasta' => '6000',
@@ -48,6 +51,7 @@ class CentrocostoSeeder extends Seeder
         Centrocosto::create([
             'name' => 'CENTRAL GUADALUPE CERDO',
             'prefijo' => 'CEGC',
+            'direccion' => '# ',
             'resolucion_dian' => '187640',
             'desde' => '1',
             'hasta' => '6000',
@@ -56,6 +60,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'GALAN',
+            'direccion' => 'Carrera 56 # 4G - 86',
             'prefijo' => 'GALA',
             'resolucion_dian' => '18764073449011',
             'desde' => '1',
@@ -65,6 +70,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'PALOQUEMAO',
+            'direccion' => 'Av Calle 19 # 22 - 38 ',
             'prefijo' => 'PALO',
             'resolucion_dian' => '18764074158248',
             'desde' => '1',
@@ -75,6 +81,7 @@ class CentrocostoSeeder extends Seeder
 
         Centrocosto::create([
             'name' => 'SUBAZAR',
+            'direccion' => 'Carrera 91 # 145 - 50',
             'prefijo' => 'SUBA',
             'resolucion_dian' => '18764073453207',
             'desde' => '1',
@@ -84,6 +91,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'CERDO CENTRAL',
+            'direccion' => 'Autopista Sur # 66 -78 LOCAL C-21',
             'prefijo' => 'CCC',
             'resolucion_dian' => '18764074699610',
             'desde' => '1',
@@ -93,6 +101,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'LECHONERIA',
+            'direccion' => 'Dg 43 sur # 22a - 67 Santa Lucia',
             'prefijo' => 'LECH',
             'resolucion_dian' => '187640',
             'desde' => '1',
@@ -102,6 +111,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'SOACHA',
+            'direccion' => 'Calle 13 # 8 - 53',
             'prefijo' => 'SOAC',
             'resolucion_dian' => '18764084628567',
             'desde' => '1',
@@ -152,6 +162,7 @@ class CentrocostoSeeder extends Seeder
         ]);
         Centrocosto::create([
             'name' => 'MEGACENTRAL',
+            'direccion' => 'Autopista Sur # 66 - 78 LOCAL C-28',
             'prefijo' => 'MEGA',
             'resolucion_dian' => '18764073445065',
             'desde' => '1',

@@ -41,6 +41,7 @@ class exportFacturaController extends Controller
                 'sales.total_iva',
                 'sales.vendedor_id',
                 'c.prefijo',
+                'c.direccion',
                 'c.resolucion_dian',
                 'c.desde',
                 'c.hasta',

@@ -27,7 +27,7 @@
 				<td class="text-center">
 					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 2;">NIT 900.490.684-3</span>
-				 	<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">CL 35 SUR # 70B - 79</span>			
+				 	<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{ $sale->direccion }}</span>			
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Bogotá - Tels: 01-3178302986</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{ $sale->namecentrocosto }}</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">HABILITACION CON</span>

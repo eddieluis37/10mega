@@ -16,6 +16,7 @@ class CreateTableCentroCosto extends Migration
         Schema::create('centro_costo', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('direccion', 150, 0)->nullable(); 
             $table->boolean('status')->parent_select()->default(true)->nullable();
             $table->string('prefijo', 50, 0)->nullable();
             $table->string('resolucion_dian', 50, 0)->nullable();            
