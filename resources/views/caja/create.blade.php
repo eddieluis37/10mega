@@ -4,18 +4,15 @@
 	.table-totales {
 		border: 2px solid red;
 	}
-
 	.table-inventario,
 	th,
 	td {
 		border: 0px solid #DCDCDC;
 		text-align: center;
 	}
-
 	.input {
 		height: 38px;
 	}
-
 	td {
 		text-align: right;
 		font-weight: bold;
@@ -39,50 +36,7 @@
 				</ul>
 			</div>
 
-			<!-- Asegúrate de incluir Bootstrap en tu layout o en este archivo -->
 			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-			<style>
-				/* Estilos personalizados para el widget de caja */
-				.widget-content {
-					margin-top: 1.5rem;
-				}
-
-				.card {
-					border: none;
-					border-radius: 10px;
-					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-				}
-
-				.task-header {
-					padding: 1rem;
-					background-color: #f8f9fa;
-					border-radius: 5px;
-					transition: background-color 0.3s ease;
-				}
-
-				.task-header:hover {
-					background-color: #e9ecef;
-				}
-
-				.form-label {
-					font-weight: 600;
-					color: #6c757d;
-				}
-
-				.task-header p {
-					font-size: 1rem;
-					margin: 0;
-					color: #343a40;
-				}
-
-				/* Ajustes para dispositivos pequeños */
-				@media (max-width: 768px) {
-					.task-header {
-						margin-bottom: 1rem;
-					}
-				}
-			</style>
 
 			<div class="widget-content mt-3">
 				<div class="card">
@@ -92,7 +46,7 @@
 								<div class="task-header">
 									<div class="form-group">
 										<label class="form-label">Fecha hora inicio turno</label>
-										<p>{{ $caja->fecha_hora_inicio }}</p>
+										<p>{{ $caja->fecha_hora_inicio ? $caja->fecha_hora_inicio->format('d/m/Y H:i') : 'N/A' }}</p>
 									</div>
 								</div>
 							</div>
@@ -112,14 +66,6 @@
 									</div>
 								</div>
 							</div>
-							<!-- <div class="col-md-3">
-								<div class="task-header">
-									<div class="form-group">
-										<label class="form-label">Fecha hora cierre turno</label>
-										<p>{{ $caja->fecha_hora_cierre }}</p>
-									</div>
-								</div>
-							</div> -->
 							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
@@ -165,7 +111,6 @@
 				</div>
 			</div>
 
-
 			<div class="row justify-content-center mt-2">
 				<div class="col-md-6">
 					<div class="widget widget-chart-one">
@@ -178,41 +123,41 @@
 										<table class="table">
 											<thead>
 												<tr>
-													<th scope="col" style="text-align: center; vertical-align: middle;">CONCEPTO</th>
-													<th scope="col" style="text-align: center; vertical-align: middle;">VALOR</th>
+													<th scope="col">CONCEPTO</th>
+													<th scope="col">VALOR</th>
 												</tr>
 											</thead>
 											<tbody>
 												<tr>
-													<th scope="row" style="text-align: left">Total tarjetas</th>
+													<th style="text-align: left">Total tarjetas</th>
 													<td>
 														<input type="text" id="valor_a_pagar_tarjeta" name="valor_a_pagar_tarjeta"
 															value="$ {{ number_format($arrayTotales['valorApagarTarjeta'], 0, ',', '.') }}"
-															style="text-align: right; font-weight: bold; color: black" readonly>
+															style="text-align: right; font-weight: bold;" readonly>
 													</td>
 												</tr>
 												<tr>
-													<th scope="row" style="text-align: left">Otros</th>
+													<th style="text-align: left">Otros</th>
 													<td>
 														<input type="text" id="valor_a_pagar_otros" name="valor_a_pagar_otros"
 															value="$ {{ number_format($arrayTotales['valorApagarOtros'], 0, ',', '.') }}"
-															style="text-align: right; font-weight: bold; color: black" readonly>
+															style="text-align: right; font-weight: bold;" readonly>
 													</td>
 												</tr>
 												<tr>
-													<th scope="row" style="text-align: left">Crédito</th>
+													<th style="text-align: left">Crédito</th>
 													<td>
 														<input type="text" id="valor_a_pagar_credito" name="valor_a_pagar_credito"
 															value="$ {{ number_format($arrayTotales['valorApagarCredito'], 0, ',', '.') }}"
-															style="text-align: right; font-weight: bold; color: black" readonly>
+															style="text-align: right; font-weight: bold;" readonly>
 													</td>
 												</tr>
 												<tr>
-													<th scope="row" style="text-align: left">Total</th>
+													<th style="text-align: left">Total</th>
 													<td>
 														<input type="text" name="valorTotal"
 															value="$ {{ number_format($arrayTotales['valorTotal'], 0, ',', '.') }}"
-															style="text-align: right; font-weight: bold; color: black" readonly>
+															style="text-align: right; font-weight: bold;" readonly>
 													</td>
 												</tr>
 											</tbody>
@@ -233,55 +178,55 @@
 									<table class="table">
 										<thead>
 											<tr>
-												<th scope="col" style="text-align: center; vertical-align: middle;">CONCEPTO</th>
-												<th scope="col" style="text-align: center; vertical-align: middle;">VALOR</th>
+												<th scope="col">CONCEPTO</th>
+												<th scope="col">VALOR</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr>
-												<th scope="row" style="text-align: left">Base inicial</th>
+												<th style="text-align: left">Base inicial</th>
 												<td>
 													<input type="text" id="base" name="base"
 														value="$ {{ number_format($caja->base, 0, ',', '.') }}"
-														style="text-align: right; font-weight: bold; color: black" readonly>
+														style="text-align: right; font-weight: bold;" readonly>
 												</td>
 											</tr>
 											<tr>
-												<th scope="row" style="text-align: left">Efectivo</th>
+												<th style="text-align: left">Efectivo</th>
 												<td>
 													<input type="text" id="efectivo" name="efectivo"
 														value="$ {{ number_format($arrayTotales['valorEfectivo'], 0, ',', '.') }}"
-														style="text-align: right; font-weight: bold; color: black" readonly>
+														style="text-align: right; font-weight: bold;" readonly>
 												</td>
 											</tr>
 											<tr>
-												<th scope="row" style="text-align: left">Retiro de caja</th>
+												<th style="text-align: left">Retiro de caja</th>
 												<td>
-													<!-- Se puede agregar el input correspondiente -->
+													<input type="number" id="retiro_caja" name="retiro_caja" class="form-control" value="0">
 												</td>
 											</tr>
 											<tr>
-												<th scope="row" style="text-align: left">Total</th>
+												<th style="text-align: left">Total</th>
 												<td>
 													<input type="text" id="total" name="total"
-														value=""
-														style="text-align: right; font-weight: bold; color: black" readonly>
+														value="$ {{ number_format($caja->total ?? 0, 0, ',', '.') }}"
+														style="text-align: right; font-weight: bold;" readonly>
 												</td>
 											</tr>
 											<tr>
-												<th scope="row" style="text-align: left">Valor real ingresado</th>
+												<th style="text-align: left">Valor real ingresado</th>
 												<td>
-													<input type="text" id="valor_real" name="valor_real"
+													<input type="number" step="0.01" id="valor_real" name="valor_real"
 														value=""
-														style="text-align: right; font-weight: bold; color: black">
+														style="text-align: right; font-weight: bold;">
 												</td>
 											</tr>
 											<tr>
-												<th scope="row" style="text-align: left">Diferencia</th>
+												<th style="text-align: left">Diferencia</th>
 												<td>
 													<input type="text" id="diferencia" name="diferencia"
 														value=""
-														style="text-align: right; font-weight: bold; color: black" readonly>
+														style="text-align: right; font-weight: bold;" readonly>
 												</td>
 											</tr>
 										</tbody>
@@ -290,7 +235,7 @@
 												<th colspan="2">
 													<div class="form-group">
 														@if($caja->status == 0)
-														<button type="submit" class="btn btn-success btn-block" id="btnGuardar" disabled>Guardar e imprimir</button>
+															<button type="submit" class="btn btn-success btn-block" id="btnGuardar" disabled>Guardar e imprimir</button>
 														@endif
 														<button type="button" class="btn btn-primary btn-block" onclick="history.back()">Volver</button>
 													</div>

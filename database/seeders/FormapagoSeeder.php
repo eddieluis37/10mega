@@ -81,6 +81,24 @@ class FormapagoSeeder extends Seeder
         $formapago->save();
 
         $formapago = new Formapago([
+            "codigo" => "DATAFONO",
+            "nombre" => "DATAFONO",
+            "tipoformapago" => "TARJETA",
+            "diascredito" => null,
+            "cuenta" => "34050502"
+        ]);
+        $formapago->save();
+
+        $formapago = new Formapago([
+            "codigo" => "BOLD",
+            "nombre" => "BOLD",
+            "tipoformapago" => "TARJETA",
+            "diascredito" => null,
+            "cuenta" => "34050502"
+        ]);
+        $formapago->save();
+
+        $formapago = new Formapago([
             "codigo" => "VENTA A CREDITO",
             "nombre" => "VENTA A CREDITO",
             "tipoformapago" => "OTROS",

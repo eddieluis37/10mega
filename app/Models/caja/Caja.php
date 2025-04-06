@@ -31,6 +31,12 @@ class Caja extends Model
         'status',
     ];
 
+    // Opcional: casteo de campos de fecha para usar métodos de Carbon
+    protected $casts = [
+        'fecha_hora_inicio' => 'datetime',
+        'fecha_hora_cierre' => 'datetime', // Si lo usas
+    ];
+
     /**
      * Relación con el centro de costo.
      */
@@ -63,8 +69,28 @@ class Caja extends Model
         return $this->cajero ? $this->cajero->name : '';
     }
 
-    // Puedes agregar aquí la relación con las ventas (sales)
+    /*  // Puedes agregar aquí la relación con las ventas (sales)
     public function sales()
+    {
+        return $this->hasMany(Sale::class, 'user_id', 'cajero_id');
+    } */
+
+    /**
+     * Relación con las ventas a través de la tabla pivote sale_caja.
+     * Esta relación se utiliza tanto en el método create (para obtener las ventas del turno vigente)
+     * como en el reporte de cierre de caja.
+     */
+    public function sales()
+    {
+        return $this->belongsToMany(Sale::class, 'sale_caja', 'caja_id', 'sale_id');
+    }
+
+    /**
+     * (Opcional) Relación alternativa para obtener las ventas asociadas al cajero de la caja.
+     * Puede usarse en casos donde la relación se base en que el cajero de la caja
+     * sea igual al user_id de la venta.
+     */
+    public function salesByCajero()
     {
         return $this->hasMany(Sale::class, 'user_id', 'cajero_id');
     }

@@ -116,11 +116,14 @@ use App\Http\Controllers\reportes\reporteasignarpreciosController;
 use App\Http\Controllers\ProductLoteController;
 use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
+use App\Http\Controllers\ReporteCierreCajaController;
 
 //use App\Http\Controllers\InventarioController;
 
 
 /************************************************* */
+
+Route::get('/reporte-cierre-caja/{id}', [ReporteCierreCajaController::class, 'show'])->name('reporte.cierre');
 
 Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
 Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');

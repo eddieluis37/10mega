@@ -121,17 +121,17 @@
       <h1>REPORTE PARA VALIDACIÓN DEL CIERRE DE CAJA</h1>
     </div>
 
-    <!-- Sección de Información General -->
+    <!-- Sección de Información General Caja-->
     <div class="info-section">
-      <div class="info-item"><strong>Centro Costo:</strong> EDDIE</div>
-      <div class="info-item"><strong>Planta:</strong> 1</div>
-      <div class="info-item"><strong>Cajero:</strong> EDDIE</div>
-      <div class="info-item"><strong>Fecha:</strong> 3/04/2025</div>
-      <div class="info-item"><strong>Turno:</strong> 1</div>
-      <div class="info-item"><strong>Diferencia:</strong> $3.200</div>
+      <div class="info-item"><strong>Centro Costo:</strong> PlANTA</div>
+      <div class="info-item"><strong>Cajero:</strong>MARIA</div>
+      <div class="info-item"><strong>Cantidad facturas:</strong> caja->antidad_facturas </div>
+      <div class="info-item"><strong>Fecha:</strong>caja->fecha_hora_inicio</div>
+      <div class="info-item"><strong>Turno:</strong> caja->id</div>
+      <div class="info-item"><strong>Diferencia:</strong> caja-> diferencia </div>
     </div>
 
-    <!-- Tabla de Detalle de Facturas -->
+    <!-- Tabla de Detalle de Facturas de la tabla sales -->
     <table>
       <thead>
         <tr>
@@ -142,7 +142,7 @@
           <th>NEQUI</th>
           <th>DAVIPLATA</th>
           <th>CODIGO QR</th>
-          <th>BANCO LOMBIA</th>
+          <th>BANCOLOMBIA</th>
           <th>BBVA</th>
           <th>WOMPI</th>
           <th>DATAFONO</th>
@@ -152,35 +152,20 @@
       </thead>
       <tbody>
         <tr>
-          <td>JUAN PEREZ</td>
-          <td>PLA-0001</td>
-          <td>$2,500.00</td>
-          <td>$1,000.00</td>
-          <td>$500.00</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$500.00</td>
-        </tr>
-        <tr>
-          <td>MARIA GONZALEZ</td>
-          <td>PLA-0002</td>
-          <td>$1,000.00</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$0</td>
-          <td>$500.00</td>
-        </tr>
+          <td> third_id name </td>
+          <td> sale->consecutivo </td>
+          <td> sale->total_valor_a_pagar </td>
+          <td> sale->valor_a_pagar_efectivo </td>
+          <td> sale->forma_pago_tarjeta_id->NEQUI</td>
+          <td> sale->forma_pago_tarjeta_id->DAVIPLATA</td>
+          <td> sale->forma_pago_tarjeta_id->CODIGO QR</td>
+          <td> sale->forma_pago_tarjeta_id->BANCOLOMBIA</td>
+          <td> sale->forma_pago_tarjeta_id->BBVA</td>
+          <td> sale->forma_pago_tarjeta_id->WOMPI</td>
+          <td> sale->forma_pago_tarjeta_id->DATAFONO</td>
+          <td> sale->forma_pago_tarjeta_id->BOLD</td>
+          <td> sale->forma_pago_credito_id->CREDITO</td>                   
+        </tr>        
       </tbody>
       <tfoot>
         <tr>

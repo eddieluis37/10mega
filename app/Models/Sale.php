@@ -12,8 +12,18 @@ class Sale extends Model
 
     protected $fillable = [
         'user_id',
+        'user_id',
+        'store_id',
+        'third_id',
+        'vendedor_id',
+        'domiciliario_id',
+        'centrocosto_id',
         'consecutivo',
+        'fecha_venta',
         'valor_a_pagar_efectivo',
+        'valor_a_pagar_tarjeta',
+        'valor_a_pagar_otros',
+        'valor_a_pagar_credito',
         'total',
         'total_iva',
         'items',
@@ -22,12 +32,13 @@ class Sale extends Model
         'status',
         'fecha',
         'resol',
-        'user_id',
-        'store_id',
-        'third_id',
-        'vendedor_id',
-        'domiciliario_id',
-        'centrocosto_id'
+        
+    ];
+
+    // Si deseas que Laravel trate ciertos campos como instancias de Carbon,
+    // puedes agregarlos al array $dates o utilizar $casts.
+    protected $casts = [
+        'fecha_venta' => 'datetime',
     ];
 
     public function user()
@@ -73,11 +84,16 @@ class Sale extends Model
     /**
      * Scope para filtrar las ventas del turno vigente.
      * Este scope se debe ajustar a la lógica de tu negocio, por ejemplo,
-     * comparando el created_at con el inicio y fin del turno.
+     * comparando el fecha_venta con el inicio y fin del turno.
      */
     public function scopeTurnoVigente($query)
     {
-        // Ejemplo: suponiendo que el turno es del día actual
-        return $query->whereDate('created_at', today());
+        // Suponiendo que la fecha se compara con la fecha actual:
+        return $query->whereDate('sales.fecha_venta', now()->toDateString());
+    }
+
+    public function tercero()
+    {
+        return $this->belongsTo(\App\Models\Third::class, 'third_id');
     }
 }

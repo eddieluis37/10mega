@@ -157,7 +157,7 @@ class cajaController extends Controller
         $user = Auth::user();
 
         // Definir el id del centro de costo a excluir (puede venir del request o estar definido estáticamente)
-        $excludeCentroCostoId = 3; // Ejemplo: excluir el centro de costo con id 3
+        $excludeCentroCostoId = 13; // Ejemplo: excluir el centro de costo con id 3
 
         // Obtener los IDs de centro de costo asociados a las tiendas del usuario
         $centroCostoIds = $user->stores->pluck('centrocosto_id')->unique();
@@ -177,15 +177,15 @@ class cajaController extends Controller
     }
 
     /**
-     * Muestra la vista de cuadre de caja.
+     * Muestra la vista para el cierre/cuadre de caja usando la relación salesByCajero.
      *
-     * @param  int  $id
+     * @param  int  $id  Identificador de la caja
      * @return \Illuminate\Http\Response
      */
     public function create($id)
     {
-        // Obtener la caja junto con las ventas del turno vigente
-        $caja = Caja::with(['sales' => function ($query) {
+        // Obtener la caja junto con las ventas del turno vigente del cajero
+        $caja = Caja::with(['salesByCajero' => function ($query) {
             $query->turnoVigente();
         }])->find($id);
 
@@ -193,17 +193,17 @@ class cajaController extends Controller
             return redirect()->back()->with('error', 'Caja no encontrada.');
         }
 
-        if ($caja->sales->isEmpty()) {
+        if ($caja->salesByCajero->isEmpty()) {
             return redirect()->back()->with('warning', 'El cajero no tiene ventas asociadas en la tabla sales.');
         }
 
         // Ordenar las ventas por fecha de creación (ascendente)
-        $salesOrdenadas = $caja->sales->sortBy('created_at');
+        $ventasOrdenadas = $caja->salesByCajero->sortBy('created_at');
 
         // Calcular la cantidad de facturas y determinar la factura inicial y final
-        $cantidadFacturas = $salesOrdenadas->count();
-        $facturaInicial   = $salesOrdenadas->first()->consecutivo;
-        $facturaFinal     = $salesOrdenadas->last()->consecutivo;
+        $cantidadFacturas = $ventasOrdenadas->count();
+        $facturaInicial   = $ventasOrdenadas->first()->consecutivo;
+        $facturaFinal     = $ventasOrdenadas->last()->consecutivo;
 
         // Actualizar los campos en la caja
         $caja->update([
@@ -212,54 +212,32 @@ class cajaController extends Controller
             'factura_final'     => $facturaFinal,
         ]);
 
-        // Calcular totales (efectivo, tarjetas, otros, crédito, etc.)
-        $arrayTotales = $this->sumTotales($id);
+        // Calcular totales usando la relación salesByCajero
+        $arrayTotales = $this->sumTotales($caja);
 
         // Pasar la caja actualizada y los totales a la vista
         return view('caja.create', compact('caja', 'arrayTotales'));
     }
 
     /**
-     * Calcula los totales de ventas en efectivo, tarjetas, otros y crédito para la caja.
+     * Calcula los totales de ventas en efectivo, tarjetas, otros y crédito para la caja
+     * utilizando la relación salesByCajero.
      *
-     * @param  int  $id
+     * @param  \App\Models\caja\Caja  $caja
      * @return array
      */
-    protected function sumTotales($id)
+    protected function sumTotales(Caja $caja)
     {
-        $valorApagarEfectivo = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->sum('sa.valor_a_pagar_efectivo');
+        // Obtener las ventas del cajero para el turno vigente
+        $ventas = $caja->salesByCajero()->whereDate('fecha_venta', now()->toDateString())->get();
 
-        $valorCambio = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->sum('sa.cambio');
-
-        $valorEfectivo = $valorApagarEfectivo - $valorCambio;
-
-        $valorApagarTarjeta = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->sum('sa.valor_a_pagar_tarjeta');
-
-        $valorApagarOtros = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->sum('sa.valor_a_pagar_otros');
-
-        $valorApagarCredito = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->sum('sa.valor_a_pagar_credito');
-
-        $valorTotal = $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito;
+        $valorApagarEfectivo = $ventas->sum('valor_a_pagar_efectivo');
+        $valorCambio         = $ventas->sum('cambio');
+        $valorEfectivo       = $valorApagarEfectivo - $valorCambio;
+        $valorApagarTarjeta  = $ventas->sum('valor_a_pagar_tarjeta');
+        $valorApagarOtros    = $ventas->sum('valor_a_pagar_otros');
+        $valorApagarCredito  = $ventas->sum('valor_a_pagar_credito');
+        $valorTotal          = $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito;
 
         return [
             'valorApagarEfectivo' => $valorApagarEfectivo,
@@ -271,6 +249,7 @@ class cajaController extends Controller
             'valorTotal'          => $valorTotal,
         ];
     }
+
 
     public function reportecierre($id)
     {
