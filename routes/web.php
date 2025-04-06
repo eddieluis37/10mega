@@ -187,7 +187,28 @@ Route::resource('brands', BrandController::class)->parameters([
     'brands' => 'brandThird'
 ]);
 
-});    
+});  
+
+// Proteger todas las rutas dentro del modulo de cargue de productos terminados
+/*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
+Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function () {
+    Route::post('lotesave', [CargueProductTerminadosController::class, 'storelote'])->name('lote.save');
+    Route::post('productlotesave', [CargueProductTerminadosController::class, 'productlote'])->name('productlote.save');
+    Route::get('/lote-data', [CargueProductTerminadosController::class, 'getLoteData']);
+    Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
+    Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
+    Route::delete('/product-lote/{id}', [ProductLoteController::class, 'destroy']);
+    Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');
+
+    Route::get('/sincronizar-product-lote', [CargueProductTerminadosController::class, 'sincronizarProductLote'])->name('sincronizar.product.lote');
+
+    Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
+
+    Route::get('totales', [inventoryController::class, 'totales'])->name('inventory.totales');
+
+    Route::post('cargarInventariohist', [inventoryController::class, 'cargarInventariohist'])->name('cargarInventariohist');
+    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
+});  
 
 /*****************************BENEFICIO-RES*******************************************/
 
@@ -306,26 +327,7 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     Route::post('transferAddShoping', [transferController::class, 'add_shopping'])->name('transfer.addShopping');
 });
 
-// Proteger todas las rutas dentro del modulo de cargue de productos terminados
-/*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
-Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function () {
-    Route::post('lotesave', [CargueProductTerminadosController::class, 'storelote'])->name('lote.save');
-    Route::post('productlotesave', [CargueProductTerminadosController::class, 'productlote'])->name('productlote.save');
-    Route::get('/lote-data', [CargueProductTerminadosController::class, 'getLoteData']);
-    Route::get('inventory/cargue_products_terminados', [CargueProductTerminadosController::class, 'index'])->name('inventory.showcpt');
-    Route::get('showCptInventory', [CargueProductTerminadosController::class, 'show'])->name('inventory.show-cpt');
-    Route::delete('/product-lote/{id}', [ProductLoteController::class, 'destroy']);
-    Route::post('/updateCptInventory', [CargueProductTerminadosController::class, 'updateCptInventory'])->name('inventory.updateCptInventory999');
 
-    Route::get('/sincronizar-product-lote', [CargueProductTerminadosController::class, 'sincronizarProductLote'])->name('sincronizar.product.lote');
-
-    Route::get('showCcpInventory', [CentroCostoProductController::class, 'show'])->name('inventory.show-ccp');
-
-    Route::get('totales', [inventoryController::class, 'totales'])->name('inventory.totales');
-
-    Route::post('cargarInventariohist', [inventoryController::class, 'cargarInventariohist'])->name('cargarInventariohist');
-    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
-});
 
 // Proteger todas las rutas dentro del modulo de ventas
 /*****************************VENTAS******************************************/
