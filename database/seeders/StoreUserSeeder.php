@@ -105,6 +105,10 @@ class StoreUserSeeder extends Seeder
             'FacturacionPlanta' => [
                 'users' => [36, 37],
                 'stores' => Store::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])->pluck('id')->toArray(), // Bodegas específicas
+            ],
+            'Vendedor' => [
+                'users' => [40],
+                'stores' => Store::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])->pluck('id')->toArray(), // Bodegas específicas
             ],                   
         ];
 
