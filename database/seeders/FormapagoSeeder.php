@@ -43,7 +43,7 @@ class FormapagoSeeder extends Seeder
 
         $formapago = new Formapago([
             "codigo" => "CODIGO QR",
-            "nombre" => "DCODIGO QR",
+            "nombre" => "CODIGO QR",
             "tipoformapago" => "TARJETA",
             "diascredito" => null,
             "cuenta" => "11050501"

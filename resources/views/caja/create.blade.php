@@ -129,7 +129,7 @@
 											</thead>
 											<tbody>
 												<tr>
-													<th style="text-align: left">Total tarjetas</th>
+													<th style="text-align: left">Medios electrónicos</th>
 													<td>
 														<input type="text" id="valor_a_pagar_tarjeta" name="valor_a_pagar_tarjeta"
 															value="$ {{ number_format($arrayTotales['valorApagarTarjeta'], 0, ',', '.') }}"
