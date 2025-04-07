@@ -3,27 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\caja\Caja;
+use App\Models\Formapago;
 use Illuminate\Http\Request;
 
 class ReporteCierreCajaController extends Controller
 {
-    /**
-     * Muestra el reporte dinámico de cierre de caja.
-     *
-     * @param  int  $id  Identificador de la caja
-     * @return \Illuminate\View\View
-     */
     public function show($id)
     {
-        // Se carga la caja junto con sus relaciones: centroCosto, cajero y las ventas relacionadas.
+        // Cargamos la caja con sus ventas, más las relaciones que necesites
+        // (por ejemplo, el tercero o las formas de pago asociadas)
         $caja = Caja::with([
-            'centroCosto',
-            'cajero',
-            'sales'  // Asegúrate de que las ventas tengan los campos y relaciones que necesitas (p.ej., cliente, formas de pago, etc.)
+            'sales.tercero', 
+            'sales.formaPagoTarjeta',
+            'sales.formaPagoCredito'
         ])->findOrFail($id);
 
-        // Aquí podrías agregar cálculos de totales u otras lógicas adicionales
+        // Cargamos todas las formas de pago que sean de tipo TARJETA
+        $tarjetas = Formapago::where('tipoformapago', 'TARJETA')->get();
 
-        return view('reportes.cierre_caja', compact('caja'));
+        // Retornamos la vista, enviando la caja y las tarjetas
+        return view('reportes.cierre_caja', compact('caja', 'tarjetas'));
     }
 }

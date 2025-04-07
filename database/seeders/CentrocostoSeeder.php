@@ -25,7 +25,7 @@ class CentrocostoSeeder extends Seeder
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
             'fecha_final' => '2026-06-20',
-            
+
         ]);
         Centrocosto::create([
             'name' => 'CARVAJAL',
@@ -49,10 +49,10 @@ class CentrocostoSeeder extends Seeder
             'fecha_final' => '2026-06-20',
         ]);
         Centrocosto::create([
-            'name' => 'CENTRAL GUADALUPE CERDO',
-            'prefijo' => 'CEGC',
-            'direccion' => '# ',
-            'resolucion_dian' => '187640',
+            'name' => 'MEGACENTRAL',
+            'direccion' => 'Autopista Sur # 66 - 78 LOCAL C-28',
+            'prefijo' => 'MEGA',
+            'resolucion_dian' => '18764073445065',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
@@ -127,7 +127,7 @@ class CentrocostoSeeder extends Seeder
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
             'fecha_final' => '2026-06-20',
-        ]);       
+        ]);
         Centrocosto::create([
             'name' => 'GASTOS Y MANTENIMIENTO VEHICULOS',
             'prefijo' => 'GAMV',
@@ -160,11 +160,12 @@ class CentrocostoSeeder extends Seeder
             'fecha_inicial' => '2024-06-20',
             'fecha_final' => '2026-06-20',
         ]);
+
         Centrocosto::create([
-            'name' => 'MEGACENTRAL',
-            'direccion' => 'Autopista Sur # 66 - 78 LOCAL C-28',
-            'prefijo' => 'MEGA',
-            'resolucion_dian' => '18764073445065',
+            'name' => 'VALIDAR PARA ELIMINAR',
+            'prefijo' => 'CEGC',
+            'direccion' => '# ',
+            'resolucion_dian' => '187640',
             'desde' => '1',
             'hasta' => '6000',
             'fecha_inicial' => '2024-06-20',
