@@ -73,7 +73,7 @@
                         <div class="col-md-4">
                             <label for="" class="form-label">Medios Electronicos</label>
                             <select class="form-control form-control-sm input" name="forma_pago_tarjeta_id" id="forma_pago_tarjeta_id" required>
-                                <option value="">Seleccione medio de pago</option>
+                                <option value="1">Seleccione medio de pago</option>
                                 @foreach($forma_pago_tarjeta as $formaPagoTarjeta)
                                 <option value="{{$formaPagoTarjeta->id}}" {{ $formaPagoTarjeta->id == 0 ? 'selected' : '' }}>{{$formaPagoTarjeta->nombre}}</option>
                                 @endforeach
@@ -91,38 +91,6 @@
                             <div class="input-group flex-nowrap">
                                 <span class="input-group-text" id="addon-wrapping">$</span>
                                 <input class="form-control form-control-sm" type="text" name="valor_a_pagar_tarjeta" id="valor_a_pagar_tarjeta" value="0">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="widget-content mt-1">
-            <div class="card">
-                <div class="card-body">
-                    <input type="hidden" id="saleId" name="saleId" value="{{$venta->id}}">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label for="" class="form-label">Otros</label>
-                            <select class="form-control form-control-sm input" name="forma_pago_otros_id" id="forma_pago_otros_id">
-                                <option value="">Seleccione la forma de pago</option>
-                                @foreach($forma_pago_otros as $formaPagoOtros)
-                                <option value="{{$formaPagoOtros->id}}" {{ $formaPagoOtros->id == 0 ? 'selected' : '' }}>{{$formaPagoOtros->nombre}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="" class="form-label">Código de transacción</label>
-                            <div class="input-group flex-nowrap">
-                                <span class="input-group-text" id="addon-wrapping">N°</span>
-                                <input type="text" id="codigo_pago_otros" name="codigo_pago_otros" class="form-control input" placeholder="">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="" class="form-label">Valor</label>
-                            <div class="input-group flex-nowrap">
-                                <span class="input-group-text" id="addon-wrapping">$</span>
-                                <input class="form-control form-control-sm" type="text" name="valor_a_pagar_otros" id="valor_a_pagar_otros" value="0">
                             </div>
                         </div>
                     </div>
@@ -163,6 +131,40 @@
                 </div>
             </div>
         </div>
+      
+        <div class="widget-content mt-1">
+            <div class="card">
+                <div class="card-body">
+                    <input type="hidden" id="saleId" name="saleId" value="{{$venta->id}}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Otros</label>
+                            <select class="form-control form-control-sm input" name="forma_pago_otros_id" id="forma_pago_otros_id">
+                                <option value="">Seleccione la forma de pago</option>
+                                @foreach($forma_pago_otros as $formaPagoOtros)
+                                <option value="{{$formaPagoOtros->id}}" {{ $formaPagoOtros->id == 0 ? 'selected' : '' }}>{{$formaPagoOtros->nombre}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Código de transacción</label>
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">N°</span>
+                                <input type="text" id="codigo_pago_otros" name="codigo_pago_otros" class="form-control input" placeholder="">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Valor</label>
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">$</span>
+                                <input class="form-control form-control-sm" type="text" name="valor_a_pagar_otros" id="valor_a_pagar_otros" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>    
+       
     </div>
 
     <div class="col-sm-5">

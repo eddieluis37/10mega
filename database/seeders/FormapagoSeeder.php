@@ -101,7 +101,7 @@ class FormapagoSeeder extends Seeder
         $formapago = new Formapago([
             "codigo" => "VENTA A CREDITO",
             "nombre" => "VENTA A CREDITO",
-            "tipoformapago" => "OTROS",
+            "tipoformapago" => "CREDITO",
             "diascredito" => null,
             "cuenta" => "42050501"
         ]);
