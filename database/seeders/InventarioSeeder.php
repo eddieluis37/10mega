@@ -10,7 +10,7 @@ class InventarioSeeder extends Seeder
 {
     public function run()
     {
-        $file = database_path('data/inventarios7.csv');
+        $file = database_path('data/inventarios8.csv');
         $data = [];
 
         if (($handle = fopen($file, 'r')) !== false) {

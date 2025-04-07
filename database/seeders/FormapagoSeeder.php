@@ -160,5 +160,14 @@ class FormapagoSeeder extends Seeder
             "cuenta" => "10205050"
         ]);
         $formapago->save();
+
+        $formapago = new Formapago([
+            "codigo" => "CR60",
+            "nombre" => "CREDITO A 60 DIAS",
+            "tipoformapago" => "CREDITO",
+            "diascredito" => 45,
+            "cuenta" => "11205050"
+        ]);
+        $formapago->save();
     }
 }
