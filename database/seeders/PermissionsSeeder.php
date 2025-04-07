@@ -34,9 +34,9 @@ class PermissionsSeeder extends Seeder
         $admin = Role::updateOrCreate(['name' => 'Admin']);
         $admin->syncPermissions($allPermissions); // Asigna todos los permisos
 
-         // Crear o actualizar roles
-         $adminCentroCosto= Role::updateOrCreate(['name' => 'AdminCentroCosto']);
-         $adminCentroCosto->syncPermissions($allPermissions); // Asigna todos los permisos
+        // Crear o actualizar roles
+        $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
+        $adminCentroCosto->syncPermissions($allPermissions); // Asigna todos los permisos
 
         // Crear o actualizar roles
         $comercial = Role::updateOrCreate(['name' => 'Comercial']);
@@ -220,7 +220,7 @@ class PermissionsSeeder extends Seeder
         }
 
         $user = User::where('name', 'LIDER AUDITORIA')->first();
-        if ($user) {           
+        if ($user) {
             $user->syncPermissions($allPermissions); // Asigna todos los permisos
         }
 
@@ -493,7 +493,7 @@ class PermissionsSeeder extends Seeder
         }
 
         // 3. Definir el listado de permisos a sincronizar
-        $permisos = [            
+        $permisos = [
             'ver_ventas',
             'ver_venta_bar',
 
@@ -597,16 +597,16 @@ class PermissionsSeeder extends Seeder
 
             'ver_ventas',
             'ver_venta_domicilio',
-            'ver_venta_pos',    
+            'ver_venta_pos',
 
-            'Pos_Create',      
+            'Pos_Create',
 
             'acceder_ventas',
             'crear_venta_pos',
             'editar_venta_pos',
-           
+
             'acceder_venta_domicilio',
-            'acceder_cargue_productos_term', 
+            'acceder_cargue_productos_term',
             'crear_venta_domicilio',
             'editar_venta_domicilio',
 
@@ -626,7 +626,7 @@ class PermissionsSeeder extends Seeder
             'acceder_inventario',
         ]);
 
-         /* ******************** DESPACHOS PLANTA ***************** */
+        /* ******************** DESPACHOS PLANTA ***************** */
         // 1. Crear o actualizar el rol "FacturacionPlanta"
 
         User::updateOrCreate(
@@ -639,7 +639,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('Desp@8Planta.*')
             ]
         );
-        
+
 
         $despachosPlanta = Role::updateOrCreate(['name' => 'DespachosPlanta']);
 
@@ -654,7 +654,7 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $despachosPlanta->syncPermissions([
-            
+
             'ver_traslado',
             'acceder_traslado',
             'crear_traslado',
@@ -666,7 +666,7 @@ class PermissionsSeeder extends Seeder
 
         ]);
 
-           /* ******************** CALIDAD PLANTA ***************** */
+        /* ******************** CALIDAD PLANTA ***************** */
         // 1. Crear o actualizar el rol "FacturacionPlanta"
 
         User::updateOrCreate(
@@ -679,7 +679,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('C@l1d@Planta.*')
             ]
         );
-    
+
         $calidadPlanta = Role::updateOrCreate(['name' => 'CalidadPlanta']);
 
         $usuarios = User::where('name', 'like', '%CALIDAD%')
@@ -693,7 +693,7 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $calidadPlanta->syncPermissions([
-            
+
             'ver_traslado',
             'acceder_traslado',
             'crear_traslado',
@@ -702,7 +702,57 @@ class PermissionsSeeder extends Seeder
 
             'ver_inventario',
             'acceder_inventario',
-            
+
+        ]);
+
+
+        /* ******************** COMERCIAL 1 ***************** */
+        // 1. Crear o actualizar el rol "FacturacionPlanta"
+
+        User::updateOrCreate(
+            ['email' => 'comercial1@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'COMERCIAL 1',
+                'phone' => '3004154625',
+                'profile' => 'Vendedor',
+                'status' => 'Active',
+                'password' => bcrypt('Com3rC1@l1.*')
+            ]
+        );
+
+        $vendedor = Role::updateOrCreate(['name' => 'Vendedor']);
+
+        $usuarios = User::where('name', 'like', '%COMERCIAL%')
+            // ->orWhere('name', 'like', '%CAJERO%')
+            //  ->orWhereIn('id', $idsUsuarios)
+            ->get();
+
+        foreach ($usuarios as $usuario) {
+            $usuario->assignRole($vendedor);
+        }
+
+        // 3. Definir el listado de permisos a sincronizar
+        $vendedor->syncPermissions([
+
+            'ver_orders',
+            'acceder_orders',
+            'crear_orders',
+            'editar_orders',
+            'eliminar_orders',
+
+            'ver_ventas',
+            'ver_venta_domicilio',
+
+            'Pos_Create',
+            'acceder_ventas',
+
+            'acceder_venta_domicilio',
+            'acceder_cargue_productos_term',
+            'crear_venta_domicilio',
+            'editar_venta_domicilio',
+
+            'ver_inventario',
+            'acceder_inventario',
         ]);
     }
 }
