@@ -63,7 +63,7 @@
 							</div>
 
 							<div class="col-md-4">
-		      						<div class="task-header">
+								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">% Descuento cliente</label>
 										<p>{{$datacompensado[0]->porc_descuento_cliente}}</p>
@@ -85,7 +85,7 @@
 							<input type="hidden" id="codigoBarras" name="codigoBarras" value="999999999">
 							<div class="row g-3">
 
-								
+
 								<script>
 									$(document).ready(function() {
 
@@ -189,12 +189,9 @@
 									</div>
 								</div>
 
-
+								@can('ver_CambiarPrecioVenta')
 								<div class="col-md-12">
-									<div class="form-group row" style="margin-top:3px; margin-left:400px">
-
-										@if($datacompensado[0]->status == '0')
-
+									<div class="form-group row" style="margin-top:3px; margin-right:400px">
 										<!-- <div class="col-md-1">
 										<div class="" style="margin-top:30px;">
 											<div class="d-grid gap-2">
@@ -203,130 +200,126 @@
 										</div>
 									</div> -->
 
-										@can('Admin_Menu')
+										<div class="col-md-4">
+											<div class="" style="margin-top:0px; margin-left:3px">
+												<label for="password">PassWord</label>
+												<input type="password" id="password" name="password" class="form-control input" placeholder="Contraseña">
 
-										<div class="col-md-3" id="cambiarContraseDiv">
-
-											<div class="col-md-4">
-												<div class="" style="margin-top:0px; margin-left:3px">
-													<label for="password">PassWord</label>
-													<input type="password" id="password" name="password" class="form-control input" placeholder="Contraseña">
-
-												</div>
-											</div>
-
-											<div class="col-md-3">
-												<div class="" style="margin-top:30px;">
-													<div class="d-grid gap-2">
-														<button id="btnRemove" class="btn btn-warning btn-block">Modificar Precio</button>
-													</div>
-												</div>
 											</div>
 										</div>
 
-										@endcan
-										@endif
+										<div class="col-md-4">
+											<div class="" style="margin-top:30px;">
+												<div class="d-grid gap-2">
+													<button id="btnRemove" class="btn btn-warning btn-block">Modificar Precio</button>
+												</div>
+											</div>
+
+										</div>
 									</div>
 								</div>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div class="widget-content mt-1">
-		<div class="card">
-			<div class="card-body">
-				<div class="table-responsive mt-3">
-					<table id="tableDespostere" class="table table-sm table-striped table-bordered">
-						<thead class="text-white" style="background: #3B3F5C">
-							<tr>
-								<th class="table-th text-white">Producto</th>
-								<th class="table-th text-white">Cant</th>
-								<th class="table-th text-white">Valor.U</th>
-								<th class="table-th text-white">%Des</th>
-								<th class="table-th text-white">Des</th>
-								<th class="table-th text-white">{{$datacompensado[0]->porc_descuento_cliente}}%DCl</th>
-								<th class="table-th text-white">Total.B</th>
-								<th class="table-th text-white">%IVA</th>
-								<th class="table-th text-white">IVA</th>
-								<th class="table-th text-white">%I.S</th>
-								<th class="table-th text-white">I.S</th>
-								<th class="table-th text-white">%I.C</th>
-								<th class="table-th text-white">I.C</th>
-								<th class="table-th text-white">Total</th>
-								<th class="table-th text-white text-center">Acciones</th>
-							</tr>
-						</thead>
-						<tbody id="tbodyDetail">
-							@foreach($detalleVenta as $proddetail)
-							<tr>
-								<!--td>{{$proddetail->id}}</td-->
-								<td>{{$proddetail->nameprod}}</td>
-								<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
-								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
-								<td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
-								<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
-								<td>{{ number_format($proddetail->porc_otro_impuesto, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
-								<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
-								<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
-								<td class="text-center">
-									@if($datacompensado[0]->status == '0')
-									<button class="btn btn-dark fas fa-edit" name="btnEdit" data-id="{{$proddetail->id}}" title="Editar">
-									</button>
-									<button class="btn btn-dark fas fa-trash" name="btnDown" data-id="{{$proddetail->id}}" title="Borrar">
-									</button>
-									@else
-									<button class="btn btn-dark fas fa-edit" name="btnEdit" title="Editar" disabled>
-									</button>
-									<button class="btn btn-dark fas fa-trash" name="btnDown" title="Borrar" disabled>
-									</button>
-									@endif
-								</td>
-							</tr>
-							@endforeach
-						</tbody>
-						<tfoot id="tabletfoot">
-							<tr>
-								<th>Totales</th>
-								<th></th>
-								<th></th>
-								<td></td>
-								<th></th>
-								<th></th>
-								<th>${{number_format($arrayTotales['TotalBruto'], 0, ',', '.')}} </th>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td></td>
-								<th>${{number_format($arrayTotales['TotalValorAPagar'], 0, ',', '.')}} </th>
-							</tr>
-						</tfoot>
-					</table>
-					@if($datacompensado[0]->status == '0')
-					<div class="col-md-12">
-						<form method="GET" action="registrar_pago/{{$id}}">
-							@csrf
-							<div class="col-md-12 text-right mt-1">
-								<button id="cargarInventarioBtn" type="submit" class="btn btn-success btn-block">Pagar</button>
-								<!-- <a href="registrar_pago/{{$id}}" target="_blank" class="btn btn-success">Pagar</a> -->
+								@endcan
 							</div>
-						</form>
 					</div>
-					@endif
+					</form>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>
+
+<div class="widget-content mt-1">
+	<div class="card">
+		<div class="card-body">
+			<div class="table-responsive mt-3">
+				<table id="tableDespostere" class="table table-sm table-striped table-bordered">
+					<thead class="text-white" style="background: #3B3F5C">
+						<tr>
+							<th class="table-th text-white">Producto</th>
+							<th class="table-th text-white">Cant</th>
+							<th class="table-th text-white">Valor.U</th>
+							<th class="table-th text-white">%Des</th>
+							<th class="table-th text-white">Des</th>
+							<th class="table-th text-white">{{$datacompensado[0]->porc_descuento_cliente}}%DCl</th>
+							<th class="table-th text-white">Total.B</th>
+							<th class="table-th text-white">%IVA</th>
+							<th class="table-th text-white">IVA</th>
+							<th class="table-th text-white">%I.S</th>
+							<th class="table-th text-white">I.S</th>
+							<th class="table-th text-white">%I.C</th>
+							<th class="table-th text-white">I.C</th>
+							<th class="table-th text-white">Total</th>
+							<th class="table-th text-white text-center">Acciones</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyDetail">
+						@foreach($detalleVenta as $proddetail)
+						<tr>
+							<!--td>{{$proddetail->id}}</td-->
+							<td>{{$proddetail->nameprod}}</td>
+							<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
+							<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
+							<td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
+							<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
+							<td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
+							<td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
+							<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
+							<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
+							<td>{{ number_format($proddetail->porc_otro_impuesto, 0, ',', '.')}}</td>
+							<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
+							<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
+							<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
+							<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
+							<td class="text-center">
+								@if($datacompensado[0]->status == '0')
+								<button class="btn btn-dark fas fa-edit" name="btnEdit" data-id="{{$proddetail->id}}" title="Editar">
+								</button>
+								<button class="btn btn-dark fas fa-trash" name="btnDown" data-id="{{$proddetail->id}}" title="Borrar">
+								</button>
+								@else
+								<button class="btn btn-dark fas fa-edit" name="btnEdit" title="Editar" disabled>
+								</button>
+								<button class="btn btn-dark fas fa-trash" name="btnDown" title="Borrar" disabled>
+								</button>
+								@endif
+							</td>
+						</tr>
+						@endforeach
+					</tbody>
+					<tfoot id="tabletfoot">
+						<tr>
+							<th>Totales</th>
+							<th></th>
+							<th></th>
+							<td></td>
+							<th></th>
+							<th></th>
+							<th>${{number_format($arrayTotales['TotalBruto'], 0, ',', '.')}} </th>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<th>${{number_format($arrayTotales['TotalValorAPagar'], 0, ',', '.')}} </th>
+						</tr>
+					</tfoot>
+				</table>
+				@if($datacompensado[0]->status == '0')
+				<div class="col-md-12">
+					<form method="GET" action="registrar_pago/{{$id}}">
+						@csrf
+						<div class="col-md-12 text-right mt-1">
+							<button id="cargarInventarioBtn" type="submit" class="btn btn-success btn-block">Pagar</button>
+							<!-- <a href="registrar_pago/{{$id}}" target="_blank" class="btn btn-success">Pagar</a> -->
+						</div>
+					</form>
+				</div>
+				@endif
+			</div>
+		</div>
+	</div>
+</div>
 </div>
 </div>
 <script>
@@ -352,8 +345,8 @@
 			}
 		});
 
-		$('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
-		$('#cambiarContraseDiv').hide(); // 
+		//	$('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
+		//	$('#cambiarContraseDiv').hide(); // 
 	});
 </script>
 

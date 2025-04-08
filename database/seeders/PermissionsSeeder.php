@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['administracion', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas', 'CambiarPrecioVenta']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -754,5 +754,60 @@ class PermissionsSeeder extends Seeder
             'ver_inventario',
             'acceder_inventario',
         ]);
+
+        /* ******************** ADMINISTRADOR CERDO CENTRAL ***************** */
+        // 1. Crear o actualizar el rol "AdminBodegaCerdoCentral"
+        $adminBodegaCerdoCentral = Role::updateOrCreate(['name' => 'AdminBodegaCerdoCentral']);
+        User::updateOrCreate(
+            ['email' => 'centralcerdomega@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'ADMINISTRADOR CERDO CENTRAL',
+                'phone' => '3214154625',
+                'profile' => 'AdminBodegaCerdoCentral',
+                'status' => 'Active',
+                'password' => bcrypt('a13.AdminCerdoGuad+')
+            ]
+        );
+
+        $usuarios = User::where('name', 'like', '%ADMINISTRADOR CERDO CENTRAL%')
+            // ->orWhere('name', 'like', '%CAJERO%')
+            //  ->orWhereIn('id', $idsUsuarios)
+            ->get();
+
+        foreach ($usuarios as $usuario) {
+            $usuario->assignRole($adminBodegaCerdoCentral);
+        }
+
+        // 3. Definir el listado de permisos a sincronizar
+        $permisos = [
+            'ver_CambiarPrecioVenta',           
+        ];
+
+        // 4. Crear o actualizar cada permiso (esto asegura que, si ya existen, se mantengan actualizados)
+        foreach ($permisos as $permiso) {
+            Permission::updateOrCreate(['name' => $permiso]);
+        }
+
+        // 5. Definir roles para asignar a usuarios específicos.
+        // La llave es el nombre del rol y el valor es el nombre del usuario al que se le asignará.
+        $rolesUsuarios = [
+            'AdminBodegaCerdoCentral' => 'ADMINISTRADOR CERDO CENTRAL',
+        ];
+
+        // 6. Para cada rol definido, se crea o actualiza y se sincronizan los permisos,
+        //    luego se asigna al usuario correspondiente si existe.
+        foreach ($rolesUsuarios as $roleName => $userName) {
+            // Crear o actualizar el rol
+            $role = Role::updateOrCreate(['name' => $roleName]);
+
+            // Sincronizar los permisos con el rol
+            $role->syncPermissions($permisos);
+
+            // Buscar el usuario por nombre y asignarle el rol
+            $user = User::where('name', $userName)->first();
+            if ($user) {
+                $user->assignRole($role);
+            }
+        }
     }
 }
