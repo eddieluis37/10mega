@@ -383,7 +383,7 @@ class cajaController extends Controller
                          <i class="fas fa-eye"></i>
                          </a>		                    
 
-                        <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre" target="_blank">
+                        <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre">
                             RC
                         </a>
                          
@@ -401,7 +401,7 @@ class cajaController extends Controller
                          </a>
                       
 
-                        <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre" target="_blank">
+                        <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre">
                             RC
                         </a>
                        
@@ -414,7 +414,7 @@ class cajaController extends Controller
                          <a href="caja/showReciboCaja/' . $data->id . '" class="btn btn-dark" title="CuadreCajaCerrado" target="_blank">
                          <i class="far fa-file-pdf"></i>
                          </a>
-                         <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre" target="_blank">
+                         <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre">
                          RC
                          </a>
                        
