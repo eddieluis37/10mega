@@ -258,7 +258,7 @@
 							<div class="form-group">
 								<label>Cantidad</label>
 								<!--input type="number" name="cantidad" id="cantidad" class="form-control" "aria-describedby=" helpId" required="" min="1" max="30" step="1" value="1">-->
-								<input type="number" name="cantidadMacho" id="cantidadMacho" class="form-control" "aria-describedby=" helpId" required="" min="1" max="30" step="1" value="0">
+								<input type="number" name="cantidadMacho" id="cantidadMacho" class="form-control" "aria-describedby=" helpId" required="" min="1" step="1" value="0">
 								@error('cantidadMacho') <span class="text-danger er">{{ $message}}</span>@enderror
 							</div>
 						</div>
@@ -285,7 +285,7 @@
 						<div class="task-header">
 							<div class="form-group">
 								<label>Cantidad <br> Hembra</label>
-								<input type="number" name="cantidadHembra" id="cantidadHembra" class="form-control" "aria-describedby=" helpId" min="0" max="30" step="0" value="0">
+								<input type="number" name="cantidadHembra" id="cantidadHembra" class="form-control" "aria-describedby=" helpId" min="0" step="0" value="0">
 							</div>
 						</div>
 					</div>

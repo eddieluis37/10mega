@@ -34,9 +34,9 @@ class PermissionsSeeder extends Seeder
         $admin = Role::updateOrCreate(['name' => 'Admin']);
         $admin->syncPermissions($allPermissions); // Asigna todos los permisos
 
-        // Crear o actualizar roles
+       /*  // Crear o actualizar roles
         $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
-        $adminCentroCosto->syncPermissions($allPermissions); // Asigna todos los permisos
+        $adminCentroCosto->syncPermissions($allPermissions); // Asigna todos los permisos */
 
         // Crear o actualizar roles
         $comercial = Role::updateOrCreate(['name' => 'Comercial']);
@@ -102,14 +102,14 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($analistaCostos);
         }
 
-        /* // 1. Crear o actualizar el rol "AdminCentroCosto"
+         // 1. Crear o actualizar el rol "AdminCentroCosto"
         $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
 
         // 2. Asignar el rol "AdminCentroCosto" a los usuarios que contengan 'ADMINISTRADOR' en su nombre o cuyos IDs estén en el arreglo
-        $idsUsuarios = [20, 21];
+        // $idsUsuarios = [20, 21];
 
-        $usuarios = User::where('name', 'like', '%ADMINISTRADOR%')
-            ->orWhereIn('id', $idsUsuarios)
+        $usuarios = User::where('profile', 'like', '%AdminCentroCosto%')
+            //->orWhereIn('id', $idsUsuarios)
             ->get();
 
         foreach ($usuarios as $usuario) {
@@ -137,6 +137,7 @@ class PermissionsSeeder extends Seeder
             'editar_venta_pos',
 
             'ver_venta_domicilio',
+            'acceder_cargue_productos_term',
             'acceder_venta_domicilio',
             'crear_venta_domicilio',
             'editar_venta_domicilio',
@@ -179,7 +180,6 @@ class PermissionsSeeder extends Seeder
                 $user->assignRole($role);
             }
         }
- */
 
         $supervisorPuntosDeVenta = Role::updateOrCreate(['name' => 'SupervisorPuntosDeVenta']);
         $supervisorPuntosDeVenta->syncPermissions([
