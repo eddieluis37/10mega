@@ -1,7 +1,3 @@
-@extends('layouts.theme.app')
-@section('content')
-
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -30,9 +26,9 @@
 
     /* Encabezado Principal */
     .header {
-      /*   background: linear-gradient(to right, #007bff, #00c8ff);
+      background: linear-gradient(to right, #007bff, #00c8ff);
       color: #fff; 
-      padding: 1.5rem;*/
+    /*   padding: 1.5rem; */
       text-align: center;
     }
 
@@ -67,7 +63,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.95rem;
+      font-size: 0.75rem;
     }
 
     thead {
@@ -235,4 +231,3 @@
 </body>
 
 </html>
-@endsection

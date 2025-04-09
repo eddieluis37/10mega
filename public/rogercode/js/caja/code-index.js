@@ -67,6 +67,39 @@ $(document).ready(function () {
    
 });
 
+  /* document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.open-report').forEach(function(button) {
+          button.addEventListener('click', function(e) {
+              e.preventDefault();
+              var cajaId = this.getAttribute('data-id');
+              var reportUrl = '/reporte-cierre-caja/' + cajaId;
+              document.getElementById('reportIframe').setAttribute('src', reportUrl);
+              var reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+              reportModal.show();
+          });
+      });
+  }); */
+
+  async function openReport(id) {
+    try {
+        // Realiza la petición al endpoint del reporte
+        const response = await fetch(`/reporte-cierre-caja/${id}`);
+        if (!response.ok) {
+            throw new Error('Error al cargar el reporte');
+        }
+        const html = await response.text();
+        // Inserta el contenido obtenido en el contenedor del modal
+        document.getElementById('reportContent').innerHTML = html;
+        // Muestra el modal utilizando Bootstrap 5
+        const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+        reportModal.show();
+    } catch (error) {
+        console.error(error);
+        alert("Hubo un error al cargar el reporte.");
+    }
+}
+
+
 const showModalcreate = () => {
     if (contentform.hasAttribute("disabled")) {
         contentform.removeAttribute("disabled");
@@ -189,3 +222,5 @@ const refresh_table = () => {
     let table = $("#tableAlistamiento").dataTable();
     table.fnDraw(false);
 };
+
+

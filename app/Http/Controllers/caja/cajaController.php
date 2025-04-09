@@ -132,7 +132,7 @@ class cajaController extends Controller
 
     public function index()
     {
-        $category = Category::WhereIn('id', [1, 2, 3])->get();
+        $cajas = Caja::all();
         // Obtener el usuario autenticado
         $authUser = Auth::user();
 
@@ -173,7 +173,7 @@ class cajaController extends Controller
         $defaultCentroCostoId = $centroCostoUser->first() ? $centroCostoUser->first()->id : null;
 
 
-        return view("caja.index", compact('usuario', 'category', 'centroCostoUser', 'defaultCentroCostoId'));
+        return view("caja.index", compact('usuario', 'cajas', 'centroCostoUser', 'defaultCentroCostoId'));
     }
 
     /**
@@ -378,15 +378,12 @@ class cajaController extends Controller
                          <a href="caja/pdfCierreCaja/' . $data->id . '" class="btn btn-dark" title="PdfCuadreCajaPendiente" target="_blank">
                          <i class="far fa-file-pdf"></i>
                          </a>
-                      
                          <a href="caja/showReciboCaja/' . $data->id . '" class="btn btn-dark" title="RecibodeCajaCerrado" target="_blank">
                          <i class="fas fa-eye"></i>
-                         </a>		                    
-
-                        <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre">
-                            RC
-                        </a>
-                         
+                         </a>		                 
+                        <button class="btn btn-warning" title="ReporteCierre" onclick="openReport(' . $data->id . ');">
+						     RC
+					    </button>                         
                          </div>
                          ';
                 } elseif ($data->status == 0) {
@@ -398,13 +395,11 @@ class cajaController extends Controller
                         
                          <a href="caja/pdfCierreCaja/' . $data->id . '" class="btn btn-dark" title="PdfCuadreCajaOpen" target="_blank">
                          <i class="far fa-file-pdf"></i>
-                         </a>
-                      
+                         </a>                                        
 
-                        <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre">
-                            RC
-                        </a>
-                       
+                        <button class="btn btn-warning" title="ReporteCierre" onclick="openReport(' . $data->id . ');">
+						     RC
+					    </button>
                          </div>
                          ';
                     //ESTADO Cerrada
@@ -414,10 +409,9 @@ class cajaController extends Controller
                          <a href="caja/showReciboCaja/' . $data->id . '" class="btn btn-dark" title="CuadreCajaCerrado" target="_blank">
                          <i class="far fa-file-pdf"></i>
                          </a>
-                         <a href="reporte-cierre-caja/' . $data->id . '" class="btn btn-warning" title="ReporteCierre">
-                         RC
-                         </a>
-                       
+                        <button class="btn btn-warning" title="ReporteCierre" onclick="openReport(' . $data->id . ');">
+						     RC
+					    </button>                       
                          </div>
                          ';
                 }

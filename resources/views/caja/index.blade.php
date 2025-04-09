@@ -20,10 +20,10 @@
 					<table id="tableAlistamiento" class="table table-striped mt-1">
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
-								<th class="table-th text-white">T</th>							
-								<th class="table-th text-white ">CENTRO_COSTO</th>		
+								<th class="table-th text-white">T</th>
+								<th class="table-th text-white ">CENTRO_COSTO</th>
 								<th class="table-th text-white ">CAJERO</th>
-								<th class="table-th text-white ">BASE</th>							
+								<th class="table-th text-white ">BASE</th>
 								<th class="table-th text-white ">ESTADO</th>
 								<th class="table-th text-white">INICIO</th>
 								<th class="table-th text-white">CIERRE</th>
@@ -38,7 +38,7 @@
 		</div>
 	</div>
 	<!-- modal -->
-	<div class="modal fade" id="modal-create-alistamiento" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
+	<div class="modal fade" id="modal-create-alistamiento" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
 			<div class="modal-content bg-default">
 				<fieldset id="contentDisable">
@@ -48,7 +48,7 @@
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span></button>
 						</div>
-				 		<div class="modal-body">
+						<div class="modal-body">
 							@include('caja.modal_create')
 						</div>
 						<div class="modal-footer">
@@ -63,6 +63,29 @@
 		<!-- /.modal-dialog -->
 	</div>
 	<!-- /.modal -->
+
+	<!-- Modal para mostrar el reporte cargado vía fetch -->
+	<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<!-- <div class="modal-header">
+					<h5 class="modal-title">Reporte Validación del Cierre de Caja</h5>
+					
+					<a href="{{ route('caja.index') }}" class="btn btn-secondary ms-auto me-2" title="Ir a Principal">
+						Volver a Caja
+					</a>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
+ -->
+
+				<div class="modal-body">
+					<!-- Contenedor donde se insertará el HTML obtenido -->
+					<div id="reportContent"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>
 @endsection
 @section('script')
