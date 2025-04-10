@@ -121,8 +121,8 @@ $(document).ready(function () {
             },
         });
     });
-    $(".select2Provider").select2({
-        placeholder: "Busca un proveedor",
+    $(".select2Cliente").select2({
+        placeholder: "Busca un cliente",
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,

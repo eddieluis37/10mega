@@ -29,7 +29,6 @@ console.log("centro " + centrocosto); */
 
 var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
-
 $(".select2Prod").select2({
     placeholder: "Busca una factura",
     width: "100%",

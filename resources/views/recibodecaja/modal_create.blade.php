@@ -18,7 +18,7 @@
 					<div class="form-group">
 						<label for="" class="form-label">Tipo de recibo</label>
 						<select class="form-control form-control-sm" name="tipo" id="tipo">
-							<option value="">Seleccione una opción</option>							
+							<option value="">Seleccione una opción</option>
 							<option value="1">DIARIO</option>
 							<option value="2">CARTERA</option>
 						</select>
@@ -31,10 +31,10 @@
 				<div class="task-header">
 					<div class="form-group">
 						<label for="" class="form-label">Cliente</label>
-						<select class="form-control form-control-sm input " name="cliente" id="cliente" required>
+						<select class="form-control form-control-sm select2Cliente " name="cliente" id="cliente" required>
 							<option value="">Seleccione el cliente</option>
-							@foreach($clientes as $cliente)
-							<option value="{{ $cliente->id }}">{{ $cliente->name }}</option>
+							@foreach($clientes as $option)
+							<option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
 							@endforeach
 						</select>
 						<span class="text-danger error-message"></span>
@@ -46,10 +46,10 @@
 				<div class="task-header">
 					<div class="form-group">
 						<label for="" class="form-label">Facturas</label>
-						<select class="form-control form-control-sm select2Ventas " name="factura" id="factura" required>
+						<select class="form-control form-control-sm" name="factura" id="factura" required>
 							<option value="">Seleccione factura</option>
 							@foreach($ventas as $factura)
-							<option value="{{ $factura->id }}">{{ $factura->resolucion }}</option>
+							<option value="{{ $factura->id }}">{{ $factura->consecutivo }}</option>
 							@endforeach
 						</select>
 						<span class="text-danger error-message"></span>
@@ -69,27 +69,6 @@
 						</select>
 						<span class="text-danger error-message"></span>
 					</div>
-				</div>
-			</div>
-
-			<div class="col-md-6">
-				<div class="task-header">
-
-				</div>
-			</div>
-
-			<div class="col-md-6">
-				<div class="task-header">
-					<!-- <div class="form-group">
-						<label for="" class="form-label">Domiciliario</label>
-						<select class="form-control form-control-sm input" name="domiciliario" id="domiciliario" required>
-							<option value="">Seleccione el domiciliario</option>
-							@foreach($domiciliarios as $domiciliario)
-							<option value="{{ $domiciliario->id }}">{{ $domiciliario->name }}</option>
-							@endforeach
-						</select>
-						<span class="text-danger error-message"></span>
-					</div> -->
 				</div>
 			</div>
 

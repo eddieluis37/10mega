@@ -92,8 +92,8 @@
 											<input type="hidden" id="facturaId" name="facturaId" value="{{$datacompensado[0]->sale_id}}" data-id="{{$datacompensado[0]->sale_id}}">
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
 												<option value="">Seleccione el facturas</option>
-												@foreach ($prod as $p)
-												<option value="{{$p->id}}">{{$p->resolucion}} - {{$p->consecutivo}}</option>
+												@foreach ($ventas as $p)
+												<option value="{{$p->id}}">{{$p->consecutivo}} - {{$p->consecutivo}}</option>
 												@endforeach
 											</select>
 											<span class="text-danger error-message"></span>

@@ -302,6 +302,7 @@ class saleController extends Controller
         $cXc->third_id = $clienteId;
         $cXc->deuda_inicial = $venta->valor_a_pagar_credito;
         $cXc->deuda_x_cobrar = $venta->valor_a_pagar_credito;
+        $cXc->fecha_inicial = now();
         $cXc->fecha_vencimiento = now()->addDays($diasCredito);
         $cXc->save();
     }
@@ -1318,7 +1319,8 @@ class saleController extends Controller
                 Log::debug('Venta tiene valor a pagar en crédito, se debe invocar cuentasPorCobrar', [
                     'valor_a_pagar_credito' => $sale->valor_a_pagar_credito
                 ]);
-                // Ejemplo: $this->cuentasPorCobrar($sale);
+                
+                $this->cuentasPorCobrar($sale->id);
             }
 
             // Marcar la venta como cerrada y asignar la fecha de cierre

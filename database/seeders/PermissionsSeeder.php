@@ -58,6 +58,12 @@ class PermissionsSeeder extends Seeder
 
             'acceder_cargue_productos_term',
 
+            'ver_traslado',
+            'acceder_traslado',
+            'crear_traslado',
+            'editar_traslado',
+            'eliminar_traslado',
+
         ]);
 
         // Asignar rol "RecibidoPlanta" a un usuario con el nombre "Recibido Planta"
