@@ -601,6 +601,14 @@ class PermissionsSeeder extends Seeder
             'acceder_terceros',
             'crear_terceros',
 
+            'Pos_Create',
+            'ver_compras',
+            'ver_compra_productos',
+            'acceder_compra_productos',
+            'acceder_cargue_productos_term',
+            'crear_compra_productos',
+            'editar_compra_productos',
+
             'ver_ventas',
             'ver_venta_domicilio',
             'ver_venta_pos',
