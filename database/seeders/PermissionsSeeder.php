@@ -34,7 +34,7 @@ class PermissionsSeeder extends Seeder
         $admin = Role::updateOrCreate(['name' => 'Admin']);
         $admin->syncPermissions($allPermissions); // Asigna todos los permisos
 
-       /*  // Crear o actualizar roles
+        /*  // Crear o actualizar roles
         $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
         $adminCentroCosto->syncPermissions($allPermissions); // Asigna todos los permisos */
 
@@ -108,7 +108,7 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($analistaCostos);
         }
 
-         // 1. Crear o actualizar el rol "AdminCentroCosto"
+        // 1. Crear o actualizar el rol "AdminCentroCosto"
         $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
 
         // 2. Asignar el rol "AdminCentroCosto" a los usuarios que contengan 'ADMINISTRADOR' en su nombre o cuyos IDs estén en el arreglo
@@ -144,6 +144,7 @@ class PermissionsSeeder extends Seeder
 
             'ver_venta_domicilio',
             'acceder_cargue_productos_term',
+            'acceder_ventas',
             'acceder_venta_domicilio',
             'crear_venta_domicilio',
             'editar_venta_domicilio',
@@ -258,10 +259,23 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('SubG3r3nt3M@*')
             ]
         );
+        User::updateOrCreate(
+            ['email' => 'administradora@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'ELSA LILIANA BELLO SENA',
+                'phone' => '3014154625',
+                'profile' => 'Comercial',
+                'status' => 'Active',
+                'password' => bcrypt('Bell02005*')
+            ]
+        );
+       
+        $user = User::where('profile', 'like', '%Comercial%')
+            //->orWhereIn('id', $idsUsuarios)
+            ->get();
 
-        $user = User::where('name', 'BRAYAN GONZALEZ')->first();
-        if ($user) {
-            $user->assignRole($comercial);
+        foreach ($user as $usuario) {
+            $usuario->assignRole($comercial);
         }
 
 
@@ -794,7 +808,7 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $permisos = [
-            'ver_CambiarPrecioVenta',           
+            'ver_CambiarPrecioVenta',
         ];
 
         // 4. Crear o actualizar cada permiso (esto asegura que, si ya existen, se mantengan actualizados)
