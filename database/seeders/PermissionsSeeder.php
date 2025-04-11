@@ -809,6 +809,32 @@ class PermissionsSeeder extends Seeder
         // 3. Definir el listado de permisos a sincronizar
         $permisos = [
             'ver_CambiarPrecioVenta',
+
+            'ver_productos',
+
+            'ver_lista_de_precio',
+            'acceder_lista_de_precio',
+            'crear_lista_de_precio',
+            'editar_lista_de_precio',
+            'eliminar_lista_de_precio',
+            
+            'ver_alistamiento',
+            'acceder_alistamiento',
+            'crear_alistamiento',
+            'editar_alistamiento',
+            'eliminar_alistamiento',
+                                    
+            'ver_compras',
+            'acceder_compras',
+            'crear_compras',
+            'editar_compras',
+            'eliminar_compras',
+
+            'ver_compra_lote',
+            'acceder_compra_lote',
+            'crear_compra_lote',
+            'editar_compra_lote',
+            'eliminar_compra_lote',            
         ];
 
         // 4. Crear o actualizar cada permiso (esto asegura que, si ya existen, se mantengan actualizados)
