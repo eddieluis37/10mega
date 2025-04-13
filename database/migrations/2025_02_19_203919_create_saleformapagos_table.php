@@ -15,16 +15,20 @@ class CreateSaleformapagosTable extends Migration
     {
         Schema::create('saleformapagos', function (Blueprint $table) {
             $table->id();
+            
             $table->unsignedBigInteger('sale_id');    
             $table->foreign('sale_id')->references('id')->on('sales'); 
+            
             $table->unsignedBigInteger('formapago_id');    
             $table->foreign('formapago_id')->references('id')->on('formapagos'); 
+
             $table->integer('diascredito');
             $table->string('telefonoasociado');
             $table->string('bancoorigen');
             $table->string('bancodestino');
             $table->string('numcheque');
             $table->string('descripcion');
+            
             $table->timestamps();
         });
     }

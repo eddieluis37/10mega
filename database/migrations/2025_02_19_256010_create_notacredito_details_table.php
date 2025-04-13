@@ -15,8 +15,22 @@ class CreateNotacreditoDetailsTable extends Migration
     {
         Schema::create('notacredito_details', function (Blueprint $table) {
             $table->id();
-            /*   $table->foreignId('sale_id')->constrained(); */
+            
             $table->foreignId('notacredito_id')->constrained();
+
+            $table->unsignedBigInteger('sale_detail_id')->nullable()->after('product_id');
+            $table->foreign('sale_detail_id')->references('id')->on('sale_details');
+            
+            $table->unsignedBigInteger('store_id')->nullable()->after('sale_detail_id');
+            $table->foreign('store_id')->references('id')->on('stores');
+            
+            $table->unsignedBigInteger('lote_id')->nullable()->after('store_id');
+            $table->foreign('lote_id')->references('id')->on('lotes');
+            
+            $table->unsignedBigInteger('inventario_id')->nullable()->after('lote_id');
+            $table->foreign('inventario_id')->references('id')->on('inventarios');
+            
+
             $table->foreignId('product_id')->constrained();
             $table->decimal('quantity', 10, 2);
             $table->decimal('price', 10, 2);
@@ -33,6 +47,10 @@ class CreateNotacreditoDetailsTable extends Migration
 
             $table->boolean('status')->parent_select()->default(true)->nullable();
 
+            $table->boolean('inventory_processed')->default(false)
+            ->comment('Indica si ya se actualizó el inventario para este detalle')
+            ->after('inventario_id');
+
             $table->timestamps();
         });
     }
@@ -44,6 +62,16 @@ class CreateNotacreditoDetailsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('notacredito_details');
+        Schema::table('notacredito_details', function (Blueprint $table) {
+            $table->dropForeign(['sale_detail_id']);
+            $table->dropColumn('sale_detail_id');
+            $table->dropForeign(['store_id']);
+            $table->dropColumn('store_id');
+            $table->dropForeign(['lote_id']);
+            $table->dropColumn('lote_id');
+            $table->dropForeign(['inventario_id']);
+            $table->dropColumn('inventario_id');
+            $table->dropColumn('inventory_processed');
+        });
     }
 }

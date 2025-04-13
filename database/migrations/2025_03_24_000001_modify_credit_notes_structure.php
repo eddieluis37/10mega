@@ -11,51 +11,48 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Add a field to track the number of credit notes per sale
+        // Actualizaciones adicionales para seguimiento de Notas de Crédito
         Schema::table('sales', function (Blueprint $table) {
             $table->unsignedTinyInteger('credit_notes_count')->default(0)
-                ->comment('Counter for credit notes associated with this sale. Max allowed is 2.');
+                ->comment('Contador de notas de crédito asociadas (máximo permitido: 2)');
             $table->enum('credit_note_status', ['none', 'partial', 'full'])
                 ->default('none')
-                ->comment('Status of credit notes: none = no credit notes, partial = partial returns, full = fully voided');
+                ->comment('Estado de las notas de crédito: none = sin notas, partial = devolución parcial, full = venta anulada');
         });
 
         // 2. Modify the notacreditos table to better handle inventory returns
         Schema::table('notacreditos', function (Blueprint $table) {
-            // Add a clearer type field
             $table->enum('return_type', ['full_cancellation', 'partial_return'])
                 ->after('tipo')
-                ->comment('Type of return: full_cancellation = entire sale voided, partial_return = some items returned');
-            
-            // Add inventory-related fields
+                ->comment('Tipo de devolución: full_cancellation = anulación total, partial_return = devolución parcial');
             $table->boolean('inventory_processed')->default(false)
-                ->comment('Flag to track if inventory has been updated for this credit note');
-            
-            // Add sequence number field (1st or 2nd credit note for this sale)
+                ->comment('Indica si el inventario fue ajustado para esta nota de crédito')
+                ->after('return_type');
             $table->unsignedTinyInteger('credit_note_sequence')->default(1)
-                ->comment('Sequence number of this credit note for the parent sale (1 or 2)');
+                ->comment('Secuencia de la nota de crédito para la venta (1 o 2)')
+                ->after('inventory_processed');
         });
 
         // 3. Enhance notacredito_details to better track inventory items
-        Schema::table('notacredito_details', function (Blueprint $table) {
+    /*     Schema::table('notacredito_details', function (Blueprint $table) {
             // Add reference to original sale_detail_id
             $table->unsignedBigInteger('sale_detail_id')->nullable()->after('product_id');
             $table->foreign('sale_detail_id')->references('id')->on('sale_details');
-            
+
             // Add store and lote information (copied from sale_details)
             $table->unsignedBigInteger('store_id')->nullable()->after('sale_detail_id');
             $table->foreign('store_id')->references('id')->on('stores');
-            
+
             $table->unsignedBigInteger('lote_id')->nullable()->after('store_id');
             $table->foreign('lote_id')->references('id')->on('lotes');
-            
+
             $table->unsignedBigInteger('inventario_id')->nullable()->after('lote_id');
             $table->foreign('inventario_id')->references('id')->on('inventarios');
-            
+
             // Add a field to track if this detail has been processed in inventory
             $table->boolean('inventory_processed')->default(false)
                 ->comment('Flag to track if inventory has been updated for this specific item');
-        });
+        }); */
 
         // 4. Create a new table to track credit note inventory movements
         Schema::create('notacredito_inventory_movements', function (Blueprint $table) {
@@ -80,7 +77,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('notacredito_inventory_movements');
-        
+
         Schema::table('notacredito_details', function (Blueprint $table) {
             $table->dropForeign(['sale_detail_id']);
             $table->dropForeign(['store_id']);
@@ -88,11 +85,11 @@ return new class extends Migration
             $table->dropForeign(['inventario_id']);
             $table->dropColumn(['sale_detail_id', 'store_id', 'lote_id', 'inventario_id', 'inventory_processed']);
         });
-        
+
         Schema::table('notacreditos', function (Blueprint $table) {
             $table->dropColumn(['return_type', 'inventory_processed', 'credit_note_sequence']);
         });
-        
+
         Schema::table('sales', function (Blueprint $table) {
             $table->dropColumn(['credit_notes_count', 'credit_note_status']);
         });

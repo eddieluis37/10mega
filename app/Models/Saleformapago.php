@@ -9,5 +9,26 @@ class Saleformapago extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['codigo','nombre','tipoformapago','diascredito','cuenta'];
+    protected $table = 'saleformapagos';
+
+    protected $fillable = [
+        'sale_id',
+        'formapago_id',
+        'diascredito',
+        'telefonoasociado',
+        'bancoorigen',
+        'bancodestino',
+        'numcheque',
+        'descripcion'
+    ];
+
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
+
+    public function formaPago()
+    {
+        return $this->belongsTo(FormaPago::class, 'formapago_id');
+    }
 }

@@ -159,6 +159,9 @@ class PermissionsSeeder extends Seeder
             'crear_orders',
             'editar_orders',
             'eliminar_orders',
+
+            'ver_inventario',
+            'acceder_inventario',
         ];
 
         // 4. Crear o actualizar cada permiso (esto asegura que, si ya existen, se mantengan actualizados)

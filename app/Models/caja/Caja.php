@@ -2,7 +2,9 @@
 
 namespace App\Models\caja;
 
+use App\Models\CajaReciboDineroDetail;
 use App\Models\centros\Centrocosto;
+use App\Models\Recibodecaja;
 use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,12 +39,10 @@ class Caja extends Model
         'fecha_hora_cierre' => 'datetime', // Si lo usas
     ];
 
-    /**
-     * Relación con el centro de costo.
-     */
-    public function centroCosto()
+    // Relación con el usuario que creó la caja
+    public function user()
     {
-        return $this->belongsTo(Centrocosto::class, 'centrocosto_id');
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -52,6 +52,20 @@ class Caja extends Model
     {
         return $this->belongsTo(User::class, 'cajero_id');
     }
+
+    /**
+     * Relación con el centro de costo.
+     */
+    public function centroCosto()
+    {
+        return $this->belongsTo(Centrocosto::class, 'centrocosto_id');
+    }    
+
+     // Relación con los recibos generados en este turno de caja
+     public function recibosDeCaja()
+     {
+         return $this->hasMany(Recibodecaja::class);
+     }
 
     /**
      * Accessor para obtener el nombre del centro de costo.
@@ -67,22 +81,23 @@ class Caja extends Model
     public function getNamecajeroAttribute()
     {
         return $this->cajero ? $this->cajero->name : '';
-    }
-
-    /*  // Puedes agregar aquí la relación con las ventas (sales)
-    public function sales()
-    {
-        return $this->hasMany(Sale::class, 'user_id', 'cajero_id');
-    } */
+    }    
 
     /**
      * Relación con las ventas a través de la tabla pivote sale_caja.
      * Esta relación se utiliza tanto en el método create (para obtener las ventas del turno vigente)
      * como en el reporte de cierre de caja.
      */
+    // Relación many-to-many con las ventas, vía la tabla pivot sale_caja
     public function sales()
     {
         return $this->belongsToMany(Sale::class, 'sale_caja', 'caja_id', 'sale_id');
+    }
+
+    // Detalle de los movimientos de dinero asociados a la caja
+    public function detallesMovimiento()
+    {
+        return $this->hasMany(CajaReciboDineroDetail::class, 'caja_id');
     }
 
     /**

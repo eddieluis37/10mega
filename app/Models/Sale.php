@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\caja\Caja;
 use App\Models\centros\Centrocosto;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
-    use HasFactory;
+    protected $table = 'sales';
 
     protected $fillable = [
         'user_id',
@@ -105,5 +106,35 @@ class Sale extends Model
     public function formaPagoCredito()
     {
         return $this->belongsTo(\App\Models\Formapago::class, 'forma_pago_credito_id');
+    }
+
+    // Ventas relacionadas con la caja mediante la tabla pivot sale_caja
+    public function cajas()
+    {
+        return $this->belongsToMany(Caja::class, 'sale_caja');
+    }
+
+    // Recibos de caja asociados (por ejemplo, en abonos o pagos totales)
+    public function recibosDeCaja()
+    {
+        return $this->hasMany(Recibodecaja::class);
+    }
+
+    // Pagos realizados sobre la venta (para actualizar la cuenta por cobrar)
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class);
+    }
+
+    // Relación con las formas de pago utilizadas
+    public function saleFormaPagos()
+    {
+        return $this->hasMany(SaleFormaPago::class);
+    }
+
+    // Cuenta por cobrar asociada a esta venta (para ventas a crédito)
+    public function cuentaPorCobrar()
+    {
+        return $this->hasOne(CuentaPorCobrar::class);
     }
 }

@@ -25,30 +25,20 @@ class CreateCajasTable extends Migration
             $table->unsignedBigInteger('cajero_id');           
             $table->foreign('cajero_id')->references('id')->on('users');
 
-            $table->integer('cantidad_facturas')->nullable();
-            
-            $table->string('factura_inicial', 50, 0)->nullable();
-            
+            $table->integer('cantidad_facturas')->nullable();            
+            $table->string('factura_inicial', 50, 0)->nullable();            
             $table->string('factura_final', 50, 0)->nullable();
 
-            $table->decimal('base',10,0)->nullable();
-            
+            $table->decimal('base',10,0)->nullable();            
             $table->decimal('efectivo',10,0)->nullable();
-
             $table->decimal('retiro_caja',10,0)->nullable();
-
             $table->decimal('total',10,0)->nullable();
-
             $table->decimal('valor_real',10,0)->nullable();
-            
             $table->decimal('diferencia',10,0)->nullable();
 
             $table->dateTime('fecha_hora_inicio')->nullable();
-
             $table->dateTime('fecha_hora_cierre')->nullable();
-
             $table->enum('estado', ['close', 'open'])->default('open');
-
             $table->boolean('status')->parent_select()->default(true)->nullable();            
            
             $table->timestamps();
