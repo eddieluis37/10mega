@@ -272,7 +272,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('Bell02005*')
             ]
         );
-       
+
         $user = User::where('profile', 'like', '%Comercial%')
             //->orWhereIn('id', $idsUsuarios)
             ->get();
@@ -801,7 +801,7 @@ class PermissionsSeeder extends Seeder
         );
 
         $usuarios = User::where('name', 'like', '%ADMINISTRADOR CERDO CENTRAL%')
-            // ->orWhere('name', 'like', '%CAJERO%')
+            ->orWhere('name', 'like', '%ADMINISTRADOR PALOQUEMADO%')
             //  ->orWhereIn('id', $idsUsuarios)
             ->get();
 
@@ -820,13 +820,13 @@ class PermissionsSeeder extends Seeder
             'crear_lista_de_precio',
             'editar_lista_de_precio',
             'eliminar_lista_de_precio',
-            
+
             'ver_alistamiento',
             'acceder_alistamiento',
             'crear_alistamiento',
             'editar_alistamiento',
             'eliminar_alistamiento',
-                                    
+
             'ver_compras',
             'acceder_compras',
             'crear_compras',
@@ -837,8 +837,8 @@ class PermissionsSeeder extends Seeder
             'acceder_compra_lote',
             'crear_compra_lote',
             'editar_compra_lote',
-            'eliminar_compra_lote', 
-            
+            'eliminar_compra_lote',
+
             'ver_inventario',
             'acceder_inventario',
         ];
