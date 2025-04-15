@@ -40,7 +40,7 @@
                         </div>
                         <div class="col-sm-6 col-md-4"></div>
                         <div class="table-responsive mt-3">
-                            <form method="POST" action="/customerPayment">
+                            <form method="POST">
                                 @csrf
                                 <table id="tablePagoCliente" class="table table-striped mt-1">
                                     <thead class="text-white" style="background: #3B3F5C">

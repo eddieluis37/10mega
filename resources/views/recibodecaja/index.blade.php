@@ -25,7 +25,7 @@
 					<table id="tableCompensado" class="table table-striped mt-1">
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
-								<th class="table-th text-white">#</th>								
+								<th class="table-th text-white">#</th>
 								<th class="table-th text-white">CLIENTE</th>
 								<th class="table-th text-white ">TIPO</th>
 								<th class="table-th text-white">ESTADO</th>
@@ -35,7 +35,7 @@
 								<th class="table-th text-white">SALDO</th>
 								<th class="table-th text-white">DIA.HORA</th>
 								<th class="table-th text-white">RECIBO</th>
-								
+
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
 						</thead>
@@ -47,18 +47,18 @@
 		</div>
 	</div>
 	<!-- modal -->
-	<div class="modal fade" id="modal-create-pagocliente" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
+	<div class="modal fade" id="modal-create-recibodecaja" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
 			<div class="modal-content bg-default">
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
 						<div class="modal-header">
-							<h4 class="modal-title">Registrar pago a cliente</h4>
+							<h4 class="modal-title">Crear recibo de caja</h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span></button>
 						</div>
-				 		<div class="modal-body">
-								@include('recibodecaja.modal_create_pagocliente')
+						<div class="modal-body">
+							@include('recibodecaja.modal_create')
 						</div>
 						<div class="modal-footer">
 							<button type="button" id="btnModalClose" class="btn btn-default" data-dismiss="modal">Cancelar</button>
@@ -73,22 +73,23 @@
 	</div>
 	<!-- /.modal -->
 	<!-- modal -->
-	<div class="modal fade" id="modal-create-recibodecaja" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
+	<div class="modal fade" id="modal-create-pagocliente" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
 			<div class="modal-content bg-default">
 				<fieldset id="contentDisable">
-					<form action="" id="form-compensado-res">
+					<form action="">
 						<div class="modal-header">
-							<h4 class="modal-title">Crear recibo de caja</h4>
+							<h4 class="modal-title">Registrar pago a cliente</h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span></button>
 						</div>
-				 		<div class="modal-body">
-								@include('recibodecaja.modal_create')
+						<div class="modal-body">
+							@include('recibodecaja.modal_create_pagocliente')
+							<!-- Aquí se asume que en este include se encuentra la tabla #tablePagoCliente -->
 						</div>
 						<div class="modal-footer">
 							<button type="button" id="btnModalClose" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-							<button type="submit" id="btnAddVentaDomicilio" class="btn btn-primary">Aceptar</button>
+							<button type="submit" id="btnAddCustomerPayment" class="btn btn-primary">Aceptar</button>
 						</div>
 					</form>
 				</fieldset>
@@ -98,6 +99,7 @@
 		<!-- /.modal-dialog -->
 	</div>
 	<!-- /.modal -->
+	
 </div>
 @endsection
 @section('script')

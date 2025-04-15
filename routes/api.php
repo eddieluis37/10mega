@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/productos', [productoController::class, 'getProductos']);
 
-
+/* 
 // Pagos de clientes y proveedores
 Route::post('/customer-payment', [PaymentController::class, 'customerPayment']);
 Route::post('/supplier-payment', [PaymentController::class, 'supplierPayment']);
@@ -32,3 +32,4 @@ Route::post('/supplier-payment', [PaymentController::class, 'supplierPayment']);
 // Apertura y cierre de caja
 Route::post('/caja/open', [CajaController::class, 'openCaja']);
 Route::post('/caja/close', [CajaController::class, 'closeCaja']);
+ */
