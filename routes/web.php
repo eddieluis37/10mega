@@ -123,6 +123,9 @@ use App\Http\Controllers\ReporteCierreCajaController;
 
 /************************************************* */
 
+// Ruta para obtener los registros de cuentas_por_cobrars vía AJAX
+Route::get('/getClientPayments', [recibodecajaController::class, 'getClientPayments'])->name('reciboCaja.getClientPayments');
+
 Route::get('/reporte-cierre-caja/{id}', [ReporteCierreCajaController::class, 'show'])->name('reporte.cierre');
 
 Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');

@@ -17,7 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\caja\Caja;
-use App\Models\Cuentas_por_cobrar;
+use App\Models\CuentaPorCobrar;
 use App\Models\Formapago;
 use App\Models\Inventario;
 use App\Models\Listapreciodetalle;
@@ -297,7 +297,7 @@ class saleController extends Controller
         $formaPagoCreditoId =  $venta->forma_pago_credito_id;
         $formaPagos = Formapago::find($formaPagoCreditoId);
         $diasCredito = $formaPagos->diascredito;
-        $cXc = new Cuentas_por_cobrar();
+        $cXc = new CuentaPorCobrar();
         $cXc->sale_id = $ventaId;
         $cXc->third_id = $clienteId;
         $cXc->deuda_inicial = $venta->valor_a_pagar_credito;

@@ -10,6 +10,10 @@
 				</h4>
 				<ul class="tabs tab-pills">
 					<li>
+						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-pagocliente" title="Nueva venta por domicilio">Pago cliente</a>
+						<!-- <a href="javascript:void(0)" class="tabmenu bg-dark ml-2" id="storeVentaMostradorBtn"  title="Nueva venta por mostrador">Mostrador</a> -->
+					</li>
+					<li>
 						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-recibodecaja" title="Nueva venta por domicilio">Nuevo recibo</a>
 						<!-- <a href="javascript:void(0)" class="tabmenu bg-dark ml-2" id="storeVentaMostradorBtn"  title="Nueva venta por mostrador">Mostrador</a> -->
 					</li>
@@ -42,6 +46,32 @@
 			</div>
 		</div>
 	</div>
+	<!-- modal -->
+	<div class="modal fade" id="modal-create-pagocliente" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content bg-default">
+				<fieldset id="contentDisable">
+					<form action="" id="form-compensado-res">
+						<div class="modal-header">
+							<h4 class="modal-title">Registrar pago a cliente</h4>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span></button>
+						</div>
+				 		<div class="modal-body">
+								@include('recibodecaja.modal_create_pagocliente')
+						</div>
+						<div class="modal-footer">
+							<button type="button" id="btnModalClose" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+							<button type="submit" id="btnAddVentaDomicilio" class="btn btn-primary">Aceptar</button>
+						</div>
+					</form>
+				</fieldset>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	<!-- /.modal -->
 	<!-- modal -->
 	<div class="modal fade" id="modal-create-recibodecaja" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
 		<div class="modal-dialog modal-xl" role="document">

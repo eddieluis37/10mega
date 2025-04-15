@@ -40,13 +40,48 @@ class recibodecajaController extends Controller
     {
         $ventas = Sale::get();
         $centros = Centrocosto::Where('status', 1)->get();
-        $clientes = Third::Where('cliente', 1)->get();
+
+        $clientes = DB::table('cuentas_por_cobrars')
+            ->join('thirds', 'cuentas_por_cobrars.third_id', '=', 'thirds.id')
+            ->select('thirds.id', 'thirds.name', 'cuentas_por_cobrars.deuda_x_cobrar')
+            ->where('cuentas_por_cobrars.deuda_x_cobrar', '>', 0)
+            ->distinct()
+            ->get();
+
         $formapagos = Formapago::whereIn('tipoformapago', ['EFECTIVO', 'TARJETA', 'OTROS'])->get();
         $domiciliarios = Third::Where('domiciliario', 1)->get();
         /*      $subcentrodecostos = Subcentrocosto::get(); */
 
         return view('recibodecaja.index', compact('ventas', 'centros', 'clientes', 'formapagos', 'domiciliarios'));
     }
+
+    // Método para obtener los registros de cuentas_por_cobrars del cliente seleccionado
+    public function getClientPayments(Request $request)
+    {
+        $clienteId = $request->query('client_id');
+
+        // Se consulta la tabla cuentas_por_cobrars filtrando por third_id (cliente)
+        // Se calcula DIAS_MORA utilizando la diferencia entre la fecha actual y la fecha_vencimiento.
+        $records = DB::table('cuentas_por_cobrars')
+            ->select(
+                'id',
+                'fecha_inicial as FECHA_VENTA',
+                // Se asume que para la "identificación del cliente" se podría usar, por ejemplo, el id o algún otro campo.
+                // Ajusta según tu modelo o agrega JOIN con thirds para mayor información.
+                'third_id as identification_cliente',
+                'sale_id as consecutivo',
+                'fecha_vencimiento as FECHA_VENCIMIENTO',
+                DB::raw('DATEDIFF(CURRENT_DATE, fecha_vencimiento) as DIAS_MORA'),
+                'deuda_x_cobrar',
+                'deuda_x_pagar',
+                'saldo_cartera'
+            )
+            ->where('third_id', $clienteId)
+            ->get();
+
+        return response()->json($records);
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -165,9 +200,9 @@ class recibodecajaController extends Controller
 
             $getReg = Recibodecaja::firstWhere('id', $request->recibocajaId);
 
-           /*  $SaleIdRC = $getReg->sale_id; */
+            /*  $SaleIdRC = $getReg->sale_id; */
 
-           // dd ($getReg);
+            // dd ($getReg);
 
             if ($getReg == null) {
                 $currentDateTime = Carbon::now();
@@ -217,7 +252,7 @@ class recibodecajaController extends Controller
                 ]);
             } else {
                 $getReg = Recibodecaja::firstWhere('id', $request->recibocajaId);
-                dd ($getReg);
+                dd($getReg);
 
                 $getReg->third_id = $request->vendedor;
 

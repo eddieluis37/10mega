@@ -1,4 +1,4 @@
-console.log("Starting");
+console.log("Starting recibo de caja");
 const btnAddVentaDomicilio = document.querySelector("#btnAddVentaDomicilio");
 const formCompensadoRes = document.querySelector("#form-compensado-res");
 const token = document
@@ -96,7 +96,7 @@ $(document).ready(function () {
                 },
                 { data: "date", name: "date" },
                 { data: "consecutivo", name: "consecutivo" },
-              
+
                 { data: "action", name: "action" },
             ],
             order: [[0, "DESC"]],
@@ -121,13 +121,101 @@ $(document).ready(function () {
             },
         });
     });
+});
+
+$(document).ready(function () {
+    // Inicializa los select2
     $(".select2Cliente").select2({
         placeholder: "Busca un cliente",
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,
     });
+    $(".select2FormaPago").select2({
+        placeholder: "Busca una forma pago",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+    });
+
+    // Al cambiar el cliente, se hacen la petición AJAX y se construyen las filas
+    $("#cliente").on("change", function () {
+        var clienteId = $(this).val();
+        if (!clienteId) {
+            $("#tablePagoCliente tbody").html("");
+            updateTotals();
+            return;
+        }
+        $.ajax({
+            url: "/getClientPayments", // Asegúrate de tener la ruta configurada
+            method: "GET",
+            data: { client_id: clienteId },
+            success: function (data) {
+                var rows = "";
+                $.each(data, function (index, reg) {
+                    // Se guarda el valor original de la deuda sin formato para usarlo en los cálculos
+                    rows += "<tr>" +
+                                "<td>" + reg.id + "</td>" +
+                                "<td>" + reg.FECHA_VENTA + "</td>" +
+                                "<td>" + reg.identification_cliente + "</td>" +
+                                "<td>" + reg.consecutivo + "</td>" +
+                                "<td>" + reg.FECHA_VENCIMIENTO + "</td>" +
+                                "<td>" + reg.DIAS_MORA + "</td>" +
+                                // Columna VR.DEUDA: se muestra el valor formateado y se guarda en un data-attribute
+                                "<td class='vr-deuda' data-value='" + reg.deuda_x_cobrar + "'>$" + parseFloat(reg.deuda_x_cobrar).toLocaleString() + "</td>" +
+                                // Columna VR.PAGO: input para el pago
+                                "<td>$<input type='text' class='form-control vr-pago' value='0' style='text-align:right;' /></td>" +
+                                // Columna NVO.SALDO: se inicia con el valor total de la deuda
+                                "<td class='nvo-saldo'>$" + parseFloat(reg.deuda_x_cobrar).toLocaleString() + "</td>" +
+                                // Columna de acciones: botón para pago total (PT)
+                                "<td><button type='button' class='btn btn-primary btn-sm btn-pt'>PT</button></td>" +
+                            "</tr>";
+                });
+                $("#tablePagoCliente tbody").html(rows);
+                updateTotals();
+            },
+            error: function (error) {
+                console.error("Error al obtener datos:", error);
+            },
+        });
+    });
+
+    // Evento para actualizar el nuevo saldo cuando el usuario digita un abono
+    $(document).on('input', '.vr-pago', function(){
+        var tr = $(this).closest('tr');
+        var deuda = parseFloat(tr.find('.vr-deuda').data('value')) || 0;
+        // Se remueven posibles comas para poder convertir el valor
+        var pago = parseFloat($(this).val().replace(/,/g, '')) || 0;
+        var nuevoSaldo = deuda - pago;
+        tr.find('.nvo-saldo').text("$ " + nuevoSaldo.toLocaleString());
+        updateTotals();
+    });
+
+    // Botón "PT": asigna el valor total de la deuda al input VR.PAGO y recalcula el nuevo saldo
+    $(document).on('click', '.btn-pt', function(){
+        var tr = $(this).closest('tr');
+        var deuda = parseFloat(tr.find('.vr-deuda').data('value')) || 0;
+        tr.find('.vr-pago').val(deuda);
+        tr.find('.nvo-saldo').text("$ " + (deuda - deuda).toLocaleString());
+        updateTotals();
+    });
+
+    // Función para actualizar los totales en el pie de la tabla
+    function updateTotals(){
+        var totalDeuda = 0, totalPago = 0, totalSaldo = 0;
+        $("#tablePagoCliente tbody tr").each(function(){
+            var deuda = parseFloat($(this).find('.vr-deuda').data('value')) || 0;
+            totalDeuda += deuda;
+            var pago = parseFloat($(this).find('.vr-pago').val().replace(/,/g, '')) || 0;
+            totalPago += pago;
+            totalSaldo += (deuda - pago);
+        });
+        $("#totalDeuda").text("$ " + totalDeuda.toLocaleString());
+        $("#totalPago").text("$ " + totalPago.toLocaleString());
+        $("#totalSaldo").text("$ " + totalSaldo.toLocaleString());
+    }
 });
+
 
 const send = async (dataform, ruta) => {
     let response = await fetch(ruta, {
@@ -146,15 +234,7 @@ const refresh_table = () => {
     let table = $("#tableCompensado").dataTable();
     table.fnDraw(false);
 };
-const showModalcreate = () => {
-    if (contentform.hasAttribute("disabled")) {
-        contentform.removeAttribute("disabled");
-        $("#provider").prop("disabled", false);
-    }
-    $("#provider").val("").trigger("change");
-    formCompensadoRes.reset();
-    sale_id.value = 0;
-};
+
 
 const showDataForm = (id) => {
     console.log(id);
