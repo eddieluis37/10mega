@@ -16,7 +16,7 @@
                                         <option value="">Seleccione el cliente</option>
                                         @foreach($clientes as $cliente)
                                         <option value="{{ $cliente->id }}">
-                                            {{ $cliente->name }} (Deuda: ${{ number_format($cliente->deuda_x_cobrar, 0, ',', '.') }})
+                                            {{ $cliente->name }} (Deuda: ${{ number_format($cliente->total_deuda, 0, ',', '.') }})
                                         </option>
                                         @endforeach
                                     </select>
@@ -70,7 +70,7 @@
                                             <td></td>
                                             <td></td>
                                             <td id="totalDeuda">$ 0</td>
-                                            <td id="totalPago">$ 0</td>
+                                            <td id="totalPago" align="right">$ 0</td>                                           
                                             <td id="totalSaldo">$ 0</td>
                                             <td></td>
                                         </tr>

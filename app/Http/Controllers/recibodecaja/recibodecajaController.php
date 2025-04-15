@@ -41,12 +41,13 @@ class recibodecajaController extends Controller
         $ventas = Sale::get();
         $centros = Centrocosto::Where('status', 1)->get();
 
-        $clientes = DB::table('cuentas_por_cobrars')
-            ->join('thirds', 'cuentas_por_cobrars.third_id', '=', 'thirds.id')
-            ->select('thirds.id', 'thirds.name', 'cuentas_por_cobrars.deuda_x_cobrar')
-            ->where('cuentas_por_cobrars.deuda_x_cobrar', '>', 0)
-            ->distinct()
-            ->get();
+        $clientes = DB::table('thirds')
+        ->join('cuentas_por_cobrars', 'cuentas_por_cobrars.third_id', '=', 'thirds.id')
+        ->select('thirds.id', 'thirds.name', DB::raw('SUM(cuentas_por_cobrars.deuda_x_cobrar) as total_deuda'))
+        ->where('cuentas_por_cobrars.deuda_x_cobrar', '>', 0)
+        ->groupBy('thirds.id', 'thirds.name')
+        ->having('total_deuda', '>', 0)
+        ->get();
 
         $formapagos = Formapago::whereIn('tipoformapago', ['EFECTIVO', 'TARJETA', 'OTROS'])->get();
         $domiciliarios = Third::Where('domiciliario', 1)->get();

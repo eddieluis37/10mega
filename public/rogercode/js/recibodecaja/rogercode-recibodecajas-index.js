@@ -138,6 +138,13 @@ $(document).ready(function () {
         allowClear: true,
     });
 
+    // Formateador de moneda para COP
+    const currencyFormat = new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0
+    });
+
     // Al cambiar el cliente, se hacen la petición AJAX y se construyen las filas
     $("#cliente").on("change", function () {
         var clienteId = $(this).val();
@@ -162,11 +169,11 @@ $(document).ready(function () {
                                 "<td>" + reg.FECHA_VENCIMIENTO + "</td>" +
                                 "<td>" + reg.DIAS_MORA + "</td>" +
                                 // Columna VR.DEUDA: se muestra el valor formateado y se guarda en un data-attribute
-                                "<td class='vr-deuda' data-value='" + reg.deuda_x_cobrar + "'>$" + parseFloat(reg.deuda_x_cobrar).toLocaleString() + "</td>" +
-                                // Columna VR.PAGO: input para el pago
-                                "<td>$<input type='text' class='form-control vr-pago' value='0' style='text-align:right;' /></td>" +
+                                "<td class='vr-deuda' data-value='" + reg.deuda_x_cobrar + "'>" + currencyFormat.format(reg.deuda_x_cobrar) + "</td>" +
+                                // VR.PAGO: input para el pago con valor inicial 0 ya formateado
+                                "<td><input type='text' class='form-control vr-pago' value='" + currencyFormat.format(0) + "' style='text-align:right;' size='9' /></td>" +
                                 // Columna NVO.SALDO: se inicia con el valor total de la deuda
-                                "<td class='nvo-saldo'>$" + parseFloat(reg.deuda_x_cobrar).toLocaleString() + "</td>" +
+                                "<td class='nvo-saldo'>" + currencyFormat.format(reg.deuda_x_cobrar) + "</td>" +
                                 // Columna de acciones: botón para pago total (PT)
                                 "<td><button type='button' class='btn btn-primary btn-sm btn-pt'>PT</button></td>" +
                             "</tr>";
@@ -176,27 +183,39 @@ $(document).ready(function () {
             },
             error: function (error) {
                 console.error("Error al obtener datos:", error);
-            },
+            }
         });
     });
 
-    // Evento para actualizar el nuevo saldo cuando el usuario digita un abono
+    // Evento para actualizar el nuevo saldo mientras se digita (utilizando el valor sin formato para cálculos)
     $(document).on('input', '.vr-pago', function(){
         var tr = $(this).closest('tr');
         var deuda = parseFloat(tr.find('.vr-deuda').data('value')) || 0;
-        // Se remueven posibles comas para poder convertir el valor
-        var pago = parseFloat($(this).val().replace(/,/g, '')) || 0;
+        // Extrae únicamente los dígitos para el cálculo
+        var pago = parseFloat($(this).val().replace(/\D/g, '')) || 0;
         var nuevoSaldo = deuda - pago;
-        tr.find('.nvo-saldo').text("$ " + nuevoSaldo.toLocaleString());
+        tr.find('.nvo-saldo').text(currencyFormat.format(nuevoSaldo));
         updateTotals();
     });
 
-    // Botón "PT": asigna el valor total de la deuda al input VR.PAGO y recalcula el nuevo saldo
+    // Evento blur: al salir del input, se re-formatea el valor escrito a moneda colombiana
+    $(document).on('blur', '.vr-pago', function(){
+        var value = $(this).val().replace(/\D/g, '');
+        var number = parseFloat(value) || 0;
+        // Se actualiza el input con el valor formateado
+        $(this).val(currencyFormat.format(number));
+        updateTotals();
+    });
+
+    // Botón "PT": asigna el valor total de la deuda al input VR.PAGO y recalcula el nuevo saldo,
+    // formateando el valor a moneda colombiana
     $(document).on('click', '.btn-pt', function(){
         var tr = $(this).closest('tr');
         var deuda = parseFloat(tr.find('.vr-deuda').data('value')) || 0;
-        tr.find('.vr-pago').val(deuda);
-        tr.find('.nvo-saldo').text("$ " + (deuda - deuda).toLocaleString());
+        // Asigna el valor total de la deuda formateado al input
+        tr.find('.vr-pago').val(currencyFormat.format(deuda));
+        // Actualiza el nuevo saldo a cero
+        tr.find('.nvo-saldo').text(currencyFormat.format(0));
         updateTotals();
     });
 
@@ -206,15 +225,17 @@ $(document).ready(function () {
         $("#tablePagoCliente tbody tr").each(function(){
             var deuda = parseFloat($(this).find('.vr-deuda').data('value')) || 0;
             totalDeuda += deuda;
-            var pago = parseFloat($(this).find('.vr-pago').val().replace(/,/g, '')) || 0;
+            // Extrae dígitos del valor del input para convertirlo a número
+            var pago = parseFloat($(this).find('.vr-pago').val().replace(/\D/g, '')) || 0;
             totalPago += pago;
             totalSaldo += (deuda - pago);
         });
-        $("#totalDeuda").text("$ " + totalDeuda.toLocaleString());
-        $("#totalPago").text("$ " + totalPago.toLocaleString());
-        $("#totalSaldo").text("$ " + totalSaldo.toLocaleString());
+        $("#totalDeuda").text(currencyFormat.format(totalDeuda));
+        $("#totalPago").text(currencyFormat.format(totalPago));
+        $("#totalSaldo").text(currencyFormat.format(totalSaldo));
     }
 });
+
 
 
 const send = async (dataform, ruta) => {
