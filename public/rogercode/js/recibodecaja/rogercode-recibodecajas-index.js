@@ -1,5 +1,5 @@
 console.log("Starting recibo de caja");
-const btnAddVentaDomicilio = document.querySelector("#btnAddVentaDomicilio");
+const btnAddCustomerPayment = document.querySelector("#btnAddCustomerPayment");
 const formCompensadoRes = document.querySelector("#form-compensado-res");
 const token = document
     .querySelector('meta[name="csrf-token"]')
@@ -12,6 +12,7 @@ const selectCentrocosto = document.querySelector("#centrocosto");
 const inputFactura = document.querySelector("#factura");
 const sale_id = document.querySelector("#ventaId");
 const contentform = document.querySelector("#contentDisable");
+
 
 $(document).ready(function () {
     $(function () {
@@ -124,7 +125,7 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    // Inicializa los select2
+    // Inicializa select2
     $(".select2Cliente").select2({
         placeholder: "Busca un cliente",
         width: "100%",
@@ -137,15 +138,15 @@ $(document).ready(function () {
         theme: "bootstrap-5",
         allowClear: true,
     });
-
+    
     // Formateador de moneda para COP
     const currencyFormat = new Intl.NumberFormat("es-CO", {
         style: "currency",
         currency: "COP",
         minimumFractionDigits: 0
     });
-
-    // Al cambiar el cliente, se hacen la petición AJAX y se construyen las filas
+  
+    // Ejemplo de carga de datos en la tabla #tablePagoCliente (modifica según tu lógica)
     $("#cliente").on("change", function () {
         var clienteId = $(this).val();
         if (!clienteId) {
@@ -154,13 +155,12 @@ $(document).ready(function () {
             return;
         }
         $.ajax({
-            url: "/getClientPayments", // Asegúrate de tener la ruta configurada
+            url: "/getClientPayments",
             method: "GET",
             data: { client_id: clienteId },
             success: function (data) {
                 var rows = "";
                 $.each(data, function (index, reg) {
-                    // Se guarda el valor original de la deuda sin formato para usarlo en los cálculos
                     rows += "<tr>" +
                                 "<td>" + reg.id + "</td>" +
                                 "<td>" + reg.FECHA_VENTA + "</td>" +
@@ -168,13 +168,13 @@ $(document).ready(function () {
                                 "<td>" + reg.consecutivo + "</td>" +
                                 "<td>" + reg.FECHA_VENCIMIENTO + "</td>" +
                                 "<td>" + reg.DIAS_MORA + "</td>" +
-                                // Columna VR.DEUDA: se muestra el valor formateado y se guarda en un data-attribute
+                                // VR.DEUDA: Se muestra formateado y se guarda el valor original en data-value
                                 "<td class='vr-deuda' data-value='" + reg.deuda_x_cobrar + "'>" + currencyFormat.format(reg.deuda_x_cobrar) + "</td>" +
-                                // VR.PAGO: input para el pago con valor inicial 0 ya formateado
-                                "<td><input type='text' class='form-control vr-pago' value='" + currencyFormat.format(0) + "' style='text-align:right;' size='9' /></td>" +
-                                // Columna NVO.SALDO: se inicia con el valor total de la deuda
+                                // VR.PAGO: Input con valor inicial 0, formateado
+                                "<td><input type='text' class='form-control vr-pago' value='" + currencyFormat.format(0) + "' style='text-align:right;' size='8' /></td>" +
+                                // NVO.SALDO: Se inicia con el valor de la deuda
                                 "<td class='nvo-saldo'>" + currencyFormat.format(reg.deuda_x_cobrar) + "</td>" +
-                                // Columna de acciones: botón para pago total (PT)
+                                // Botón PT para pago total
                                 "<td><button type='button' class='btn btn-primary btn-sm btn-pt'>PT</button></td>" +
                             "</tr>";
                 });
@@ -186,46 +186,40 @@ $(document).ready(function () {
             }
         });
     });
-
-    // Evento para actualizar el nuevo saldo mientras se digita (utilizando el valor sin formato para cálculos)
+  
+    // Actualiza el nuevo saldo mientras se digita en VR.PAGO
     $(document).on('input', '.vr-pago', function(){
         var tr = $(this).closest('tr');
         var deuda = parseFloat(tr.find('.vr-deuda').data('value')) || 0;
-        // Extrae únicamente los dígitos para el cálculo
         var pago = parseFloat($(this).val().replace(/\D/g, '')) || 0;
         var nuevoSaldo = deuda - pago;
         tr.find('.nvo-saldo').text(currencyFormat.format(nuevoSaldo));
         updateTotals();
     });
-
-    // Evento blur: al salir del input, se re-formatea el valor escrito a moneda colombiana
+  
+    // Al salir del input, se formatea el valor
     $(document).on('blur', '.vr-pago', function(){
         var value = $(this).val().replace(/\D/g, '');
         var number = parseFloat(value) || 0;
-        // Se actualiza el input con el valor formateado
         $(this).val(currencyFormat.format(number));
         updateTotals();
     });
-
-    // Botón "PT": asigna el valor total de la deuda al input VR.PAGO y recalcula el nuevo saldo,
-    // formateando el valor a moneda colombiana
+  
+    // Botón PT: asigna el total de la deuda al input y actualiza el saldo a 0
     $(document).on('click', '.btn-pt', function(){
         var tr = $(this).closest('tr');
         var deuda = parseFloat(tr.find('.vr-deuda').data('value')) || 0;
-        // Asigna el valor total de la deuda formateado al input
         tr.find('.vr-pago').val(currencyFormat.format(deuda));
-        // Actualiza el nuevo saldo a cero
         tr.find('.nvo-saldo').text(currencyFormat.format(0));
         updateTotals();
     });
-
-    // Función para actualizar los totales en el pie de la tabla
+  
+    // Función para actualizar totales en el footer de la tabla
     function updateTotals(){
         var totalDeuda = 0, totalPago = 0, totalSaldo = 0;
         $("#tablePagoCliente tbody tr").each(function(){
             var deuda = parseFloat($(this).find('.vr-deuda').data('value')) || 0;
             totalDeuda += deuda;
-            // Extrae dígitos del valor del input para convertirlo a número
             var pago = parseFloat($(this).find('.vr-pago').val().replace(/\D/g, '')) || 0;
             totalPago += pago;
             totalSaldo += (deuda - pago);
@@ -234,89 +228,61 @@ $(document).ready(function () {
         $("#totalPago").text(currencyFormat.format(totalPago));
         $("#totalSaldo").text(currencyFormat.format(totalSaldo));
     }
-});
+  
+    // Manejador para el botón Aceptar con id btnAddCustomerPayment (tipo "button")
+    $("#btnAddCustomerPayment").on("click", function(e){
+        e.preventDefault(); // Evita cualquier comportamiento predeterminado
+        console.log("Click en btnAddCustomerPayment detectado");
 
-
-
-const send = async (dataform, ruta) => {
-    let response = await fetch(ruta, {
-        headers: {
-            "X-CSRF-TOKEN": token,
-        },
-        method: "POST",
-        body: dataform,
-    });
-    let data = await response.json();
-    //console.log(data);
-    return data;
-};
-
-const refresh_table = () => {
-    let table = $("#tableCompensado").dataTable();
-    table.fnDraw(false);
-};
-
-
-const showDataForm = (id) => {
-    console.log(id);
-    const dataform = new FormData();
-    dataform.append("id", id);
-    send(dataform, "/saleById").then((resp) => {
-        console.log(resp);
-        console.log(resp.reg);
-        showData(resp);
-        $("#provider").prop("disabled", true);
-        contentform.setAttribute("disabled", "disabled");
-    });
-};
-
-const editCompensado = (id) => {
-    console.log(id);
-    const dataform = new FormData();
-    dataform.append("id", id);
-    send(dataform, "/saleById").then((resp) => {
-        console.log(resp);
-        console.log(resp.reg);
-        showData(resp);
-        if (contentform.hasAttribute("disabled")) {
-            contentform.removeAttribute("disabled");
-            $("#provider").prop("disabled", false);
-        }
-    });
-};
-
-const showData = (resp) => {
-    let register = resp.reg;
-    sale_id.value = register.id;
-    /*  selectCategory.value = register.categoria_id; */
-    $("#provider").val(register.thirds_id).trigger("change");
-    selectCentrocosto.value = register.centrocosto_id;
-    /*    inputFactura.value = register.factura; */
-    const modal = new bootstrap.Modal(
-        document.getElementById("modal-create-recibodecaja")
-    );
-    modal.show();
-};
-
-const downCompensado = (id) => {
-    swal({
-        title: "CONFIRMAR",
-        text: "¿CONFIRMAS ELIMINAR EL REGISTRO?",
-        type: "warning",
-        showCancelButton: true,
-        cancelButtonText: "Cerrar",
-        cancelButtonColor: "#fff",
-        confirmButtonColor: "#3B3F5C",
-        confirmButtonText: "Aceptar",
-    }).then(function (result) {
-        if (result.value) {
-            console.log(id);
-            const dataform = new FormData();
-            dataform.append("id", id);
-            send(dataform, "/downmaincompensado").then((resp) => {
-                console.log(resp);
-                refresh_table();
+        // Se arma la data del formulario manualmente
+        var formData = {
+            cliente: $("#cliente").val(),
+            formaPago: $("#formaPago").val(),
+            tableData: []
+        };
+      
+        $("#tablePagoCliente tbody tr").each(function(){
+            var cuentaId = $(this).find('td').eq(0).text().trim();
+            var vrDeuda = parseFloat($(this).find('.vr-deuda').data('value')) || 0;
+            var vrPago = parseFloat($(this).find('.vr-pago').val().replace(/\D/g, '')) || 0;
+            var nvoSaldo = parseFloat($(this).find('.nvo-saldo').text().replace(/\D/g, '')) || 0;
+            formData.tableData.push({
+                id: cuentaId,
+                vr_deuda: vrDeuda,
+                vr_pago: vrPago,
+                nvo_saldo: nvoSaldo
             });
-        }
+        });
+      
+        console.log("Datos recolectados del formulario:", formData);
+      
+        // Envío de datos vía AJAX
+        $.ajax({
+            url: $("#form-compensado-res").attr('action'), // La ruta definida en la acción del formulario
+            method: "POST",
+            data: formData,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                console.log("Respuesta exitosa:", response);
+                alert(response.success);
+                $("#modal-create-pagocliente").modal('hide');
+                // Aquí puedes agregar una función para refrescar la vista o limpiar el formulario si lo deseas.
+            },
+            error: function(xhr) {
+                console.error("Error en la petición:", xhr);
+                if(xhr.status === 422) {
+                    var errors = xhr.responseJSON.errors;
+                    var errorMsg = "";
+                    $.each(errors, function(key, messages){
+                        errorMsg += messages.join(", ")+"\n";
+                    });
+                    alert("Errores en el formulario:\n"+errorMsg);
+                } else {
+                    alert("Error al registrar el pago.");
+                }
+            }
+        });
     });
-};
+});

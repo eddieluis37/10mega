@@ -118,6 +118,7 @@ use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
 
+
 //use App\Http\Controllers\InventarioController;
 
 
@@ -647,6 +648,7 @@ Route::group(['middleware' => [('auth')]], function () {
 
     /*****************************RECIBO DE CAJAS******************************************/
     Route::get('recibodecajas', [recibodecajaController::class, 'index'])->name('recibodecaja.index');
+    Route::post('/recibodecajas', [recibodecajaController::class, 'payment'])->name('recibodecajas.payment');
     Route::get('showlistRecibodecajas', [recibodecajaController::class, 'show'])->name('recibodecaja.showlistRecibodecajas');
     Route::post('recibodecajasave', [recibodecajaController::class, 'store'])->name('recibodecaja.save');
     Route::get('recibodecaja/create/{id}', [recibodecajaController::class, 'create'])->name('recibodecaja.create');

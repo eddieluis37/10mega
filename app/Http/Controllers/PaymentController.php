@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+
 use App\Models\CuentaPorCobrar;
 use App\Models\CuentaPorPagar;
 use App\Models\ReciboDeCaja;
 use App\Models\CajaReciboDineroDetail;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -17,8 +19,8 @@ class PaymentController extends Controller
     {
         // Validación de los datos
         $validator = Validator::make($request->all(), [
-            'cliente' => 'required|exists:clients,id',
-            'formaPago' => 'required|exists:payment_methods,id',
+            'cliente' => 'required|exists:thrids,id',
+            'formaPago' => 'required|exists:formapagos,id',
             'tableData' => 'required|array|min:1',
             'tableData.*.id' => 'required|exists:cuentas_por_cobrars,id',
             'tableData.*.vr_deuda' => 'required|numeric|min:0',
@@ -27,7 +29,7 @@ class PaymentController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors'=> $validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         DB::beginTransaction();
@@ -38,12 +40,16 @@ class PaymentController extends Controller
             $tableData = $request->tableData;
 
             // Crear registro de pago al cliente
-            $customerPayment = CustomerPayment::create([
-                'client_id'          => $clientId,
-                'payment_method_id'  => $paymentMethodId,
-                'total_debt'         => 0,
-                'total_payment'      => 0,
-                'total_new_balance'  => 0,
+            $customerPayment = ReciboDeCaja::create([
+                'third_id'          => $clientId,
+                'formapagos_id'  => $paymentMethodId,
+                'saldo'         => 0,
+                'abono'      => 0,
+                'nuevo_saldo'  => 0,
+                'fecha_elaboracion' => now(),
+                'status'        => '0',
+                'tipo'          => '1', // '1' representa Ingreso
+                'realizar_un'   => 'Abono a deuda',
             ]);
 
             $totalDebt       = 0;
@@ -63,18 +69,7 @@ class PaymentController extends Controller
                     'deuda_x_cobrar' => $row['nvo_saldo']
                 ]);
 
-                // Registrar cada detalle del pago
-                CustomerPaymentDetail::create([
-                    'customer_payment_id' => $customerPayment->id,
-                    'cuenta_id'           => $row['id'],
-                    'vr_deuda'            => $row['vr_deuda'],
-                    'vr_pago'             => $row['vr_pago'],
-                    'nvo_saldo'           => $row['nvo_saldo'],
-                ]);
-
-                $totalDebt       += $row['vr_deuda'];
-                $totalPayment    += $row['vr_pago'];
-                $totalNewBalance += $row['nvo_saldo'];
+              
             }
 
             // Actualiza los totales en el registro del pago
@@ -85,11 +80,10 @@ class PaymentController extends Controller
             ]);
 
             // Registrar el movimiento en caja (caja_recibo_dinero_details)
-            CashReceiptDetail::create([
-                'customer_payment_id' => $customerPayment->id,
-                'client_id'           => $clientId,
-                'payment_method_id'   => $paymentMethodId,
-                'amount'              => $totalPayment,
+            CajaReciboDineroDetail::create([
+                'caja_id' => $customerPayment->id,
+                'third_id'           => $clientId,              
+                'total'              => $totalPayment,
             ]);
 
             // Log de operación exitosa
@@ -98,7 +92,6 @@ class PaymentController extends Controller
             DB::commit();
 
             return response()->json(['success' => 'Pago registrado exitosamente.'], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Error al registrar pago: " . $e->getMessage());
