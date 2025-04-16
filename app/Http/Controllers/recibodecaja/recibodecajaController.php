@@ -47,12 +47,12 @@ class recibodecajaController extends Controller
         $centros = Centrocosto::Where('status', 1)->get();
 
         $clientes = DB::table('thirds')
-        ->join('cuentas_por_cobrars', 'cuentas_por_cobrars.third_id', '=', 'thirds.id')
-        ->select('thirds.id', 'thirds.name', DB::raw('SUM(cuentas_por_cobrars.deuda_x_cobrar) as total_deuda'))
-        ->where('cuentas_por_cobrars.deuda_x_cobrar', '>', 0)
-        ->groupBy('thirds.id', 'thirds.name')
-        ->having('total_deuda', '>', 0)
-        ->get();
+            ->join('cuentas_por_cobrars', 'cuentas_por_cobrars.third_id', '=', 'thirds.id')
+            ->select('thirds.id', 'thirds.name', DB::raw('SUM(cuentas_por_cobrars.deuda_x_cobrar) as total_deuda'))
+            ->where('cuentas_por_cobrars.deuda_x_cobrar', '>', 0)
+            ->groupBy('thirds.id', 'thirds.name')
+            ->having('total_deuda', '>', 0)
+            ->get();
 
         $formapagos = Formapago::whereIn('tipoformapago', ['EFECTIVO', 'TARJETA', 'OTROS'])->get();
         $domiciliarios = Third::Where('domiciliario', 1)->get();
@@ -178,7 +178,7 @@ class recibodecajaController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request) 
+    public function store(Request $request)
     {
         try {
 
@@ -483,13 +483,16 @@ class recibodecajaController extends Controller
     {
         // Validación de los datos
         $validator = Validator::make($request->all(), [
-            'cliente' => 'required|exists:thrids,id',
-            'formaPago' => 'required|exists:formapagos,id',
-            'tableData' => 'required|array|min:1',
-            'tableData.*.id' => 'required|exists:cuentas_por_cobrars,id',
+            'cliente'              => 'required|exists:thirds,id',
+            'formaPago'            => 'required|exists:formapagos,id',
+            'tableData'            => 'required|array|min:1',
+            'tableData.*.id'       => 'required|exists:cuentas_por_cobrars,id',
             'tableData.*.vr_deuda' => 'required|numeric|min:0',
-            'tableData.*.vr_pago' => 'required|numeric|min:0',
+            'tableData.*.vr_pago'  => 'required|numeric|min:0',
             'tableData.*.nvo_saldo' => 'required|numeric|min:0',
+            // Validación para el arreglo de facturas de ventas (sale_ids)
+        //    'sale_ids'             => 'required|array|min:1',
+          //  'sale_ids.*'           => 'exists:sales,id', // Asumiendo que la tabla de ventas se llama 'sales'
         ]);
 
         if ($validator->fails()) {
@@ -499,21 +502,28 @@ class recibodecajaController extends Controller
         DB::beginTransaction();
 
         try {
-            $clientId = $request->cliente;
-            $paymentMethodId = $request->formaPago;
-            $tableData = $request->tableData;
+            // Obtención del usuario autenticado
+            $userId = auth()->id();
 
-            // Crear registro de pago al cliente
+            $clientId        = $request->cliente;
+            $paymentMethodId = $request->formaPago;
+            $tableData       = $request->tableData;
+          //  $saleIds         = $request->sale_ids;  // Arreglo con una o varias facturas de ventas
+
+            // Crear registro de pago al cliente (Recibo de Caja)
+            // Se asume que el campo 'sale_id' almacenará un JSON con los ids de facturas de ventas
             $customerPayment = ReciboDeCaja::create([
-                'third_id'          => $clientId,
-                'formapagos_id'  => $paymentMethodId,
-                'saldo'         => 0,
-                'abono'      => 0,
-                'nuevo_saldo'  => 0,
-                'fecha_elaboracion' => now(),
-                'status'        => '0',
-                'tipo'          => '1', // '1' representa Ingreso
-                'realizar_un'   => 'Abono a deuda',
+                'user_id'            => $userId,      // Asigna el usuario autenticado
+                'third_id'           => $clientId,
+                'sale_id'            => $clientId, // json_encode($saleIds), // Guardamos el arreglo en formato JSON
+                'formapagos_id'      => $paymentMethodId,
+                'saldo'              => 0,
+                'abono'              => 0,
+                'nuevo_saldo'        => 0,
+                'fecha_elaboracion'  => now(),
+                'status'             => '0',
+                'tipo'               => '1', // '1' representa Ingreso
+                'realizar_un'        => 'Abono a deuda',
             ]);
 
             $totalDebt       = 0;
@@ -528,26 +538,34 @@ class recibodecajaController extends Controller
                     throw new \Exception("Cuenta por cobrar con id {$row['id']} no encontrada.");
                 }
 
-                // Se actualiza el valor de la deuda pendiente (deuda_x_cobrar)
+                // Actualiza el valor de la deuda pendiente (deuda_x_cobrar)
                 $account->update([
                     'deuda_x_cobrar' => $row['nvo_saldo']
                 ]);
 
-              
+                // Acumula los totales para registro global (ajustar la lógica según tu necesidad)
+                $totalDebt       += $row['vr_deuda'];
+                $totalPayment    += $row['vr_pago'];
+                $totalNewBalance += $row['nvo_saldo'];
             }
 
-            // Actualiza los totales en el registro del pago
+            // Actualiza los totales en el registro del pago (Recibo de Caja)
             $customerPayment->update([
-                'total_debt'         => $totalDebt,
-                'total_payment'      => $totalPayment,
-                'total_new_balance'  => $totalNewBalance,
+                'total_debt'        => $totalDebt,
+                'total_payment'     => $totalPayment,
+                'total_new_balance' => $totalNewBalance,
             ]);
 
-            // Registrar el movimiento en caja (caja_recibo_dinero_details)
+            // Registrar el movimiento en caja (Caja Recibo Dinero Detail)
+            // Se asigna el usuario autenticado y se almacena el arreglo de facturas en sale_id
             CajaReciboDineroDetail::create([
-                'caja_id' => $customerPayment->id,
-                'third_id'           => $clientId,              
-                'total'              => $totalPayment,
+                'user_id'  => $userId,             // Usuario autenticado
+                'caja_id'  => $customerPayment->id,
+                'third_id' => $clientId,
+                'total'    => $totalPayment,
+                'quantity' => 0,                   // Ajusta según tu lógica o información
+                'price'    => 0,                   // Ajusta según tu lógica o información
+               // 'sale_id'  => json_encode($saleIds) // Almacena el arreglo de facturas (JSON)
             ]);
 
             // Log de operación exitosa
