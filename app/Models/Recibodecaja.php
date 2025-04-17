@@ -2,60 +2,78 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Recibodecaja extends Model
+class ReciboDeCaja extends Model
 {
-    use HasFactory;
     protected $table = 'recibodecajas';
-    
+
     protected $fillable = [
-        'user_id', 
+        'user_id',
         'third_id',
-        'sale_id',
-        'formapagos_id', 
-        'saldo', 
-        'abono', 
-        'nuevo_saldo',
-        'fecha_elaboracion', 
+        'formapagos_id',
+        'vr_total_deuda',
+        'vr_total_pago',
+        'nvo_total_saldo',
+        'fecha_elaboracion',
         'fecha_cierre',
-        'consecutivo', 
+        'consecutivo',
         'consec',
         'status',
         'tipo',            // '1' => Ingreso, '2' => Egreso, etc.
-        'realizar_un',     // Ejemplo: 'Abono a deuda', 'Anticipo', 'Avanzado (Impuestos, descuentos, ajustes)'
-        'observations'
+        'realizar_un',
+        'observations',
     ];
 
-    // Relación con el usuario que genera el recibo
+    protected $casts = [
+        'vr_total_deuda'   => 'decimal:0',
+        'vr_total_pago'    => 'decimal:0',
+        'nvo_total_saldo'  => 'decimal:0',
+        'fecha_elaboracion' => 'date',
+        'fecha_cierre'      => 'date',
+    ];
+
+    // Relaciones
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relación con el tercero (cliente o proveedor) involucrado
     public function third()
     {
-        return $this->belongsTo(Third::class);
+        return $this->belongsTo(Third::class, 'third_id');
     }
 
-    // Relación con la venta asociada (en caso de ser un abono a ventas a crédito)
-    public function sale()
-    {
-        return $this->belongsTo(Sale::class);
-    }
-
-    // Relación con la forma de pago utilizada
-    public function formaPago()
+    public function paymentMethod()
     {
         return $this->belongsTo(FormaPago::class, 'formapagos_id');
     }
-    
-    // Si se decide almacenar el detalle de cada movimiento del recibo en una tabla relacionada,
-    // se puede establecer la siguiente relación (requiere incluir un campo recibo_de_caja_id en la tabla detalle)
-    public function detalles()
+
+    public function details(): HasMany
     {
-        return $this->hasMany(CajaReciboDineroDetail::class, 'recibo_de_caja_id');
+        return $this->hasMany(CajaReciboDineroDetail::class, 'recibodecaja_id');
+    }
+
+    /**
+     * Recalcula y actualiza los totales basados en los detalles.
+     *
+     * @return void
+     */
+    public function recalculateTotals(): void
+    {
+        $totales = $this->details()
+            ->selectRaw('
+                SUM(vr_deuda)      AS total_deuda,
+                SUM(vr_pago)       AS total_pago,
+                SUM(nvo_saldo)     AS total_saldo
+            ')
+            ->first();
+
+        $this->update([
+            'vr_total_deuda'  => $totales->total_deuda ?? 0,
+            'vr_total_pago'   => $totales->total_pago  ?? 0,
+            'nvo_total_saldo' => $totales->total_saldo ?? 0,
+        ]);
     }
 }

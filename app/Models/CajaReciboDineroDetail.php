@@ -2,47 +2,49 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\caja\Caja;
 use Illuminate\Database\Eloquent\Model;
 
 class CajaReciboDineroDetail extends Model
 {
-    use HasFactory;
     protected $table = 'caja_recibo_dinero_details';
 
     protected $fillable = [
-        'caja_id',
+        'recibodecaja_id',
         'user_id',
-        'third_id',
-        'quantity',
-        'price',
-        'porc_desc',
-        'descuento',
-        'descuento_cliente',
-        'porc_iva',
-        'iva',
-        'porc_otro_impuesto',
-        'otro_impuesto',
-        'total_bruto',
-        'total'
+        'caja_id',
+        'cuentas_por_cobrar_id',
+        'vr_deuda',
+        'vr_pago',
+        'nvo_saldo',
+        'status',
     ];
 
-    // Relación con la caja a la que pertenece el detalle
-    public function caja()
+    protected $casts = [
+        'vr_deuda'      => 'decimal:0',
+        'vr_pago'       => 'decimal:0',
+        'nvo_saldo'     => 'decimal:0',
+        'status'        => 'boolean',
+    ];
+
+    // Relaciones
+    public function recibo()
     {
-        return $this->belongsTo(Caja::class);
+        return $this->belongsTo(ReciboDeCaja::class, 'recibodecaja_id');
     }
-    
-    // Relación con el usuario que registró el detalle
+
+    public function cuentaPorCobrar()
+    {
+        return $this->belongsTo(CuentaPorCobrar::class, 'cuentas_por_cobrar_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relación con el tercero asociado al movimiento (si aplica)
-    public function third()
+    public function caja()
     {
-        return $this->belongsTo(Third::class);
+        return $this->belongsTo(Caja::class, 'caja_id');
     }
 }
-

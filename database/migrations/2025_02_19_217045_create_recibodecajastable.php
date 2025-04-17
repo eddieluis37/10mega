@@ -24,16 +24,13 @@ En el caso de abonos totales sobre cuentas por cobrar se utilizará el tipo "Ing
 
             $table->unsignedBigInteger('third_id')->nullable();
             $table->foreign('third_id')->references('id')->on('thirds');
-
-            $table->unsignedBigInteger('sale_id');
-            $table->foreign('sale_id')->references('id')->on('sales');
-
+         
             $table->unsignedBigInteger('formapagos_id')->nullable();
             $table->foreign('formapagos_id')->references('id')->on('formapagos');
 
-            $table->decimal('saldo', 12, 0)->default(0)->nullable();
-            $table->decimal('abono', 12, 0)->default(0)->nullable();
-            $table->decimal('nuevo_saldo', 12, 0)->default(0)->nullable();
+            $table->decimal('vr_total_deuda', 12, 0)->default(0)->nullable();
+            $table->decimal('vr_total_pago', 12, 0)->default(0)->nullable();
+            $table->decimal('nvo_total_saldo', 12, 0)->default(0)->nullable();
 
             $table->date('fecha_elaboracion')->nullable();
             $table->date('fecha_cierre')->nullable();

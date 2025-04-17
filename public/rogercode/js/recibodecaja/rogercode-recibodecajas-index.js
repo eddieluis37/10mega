@@ -46,9 +46,9 @@ $(document).ready(function () {
                     name: "tipo",
                     render: function (data) {
                         if (data === "1") {
-                            return '<span title="Recibo de caja diario" style="color: white; background-color: green; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RD</span>';
+                            return '<span title="Recibo de caja diario" style="color: white; background-color: green; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RI</span>';
                         } else if (data === "2") {
-                            return '<span title="Recibo de caja de cartera" style="color: white; background-color: blue; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RC</span>';
+                            return '<span title="Recibo de caja de cartera" style="color: white; background-color: blue; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RE</span>';
                         } else {
                             return "";
                         }

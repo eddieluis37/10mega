@@ -66,23 +66,22 @@ class recibodecajaController extends Controller
     {
         $clienteId = $request->query('client_id');
 
-        // Se consulta la tabla cuentas_por_cobrars filtrando por third_id (cliente)
-        // Se calcula DIAS_MORA utilizando la diferencia entre la fecha actual y la fecha_vencimiento.
+        // Se consulta la tabla cuentas_por_cobrars y se hacen los join necesarios con thirds y sales
         $records = DB::table('cuentas_por_cobrars')
+            ->join('thirds', 'cuentas_por_cobrars.third_id', '=', 'thirds.id')
+            ->join('sales', 'cuentas_por_cobrars.sale_id', '=', 'sales.id')
             ->select(
-                'id',
-                'fecha_inicial as FECHA_VENTA',
-                // Se asume que para la "identificación del cliente" se podría usar, por ejemplo, el id o algún otro campo.
-                // Ajusta según tu modelo o agrega JOIN con thirds para mayor información.
-                'third_id as identification_cliente',
-                'sale_id as consecutivo',
-                'fecha_vencimiento as FECHA_VENCIMIENTO',
-                DB::raw('DATEDIFF(CURRENT_DATE, fecha_vencimiento) as DIAS_MORA'),
-                'deuda_x_cobrar',
-                'deuda_x_pagar',
-                'saldo_cartera'
+                'cuentas_por_cobrars.id',
+                'cuentas_por_cobrars.fecha_inicial as FECHA_VENTA',
+                'thirds.identification as identification_cliente',
+                'sales.consecutivo as consecutivo',
+                'cuentas_por_cobrars.fecha_vencimiento as FECHA_VENCIMIENTO',
+                DB::raw('DATEDIFF(CURRENT_DATE, cuentas_por_cobrars.fecha_vencimiento) as DIAS_MORA'),
+                'cuentas_por_cobrars.deuda_x_cobrar',
+                'cuentas_por_cobrars.deuda_x_pagar',
+                'cuentas_por_cobrars.saldo_cartera'
             )
-            ->where('third_id', $clienteId)
+            ->where('cuentas_por_cobrars.third_id', $clienteId)
             ->get();
 
         return response()->json($records);
@@ -98,10 +97,10 @@ class recibodecajaController extends Controller
     public function show()
     {
         $data = DB::table('recibodecajas as rc')
-            ->join('sales as sa', 'rc.sale_id', '=', 'sa.id')
+            //->join('sales as sa', 'rc.sale_id', '=', 'sa.id')
             ->join('thirds as tird', 'rc.third_id', '=', 'tird.id')
             /* ->join('subcentrocostos as centro', 'rc.subcentrocostos_id', '=', 'centro.id') */
-            ->select('rc.*', 'sa.resolucion as resolucion_factura', 'tird.name as namethird')
+            ->select('rc.*', 'tird.name as resolucion_factura', 'tird.name as namethird')
             /*  ->where('rc.status', 1) */
             ->get();
 
@@ -481,103 +480,49 @@ class recibodecajaController extends Controller
 
     public function payment(Request $request)
     {
-        // Validación de los datos
-        $validator = Validator::make($request->all(), [
-            'cliente'              => 'required|exists:thirds,id',
-            'formaPago'            => 'required|exists:formapagos,id',
-            'tableData'            => 'required|array|min:1',
-            'tableData.*.id'       => 'required|exists:cuentas_por_cobrars,id',
-            'tableData.*.vr_deuda' => 'required|numeric|min:0',
-            'tableData.*.vr_pago'  => 'required|numeric|min:0',
+        $request->validate([
+            'cliente'      => 'required|exists:thirds,id',
+            'formaPago'    => 'required|exists:formapagos,id',
+            'tableData'    => 'required|array|min:1',
+            'tableData.*.id'        => 'required|exists:cuentas_por_cobrars,id',
+            'tableData.*.vr_deuda'  => 'required|numeric|min:0',
+            'tableData.*.vr_pago'   => 'required|numeric|min:0',
             'tableData.*.nvo_saldo' => 'required|numeric|min:0',
-            // Validación para el arreglo de facturas de ventas (sale_ids)
-        //    'sale_ids'             => 'required|array|min:1',
-          //  'sale_ids.*'           => 'exists:sales,id', // Asumiendo que la tabla de ventas se llama 'sales'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        DB::beginTransaction();
-
-        try {
-            // Obtención del usuario autenticado
+        DB::transaction(function () use ($request) {
             $userId = auth()->id();
 
-            $clientId        = $request->cliente;
-            $paymentMethodId = $request->formaPago;
-            $tableData       = $request->tableData;
-          //  $saleIds         = $request->sale_ids;  // Arreglo con una o varias facturas de ventas
-
-            // Crear registro de pago al cliente (Recibo de Caja)
-            // Se asume que el campo 'sale_id' almacenará un JSON con los ids de facturas de ventas
-            $customerPayment = ReciboDeCaja::create([
-                'user_id'            => $userId,      // Asigna el usuario autenticado
-                'third_id'           => $clientId,
-                'sale_id'            => $clientId, // json_encode($saleIds), // Guardamos el arreglo en formato JSON
-                'formapagos_id'      => $paymentMethodId,
-                'saldo'              => 0,
-                'abono'              => 0,
-                'nuevo_saldo'        => 0,
-                'fecha_elaboracion'  => now(),
-                'status'             => '0',
-                'tipo'               => '1', // '1' representa Ingreso
-                'realizar_un'        => 'Abono a deuda',
+            // 1) Crear Recibo de Caja
+            $recibo = ReciboDeCaja::create([
+                'user_id'           => $userId,
+                'third_id'          => $request->cliente,
+                'formapagos_id'     => $request->formaPago,
+                'fecha_elaboracion' => now(),
+                'tipo'              => '1', // Ingreso
+                'realizar_un'       => 'Abono a deuda',
             ]);
 
-            $totalDebt       = 0;
-            $totalPayment    = 0;
-            $totalNewBalance = 0;
-
-            // Itera sobre cada registro de la tabla para actualizar la cuenta por cobrar
-            foreach ($tableData as $row) {
-                // Buscar la cuenta por cobrar
-                $account = CuentaPorCobrar::find($row['id']);
-                if (!$account) {
-                    throw new \Exception("Cuenta por cobrar con id {$row['id']} no encontrada.");
-                }
-
-                // Actualiza el valor de la deuda pendiente (deuda_x_cobrar)
-                $account->update([
-                    'deuda_x_cobrar' => $row['nvo_saldo']
+            // 2) Iterar y guardar detalles + actualizar cuentas
+            foreach ($request->tableData as $row) {
+                $recibo->details()->create([
+                    'user_id'               => $userId,
+                    'caja_id'               => $recibo->id,  // o la caja real si difiere
+                    'cuentas_por_cobrar_id' => $row['id'],
+                    'vr_deuda'              => $row['vr_deuda'],
+                    'vr_pago'               => $row['vr_pago'],
+                    'nvo_saldo'             => $row['nvo_saldo'],
                 ]);
 
-                // Acumula los totales para registro global (ajustar la lógica según tu necesidad)
-                $totalDebt       += $row['vr_deuda'];
-                $totalPayment    += $row['vr_pago'];
-                $totalNewBalance += $row['nvo_saldo'];
+                // Actualizar saldo en la cuenta por cobrar
+                CuentaPorCobrar::find($row['id'])
+                    ->updateSaldo($row['nvo_saldo']);
             }
 
-            // Actualiza los totales en el registro del pago (Recibo de Caja)
-            $customerPayment->update([
-                'total_debt'        => $totalDebt,
-                'total_payment'     => $totalPayment,
-                'total_new_balance' => $totalNewBalance,
-            ]);
+            // 3) Recalcular totales en el recibo
+            $recibo->recalculateTotals();
+        });
 
-            // Registrar el movimiento en caja (Caja Recibo Dinero Detail)
-            // Se asigna el usuario autenticado y se almacena el arreglo de facturas en sale_id
-            CajaReciboDineroDetail::create([
-                'user_id'  => $userId,             // Usuario autenticado
-                'caja_id'  => $customerPayment->id,
-                'third_id' => $clientId,
-                'total'    => $totalPayment,
-                'quantity' => 0,                   // Ajusta según tu lógica o información
-                'price'    => 0,                   // Ajusta según tu lógica o información
-               // 'sale_id'  => json_encode($saleIds) // Almacena el arreglo de facturas (JSON)
-            ]);
-
-            // Log de operación exitosa
-            Log::info("Pago registrado exitosamente. ID de pago: {$customerPayment->id}");
-
-            DB::commit();
-
-            return response()->json(['success' => 'Pago registrado exitosamente.'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error al registrar pago: " . $e->getMessage());
-            return response()->json(['error' => 'Error al registrar el pago.'], 500);
-        }
+        return response()->json(['success' => 'Pago registrado exitosamente.'], 200);
     }
 }
