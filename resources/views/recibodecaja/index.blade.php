@@ -92,8 +92,13 @@
 
 
 </div>
+{{-- Inyecta el arreglo en una variable global --}}
+<script>
+    window.formasPago = @json($formapagos);
+</script>
 @endsection
 @section('script')
+
 <script src="{{asset('rogercode/js/recibodecaja/rogercode-recibodecajas-index.js')}}"></script>
 <script src="{{asset('rogercode/js/recibodecaja/rogercode-create-update.js')}}" type="module"></script>
 @endsection

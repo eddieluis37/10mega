@@ -484,46 +484,44 @@ class recibodecajaController extends Controller
     public function payment(Request $request)
     {
         $request->validate([
-            'cliente'      => 'required|exists:thirds,id',
-            'formaPago'    => 'required|exists:formapagos,id',
-            'tableData'    => 'required|array|min:1',
-            'tableData.*.id'        => 'required|exists:cuentas_por_cobrars,id',
-            'tableData.*.vr_deuda'  => 'required|numeric|min:0',
-            'tableData.*.vr_pago'   => 'required|numeric|min:0',
-            'tableData.*.nvo_saldo' => 'required|numeric|min:0',
+            'cliente'                 => 'required|exists:thirds,id',
+            'tableData'               => 'required|array|min:1',
+            'tableData.*.id'          => 'required|exists:cuentas_por_cobrars,id',
+            'tableData.*.vr_deuda'    => 'required|numeric|min:0',
+            'tableData.*.vr_pago'     => 'required|numeric|min:0',
+            'tableData.*.nvo_saldo'   => 'required|numeric|min:0',
+            'tableData.*.formaPago'   => 'required|exists:formapagos,id',
         ]);
 
         DB::transaction(function () use ($request) {
             $userId = auth()->id();
 
-            // 1) Crear Recibo de Caja
+            // 1) Crear cabecera de recibo
             $recibo = ReciboDeCaja::create([
                 'user_id'           => $userId,
                 'third_id'          => $request->cliente,
-                'formapagos_id'     => $request->formaPago,
                 'fecha_elaboracion' => now(),
-                'tipo'              => '1', // Ingreso
-                'status'            => '1', // Cerrada
+                'tipo'              => '1',      // Ingreso
+                'status'            => '1',      // Cerrada
                 'realizar_un'       => 'Abono a deuda',
             ]);
 
-            // 2) Iterar y guardar detalles + actualizar cuentas
+            // 2) Detalles y actualización de cuentas
             foreach ($request->tableData as $row) {
                 $recibo->details()->create([
-                    'user_id'               => $userId,
-                    'caja_id'               => $recibo->id,  // o la caja real si difiere
+                    'user_id'               => $userId,                    
                     'cuentas_por_cobrar_id' => $row['id'],
+                    'formapagos_id'         => $row['formaPago'],
                     'vr_deuda'              => $row['vr_deuda'],
                     'vr_pago'               => $row['vr_pago'],
                     'nvo_saldo'             => $row['nvo_saldo'],
                 ]);
 
-                // Actualizar saldo en la cuenta por cobrar
                 CuentaPorCobrar::find($row['id'])
                     ->updateSaldo($row['nvo_saldo']);
             }
 
-            // 3) Recalcular totales en el recibo
+            // 3) Recalcular totales
             $recibo->recalculateTotals();
         });
 

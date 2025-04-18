@@ -12,8 +12,8 @@ class CajaReciboDineroDetail extends Model
     protected $fillable = [
         'recibodecaja_id',
         'user_id',
-        'caja_id',
         'cuentas_por_cobrar_id',
+        'formapagos_id',
         'vr_deuda',
         'vr_pago',
         'nvo_saldo',
@@ -38,13 +38,13 @@ class CajaReciboDineroDetail extends Model
         return $this->belongsTo(CuentaPorCobrar::class, 'cuentas_por_cobrar_id');
     }
 
+    public function formaPago()
+    {
+        return $this->belongsTo(FormaPago::class, 'formapagos_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function caja()
-    {
-        return $this->belongsTo(Caja::class, 'caja_id');
     }
 }

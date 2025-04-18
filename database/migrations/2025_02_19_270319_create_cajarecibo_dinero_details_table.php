@@ -20,13 +20,13 @@ class CreateCajaReciboDineroDetailsTable extends Migration
             $table->foreign('recibodecaja_id')->references('id')->on('recibodecajas');
 
             $table->unsignedBigInteger('user_id');           
-            $table->foreign('user_id')->references('id')->on('users');
-            
-            $table->unsignedBigInteger('caja_id')->nullable();         
-            $table->foreign('caja_id')->references('id')->on('cajas');
+            $table->foreign('user_id')->references('id')->on('users');          
            
             $table->unsignedBigInteger('cuentas_por_cobrar_id')->nullable();
-            $table->foreign('cuentas_por_cobrar_id')->references('id')->on('cuentas_por_cobrars');                
+            $table->foreign('cuentas_por_cobrar_id')->references('id')->on('cuentas_por_cobrars');
+            
+            $table->unsignedBigInteger('formapagos_id')->nullable();
+            $table->foreign('formapagos_id')->references('id')->on('formapagos');
            
             $table->decimal('vr_deuda', 12, 0)->default(0)->nullable();
             $table->decimal('vr_pago', 12, 0)->default(0)->nullable();

@@ -23,20 +23,15 @@ En el caso de abonos totales sobre cuentas por cobrar se utilizará el tipo "Ing
             $table->foreign('user_id')->references('id')->on('users');
 
             $table->unsignedBigInteger('third_id')->nullable();
-            $table->foreign('third_id')->references('id')->on('thirds');
-         
-            $table->unsignedBigInteger('formapagos_id')->nullable();
-            $table->foreign('formapagos_id')->references('id')->on('formapagos');
+            $table->foreign('third_id')->references('id')->on('thirds');       
+          
 
             $table->decimal('vr_total_deuda', 12, 0)->default(0)->nullable();
             $table->decimal('vr_total_pago', 12, 0)->default(0)->nullable();
             $table->decimal('nvo_total_saldo', 12, 0)->default(0)->nullable();
 
             $table->date('fecha_elaboracion')->nullable();
-            $table->date('fecha_cierre')->nullable();
-            $table->string('consecutivo', 50, 0)->nullable();
-            $table->bigInteger('consec')->length(50)->nullable();
-
+          
 
             $table->enum('status', ['0', '1', '2', '3', '4', '5'])->default('0');
             // Tipo de recibo: 

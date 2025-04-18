@@ -123,27 +123,38 @@ $(document).ready(function () {
     });
 });
 
+
+
 $(document).ready(function () {
+    
     // Inicializa select2
     $(".select2Cliente").select2({
         placeholder: "Busca un cliente",
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,
-    });
-    $(".select2FormaPago").select2({
-        placeholder: "Busca una forma pago",
-        width: "100%",
-        theme: "bootstrap-5",
-        allowClear: true,
-    });
-    
+    });        
     // Formateador de moneda para COP
     const currencyFormat = new Intl.NumberFormat("es-CO", {
         style: "currency",
         currency: "COP",
         minimumFractionDigits: 0
     });
+
+    // Antes de todo, expón el arreglo de métodos de pago:
+
+    // Leer la variable inyectada
+    const formas = window.formasPago;
+
+function buildFormaPagoSelect(selected = null) {
+    let html = '<select class="form-control form-control-sm select2RowFormaPago">';
+    html += '<option value="">Seleccione</option>';
+    formas.forEach(f => {
+        html += `<option value="${f.id}" ${ f.id == selected ? 'selected' : '' }> ${f.nombre}</option>`;
+    });
+    html += '</select>';
+    return html;
+}
   
     // Ejemplo de carga de datos en la tabla #tablePagoCliente (modifica según tu lógica)
     $("#cliente").on("change", function () {
@@ -169,8 +180,9 @@ $(document).ready(function () {
                                 "<td>" + reg.DIAS_MORA + "</td>" +
                                 // VR.DEUDA: Se muestra formateado y se guarda el valor original en data-value
                                 "<td class='vr-deuda' data-value='" + reg.deuda_x_cobrar + "'>" + currencyFormat.format(reg.deuda_x_cobrar) + "</td>" +
+                                "<td>" + buildFormaPagoSelect() + "</td>" +
                                 // VR.PAGO: Input con valor inicial 0, formateado
-                                "<td><input type='text' class='form-control vr-pago' value='" + currencyFormat.format(0) + "' style='text-align:right;' size='8' /></td>" +
+                                "<td><input type='text' class='form-control vr-pago' value='" + currencyFormat.format(0) + "' style='text-align:right;' size='10' /></td>" +
                                 // NVO.SALDO: Se inicia con el valor de la deuda
                                 "<td class='nvo-saldo'>" + currencyFormat.format(reg.deuda_x_cobrar) + "</td>" +
                                 // Botón PT para pago total
@@ -178,7 +190,16 @@ $(document).ready(function () {
                             "</tr>";
                 });
                 $("#tablePagoCliente tbody").html(rows);
-                updateTotals();
+
+    // Inicializa Select2 en cada fila:
+    $(".select2RowFormaPago").select2({
+        placeholder: "Forma pago",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true
+    });
+
+    updateTotals();
             },
             error: function (error) {
                 console.error("Error al obtener datos:", error);
@@ -230,26 +251,21 @@ $(document).ready(function () {
   
     // Manejador para el botón Aceptar con id btnAddCustomerPayment (tipo "button")
     $("#btnAddCustomerPayment").on("click", function(e){
-        e.preventDefault(); // Evita cualquier comportamiento predeterminado
-        console.log("Click en btnAddCustomerPayment detectado");
-
-        // Se arma la data del formulario manualmente
-        var formData = {
+        e.preventDefault();
+    
+        let formData = {
             cliente: $("#cliente").val(),
-            formaPago: $("#formaPago").val(),
             tableData: []
         };
-      
+    
         $("#tablePagoCliente tbody tr").each(function(){
-            var cuentaId = $(this).find('td').eq(0).text().trim();
-            var vrDeuda = parseFloat($(this).find('.vr-deuda').data('value')) || 0;
-            var vrPago = parseFloat($(this).find('.vr-pago').val().replace(/\D/g, '')) || 0;
-            var nvoSaldo = parseFloat($(this).find('.nvo-saldo').text().replace(/\D/g, '')) || 0;
+            let $tr = $(this);
             formData.tableData.push({
-                id: cuentaId,
-                vr_deuda: vrDeuda,
-                vr_pago: vrPago,
-                nvo_saldo: nvoSaldo
+                id:        $tr.find('td').eq(0).text().trim(),
+                vr_deuda:  parseFloat($tr.find('.vr-deuda').data('value')),
+                formaPago: $tr.find('.select2RowFormaPago').val(),    // <-- aquí
+                vr_pago:   parseFloat($tr.find('.vr-pago').val().replace(/\D/g, '')),
+                nvo_saldo: parseFloat($tr.find('.nvo-saldo').text().replace(/\D/g, ''))
             });
         });
       

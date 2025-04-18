@@ -8,7 +8,7 @@
                             <input type="hidden" value="0" name="productloteId" id="productloteId">
                             <input type="hidden" value="1" name="store_id" id="store_id">
                         </div>
-                        <div class="col-sm-6 col-md-4">
+                        <div class="col-sm-6 col-md-6">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label for="cliente" class="form-label">Buscar cliente</label>
@@ -24,20 +24,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label for="formaPago" class="form-label">Buscar forma de pago</label>
-                                    <select class="form-control form-control-sm select2FormaPago" name="formaPago" id="formaPago" required>
-                                        <option value="">Seleccione la forma pago</option>
-                                        @foreach ($formapagos as $p)
-                                        <option value="{{$p->id}}">{{$p->nombre}}</option>
-                                        @endforeach
-                                    </select>
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- <td id="totalPago" align="right">$ 0</td>  -->
                         <div class="col-sm-6 col-md-4"></div>
                         <div class="table-responsive mt-3">
                             <form method="POST">
@@ -47,12 +34,13 @@
                                         <tr>
                                             <th class="table-th text-white">ID</th>
                                             <th class="table-th text-white">F_VENTA</th>
-                                            <th class="table-th text-white">IDENTIDAD</th>
-                                            <th class="table-th text-white">DOCUMENTO</th>
+                                            <th class="table-th text-white">IDENTY</th>
+                                            <th class="table-th text-white">DOCUMENT</th>
                                             <th class="table-th text-white">F_VENCE</th>
-                                            <th class="table-th text-white">DIAS_MORA</th>
+                                            <th class="table-th text-white">D.M</th>
                                             <th class="table-th text-white">VR.DEUDA</th>
-                                            <th class="table-th text-white">VALOR.PAGO</th>
+                                            <th class="table-th text-white">FORMA.PAGO</th>
+                                            <th class="table-th text-white">VALOR.PAGADO</th>
                                             <th class="table-th text-white">NVO.SALDO</th>
                                             <th class="table-th text-white">ACCIONES</th>
                                         </tr>
@@ -64,12 +52,13 @@
                                         <tr>
                                             <!-- Se generan 10 celdas; en este ejemplo se muestran totales en columnas 7 (VR.DEUDA), 8 (VR.PAGO) y 9 (NVO.SALDO) -->
                                             <th>Totales</th>
-                                            <td></td>
+                                            <td></td>                                         
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                             <td id="totalDeuda">$ 0</td>
+                                            <td></td>
                                             <td id="totalPago" align="right">$ 0</td>                                           
                                             <td id="totalSaldo">$ 0</td>
                                             <td></td>
