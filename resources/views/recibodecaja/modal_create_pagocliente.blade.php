@@ -1,3 +1,27 @@
+<style>
+    .table-responsive {
+        margin: 0 auto;
+        /* Center the table */
+    }
+
+    .table {
+        border-collapse: collapse;
+        /* Optional: For better table appearance */
+    }
+
+    .table th {      
+        text-align: center;
+    }
+    .table td {
+        padding: 8px;
+        /* Adjust padding for table cells */
+        text-align: right;
+        /* Align text in table cells */
+        border: 1px solid #ddd;
+        /* Optional: Add borders to cells */
+    }
+</style>
+
 <div class="row">
     <div class="col-sm-12">
         <div class="connect-sorting-content">
@@ -23,12 +47,12 @@
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
-                        </div>                        
+                        </div>
                         <div class="col-sm-6 col-md-6"></div>
-                        <div class="table-responsive mt-3">
+                        <div class="table-responsive mt-3" style="overflow-x: auto;">
                             <form method="POST">
                                 @csrf
-                                <table id="tablePagoCliente" class="table table-striped mt-1">
+                                <table id="tablePagoCliente" class="table table-striped mt-1" style="width: 100%;">
                                     <thead class="text-white" style="background: #3B3F5C">
                                         <tr>
                                             <th class="table-th text-white">ID</th>
@@ -49,16 +73,15 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <!-- Se generan 10 celdas; en este ejemplo se muestran totales en columnas 7 (VR.DEUDA), 8 (VR.PAGO) y 9 (NVO.SALDO) -->
                                             <th>Totales</th>
-                                            <td></td>                                         
+                                            <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                             <td id="totalDeuda">$ 0</td>
                                             <td></td>
-                                            <td id="totalPago" align="right">$ 0</td>                                           
+                                            <td id="totalPago" align="right">$ 0</td>
                                             <td id="totalSaldo">$ 0</td>
                                             <td></td>
                                         </tr>
