@@ -23,9 +23,8 @@
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
-                        </div>
-                        <!-- <td id="totalPago" align="right">$ 0</td>  -->
-                        <div class="col-sm-6 col-md-4"></div>
+                        </div>                        
+                        <div class="col-sm-6 col-md-6"></div>
                         <div class="table-responsive mt-3">
                             <form method="POST">
                                 @csrf
@@ -40,7 +39,7 @@
                                             <th class="table-th text-white">D.M</th>
                                             <th class="table-th text-white">VR.DEUDA</th>
                                             <th class="table-th text-white">FORMA.PAGO</th>
-                                            <th class="table-th text-white">VALOR.PAGADO</th>
+                                            <th class="table-th text-white">VALORES.PAGADO</th>
                                             <th class="table-th text-white">NVO.SALDO</th>
                                             <th class="table-th text-white">ACCIONES</th>
                                         </tr>

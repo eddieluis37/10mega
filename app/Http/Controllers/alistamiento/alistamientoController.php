@@ -267,7 +267,7 @@ class alistamientoController extends Controller
         $category = Category::WhereIn('id', [13, 2, 3])->get();
         //$centros = Centrocosto::Where('status', 1)->get();
         //$centros = Store::whereNotIn('id', [1, 4, 5, 6, 7])
-        $stores = Store::whereIn('id', [8, 22])
+        $stores = Store::whereIn('id', [8, 9, 10, 22])
             ->orderBy('id', 'asc')
             ->get();
         $lotes = Lote::orderBy('id', 'asc')->get();
