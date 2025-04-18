@@ -22,6 +22,7 @@ use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\caja\Caja;
@@ -483,48 +484,79 @@ class recibodecajaController extends Controller
 
     public function payment(Request $request)
     {
-        $request->validate([
-            'cliente'                 => 'required|exists:thirds,id',
-            'tableData'               => 'required|array|min:1',
-            'tableData.*.id'          => 'required|exists:cuentas_por_cobrars,id',
-            'tableData.*.vr_deuda'    => 'required|numeric|min:0',
-            'tableData.*.vr_pago'     => 'required|numeric|min:0',
-            'tableData.*.nvo_saldo'   => 'required|numeric|min:0',
-            'tableData.*.formaPago'   => 'required|exists:formapagos,id',
-        ]);
+        // 1) Defino las reglas por fila, incluida la validación condicional de formaPago
+        $rules = [
+            'cliente'               => 'required|exists:thirds,id',
+            'tableData'             => 'required|array|min:1',
+            'tableData.*.id'        => 'required|exists:cuentas_por_cobrars,id',
+            'tableData.*.vr_deuda'  => 'required|numeric|min:0',
+            'tableData.*.vr_pago'   => 'required|numeric|min:0',
+            'tableData.*.formaPago' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if (preg_match('/tableData\.(\d+)\.formaPago$/', $attribute, $m)) {
+                        $index = $m[1];
+                        $vrPago = data_get($request->input('tableData'), "$index.vr_pago", 0);
+                        if ($vrPago > 0 && empty($value)) {
+                            $fail("La forma de pago es obligatoria cuando el pago es mayor a cero (fila #{$index}).");
+                        }
+                    }
+                },
+            ],
+        ];
 
+        // 2) Construyo el Validator y le añado el chequeo “al menos un vr_pago > 0”
+        $validator = Validator::make($request->all(), $rules);
+
+        $validator->after(function ($validator) use ($request) {
+            $rows = $request->input('tableData', []);
+            $hayPago = false;
+            foreach ($rows as $row) {
+                if (isset($row['vr_pago']) && is_numeric($row['vr_pago']) && $row['vr_pago'] > 0) {
+                    $hayPago = true;
+                    break;
+                }
+            }
+            if (! $hayPago) {
+                // error global en "tableData"
+                $validator->errors()->add(
+                    'tableData',
+                    'Debe registrar al menos un pago mayor a cero en alguna fila.'
+                );
+            }
+        });
+
+        // 3) Lanzo la validación (throws ValidationException si hay errores)
+        $validator->validate();
+
+        // 4) Si todo ok, continúo con tu transacción habitual...
         DB::transaction(function () use ($request) {
             $userId = auth()->id();
-
-            // 1) Crear cabecera de recibo
             $recibo = ReciboDeCaja::create([
                 'user_id'           => $userId,
                 'third_id'          => $request->cliente,
                 'fecha_elaboracion' => now(),
-                'tipo'              => '1',      // Ingreso
-                'status'            => '1',      // Cerrada
+                'tipo'              => '1',
+                'status'            => '1',
                 'realizar_un'       => 'Abono a deuda',
             ]);
-
-            // 2) Detalles y actualización de cuentas
             foreach ($request->tableData as $row) {
                 $recibo->details()->create([
-                    'user_id'               => $userId,                    
+                    'user_id'               => $userId,
                     'cuentas_por_cobrar_id' => $row['id'],
-                    'formapagos_id'         => $row['formaPago'],
+                    'formapagos_id'         => $row['formaPago'] ?? null,
                     'vr_deuda'              => $row['vr_deuda'],
                     'vr_pago'               => $row['vr_pago'],
                     'nvo_saldo'             => $row['nvo_saldo'],
                 ]);
-
                 CuentaPorCobrar::find($row['id'])
                     ->updateSaldo($row['nvo_saldo']);
             }
-
-            // 3) Recalcular totales
             $recibo->recalculateTotals();
         });
 
-        return response()->json(['success' => 'Pago registrado exitosamente.'], 200);
+        return response()->json([
+            'success'     => 'Pago registrado exitosamente.',
+            'reloadTable' => true,
+        ], 200);
     }
 }

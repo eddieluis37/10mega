@@ -1,5 +1,29 @@
 @extends('layouts.theme.app')
 @section('content')
+<style>
+    .table-responsive {
+        margin: 0 auto;
+        /* Center the table */
+    }
+
+    .table {
+        border-collapse: collapse;
+        /* Optional: For better table appearance */
+    }
+
+    .table th {      
+        text-align: center;
+    }
+    .table td {
+        padding: 8px;
+        /* Adjust padding for table cells */
+        text-align: right;
+        /* Align text in table cells */
+        border: 1px solid #ddd;
+        /* Optional: Add borders to cells */
+    }
+</style>
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="row sales layout-top-spacing">
 	<div class="col-sm-12">
@@ -32,9 +56,7 @@
 								<th class="table-th text-white">VR.T.DEUDA</th>
 								<th class="table-th text-white">VR.T.PAGADO</th>
 								<th class="table-th text-white">VR.N.SALDO</th>
-								<th class="table-th text-white">DIA.HORA</th>
-								<th class="table-th text-white">RECIBO</th>
-
+								<th class="table-th text-white">DIA.HORA</th>						
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
 						</thead>
