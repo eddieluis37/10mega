@@ -126,13 +126,16 @@ class recibodecajaController extends Controller
                 if ($data->status == 1) {
                     $btn = '
                          <div class="text-center">                         
+                         <button class="btn btn-warning" title="DetalleRecibo" onclick="openReport(' . $data->id . ');">
+						    DE
+					     </button> 
                          <a href="recibodecaja/showRecibodecaja/' . $data->id . '" class="btn btn-dark" title="RecibodecajaCerrado" target="_blank">
                          <i class="far fa-file-pdf"></i>
                          </a>				
                          <button class="btn btn-dark" title="Borrar venta" disabled>
                              <i class="fas fa-trash"></i>
                          </button>
-                         <a href="javascript:void(0)" data-toggle="tooltip"  data-id="' . $data->id . '" data-original-title="Delete" class="btn btn-danger btn-sm deleteBook">E</a>
+                        
                          </div>
                          ';
                 } elseif ($data->status == 0) {
@@ -500,6 +503,7 @@ class recibodecajaController extends Controller
                 'formapagos_id'     => $request->formaPago,
                 'fecha_elaboracion' => now(),
                 'tipo'              => '1', // Ingreso
+                'status'            => '1', // Cerrada
                 'realizar_un'       => 'Abono a deuda',
             ]);
 

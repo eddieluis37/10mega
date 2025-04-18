@@ -29,10 +29,9 @@
 								<th class="table-th text-white">CLIENTE</th>
 								<th class="table-th text-white ">TIPO</th>
 								<th class="table-th text-white">ESTADO</th>
-								<th class="table-th text-white">FACTURA</th>
-								<th class="table-th text-white">VR.DOC</th>
-								<th class="table-th text-white">ABONO</th>
-								<th class="table-th text-white">SALDO</th>
+								<th class="table-th text-white">VR.T.DEUDA</th>
+								<th class="table-th text-white">VR.T.PAGADO</th>
+								<th class="table-th text-white">VR.N.SALDO</th>
 								<th class="table-th text-white">DIA.HORA</th>
 								<th class="table-th text-white">RECIBO</th>
 
@@ -77,6 +76,19 @@
 		<!-- /.modal-dialog -->
 	</div>
 	<!-- /.modal -->
+
+	<!-- Modal para mostrar el reporte cargado vía fetch -->
+	<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+
+				<div class="modal-body">
+					<!-- Contenedor donde se insertará el HTML obtenido -->
+					<div id="reportContent"></div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 
 </div>

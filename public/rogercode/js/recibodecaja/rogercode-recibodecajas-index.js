@@ -46,22 +46,21 @@ $(document).ready(function () {
                     name: "tipo",
                     render: function (data) {
                         if (data === "1") {
-                            return '<span title="Recibo de caja diario" style="color: white; background-color: green; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RI</span>';
+                            return '<span title="Recibo de ingreso" style="color: white; background-color: green; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RI</span>';
                         } else if (data === "2") {
-                            return '<span title="Recibo de caja de cartera" style="color: white; background-color: blue; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RE</span>';
+                            return '<span title="Recibo de egreso" style="color: white; background-color: blue; border-radius: 5px; padding: 5px; line-height: 1; font-size: 11px;">RE</span>';
                         } else {
                             return "";
                         }
                     },
                 },
-                { data: "status", name: "status" },
-                { data: "resolucion_factura", name: "resolucion_factura" },
+                { data: "status", name: "status" },               
                 {
-                    data: "saldo",
-                    name: "saldo",
+                    data: "vr_total_deuda",
+                    name: "vr_total_deuda",
                     render: function (data) {
                         return (
-                            "$ " +
+                            "$" +
                             parseFloat(data).toLocaleString(undefined, {
                                 minimumFractionDigits: 0,
                                 maximumFractionDigits: 0,
@@ -70,11 +69,11 @@ $(document).ready(function () {
                     },
                 },
                 {
-                    data: "abono",
-                    name: "abono",
+                    data: "vr_total_pago",
+                    name: "vr_total_pago",
                     render: function (data) {
                         return (
-                            "$ " +
+                            "$" +
                             parseFloat(data).toLocaleString(undefined, {
                                 minimumFractionDigits: 0,
                                 maximumFractionDigits: 0,
@@ -83,11 +82,11 @@ $(document).ready(function () {
                     },
                 },
                 {
-                    data: "nuevo_saldo",
-                    name: "nuevo_saldo",
+                    data: "nvo_total_saldo",
+                    name: "nvo_total_saldo",
                     render: function (data) {
                         return (
-                            "$ " +
+                            "$" +
                             parseFloat(data).toLocaleString(undefined, {
                                 minimumFractionDigits: 0,
                                 maximumFractionDigits: 0,
@@ -286,3 +285,22 @@ $(document).ready(function () {
         });
     });
 });
+
+async function openReport(id) {
+    try {
+        // Realiza la petición al endpoint del reporte
+        const response = await fetch(`/reporte-detalle-recibo-caja/${id}`);
+        if (!response.ok) {
+            throw new Error('Error al cargar el reporte');
+        }
+        const html = await response.text();
+        // Inserta el contenido obtenido en el contenedor del modal
+        document.getElementById('reportContent').innerHTML = html;
+        // Muestra el modal utilizando Bootstrap 5
+        const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+        reportModal.show();
+    } catch (error) {
+        console.error(error);
+        alert("Hubo un error al cargar el reporte.");
+    }
+}
