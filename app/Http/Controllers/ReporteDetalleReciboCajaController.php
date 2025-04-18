@@ -13,8 +13,8 @@ class ReporteDetalleReciboCajaController extends Controller
         $recibo = ReciboDeCaja::with([
             'user',
             'third',
-            'paymentMethod',
             'details.cuentaPorCobrar.sale.third',
+            'details.formaPago',
         ])->findOrFail($id);
 
         return view('reportes.detalle_recibo_caja', compact('recibo'));
