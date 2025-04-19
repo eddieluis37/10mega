@@ -93,6 +93,7 @@ use App\Http\Controllers\inventory\mensualController;
 use App\Http\Controllers\listaprecio\listaprecioController;
 
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportReciboCajaController;
 
 use App\Http\Controllers\ImportStockFisicoController;
 use App\Http\Controllers\inventory\inventoryUtilidadHistoricoController;
@@ -117,14 +118,14 @@ use App\Http\Controllers\ProductLoteController;
 use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
-use App\Http\Controllers\ReportReciboCajaController;
+
 
 //use App\Http\Controllers\InventarioController;
 
 
 /************************************************* */
 
-Route::get('/reporte-detalle-recibo-caja/{id}', [ReportReciboCajaController::class, 'show'])->name('reportrecibocaja.show');
+Route::get('/reporte-detalle-recibo/{id}', [ReportReciboCajaController::class, 'show'])->name('reportrecibocaja.show');
 
 // Ruta para obtener los registros de cuentas_por_cobrars vía AJAX
 Route::get('/getClientPayments', [recibodecajaController::class, 'getClientPayments'])->name('reciboCaja.getClientPayments');

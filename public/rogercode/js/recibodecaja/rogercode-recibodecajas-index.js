@@ -357,7 +357,7 @@ $(document).ready(function () {
 async function openReport(id) {
     try {
         // Realiza la petición al endpoint del reporte
-        const response = await fetch(`/reporte-detalle-recibo-caja/${id}`);
+        const response = await fetch(`/reporte-detalle-recibo/${id}`);
         if (!response.ok) {
             throw new Error("Error al cargar el reporte");
         }
