@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\caja\Caja;
 use Illuminate\Database\Eloquent\Model;
 
-class CajaReciboDineroDetail extends Model
+class Cajarecibodinerodetail extends Model
 {
     protected $table = 'caja_recibo_dinero_details';
 
@@ -28,7 +28,7 @@ class CajaReciboDineroDetail extends Model
     // Relaciones
     public function recibo()
     {
-        return $this->belongsTo(ReciboDeCaja::class, 'recibodecaja_id');
+        return $this->belongsTo(Recibodecaja::class, 'recibodecaja_id');
     }
 
     public function cuentaPorCobrar()

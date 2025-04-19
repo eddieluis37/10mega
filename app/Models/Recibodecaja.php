@@ -44,7 +44,7 @@ class Recibodecaja extends Model
 
     public function details()
     {
-        return $this->hasMany(CajaReciboDineroDetail::class, 'recibodecaja_id');
+        return $this->hasMany(Cajarecibodinerodetail::class, 'recibodecaja_id');
     }
 
     /**
