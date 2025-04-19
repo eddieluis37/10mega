@@ -12,18 +12,10 @@ class ReciboDeCaja extends Model
     protected $fillable = [
         'user_id',
         'third_id',
-        'formapagos_id',
-        'vr_total_deuda',
-        'vr_total_pago',
-        'nvo_total_saldo',
-        'fecha_elaboracion',
-        'fecha_cierre',
-        'consecutivo',
-        'consec',
-        'status',
+        'fecha_elaboracion', 
         'tipo',            // '1' => Ingreso, '2' => Egreso, etc.
+        'status',
         'realizar_un',
-        'observations',
     ];
 
     protected $casts = [
@@ -50,7 +42,7 @@ class ReciboDeCaja extends Model
         return $this->belongsTo(FormaPago::class, 'formapagos_id');
     }
 
-    public function details(): HasMany
+    public function details()
     {
         return $this->hasMany(CajaReciboDineroDetail::class, 'recibodecaja_id');
     }

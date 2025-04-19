@@ -10,14 +10,12 @@ class CajaReciboDineroDetail extends Model
     protected $table = 'caja_recibo_dinero_details';
 
     protected $fillable = [
-        'recibodecaja_id',
-        'user_id',
+        'recibodecaja_id',       
         'cuentas_por_cobrar_id',
         'formapagos_id',
         'vr_deuda',
         'vr_pago',
-        'nvo_saldo',
-        'status',
+        'nvo_saldo',     
     ];
 
     protected $casts = [
