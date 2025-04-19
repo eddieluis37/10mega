@@ -124,12 +124,14 @@ use App\Http\Controllers\reportedetallerecibocajaController;
 
 /************************************************* */
 
+Route::get('/reporte-detalle-recibo-caja/{id}', [reportedetallerecibocajaController::class, 'show'])->name('reportedetallerecibocaja.show');
+
 // Ruta para obtener los registros de cuentas_por_cobrars vía AJAX
 Route::get('/getClientPayments', [recibodecajaController::class, 'getClientPayments'])->name('reciboCaja.getClientPayments');
 
 Route::get('/reporte-cierre-caja/{id}', [ReporteCierreCajaController::class, 'show'])->name('reporte.cierre');
 
-Route::get('/reporte-detalle-recibo-caja/{id}', [reportedetallerecibocajaController::class, 'show'])->name('reportedetallerecibocaja.show');
+
 
 Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
 Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');
