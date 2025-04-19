@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ReciboDeCaja;
+use App\Models\Recibodecaja;
 use Illuminate\Http\Request;
 
 class ReportReciboCajaController extends Controller
@@ -10,7 +10,7 @@ class ReportReciboCajaController extends Controller
     public function show($id)
     {
         // Cargo el recibo con TODO lo que necesito de una sola vez:
-        $recibo = ReciboDeCaja::with([
+        $recibo = Recibodecaja::with([
             'user',
             'third',
             'details.cuentaPorCobrar.sale.third',
