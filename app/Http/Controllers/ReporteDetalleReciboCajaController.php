@@ -14,7 +14,7 @@ class reportedetallerecibocajaController extends Controller
             'user',
             'third',
             'details.cuentaPorCobrar.sale.third',
-            'details.formaPago',
+            'details.paymentMethod',
         ])->findOrFail($id);
 
         return view('reportes.detalle_recibo_caja', compact('recibo'));

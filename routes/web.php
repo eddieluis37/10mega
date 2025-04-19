@@ -117,7 +117,7 @@ use App\Http\Controllers\ProductLoteController;
 use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
-use App\Http\Controllers\reportedetallerecibocajaController;
+use App\Http\Controllers\ReporteDetalleReciboCajaController;
 
 //use App\Http\Controllers\InventarioController;
 
@@ -129,7 +129,7 @@ Route::get('/getClientPayments', [recibodecajaController::class, 'getClientPayme
 
 Route::get('/reporte-cierre-caja/{id}', [ReporteCierreCajaController::class, 'show'])->name('reporte.cierre');
 
-Route::get('/reporte-detalle-recibo-caja/{id}', [reportedetallerecibocajaController::class, 'show'])->name('reportedetallerecibocaja.show');
+Route::get('/reporte-detalle-recibo-caja/{id}', [ReporteDetalleReciboCajaController::class, 'show'])->name('reportedetallerecibocaja.show');
 
 Route::get('/obtener-valores-producto', [transferController::class, 'obtenerValoresProducto'])->name('transfer.obtener-valores-producto');
 Route::get('/obtener-valores-producto-destino', [transferController::class, 'obtenerValoresProductoDestino'])->name('transfer.obtener-valores-producto-destino');

@@ -38,7 +38,7 @@ class CajaReciboDineroDetail extends Model
         return $this->belongsTo(CuentaPorCobrar::class, 'cuentas_por_cobrar_id');
     }
 
-    public function formaPago()
+    public function paymentMethod()
     {
         return $this->belongsTo(FormaPago::class, 'formapagos_id');
     }
