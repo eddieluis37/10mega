@@ -38,7 +38,7 @@ class Cajarecibodinerodetail extends Model
 
     public function paymentMethod()
     {
-        return $this->belongsTo(FormaPago::class, 'formapagos_id');
+        return $this->belongsTo(Formapago::class, 'formapagos_id');
     }
 
     public function user()
