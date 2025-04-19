@@ -66,9 +66,7 @@
                                         <th class="table-th text-white text-center">ESTADO</th>
                                         <th class="table-th text-white text-center">FECHA.V</th>
                                         <th class="table-th text-white text-center">DEUDA.I</th>
-                                        <th class="table-th text-white text-center">NC</th>
-                                        <th class="table-th text-white text-center">ND</th>
-                                        <th class="table-th text-white text-center">REC.CAJA</th>
+                                        <th class="table-th text-white text-center">PAGO</th>                                      
                                         <th class="table-th text-white text-center">SALDO</th>
                                         <th class="table-th text-white text-center">ACCIONES</th>
                                     </tr>
@@ -86,7 +84,7 @@
                                                 <h6>{{$d->id}}</h6>
                                             </td>
                                             <td class="text-center">
-                                                <h6>{{$d->identification}}</h6>
+                                                <h6>{{$d->name}}</h6>
                                             </td>
                                             <td class="text-center">
                                                 <h6>{{$d->consecutivo}}</h6>
@@ -115,14 +113,9 @@
                                             <td class="text-center">
                                                 <h6>${{number_format($d->deuda_x_cobrar)}}</h6>
                                             </td>
+                                            
                                             <td class="text-center">
-                                                <h6>${{number_format($d->deuda_x_pagar)}}</h6>
-                                            </td>
-                                            <td class="text-center">
-                                                <h6>{{number_format($d->abono)}}</h6>
-                                            </td>
-                                            <td class="text-center">
-                                                <h6>${{number_format($d->deuda_inicial - $d->abono)}}</h6>
+                                                <h6>${{number_format($d->deuda_inicial - $d->deuda_x_cobrar)}}</h6>
                                             </td>
 
                                             <td class="text-center">
