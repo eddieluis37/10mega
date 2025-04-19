@@ -32,7 +32,7 @@
         $cliente = optional(optional($sale)->third)->name;
         $factura = $sale->consecutivo ?? '–';
         // Nombre de la forma de pago:
-        $forma   = optional($detail->formaPago)->nombre ?? 'No especificada';
+        $forma   = optional($detail->paymentMethod)->nombre ?? 'No especificada';
       @endphp
       <tr>
         <td class="px-4 py-2">{{ $cliente }}</td>
