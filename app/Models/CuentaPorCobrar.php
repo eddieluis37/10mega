@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CuentaPorCobrar extends Model
+class Cuentaporcobrar extends Model
 {
     protected $table = 'cuentas_por_cobrars';
 
@@ -51,7 +51,7 @@ class CuentaPorCobrar extends Model
 
     public function cajaDetails()
     {
-        return $this->hasMany(CajaReciboDineroDetail::class, 'cuentas_por_cobrar_id');
+        return $this->hasMany(Cajarecibodinerodetail::class, 'cuentas_por_cobrar_id');
     }
 
     /**

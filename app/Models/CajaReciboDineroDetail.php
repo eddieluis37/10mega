@@ -33,7 +33,7 @@ class Cajarecibodinerodetail extends Model
 
     public function cuentaPorCobrar()
     {
-        return $this->belongsTo(CuentaPorCobrar::class, 'cuentas_por_cobrar_id');
+        return $this->belongsTo(Cuentaporcobrar::class, 'cuentas_por_cobrar_id');
     }
 
     public function paymentMethod()
