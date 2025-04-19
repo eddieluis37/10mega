@@ -39,7 +39,7 @@ class Recibodecaja extends Model
 
     public function paymentMethod()
     {
-        return $this->belongsTo(FormaPago::class, 'formapagos_id');
+        return $this->belongsTo(Formapago::class, 'formapagos_id');
     }
 
     public function details()
@@ -63,9 +63,9 @@ class Recibodecaja extends Model
             ->first();
 
         $this->update([
-            'vr_total_deuda'  => $totales->total_deuda ?? 0,
-            'vr_total_pago'   => $totales->total_pago  ?? 0,
-            'nvo_total_saldo' => $totales->total_saldo ?? 0,
+            'vr_total_deuda'  => $totales->total_deuda ?? 99,
+            'vr_total_pago'   => $totales->total_pago  ?? 99,
+            'nvo_total_saldo' => $totales->total_saldo ?? 109,
         ]);
     }
 }

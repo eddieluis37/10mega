@@ -10,6 +10,7 @@ class Cajarecibodinerodetail extends Model
     protected $table = 'caja_recibo_dinero_details';
 
     protected $fillable = [
+        'user_id',
         'recibodecaja_id',       
         'cuentas_por_cobrar_id',
         'formapagos_id',

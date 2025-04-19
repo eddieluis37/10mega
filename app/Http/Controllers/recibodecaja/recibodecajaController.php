@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\recibodecaja;
 
 
-use App\Models\CuentaPorCobrar;
+use App\Models\Cuentaporcobrar;
 use App\Models\CuentaPorPagar;
-use App\Models\ReciboDeCaja;
+use App\Models\Recibodecaja;
 use App\Models\CajaReciboDineroDetail;
 
 use App\Http\Controllers\Controller;
@@ -531,7 +531,7 @@ class recibodecajaController extends Controller
         // 4) Si todo ok, continúo con tu transacción habitual...
         DB::transaction(function () use ($request) {
             $userId = auth()->id();
-            $recibo = ReciboDeCaja::create([
+            $recibo = Recibodecaja::create([
                 'user_id'           => $userId,
                 'third_id'          => $request->cliente,
                 'fecha_elaboracion' => now(),
@@ -548,7 +548,7 @@ class recibodecajaController extends Controller
                     'vr_pago'               => $row['vr_pago'],
                     'nvo_saldo'             => $row['nvo_saldo'],
                 ]);
-                CuentaPorCobrar::find($row['id'])
+                Cuentaporcobrar::find($row['id'])
                     ->updateSaldo($row['nvo_saldo']);
             }
             $recibo->recalculateTotals();
