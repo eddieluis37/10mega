@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ReciboDeCaja;
 use Illuminate\Http\Request;
 
-class ReporteDetalleReciboCajaController extends Controller
+class reportedetallerecibocajaController extends Controller
 {
     public function show($id)
     {
