@@ -12,10 +12,14 @@ class Recibodecaja extends Model
     protected $fillable = [
         'user_id',
         'third_id',
-        'fecha_elaboracion', 
+        'fecha_elaboracion',
         'tipo',            // '1' => Ingreso, '2' => Egreso, etc.
         'status',
         'realizar_un',
+        'vr_total_deuda',
+        'vr_total_pago',
+        'nvo_total_saldo',
+        'fecha_cierre',
     ];
 
     protected $casts = [
@@ -54,18 +58,16 @@ class Recibodecaja extends Model
      */
     public function recalculateTotals(): void
     {
-        $totales = $this->details()
-            ->selectRaw('
-                SUM(vr_deuda)      AS total_deuda,
-                SUM(vr_pago)       AS total_pago,
-                SUM(nvo_saldo)     AS total_saldo
-            ')
-            ->first();
+        $this->load('details');
+
+        $total_deuda = $this->details->sum('vr_deuda');
+        $total_pago  = $this->details->sum('vr_pago');
+        $total_saldo = $this->details->sum('nvo_saldo');
 
         $this->update([
-            'vr_total_deuda'  => $totales->total_deuda ?? 99,
-            'vr_total_pago'   => $totales->total_pago  ?? 99,
-            'nvo_total_saldo' => $totales->total_saldo ?? 109,
+            'vr_total_deuda'  => $total_deuda,
+            'vr_total_pago'   => $total_pago,
+            'nvo_total_saldo' => $total_saldo,
         ]);
     }
 }

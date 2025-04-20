@@ -551,7 +551,9 @@ class recibodecajaController extends Controller
                 Cuentaporcobrar::find($row['id'])
                     ->updateSaldo($row['nvo_saldo']);
             }
-            $recibo->recalculateTotals();
+            // ¡Cuidado! refresh() antes de recalculateTotals()
+            $recibo->refresh()
+                ->recalculateTotals();
         });
 
         return response()->json([

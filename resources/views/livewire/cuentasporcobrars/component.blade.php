@@ -66,8 +66,7 @@
                                         <th class="table-th text-white text-center">ESTADO</th>
                                         <th class="table-th text-white text-center">FECHA.V</th>
                                         <th class="table-th text-white text-center">DEUDA.I</th>
-                                        <th class="table-th text-white text-center">PAGO</th>                                      
-                                        <th class="table-th text-white text-center">SALDO</th>
+                                        <th class="table-th text-white text-center">DEUDA.X.COBRAR</th>                                                                             
                                         <th class="table-th text-white text-center">ACCIONES</th>
                                     </tr>
                                 </thead>
@@ -112,11 +111,8 @@
                                             </td>
                                             <td class="text-center">
                                                 <h6>${{number_format($d->deuda_x_cobrar)}}</h6>
-                                            </td>
-                                            
-                                            <td class="text-center">
-                                                <h6>${{number_format($d->deuda_inicial - $d->deuda_x_cobrar)}}</h6>
-                                            </td>
+                                            </td>                                     
+                                         
 
                                             <td class="text-center">
                                                 <button wire:click.prevent="getDetails({{$d->id}})" class="btn btn-dark btn-sm">
