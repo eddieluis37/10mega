@@ -307,8 +307,7 @@ tableTransfer.addEventListener("keydown", (event) => {
     const bodegaD = document.querySelector("#bodegaDestino").value;
     const stockO = document.querySelector("#stockOrigen").value;
 
-    // Aquí leemos el lote_id que tenías guardado en un input oculto
-    const loteId = document.querySelector("#loteTraslado").value;
+   
 
     // Preparamos el FormData con TODO lo que pide el controlador
     const dataform = new FormData();
@@ -319,7 +318,6 @@ tableTransfer.addEventListener("keydown", (event) => {
     dataform.append("bodegaOrigen", bodegaO);
     dataform.append("bodegaDestino", bodegaD);
     dataform.append("stockOrigen", stockO);
-    dataform.append("loteTraslado", loteId); // ← ¡Esto faltaba!
 
     // Envío AJAX
     sendData("/transferUpdate", dataform, token)
