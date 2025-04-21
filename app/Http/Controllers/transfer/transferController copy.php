@@ -190,83 +190,6 @@ class transferController extends Controller
             ->make(true);
     }
 
-    public function search(Request $request)
-    {
-
-        //$bodegaOrigenId = 16;
-
-        $bodegaOrigenId = $request->input('bodegaOrigen');
-        if (!$bodegaOrigenId) {
-            return response()->json([], 422);
-        }
-
-        $query = $request->input('q');
-
-        // Consulta de productos. Se busca por barcode o por nombre o por el código del lote (mediante la relación "lotes")
-        $productsQuery = Product::query();
-
-        if ($query) {
-            if (preg_match('/^\d{13}$/', $query)) {
-                // Si es un EAN-13, buscar por barcode
-                $productsQuery->where('barcode', $query);
-            } else {
-                // Si no, buscar por nombre, código de producto ó código de lote
-                $productsQuery->where(function ($q) use ($query) {
-                    $q->where('name',   'LIKE', "%{$query}%")
-                        ->orWhere('code', 'LIKE', "%{$query}%")                            // ← nueva línea
-                        ->orWhereHas('lotes', function ($q2) use ($query) {
-                            $q2->where('codigo', 'LIKE', "%{$query}%");
-                        });
-                });
-            }
-        }
-
-        // Se filtran los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
-        $productsQuery->whereHas('inventarios', function ($q) use ($bodegaOrigenId) {
-            $q->where('store_id', $bodegaOrigenId)
-                ->where('stock_ideal', '>', 0);
-        });
-
-        $products = $productsQuery->get();
-
-        // Se obtienen todos los inventarios que cumplan la condición, cargando además la relación "lote" y "store"
-        $inventarios = Inventario::with('store', 'lote')
-            ->where('store_id', $bodegaOrigenId)
-            ->where('stock_ideal', '>', 0)
-            ->get();
-
-        $results = [];
-
-        foreach ($products as $prod) {
-            // Filtrar todos los inventarios que correspondan al producto actual
-            $inventariosProducto = $inventarios->where('product_id', $prod->id);
-
-            foreach ($inventariosProducto as $inventario) {
-                // Validar la fecha de vencimiento del lote
-                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
-                    $text = "Lt: " . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
-                        . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
-                        . " - " . $prod->name
-                        . " - Stk: " . $inventario->stock_ideal;
-
-                    $results[] = [
-                        // Se utiliza el id del inventario para que cada registro sea único
-                        'id'             => $inventario->id,
-                        'text'           => $text,
-                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
-                        'inventario_id'  => $inventario->id,
-                        'stock_ideal'    => $inventario->stock_ideal,
-                        'barcode'        => $prod->barcode,
-                        // Se conserva el id del producto en otra propiedad para otros usos
-                        'product_id'     => $prod->id,
-                    ];
-                }
-            }
-        }
-
-        return response()->json($results);
-    }
-
     public function create($id) // http://2puracarnes.test:8080/transfer/create/2  llenado de la vista Translado | Categoria
     {
         // $loteId = 99; //$request->lote_id;
@@ -341,54 +264,6 @@ class transferController extends Controller
         $transfers = $this->gettransferdetail($id, $storeOrigenId);
         $arrayTotales = $this->sumTotales($id);
 
-        $storeIds = \DB::table('store_user')
-            ->where('user_id', auth()->id())
-            ->pluck('store_id')
-            ->toArray();
-
-        // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
-        $productsQuery = Product::query();
-        $productsQuery->whereHas('inventarios', function ($q) use ($storeOrigenId) {
-            $q->where('store_id', $storeOrigenId)
-                ->where('stock_ideal', '>', 0);
-        });
-        $products = $productsQuery->get();
-
-        // Se obtienen todos los inventarios que cumplan la condición, cargando las relaciones 'store' y 'lote'
-        $inventarios = Inventario::with('store', 'lote')
-            ->where('store_id', $storeOrigenId)
-            ->where('stock_ideal', '>', 0)
-            ->get();
-
-        $results = [];
-
-        foreach ($products as $prod) {
-            // Filtrar todos los inventarios que correspondan al producto actual
-            $inventariosProducto = $inventarios->where('product_id', $prod->id);
-
-            foreach ($inventariosProducto as $inventario) {
-                // Validar la fecha de vencimiento del lote
-                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
-                    $text = "Lt: " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
-                        . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
-                        . " - " . $prod->name
-                        . " - Stk: " . $inventario->stock_ideal;
-
-                    $results[] = [
-                        // Se utiliza el id del inventario para que cada registro sea único
-                        'id'             => $inventario->id,
-                        'text'           => $text,
-                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
-                        'inventario_id'  => $inventario->id,
-                        'stock_ideal'    => $inventario->stock_ideal,
-                        'barcode'        => $prod->barcode,
-                        // Se conserva el id del producto en otra propiedad para otros usos
-                        'product_id'     => $prod->id,
-                    ];
-                }
-            }
-        }
-
         return view('transfer.create', compact(
             'lotes',
             'dataTransfer',
@@ -398,8 +273,7 @@ class transferController extends Controller
             'arrayTotales',
             'status',
             'statusInventory',
-            'display',
-            'results'
+            'display'
         ));
     }
 
@@ -586,7 +460,7 @@ class transferController extends Controller
     {
         $bodegaOrigenId = $request->input('bodegaOrigen');
         $bodegaDestinoId = $request->input('bodegaDestino');
-        $loteId = $request->input('loteTraslado');
+        $loteId = $request->input('lote');
         $productId = $request->input('producto');
 
         try {
@@ -653,8 +527,9 @@ class transferController extends Controller
             $stockDestino = optional($prodDestino)->stock_ideal ?? 0;
             $cantidadInventarioDestino = optional($prodDestino)->cantidad_inventario_inicial ?? 0;
 
-            // Instancia para formateo de números          
-            $formatkgrequeridos = $request->kgrequeridos;
+            // Instancia para formateo de números
+            $formatCantidad = new metodosrogercodeController();
+            $formatkgrequeridos = $formatCantidad->MoneyToNumber($request->kgrequeridos);
 
             // Calcular nuevos stocks
             $newStockOrigen = optional($prodOrigen)->stock_ideal - $formatkgrequeridos;
@@ -975,16 +850,16 @@ class transferController extends Controller
 
     public function add_shopping(Request $request)
     {
-        // 1) Validaciones previas
         $validator = Validator::make($request->all(), [
             'transferId'    => 'required|exists:transfers,id',
             'stockOrigen'   => 'required|numeric',
             'bodegaOrigen'  => 'required|exists:stores,id',
-            'bodegaDestino' => [
+            'bodegaDestino'  => [
                 'required',
                 'exists:stores,id',
-                function ($attr, $value, $fail) {
-                    if (! DB::table('store_user')
+                // Validación personalizada: el usuario debe estar asociado a la bodega
+                function ($attribute, $value, $fail) {
+                    if (!DB::table('store_user')
                         ->where('user_id', auth()->id())
                         ->where('store_id', $value)
                         ->exists()) {
@@ -992,93 +867,104 @@ class transferController extends Controller
                     }
                 },
             ],
-            // Opcional: si quieres poder enviar lote desde el front
-            'loteTraslado'  => 'sometimes|nullable|integer',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status'  => 0,
-                'message' => 'Datos inválidos.',
+                'message' => 'Datos de usuario inválidos.',
                 'errors'  => $validator->errors(),
             ], 422);
         }
 
         DB::beginTransaction();
         try {
-            // 2) Obtengo la transferencia válida
-            $transfer = Transfer::where('id', $request->transferId)
-                ->where('status', '1')
-                ->firstOrFail();
+            $transferId    = $request->input('transferId');
+            $bodegaOrigen  = $request->input('bodegaOrigen');
+            $bodegaDestino = $request->input('bodegaDestino');
 
-            // 3) Traigo los detalles activos
-            $details = transfer_details::where('transfers_id', $transfer->id)
+            // Obtener la transferencia activa (status = '1')
+            $transfer = Transfer::where('id', $transferId)
+                ->where('status', '1')
+                ->first();
+            if (!$transfer) {
+                throw new \Exception("Transferencia no encontrada o no está activa.");
+            }
+
+            // Obtener los detalles de la transferencia activos (status = '1')
+            $transferDetails = transfer_details::where('transfers_id', $transferId)
                 ->where('status', '1')
                 ->get();
 
-            foreach ($details as $detail) {
-                // 4) Me aseguro de tener loteId
-                $loteId = $detail->lote_prod_traslado_id
-                    ?? $request->input('loteTraslado', null);
-
-                if (! $loteId) {
-                    throw new \Exception(
-                        "Detalle ID {$detail->id}: lote de traslado no definido."
-                    );
-                }
-
+            foreach ($transferDetails as $detail) {
+                $loteId    = $detail->lote_prod_traslado_id;
                 $productId = $detail->product_id;
-                $quantity  = $detail->kgrequeridos;
+                $quantity  = $detail->kgrequeridos; // Cantidad a trasladar
 
-                // 5) Origen
-                $invOrigen = Inventario::where('store_id', $request->bodegaOrigen)
+                /*** PROCESO EN BODEGA ORIGEN ***/
+                // Obtener el inventario de origen
+                $inventarioOrigen = Inventario::where('store_id', $bodegaOrigen)
                     ->where('lote_id', $loteId)
                     ->where('product_id', $productId)
                     ->first();
 
-                if (! $invOrigen) {
-                    throw new \Exception(
-                        "No se encontró inventario en origen para producto ID {$productId} y lote ID {$loteId}."
-                    );
+                if (!$inventarioOrigen) {
+                    throw new \Exception("No se encontró inventario en la bodega de origen para el producto ID {$productId} y lote ID {$loteId}.");
                 }
-                $invOrigen->stock_ideal      -= $quantity;
-                $invOrigen->cantidad_traslado = ($invOrigen->cantidad_traslado ?? 0) + $quantity;
-                $invOrigen->save();
 
+                // Actualizar stock ideal en origen (se resta la cantidad trasladada)
+                $inventarioOrigen->stock_ideal -= $quantity;
+                // Acumular la cantidad trasladada en salida
+                $inventarioOrigen->cantidad_traslado = ($inventarioOrigen->cantidad_traslado ?? 0) + $quantity;
+                $inventarioOrigen->save();
+
+                // Registrar movimiento de traslado salida
                 MovimientoInventario::create([
-                    'tipo'            => 'traslado_salida',
-                    'transfer_id'     => $transfer->id,
-                    'store_origen_id' => $request->bodegaOrigen,
-                    'lote_id'         => $loteId,
-                    'product_id'      => $productId,
-                    'cantidad'        => $quantity,
+                    'tipo'             => 'traslado_salida',
+                    'transfer_id'      => $transferId,
+                    'store_origen_id' => $bodegaOrigen, // Bodega que sufre la salida
+                    'lote_id'          => $loteId,
+                    'product_id'       => $productId,
+                    'cantidad'         => $quantity,
                 ]);
 
-                // 6) Destino
-                $invDestino = Inventario::firstOrNew([
-                    'store_id'   => $request->bodegaDestino,
-                    'lote_id'    => $loteId,
-                    'product_id' => $productId,
-                ]);
+                /*** PROCESO EN BODEGA DESTINO ***/
+                // Obtener (o crear) el inventario en destino
+                $inventarioDestino = Inventario::where('store_id', $bodegaDestino)
+                    ->where('lote_id', $loteId)
+                    ->where('product_id', $productId)
+                    ->first();
 
-                // Si ya existía, solo sumo; si es nuevo, seteo stock igual a cantidad
-                $invDestino->stock_ideal      = ($invDestino->exists
-                    ? $invDestino->stock_ideal + $quantity
-                    : $quantity);
-                $invDestino->cantidad_traslado = ($invDestino->cantidad_traslado ?? 0) + $quantity;
-                $invDestino->save();
+                if ($inventarioDestino) {
+                    // Sumar la cantidad trasladada
+                    $inventarioDestino->stock_ideal += $quantity;
+                    // Acumular la cantidad trasladada en ingreso
+                    $inventarioDestino->cantidad_traslado += $quantity;
+                    $inventarioDestino->save();
+                } else {
+                    // Crear un nuevo registro de inventario para la bodega destino
+                    $inventarioDestino = Inventario::create([
+                        'store_id'                  => $bodegaDestino,
+                        'lote_id'                   => $loteId,
+                        'product_id'                => $productId,
+                        'stock_ideal'               => $quantity,
+                        'cantidad_traslado'         => $quantity,
+                        // Otros campos (como cantidad_inventario_inicial, costo, etc.) se pueden inicializar según convenga
+                    ]);
+                }
 
+                // Registrar movimiento de traslado ingreso (almacena transferId)
                 MovimientoInventario::create([
                     'tipo'             => 'traslado_ingreso',
-                    'transfer_id'      => $transfer->id,
-                    'store_destino_id' => $request->bodegaDestino,
+                    'transfer_id'      => $transferId,
+                    'store_destino_id' => $bodegaDestino,
                     'lote_id'          => $loteId,
                     'product_id'       => $productId,
                     'cantidad'         => $quantity,
                 ]);
             }
 
-            // 7) Marcar transferencia como “procesada”
+            // (Opcional) Actualizar el estado de la transferencia (por ejemplo, marcarla como completada)
             $transfer->inventario = 'added';
             $transfer->save();
 
@@ -1095,6 +981,87 @@ class transferController extends Controller
                 'message' => 'Error al actualizar el inventario.',
                 'error'   => $e->getMessage(),
             ], 500);
+        }
+    }
+
+
+
+    public function add_shoppingOriginal(Request $request)
+    {
+        try {
+            $id_user = Auth::user()->id;
+            $currentDateTime = Carbon::now();
+
+            DB::beginTransaction();
+            $shopp = new updating_transfer();
+            $shopp->users_id = $id_user;
+            $shopp->transfers_id = $request->transferId;
+            //  $shopp->productopadre_id = $request->productoPadre;
+            $shopp->centrocostoOrigen_id = $request->bodegaOrigen;
+            $shopp->centrocostoDestino_id = $request->bodegaDestino;
+            $shopp->stock_actual = $request->stockOrigen;
+            $shopp->ultimo_conteo_tangible = $request->pesokg;
+            $shopp->nuevo_stock = $request->newStockOrigen;
+            $shopp->fecha_actualizacion = $currentDateTime;
+            $shopp->save();
+
+            $regProd = $this->gettransferdetail($request->transferId, $request->bodegaOrigen);
+            $count = count($regProd);
+            if ($count == 0) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'No tiene productos agregados'
+                ]);
+            }
+            foreach ($regProd as $key) {
+                $shoppDetails = new updating_transfer_details();
+                $shoppDetails->updating_transfer_id = $shopp->id;
+                $shoppDetails->products_id = $key->products_id;
+                $shoppDetails->stock_actual = $key->stock;
+                $shoppDetails->conteo_tangible = $key->fisico;
+                $shoppDetails->kgrequeridos = $key->kgrequeridos;
+                $shoppDetails->nuevo_stock_origen = $key->nuevo_stock_origen;
+                $shoppDetails->nuevo_stock_destino = $key->nuevo_stock_destino;
+                $shoppDetails->save();
+
+                DB::table('centro_costo_products')
+                    ->where('centro_costo_products.products_id', $key->products_id)
+                    ->where('centro_costo_products.centrocosto_id', $request->bodegaDestino)
+                    ->join('updating_transfer', 'centro_costo_products.centrocosto_id', '=', 'updating_transfer.centrocostoDestino_id')
+                    ->update([
+                        'centro_costo_products.trasladoing' => DB::raw('centro_costo_products.trasladoing + ' . $key->kgrequeridos),
+                        'centro_costo_products.stock' => DB::raw('centro_costo_products.invinicial + centro_costo_products.compralote + centro_costo_products.alistamiento
+                         + centro_costo_products.compensados + centro_costo_products.trasladoing - (centro_costo_products.venta + centro_costo_products.trasladosal)')
+                    ]);
+
+                DB::table('centro_costo_products')
+                    ->where('centro_costo_products.products_id', $key->products_id)
+                    ->where('centro_costo_products.centrocosto_id', $request->bodegaOrigen)
+                    ->join('updating_transfer', 'centro_costo_products.centrocosto_id', '=', 'updating_transfer.centrocostoOrigen_id')
+                    ->update([
+                        'centro_costo_products.trasladosal' => DB::raw('centro_costo_products.trasladosal + ' . $key->kgrequeridos),
+                        'centro_costo_products.stock' => DB::raw('centro_costo_products.invinicial + centro_costo_products.compralote + centro_costo_products.alistamiento
+                        + centro_costo_products.compensados + centro_costo_products.trasladoing - (centro_costo_products.venta + centro_costo_products.trasladosal)')
+                    ]);
+            }
+
+            $invtranf = Transfer::where('id', $request->transferId)->first();
+            $invtranf->inventario = "added";
+            $invtranf->save();
+
+            DB::commit();
+            return response()->json([
+                'status' => 1,
+                'transfer' => $regProd,
+                'count' => $count,
+                'message' => 'Se guardo co exito'
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return response()->json([
+                'status' => 0,
+                'array' => (array) $th
+            ]);
         }
     }
 }

@@ -61,41 +61,37 @@
 						<form id="form-detail">
 							<input type="hidden" id="transferId" name="transferId" value="{{$dataTransfer[0]->id}}">
 							<div class="row g-3"> <!-- Añadido justify-content-center para centrar los campos horizontalmente -->
-							<div class="col-md-8">
+								<div class="col-md-3">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="producto" class="form-label">Buscar producto</label>											
-
-											<!-- Campos ocultos para enviar datos adicionales -->
-											<input type="hidden" id="lote_id" name="lote_id" value="">
-											<input type="hidden" id="inventario_id" name="inventario_id" value="">
-											<input type="hidden" id="stock_ideal" name="stock_ideal" value="">										
-
-											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
-												<option value="">Seleccione el producto</option>
-												@foreach ($results as $result)
-												<option value="{{ $result['inventario_id'] }}"
-													data-product-id="{{ $result['product_id'] }}"
-													data-lote-id="{{ $result['lote_id'] }}"
-													data-inventario-id="{{ $result['inventario_id'] }}"
-													data-stock-ideal="{{ $result['stock_ideal'] }}"												
-													data-info="{{ $result['text'] }}">
-													{{ $result['text'] }}
-												</option>
+											<label for="lote" class="form-label mt-0">Lote</label>
+											<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required>
+												<option value="">Seleccione el lote</option>
+												@foreach ($lotes as $l)
+												<option value="{{ $l->id }}">{{ $l->codigo }}</option>
 												@endforeach
 											</select>
-
 											<span class="text-danger error-message"></span>
 										</div>
 									</div>
 								</div>
-								
-								<div class="col-md-2">
+								<div class="col-md-4">
+									<div class="task-header">
+										<div class="form-group">
+											<label for="" class="form-label">Buscar producto</label>
+											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
+												<option value="">Seleccione el producto</option>
+											</select>
+											<span class="text-danger error-message"></span>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-3">
 									<div class="form-group">
-										<label for="" class="form-label">KG|UND|trasladar</label>
+										<label for="" class="form-label">KG|UND a trasladar</label>
 										<div class="input-group flex-nowrap">
 											<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control" placeholder="EJ: 10.00">
-											<span class="input-group-text" id="addon-wrapping">Q</span>
+											<span class="input-group-text" id="addon-wrapping">QT</span>
 										</div>
 										<span class="text-danger error-message"></span>
 									</div>
