@@ -227,12 +227,24 @@ class transferController extends Controller
                 ->where('stock_ideal', '>', 0);
         });
 
+        // Obtener los IDs de productos válidos
         $products = $productsQuery->get();
+        // Obtener los IDs de productos válidos
+        $productIds = $productsQuery->pluck('id')->toArray();
 
         // Se obtienen todos los inventarios que cumplan la condición, cargando además la relación "lote" y "store"
-        $inventarios = Inventario::with('store', 'lote')
-            ->where('store_id', $bodegaOrigenId)
+        $inventarios = Inventario::with(['store', 'lote'])
+            ->where('store_id',    $bodegaOrigenId)
             ->where('stock_ideal', '>', 0)
+            ->whereIn('product_id', $productIds)
+            ->whereHas('lote', function ($q) {
+                $q->where('fecha_vencimiento', '>=', now());
+            })
+            // Unir con la tabla de lotes para poder ordenar por su fecha
+            ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
+            ->orderBy('lotes.fecha_vencimiento', 'asc')                              // ← orden ascendente
+            ->orderBy('stock_ideal', 'desc')
+            ->select('inventarios.*')
             ->get();
 
         $results = [];
