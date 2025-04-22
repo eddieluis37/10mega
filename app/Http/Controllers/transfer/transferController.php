@@ -213,7 +213,7 @@ class transferController extends Controller
                 // Si no, buscar por nombre, código de producto ó código de lote
                 $productsQuery->where(function ($q) use ($query) {
                     $q->where('name',   'LIKE', "%{$query}%")
-                        ->orWhere('code', 'LIKE', "%{$query}%")                            // ← nueva línea
+                        ->orWhere('code', 'LIKE', "%{$query}%")                            
                         ->orWhereHas('lotes', function ($q2) use ($query) {
                             $q2->where('codigo', 'LIKE', "%{$query}%");
                         });
@@ -242,7 +242,7 @@ class transferController extends Controller
             })
             // Unir con la tabla de lotes para poder ordenar por su fecha
             ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
-            ->orderBy('lotes.fecha_vencimiento', 'asc')                              // ← orden ascendente
+            ->orderBy('lotes.fecha_vencimiento', 'asc')                              
             ->orderBy('stock_ideal', 'desc')
             ->select('inventarios.*')
             ->get();

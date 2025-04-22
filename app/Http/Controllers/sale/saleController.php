@@ -481,15 +481,20 @@ class saleController extends Controller
             ->toArray();
 
 
+        $query = $request->input('q');
+
         // Consulta de productos. Se busca por barcode o por nombre o por el código del lote (mediante la relación "lotes")
         $productsQuery = Product::query();
 
         if ($query) {
             if (preg_match('/^\d{13}$/', $query)) {
+                // Si es un EAN-13, buscar por barcode
                 $productsQuery->where('barcode', $query);
             } else {
+                // Si no, buscar por nombre, código de producto ó código de lote
                 $productsQuery->where(function ($q) use ($query) {
-                    $q->where('name', 'LIKE', "%{$query}%")
+                    $q->where('name',   'LIKE', "%{$query}%")
+                        ->orWhere('code', 'LIKE', "%{$query}%")
                         ->orWhereHas('lotes', function ($q2) use ($query) {
                             $q2->where('codigo', 'LIKE', "%{$query}%");
                         });
@@ -503,12 +508,24 @@ class saleController extends Controller
                 ->where('stock_ideal', '>', 0);
         });
 
+        // Obtener los IDs de productos válidos
         $products = $productsQuery->get();
+        // Obtener los IDs de productos válidos
+        $productIds = $productsQuery->pluck('id')->toArray();
 
         // Se obtienen todos los inventarios que cumplan la condición, cargando además la relación "lote" y "store"
-        $inventarios = Inventario::with('store', 'lote')
-            ->whereIn('store_id', $storeIds)
+        $inventarios = Inventario::with(['store', 'lote'])
+            ->where('store_id',    $storeIds)
             ->where('stock_ideal', '>', 0)
+            ->whereIn('product_id', $productIds)
+            ->whereHas('lote', function ($q) {
+                $q->where('fecha_vencimiento', '>=', now());
+            })
+            // Unir con la tabla de lotes para poder ordenar por su fecha
+            ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
+            ->orderBy('lotes.fecha_vencimiento', 'asc')
+            ->orderBy('stock_ideal', 'desc')
+            ->select('inventarios.*')
             ->get();
 
         $results = [];
@@ -1319,7 +1336,7 @@ class saleController extends Controller
                 Log::debug('Venta tiene valor a pagar en crédito, se debe invocar cuentasPorCobrar', [
                     'valor_a_pagar_credito' => $sale->valor_a_pagar_credito
                 ]);
-                
+
                 $this->cuentasPorCobrar($sale->id);
             }
 
