@@ -15,32 +15,16 @@ const showRegTbody = document.querySelector("#tbodyDetail");
 const tableTransfer = document.querySelector("#tableTransfer");
 const tbodyTable = document.querySelector("#tableTransfer tbody");
 const tfootTable = document.querySelector("#tableTransfer tfoot");
-const stockPadre = document.querySelector("#stockCortePadre");
-const pesokg = document.querySelector("#pesokg");
-
 const newStockOrigen = document.querySelector("#newStockOrigen");
-const meatcutId = document.querySelector("#meatcutId");
 const tableFoot = document.querySelector("#tabletfoot");
-const selectProducto = document.getElementById("producto");
-const selectCategoria = document.querySelector("#productoCorte");
 const btnAddTrans = document.querySelector("#btnAddTransfer");
 const transferId = document.querySelector("#transferId");
 const kgrequeridos = document.querySelector("#kgrequeridos");
 const addShopping = document.querySelector("#addShopping");
-const productoPadre = document.querySelector("#productopadreId");
 const bodegaOrigen = document.querySelector("#bodegaOrigen");
 const bodegaDestino = document.querySelector("#bodegaDestino");
 const loteTraslado = document.querySelector("#lote_id");
-const categoryId = document.querySelector("#categoryId");
 
-// Obtén el valor del campo
-var centrocostoOrigenId = document.getElementById("bodegaOrigen").value;
-var centrocostoDestinoId = document.getElementById("bodegaDestino").value;
-
-console.log("origen " + centrocostoOrigenId);
-console.log("destino " + centrocostoDestinoId);
-console.log("pesokg " + pesokg);
-console.log("stockOrigen " + stockOrigen.value);
 
 // Limpia el mensaje de error al modificar el input de cantidad
 $("#kgrequeridos").on("input", function () {
@@ -305,9 +289,7 @@ tableTransfer.addEventListener("keydown", (event) => {
     const transferId = document.querySelector("#transferId").value;
     const bodegaO = document.querySelector("#bodegaOrigen").value;
     const bodegaD = document.querySelector("#bodegaDestino").value;
-    const stockO = document.querySelector("#stockOrigen").value;
-
-   
+    const stockO = document.querySelector("#stockOrigen").value;   
 
     // Preparamos el FormData con TODO lo que pide el controlador
     const dataform = new FormData();

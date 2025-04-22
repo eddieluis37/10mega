@@ -256,7 +256,7 @@ class transferController extends Controller
             foreach ($inventariosProducto as $inventario) {
                 // Validar la fecha de vencimiento del lote
                 if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
-                    $text = "Lt: " . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
+                    $text = "Lt: " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
                         . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
                         . " - " . $prod->name
                         . " - Stk: " . $inventario->stock_ideal;
@@ -281,19 +281,7 @@ class transferController extends Controller
 
     public function create($id) // http://2puracarnes.test:8080/transfer/create/2  llenado de la vista Translado | Categoria
     {
-        // $loteId = 99; //$request->lote_id;
-        //  $lotes = Lote::orderBy('id', 'desc')->get();
-        // dd($id);
-        // Consulta de lotes
-        $lotes = Lote::select('lotes.id', 'lotes.codigo')
-            ->join('inventarios', 'lotes.id', '=', 'inventarios.lote_id')
-            ->join('transfers', 'inventarios.store_id', '=', 'transfers.bodega_origen_id')
-            ->where('transfers.id', $id)
-            ->orderBy('lotes.codigo', 'asc')
-            ->distinct()
-            ->get();
-
-        // Consulta de la transferencia
+        
         $dataTransfer = DB::table('transfers as tra')
             ->join('stores as storeOrigen', 'tra.bodega_origen_id', '=', 'storeOrigen.id')
             ->join('stores as storeDestino', 'tra.bodega_destino_id', '=', 'storeDestino.id')
@@ -307,6 +295,7 @@ class transferController extends Controller
             return redirect()->back()->with('error', 'No se encontró la transferencia');
         }
 
+       
         // Ahora ya podemos usar $dataTransfer[0] con la seguridad de que existe.
         $storeOrigenId = $dataTransfer[0]->bodega_origen_id;
         $storeDestinoId = $dataTransfer[0]->bodega_destino_id;
@@ -401,8 +390,7 @@ class transferController extends Controller
             }
         }
 
-        return view('transfer.create', compact(
-            'lotes',
+        return view('transfer.create', compact(           
             'dataTransfer',
             'transfers',
             'arrayProductsOrigin',
