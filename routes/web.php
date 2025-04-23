@@ -118,7 +118,7 @@ use App\Http\Controllers\ProductLoteController;
 use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
-
+use App\Http\Controllers\transfer\exportTransferController;
 
 //use App\Http\Controllers\InventarioController;
 
@@ -339,6 +339,7 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     Route::post('productospadre', [transferController::class, 'getProductsCategoryPadre'])->name('transfer.productospadre');
     Route::post('/downmmaintransfer', [transferController::class, 'destroyTransfer'])->name('transfer.downAlistamiento');
     Route::post('transferAddShoping', [transferController::class, 'add_shopping'])->name('transfer.addShopping');
+    Route::get('transfer/showTransfer/{id}', [exportTransferController::class, 'showTransfer'])->name('transfer.showTransfer');
 });
 
 

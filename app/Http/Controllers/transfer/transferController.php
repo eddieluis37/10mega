@@ -143,9 +143,9 @@ class transferController extends Controller
 					<a href="transfer/create/' . $data->id . '" class="btn btn-dark" title="tranfar" >
 						<i class="fas fa-directions"></i>
 					</a>
-					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
-						<i class="fas fa-eye"></i>
-					</button>
+					<a href="transfer/showTransfer/' . $data->id . '" class="btn btn-danger" title="Pdf traslado" target="_blank">
+                         <i class="far fa-file-pdf"></i>
+                    </a>
 					<button class="btn btn-dark" title="" disabled>
 						<i class="fas fa-trash"></i>
 					</button>
@@ -161,9 +161,9 @@ class transferController extends Controller
 					<a href="transfer/create/' . $data->id . '" class="btn btn-dark" title="tranfar" >
 						<i class="fas fa-directions"></i>
 					</a>
-					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
-						<i class="fas fa-eye"></i>
-					</button>
+					<a href="transfer/showTransfer/' . $data->id . '" class="btn btn-danger" title="Pdf traslado" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+                    </a>
 					<button class="btn btn-dark" title="Borrar Beneficio" onclick="downTransfer(' . $data->id . ');" ' . $status . '>
 						<i class="fas fa-trash"></i>
 					</button>
@@ -175,9 +175,9 @@ class transferController extends Controller
 					<a href="transfer/create/' . $data->id . '" class="btn btn-dark" title="tranfar" >
 						<i class="fas fa-directions"></i>
 					</a>
-					<button class="btn btn-dark" title="" onclick="showDataForm(' . $data->id . ')">
-						<i class="fas fa-eye"></i>
-					</button>
+					<a href="transfer/showTransfer/' . $data->id . '" class="btn btn-danger" title="Pdf traslado" target="_blank">
+                         <i class="far fa-file-pdf"></i>
+                    </a>
 					<button class="btn btn-dark" title="" disabled>
 						<i class="fas fa-trash"></i>
 					</button>
