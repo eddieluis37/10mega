@@ -21,7 +21,7 @@ class pdfRecibodecajaController extends Controller
          $recibo = Recibodecaja::with([
             'user', 'third',
             'details.paymentMethod',
-            'details.cuentaPorCobrar'
+            'details.cuentaPorCobrar.sale.third',
         ])->findOrFail($id);
 
         // Opcional: calcular totales si no están precargados
