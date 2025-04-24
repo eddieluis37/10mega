@@ -17,26 +17,24 @@ class pdfRecibodecajaController extends Controller
 {
     public function showRecibodecaja($id)
     {
-        $sale = Recibodecaja::findOrFail($id)                     
-            ->leftJoin('sales as sa', 'sa.id', '=', 'recibodecajas.sale_id')
-            ->Join('thirds as third', 'sa.third_id', '=', 'third.id')
-            ->join('users as u', 'sa.user_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'sa.centrocosto_id', '=', 'centro.id')
-            ->select('sa.*', 'recibodecajas.consecutivo as consecutivo_caja', 'recibodecajas.saldo as saldo', 'recibodecajas.nuevo_saldo as nuevo_saldo', 'recibodecajas.observations as observations', 'recibodecajas.consecutivo as ncresolucion', 'u.name as nameuser', 'third.name as namethird', 'third.identification', 'third.direccion', 'centro.name as namecentrocosto', 'third.porc_descuento', 'recibodecajas.abono', 'sa.vendedor_id')
-            ->where([
-                ['recibodecajas.id', $id],
-                /*  ['sale_details.status', 1]  */
-            ])->get();
+         // Cargar recibo con relaciones y detalles
+         $recibo = Recibodecaja::with([
+            'user', 'third',
+            'details.paymentMethod',
+            'details.cuentaPorCobrar'
+        ])->findOrFail($id);
 
-        //  dd($sale);
+        // Opcional: calcular totales si no están precargados
+        $recibo->vr_total_pago   = $recibo->details->sum('vr_pago');
+        $recibo->nvo_total_saldo = $recibo->details->sum('nvo_saldo');
 
-     
-        
+        // Generar PDF (legal = oficio)
+        $pdf = PDF::loadView(
+            'recibodecaja.reporte',
+            compact('recibo')
+        )
+        ->setPaper('legal', 'portrait');
 
-        //  dd($saleDetails);
-
-        $showFactura = PDF::loadView('recibodecaja.reporte', compact('sale'));
-        return $showFactura->stream('recibodecaja.pdf');
-        //return $showFactura->download('sale.pdf');
+        return $pdf->stream("recibo_caja_{$recibo->id}.pdf");
     }
 }

@@ -39,12 +39,7 @@ class Recibodecaja extends Model
     public function third()
     {
         return $this->belongsTo(Third::class, 'third_id');
-    }
-
-    public function paymentMethod()
-    {
-        return $this->belongsTo(Formapago::class, 'formapagos_id');
-    }
+    }   
 
     public function details()
     {

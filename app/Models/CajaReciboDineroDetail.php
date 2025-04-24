@@ -16,7 +16,8 @@ class Cajarecibodinerodetail extends Model
         'formapagos_id',
         'vr_deuda',
         'vr_pago',
-        'nvo_saldo',     
+        'nvo_saldo',
+        'status'    
     ];
 
     protected $casts = [
@@ -32,16 +33,16 @@ class Cajarecibodinerodetail extends Model
         return $this->belongsTo(Recibodecaja::class, 'recibodecaja_id');
     }
 
-    public function cuentaPorCobrar()
-    {
-        return $this->belongsTo(Cuentaporcobrar::class, 'cuentas_por_cobrar_id');
-    }
-
     public function paymentMethod()
     {
         return $this->belongsTo(Formapago::class, 'formapagos_id');
     }
 
+    public function cuentaPorCobrar()
+    {
+        return $this->belongsTo(Cuentaporcobrar::class, 'cuentas_por_cobrar_id');
+    } 
+      
     public function user()
     {
         return $this->belongsTo(User::class);
