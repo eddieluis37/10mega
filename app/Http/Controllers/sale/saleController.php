@@ -515,7 +515,7 @@ class saleController extends Controller
 
         // Se obtienen todos los inventarios que cumplan la condición, cargando además la relación "lote" y "store"
         $inventarios = Inventario::with(['store', 'lote'])
-            ->where('store_id',    $storeIds)
+            ->whereIn('store_id',    $storeIds)
             ->where('stock_ideal', '>', 0)
             ->whereIn('product_id', $productIds)
             ->whereHas('lote', function ($q) {
