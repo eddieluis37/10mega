@@ -74,6 +74,7 @@ use App\Http\Controllers\AsignarPreciosProdController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\BrandCrudController;
 use App\Http\Controllers\caja\pdfCierreCajaController;
+use App\Http\Controllers\ComboController;
 use App\Http\Controllers\producto\productoController;
 use App\Http\Controllers\compensado\pdfCompensadoController;
 use App\Http\Controllers\faster\fasterController;
@@ -81,6 +82,7 @@ use App\Http\Controllers\transfer\transferController;
 use App\Http\Controllers\workshop\workshopController;
 
 use App\Http\Controllers\costo\costoController;
+use App\Http\Controllers\DishController;
 use App\Http\Controllers\DragDropController;
 use App\Http\Controllers\excelAnalisisKGController;
 use App\Http\Controllers\excelAnalisisUtilidadController;
@@ -97,6 +99,7 @@ use App\Http\Controllers\ReportReciboCajaController;
 
 use App\Http\Controllers\ImportStockFisicoController;
 use App\Http\Controllers\inventory\inventoryUtilidadHistoricoController;
+use App\Http\Controllers\LossController;
 use App\Http\Controllers\notacredito\notacreditoController;
 use App\Http\Controllers\notacredito\pdfNotacreditoController;
 use App\Http\Controllers\notadebito\notadebitoController;
@@ -118,9 +121,17 @@ use App\Http\Controllers\ProductLoteController;
 use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
+use App\Http\Controllers\RestaurantOrderController;
 use App\Http\Controllers\transfer\exportTransferController;
 
-//use App\Http\Controllers\InventarioController;
+Route::middleware(['auth'])->group(function () {
+    Route::resource('dishes', DishController::class)->middleware('can:viewAny,App\Models\Dish');
+    Route::resource('combos', ComboController::class)->middleware('can:viewAny,App\Models\Combo');
+    Route::resource('restaurant-orders', RestaurantOrderController::class)->middleware('can:viewAny,App\Models\RestaurantOrder');
+    Route::resource('losses', LossController::class)->middleware('can:viewAny,App\Models\Loss');
+});
+
+
 
 
 /************************************************* */
@@ -190,16 +201,15 @@ Route::middleware(['auth', 'can:acceder_terceros'])->group(function () {
 });
 
 Route::middleware(['auth', 'can:acceder_brand'])->group(function () {
-// Rutas para el CRUD de marcas (sin relaciones)
-Route::resource('brand-crud', BrandCrudController::class)
-    ->parameters(['brand-crud' => 'brand']);
+    // Rutas para el CRUD de marcas (sin relaciones)
+    Route::resource('brand-crud', BrandCrudController::class)
+        ->parameters(['brand-crud' => 'brand']);
 
-// Rutas para el módulo que relaciona una marca con proveedores
-Route::resource('brands', BrandController::class)->parameters([
-    'brands' => 'brandThird'
-]);
-
-});  
+    // Rutas para el módulo que relaciona una marca con proveedores
+    Route::resource('brands', BrandController::class)->parameters([
+        'brands' => 'brandThird'
+    ]);
+});
 
 // Proteger todas las rutas dentro del modulo de cargue de productos terminados
 /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
@@ -220,7 +230,7 @@ Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function
 
     Route::post('cargarInventariohist', [inventoryController::class, 'cargarInventariohist'])->name('cargarInventariohist');
     Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
-});  
+});
 
 /*****************************BENEFICIO-RES*******************************************/
 
@@ -317,7 +327,7 @@ Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
 // Proteger todas las rutas dentro del modulo de traslados
 Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
     /***** TRANSFER ******** */
-   
+
 
     Route::get('transfer', [transferController::class, 'index'])->name('transfer.index');
     Route::post('transfersave', [transferController::class, 'store'])->name('transfer.save');
@@ -330,7 +340,7 @@ Route::middleware(['auth', 'can:acceder_traslado'])->group(function () {
 
     Route::post('getproductos', [transferController::class, 'getproducts'])->name('transfer.getproductos');
     Route::post('productsbycostcenterdest', [transferController::class, 'ProductsByCostcenterDest'])->name('transfer.productsbycostcenterdest');
-    Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin'); 
+    Route::post('getproductsbycostcenterorigin', [transferController::class, 'getProductsByCostcenterOrigin'])->name('transfer.getproductsbycostcenterorigin');
 
     Route::post('transfersavedetail', [transferController::class, 'savedetail'])->name('transfer.savedetail');
     Route::post('/transferUpdate', [transferController::class, 'updatedetail'])->name('transfer.update');
@@ -379,7 +389,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     // Ruta para cargar la vista del formulario de devolución parcial
     // Esta ruta redirige a una vista donde se muestra el detalle de la venta
     // y permite digitar la cantidad a devolver para cada producto.
-    Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialreturnform'])->name('sales.partialReturnForm'); 
+    Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialreturnform'])->name('sales.partialReturnForm');
     // Ruta para procesar la devolución parcial (se envían los datos mediante AJAX)
     Route::post('/sale/{saleId}/annul', [saleController::class, 'annulSale']);
 
@@ -449,7 +459,7 @@ Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
     Route::get('/producto-edit/{id}', [productoController::class, 'edit'])->name('producto.edit');
 });
 
-Route::middleware(['auth', 'can:acceder_lista_de_precio'])->group(function () {    
+Route::middleware(['auth', 'can:acceder_lista_de_precio'])->group(function () {
     /*****************************LISTA_DE_PRECIO******************************************/
     Route::get('lista_de_precio', [listaprecioController::class, 'index'])->name('lista_de_precio.index');
     Route::get('showListaPrecio', [listaprecioController::class, 'show'])->name('lista_de_precio.showListaPrecio');
@@ -458,11 +468,11 @@ Route::middleware(['auth', 'can:acceder_lista_de_precio'])->group(function () {
     Route::get('lista_de_precio/create/{id}', [listaprecioController::class, 'create'])->name('lista_de_precio.create');
     Route::get('lista_de_precio{lista_de_precioId}/delete', [listaprecioController::class, 'delete'])->name('lista_de_precio.delete');
     Route::get('lista_de_precio{lista_de_precioId}/edit', [listaprecioController::class, 'edit'])->name('lista_de_precio.edit');
-    Route::post('lista_de_precio/{lista_de_precioId}', [listaprecioController::class, 'update'])->name('lista_de_precio.update');    
+    Route::post('lista_de_precio/{lista_de_precioId}', [listaprecioController::class, 'update'])->name('lista_de_precio.update');
 });
 
-Route::group(['middleware' => [('auth')]], function () {   
-   
+Route::group(['middleware' => [('auth')]], function () {
+
     Route::get('/profile', [App\Http\Controllers\UserController::class, 'profile'])
         ->name('users.profile')
         ->middleware('auth');
@@ -472,7 +482,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('roles', RolesController::class);
     Route::get('permisos', PermisosController::class);
     Route::get('asignar', AsignarController::class);
-   // Route::get('products', ProductsController::class);
+    // Route::get('products', ProductsController::class);
     Route::get('meatcuts', MeatcutsController::class);
     Route::get('pos', PosController::class);
     Route::get('coins', CoinsController::class);
@@ -595,7 +605,7 @@ Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
 
-  
+
 
 
 
@@ -656,7 +666,7 @@ Route::group(['middleware' => [('auth')]], function () {
 
     /*****************************RECIBO DE CAJAS******************************************/
     Route::post('/recibodecajas', [recibodecajaController::class, 'payment'])->name('recibodecajas.payment');
-    Route::get('recibodecajas', [recibodecajaController::class, 'index'])->name('recibodecaja.index');   
+    Route::get('recibodecajas', [recibodecajaController::class, 'index'])->name('recibodecaja.index');
     Route::get('showlistRecibodecajas', [recibodecajaController::class, 'show'])->name('recibodecaja.showlistRecibodecajas');
     Route::post('recibodecajasave', [recibodecajaController::class, 'store'])->name('recibodecaja.save');
     Route::get('recibodecaja/create/{id}', [recibodecajaController::class, 'create'])->name('recibodecaja.create');

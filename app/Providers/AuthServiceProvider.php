@@ -2,6 +2,15 @@
 
 namespace App\Providers;
 
+
+use App\Models\Dish;
+use App\Models\Combo;
+use App\Models\RestaurantOrder;
+use App\Models\Loss;
+use App\Policies\DishPolicy;
+use App\Policies\ComboPolicy;
+use App\Policies\RestaurantOrderPolicy;
+use App\Policies\LossPolicy;
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -14,7 +23,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        Combo::class             => ComboPolicy::class,
     ];
 
     /**

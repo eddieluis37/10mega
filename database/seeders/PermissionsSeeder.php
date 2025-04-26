@@ -15,10 +15,11 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['administracion', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas', 'CambiarPrecioVenta']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'combos', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas', 'CambiarPrecioVenta']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
+            Permission::updateOrCreate(['name' => "view {$module}"]);
             Permission::updateOrCreate(['name' => "ver_{$module}"]);
             Permission::updateOrCreate(['name' => "acceder_{$module}"]);
             Permission::updateOrCreate(['name' => "crear_{$module}"]);
