@@ -34,10 +34,23 @@ class ComboController extends Controller
      */
     public function store(Request $request)
     {
+        // 1) Crea el combo
         $combo = Combo::create($request->only('name', 'code', 'description', 'price', 'status'));
-        $combo->products()->attach($request->input('products', []));
+
+        // 2) Prepara los datos pivot con quantity
+        $attachData = [];
+        foreach ($request->input('products', []) as $productId) {
+            // Suponiendo que en tu formulario envías un arreglo 'quantities[<id>]'
+            $quantity = $request->input("quantities.{$productId}", 1);
+            $attachData[$productId] = ['quantity' => $quantity];
+        }
+
+        // 3) Adjunta con cantidad
+        $combo->products()->attach($attachData);
+
         return redirect()->route('combos.index');
     }
+
 
     /**
      * Display the specified resource.
@@ -52,19 +65,29 @@ class ComboController extends Controller
      */
     public function edit(Combo $combo)
     {
+        // todos los productos para la lista de checkboxes
         $products = Product::all();
         return view('combos.edit', compact('combo', 'products'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Combo $combo)
     {
-        $combo->update($request->only('name', 'description', 'price', 'status'));
-        $combo->products()->sync($request->input('products', []));
-        return redirect()->route('combos.index');
+        // valida campos según necesites...
+        $combo->update($request->only('name', 'code', 'description', 'price', 'status'));
+
+        // sincroniza pivot con cantidades
+        $attachData = [];
+        foreach ($request->input('products', []) as $productId) {
+            $attachData[$productId] = [
+                'quantity' => $request->input("quantities.{$productId}", 1)
+            ];
+        }
+        $combo->products()->sync($attachData);
+
+        return redirect()->route('combos.index')
+            ->with('success', 'Combo actualizado correctamente.');
     }
+
 
     /**
      * Remove the specified resource from storage.

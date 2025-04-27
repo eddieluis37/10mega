@@ -26,18 +26,55 @@ class DishController extends Controller
      */
     public function create()
     {
-        
+        $products = Product::all();
+        return view('dishes.create', compact('products'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
-    {
-        $dish = Dish::create($request->only('name','code','description','price','image','status'));
-        $dish->products()->attach($request->input('ingredients', []));
-        return redirect()->route('dishes.index');
+{
+    // 1) Valida los campos si lo deseas…
+
+    // 2) Crea el plato
+    $dish = Dish::create($request->only('name','code','description','price','image','status'));
+
+    // 3) Prepara el array para attach con quantity y unitofmeasure_id
+    $attach = [];
+    foreach ($request->input('ingredients', []) as $productId) {
+        $attach[$productId] = [
+            'quantity'          => $request->input("quantities.{$productId}", 1),
+            'unitofmeasure_id'  => $request->input("units.{$productId}", 1),
+        ];
     }
+
+    // 4) Adjunta
+    $dish->products()->attach($attach);
+
+    return redirect()->route('dishes.index');
+}
+
+public function update(Request $request, Dish $dish)
+{
+    // 1) Actualiza datos básicos
+    $dish->update($request->only('name','code','description','price','image','status'));
+
+    // 2) Prepara sync con pivot
+    $sync = [];
+    foreach ($request->input('ingredients', []) as $productId) {
+        $sync[$productId] = [
+            'quantity'          => $request->input("quantities.{$productId}", 1),
+            'unitofmeasure_id'  => $request->input("units.{$productId}", 1),
+        ];
+    }
+
+    // 3) Sincroniza
+    $dish->products()->sync($sync);
+
+    return redirect()->route('dishes.index');
+}
+
+
+  
+   
 
     /**
      * Display the specified resource.
@@ -56,15 +93,7 @@ class DishController extends Controller
         return view('dishes.edit', compact('dish','products'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Dish $dish)
-    {
-        $dish->update($request->only('name','description','price','status'));
-        $dish->products()->sync($request->input('ingredients', []));
-        return redirect()->route('dishes.index');
-    }
+  
 
     /**
      * Remove the specified resource from storage.

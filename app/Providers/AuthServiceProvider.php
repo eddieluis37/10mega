@@ -23,6 +23,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        Dish::class              => DishPolicy::class,
         Combo::class             => ComboPolicy::class,
     ];
 
