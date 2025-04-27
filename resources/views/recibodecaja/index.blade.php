@@ -116,7 +116,6 @@
 </script>
 @endsection
 @section('script')
-
 <script src="{{asset('rogercode/js/recibodecaja/rogercode-recibodecajas-index.js')}}"></script>
 <script src="{{asset('rogercode/js/recibodecaja/rogercode-create-update.js')}}" type="module"></script>
 @endsection
