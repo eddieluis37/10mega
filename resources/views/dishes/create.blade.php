@@ -11,35 +11,54 @@
             <option value="1">Activo</option>
             <option value="0">Inactivo</option>
         </select></div>
-    <div class="mb-3"><label class="form-label">Ingredientes</label>
-        @foreach($products as $p)
-        <div class="form-check mb-2">
-            <input type="checkbox"
-                name="ingredients[]"
-                value="{{ $p->id }}"
-                id="ing-{{ $p->id }}"
-                class="form-check-input">
-            <label for="ing-{{ $p->id }}" class="form-check-label">{{ $p->name }}</label>
-
-            {{-- Cantidad --}}
-            <input type="number"
-                name="quantities[{{ $p->id }}]"
-                value="1"
-                step="0.01"
-                class="form-control form-control-sm mt-1"
-                style="width:80px;"
-                placeholder="Cant.">
-
-            {{-- Unidad de medida (si la usas) --}}
-            <select name="units[{{ $p->id }}]" class="form-select form-select-sm mt-1" style="width:100px;">
-                @foreach(\App\Models\UnitOfMeasure::all() as $u)
-                <option value="{{ $u->id }}">{{ $u->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        @endforeach
+        {{-- Tabla de Ingredientes --}}
+    <div class="mb-3">
+        <label class="form-label">Ingredientes</label>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Seleccionar</th>
+                    <th scope="col">Ingrediente</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Unidad</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($products as $p)
+                <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox"
+                               name="ingredients[]"
+                               value="{{ $p->id }}"
+                               id="ing-{{ $p->id }}"
+                               class="form-check-input">
+                    </td>
+                    <td class="align-middle">
+                        <label for="ing-{{ $p->id }}" class="mb-0">{{ $p->name }}</label>
+                    </td>
+                    <td>
+                        <input type="number"
+                               name="quantities[{{ $p->id }}]"
+                               value="1"
+                               step="0.01"
+                               class="form-control form-control-sm"
+                               placeholder="Cant.">
+                    </td>
+                    <td>
+                        <select name="units[{{ $p->id }}]" class="form-select form-select-sm">
+                            @foreach(\App\Models\UnitOfMeasure::all() as $u)
+                                <option value="{{ $u->id }}">{{ $u->name }}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
     </div>
+
     <button type="submit" class="btn btn-success">Guardar</button>
     <a href="{{ route('dishes.index') }}" class="btn btn-secondary">Cancelar</a>
 </form>
+
 @endsection

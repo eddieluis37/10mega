@@ -26,55 +26,61 @@ class DishController extends Controller
      */
     public function create()
     {
-        $products = Product::all();
+        // $products = Product::all();
+
+        $products = Product::Where([
+            ['category_id', 3],
+            ['status', 1]
+        ])->get();
+
         return view('dishes.create', compact('products'));
     }
 
     public function store(Request $request)
-{
-    // 1) Valida los campos si lo deseas…
+    {
+        // 1) Valida los campos si lo deseas…
 
-    // 2) Crea el plato
-    $dish = Dish::create($request->only('name','code','description','price','image','status'));
+        // 2) Crea el plato
+        $dish = Dish::create($request->only('name', 'code', 'description', 'price', 'image', 'status'));
 
-    // 3) Prepara el array para attach con quantity y unitofmeasure_id
-    $attach = [];
-    foreach ($request->input('ingredients', []) as $productId) {
-        $attach[$productId] = [
-            'quantity'          => $request->input("quantities.{$productId}", 1),
-            'unitofmeasure_id'  => $request->input("units.{$productId}", 1),
-        ];
+        // 3) Prepara el array para attach con quantity y unitofmeasure_id
+        $attach = [];
+        foreach ($request->input('ingredients', []) as $productId) {
+            $attach[$productId] = [
+                'quantity'          => $request->input("quantities.{$productId}", 1),
+                'unitofmeasure_id'  => $request->input("units.{$productId}", 1),
+            ];
+        }
+
+        // 4) Adjunta
+        $dish->products()->attach($attach);
+
+        return redirect()->route('dishes.index');
     }
 
-    // 4) Adjunta
-    $dish->products()->attach($attach);
+    public function update(Request $request, Dish $dish)
+    {
+        // 1) Actualiza datos básicos
+        $dish->update($request->only('name', 'code', 'description', 'price', 'image', 'status'));
 
-    return redirect()->route('dishes.index');
-}
+        // 2) Prepara sync con pivot
+        $sync = [];
+        foreach ($request->input('ingredients', []) as $productId) {
+            $sync[$productId] = [
+                'quantity'          => $request->input("quantities.{$productId}", 1),
+                'unitofmeasure_id'  => $request->input("units.{$productId}", 1),
+            ];
+        }
 
-public function update(Request $request, Dish $dish)
-{
-    // 1) Actualiza datos básicos
-    $dish->update($request->only('name','code','description','price','image','status'));
+        // 3) Sincroniza
+        $dish->products()->sync($sync);
 
-    // 2) Prepara sync con pivot
-    $sync = [];
-    foreach ($request->input('ingredients', []) as $productId) {
-        $sync[$productId] = [
-            'quantity'          => $request->input("quantities.{$productId}", 1),
-            'unitofmeasure_id'  => $request->input("units.{$productId}", 1),
-        ];
+        return redirect()->route('dishes.index');
     }
 
-    // 3) Sincroniza
-    $dish->products()->sync($sync);
-
-    return redirect()->route('dishes.index');
-}
 
 
-  
-   
+
 
     /**
      * Display the specified resource.
@@ -89,11 +95,14 @@ public function update(Request $request, Dish $dish)
      */
     public function edit(Dish $dish)
     {
-        $products = Product::all();
-        return view('dishes.edit', compact('dish','products'));
+        $products = Product::Where([
+            ['category_id', 3],
+            ['status', 1]
+        ])->get();
+        return view('dishes.edit', compact('dish', 'products'));
     }
 
-  
+
 
     /**
      * Remove the specified resource from storage.
