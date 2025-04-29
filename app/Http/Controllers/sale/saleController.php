@@ -225,6 +225,7 @@ class saleController extends Controller
             // Buscar la caja en estado "open" asociada al cajero
             $caja = Caja::where('cajero_id', $cajeroId)
                 ->where('estado', 'open')
+                ->latest()
                 ->first();
 
             if (!$caja) {
