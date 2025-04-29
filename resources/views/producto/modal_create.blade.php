@@ -69,7 +69,7 @@
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Cantidad</label>
-                                    <input type="text" class="form-control" name="cantidad" id="cantidad" placeholder="ej: 1" required>
+                                    <input type="text" class="form-control" name="quantity" id="quantity" placeholder="ej: 1" required>
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
@@ -212,7 +212,7 @@
             $('#marca').val('');
             $('#nivel').val('');
             $('#presentacion').val('');
-            $('#cantidad').val('');
+            $('#quantity').val('');
             $('#familia').val('');
             $('#subfamilia').val('');
             $('#code').val('');

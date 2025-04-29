@@ -26,7 +26,7 @@ class CreateProductsTable extends Migration
             $table->decimal('price_fama',10,0)->default(1)->nullable(); // precio minimo en la linea de las famas
             $table->unsignedBigInteger('category_id'); 
             $table->unsignedBigInteger('unitofmeasure_id')->default(1); 
-            $table->decimal('cantidad',10,2)->default(1)->nullable();   // para la composicion        
+            $table->decimal('quantity',10,2)->default(1)->nullable();   // para la composicion        
             // marca 
             $table->decimal('fisico', 18, 2)->default(1); // valor de cantidades en inventario tangible real           
             $table->unsignedBigInteger('level_product_id')->default(2);           

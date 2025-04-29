@@ -135,7 +135,7 @@ const showForm = (data) => {
     $("#marca").val(resp.brand_id).trigger("change");
     $("#nivel").val(resp.level_product_id).trigger("change");
     $("#presentacion").val(resp.unitofmeasure_id).trigger("change");
-    $("#cantidad").val(resp.cantidad).trigger("change");
+    $("#quantity").val(resp.quantity).trigger("change");
     $("#familia").val(resp.meatcut_id).trigger("change");
     $("#subfamilia").val(resp.name).trigger("change");
     $("#code").val(resp.code).trigger("change");

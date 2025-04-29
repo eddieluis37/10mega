@@ -28,10 +28,8 @@ class DishController extends Controller
     {
         // $products = Product::all();
 
-        $products = Product::Where([
-            ['category_id', 3],
-            ['status', 1]
-        ])->get();
+        $products = Product::WhereIn('category_id', [1, 2, 3])->get();
+           
 
         return view('dishes.create', compact('products'));
     }
