@@ -211,6 +211,25 @@ Route::middleware(['auth', 'can:acceder_brand'])->group(function () {
     ]);
 });
 
+/*****************************ORDENES DE PEDIDOS******************************************/
+Route::middleware(['auth', 'can:acceder_orders'])->group(function () {
+    Route::get('orders', [orderController::class, 'index'])->name('order.index');
+    Route::get('showOrder', [orderController::class, 'show'])->name('order.showOrder');
+    Route::post('ordersave', [orderController::class, 'store'])->name('order.save');
+    Route::get('/getDireccionesByCliente/{cliente_id}', [orderController::class, 'getDireccionesByCliente'])->name('order.getDireccionesByCliente');
+    Route::get('order/create/{id}', [orderController::class, 'create'])->name('order.create');
+    Route::get('abrirOrden/{id}', [orderController::class, 'reopen'])->name('order.reopen');
+    Route::get('delivered/{id}', [orderController::class, 'delivered'])->name('order.delivered');
+    Route::post('ordersavedetail', [orderController::class, 'savedetail'])->name('order.savedetail');
+    Route::post('orderById', [orderController::class, 'editOrder'])->name('order.editOrder');    // order_details 
+    Route::get('downOrder/{id}', [orderController::class, 'destroy'])->name('order.destroy');
+    Route::post('orderdown', [orderController::class, 'destroyDetail'])->name('order.down');
+    Route::get('/order-obtener-valores', [orderController::class, 'obtenerValores'])->name('order.order-obtener-valores');
+    Route::post('order/create/registrar_order/{id}', [orderController::class, 'storeOrder'])->name('order.saveOrder');
+    Route::get('order/showPDFOrder/{id}', [pdfOrderController::class, 'showPDFOrder'])->name('order.showPDFOrder');
+    Route::get('/order-edit/{id}', [orderController::class, 'edit'])->name('order.edit'); // informacion basica inicial de la orden
+});
+
 // Proteger todas las rutas dentro del modulo de cargue de productos terminados
 /*****************************CARGUE DE PRODUCTOS TERMINADOS*******************************************/
 Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function () {
@@ -398,24 +417,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
 
 
 
-/*****************************ORDENES DE PEDIDOS******************************************/
-Route::middleware(['auth', 'can:acceder_orders'])->group(function () {
-    Route::get('orders', [orderController::class, 'index'])->name('order.index');
-    Route::get('showOrder', [orderController::class, 'show'])->name('order.showOrder');
-    Route::post('ordersave', [orderController::class, 'store'])->name('order.save');
-    Route::get('/getDireccionesByCliente/{cliente_id}', [orderController::class, 'getDireccionesByCliente'])->name('order.getDireccionesByCliente');
-    Route::get('order/create/{id}', [orderController::class, 'create'])->name('order.create');
-    Route::get('abrirOrden/{id}', [orderController::class, 'reopen'])->name('order.reopen');
-    Route::get('delivered/{id}', [orderController::class, 'delivered'])->name('order.delivered');
-    Route::post('ordersavedetail', [orderController::class, 'savedetail'])->name('order.savedetail');
-    Route::post('orderById', [orderController::class, 'editOrder'])->name('order.editOrder');    // order_details 
-    Route::get('downOrder/{id}', [orderController::class, 'destroy'])->name('order.destroy');
-    Route::post('orderdown', [orderController::class, 'destroyDetail'])->name('order.down');
-    Route::get('/order-obtener-valores', [orderController::class, 'obtenerValores'])->name('order.order-obtener-valores');
-    Route::post('order/create/registrar_order/{id}', [orderController::class, 'storeOrder'])->name('order.saveOrder');
-    Route::get('order/showPDFOrder/{id}', [pdfOrderController::class, 'showPDFOrder'])->name('order.showPDFOrder');
-    Route::get('/order-edit/{id}', [orderController::class, 'edit'])->name('order.edit'); // informacion basica inicial de la orden
-});
+
 
 Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     /*****************************INVENTORY****************************************** */

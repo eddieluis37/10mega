@@ -775,7 +775,6 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $vendedor->syncPermissions([
-
             'ver_orders',
             'acceder_orders',
             'crear_orders',
