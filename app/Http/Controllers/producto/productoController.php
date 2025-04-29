@@ -435,6 +435,7 @@ class productoController extends Controller
                 $prod->brand_id          = $request->marca;
                 $prod->level_product_id  = $request->nivel;
                 $prod->unitofmeasure_id  = $request->presentacion;
+                $prod->cantidad          = $request->cantidad;
                 $prod->meatcut_id        = $request->familia;
                 $prod->name              = $request->subfamilia;
                 $prod->code              = $request->code;
@@ -462,6 +463,7 @@ class productoController extends Controller
                 $updateProd->brand_id          = $request->marca;
                 $updateProd->level_product_id  = $request->nivel;
                 $updateProd->unitofmeasure_id  = $request->presentacion;
+                $updateProd->cantidad          = $request->cantidad;
                 $updateProd->meatcut_id        = $request->familia;
                 $updateProd->name              = $request->subfamilia;
                 $updateProd->code              = $request->code;

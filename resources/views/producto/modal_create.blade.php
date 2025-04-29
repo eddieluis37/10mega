@@ -1,4 +1,4 @@
-<div class="row">
+0<div class="row">
     <div class="col-sm-12">
         <div class="connect-sorting-content">
             <div class="card simple-title-task ui-sortable-handle">
@@ -54,13 +54,22 @@
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>Presentacion</label>
+                                    <label>Presentación</label>
                                     <select class="form-control selectVisceras" name="presentacion" id="presentacion" required="">
                                         <option value="">Buscar una presentacion</option>
                                         @foreach ($presentaciones as $p)
                                         <option value="{{$p->id}}">{{$p->name}}</option>
                                         @endforeach
                                     </select>
+                                    <span class="text-danger error-message"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label>Cantidad</label>
+                                    <input type="text" class="form-control" name="cantidad" id="cantidad" placeholder="ej: 1" required>
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
@@ -177,7 +186,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-12 col-md-6">
                             <div class="mb-3">
                                 <label for="formFile" class="form-label">Seleccione la imagen</label>
                                 <input class="form-control" type="file" id="formFile">
@@ -202,6 +211,8 @@
             $('#selectMarca').val('');
             $('#marca').val('');
             $('#nivel').val('');
+            $('#presentacion').val('');
+            $('#cantidad').val('');
             $('#familia').val('');
             $('#subfamilia').val('');
             $('#code').val('');
