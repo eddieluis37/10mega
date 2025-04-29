@@ -781,6 +781,9 @@ class PermissionsSeeder extends Seeder
             'editar_orders',
             'eliminar_orders',
 
+            'open-order',
+            'Parametros_Create',
+
             'ver_ventas',
             'ver_venta_domicilio',
 
