@@ -28,8 +28,9 @@ class DishController extends Controller
     {
         // $products = Product::all();
 
-        $products = Product::WhereIn('category_id', [1, 2, 3])->get();
-           
+        $products = Product::WhereIn('category_id', [1, 2, 3])->where([
+            ['status', 1],
+        ])->get();
 
         return view('dishes.create', compact('products'));
     }
@@ -93,9 +94,8 @@ class DishController extends Controller
      */
     public function edit(Dish $dish)
     {
-        $products = Product::Where([
-            ['category_id', 3],
-            ['status', 1]
+        $products = Product::WhereIn('category_id', [1, 2, 3])->where([
+            ['status', 1],
         ])->get();
         return view('dishes.edit', compact('dish', 'products'));
     }
