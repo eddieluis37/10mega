@@ -40,33 +40,20 @@ class InventarioSeeder extends Seeder
             return;
         }
 
-        // 2) Filtrar sólo los lote_id que realmente existen en 'lotes'
-        $validLoteIds = DB::table('lotes')->pluck('id')->all();
-        $before = count($rows);
-        $rows = array_filter($rows, function($rec) use ($validLoteIds) {
-            return in_array($rec['lote_id'], $validLoteIds, true);
-        });
-        $skipped = $before - count($rows);
-        if ($skipped > 0) {
-            $this->command->warn("Se omitieron {$skipped} filas con lote_id no existentes.");
-        }
-
-        // 3) Sacar el último ID en la tabla
+        // 2) Calcular el próximo ID (para mantener secuencialidad en seed)
         $lastId = DB::table('inventarios')->max('id') ?? 0;
-
-        // 4) Asignar IDs secuenciales
         foreach ($rows as $i => &$rec) {
             $rec['id'] = ++$lastId;
         }
         unset($rec);
 
-        // 5) Upsert masivo dentro de transacción, deshabilitando FKs sólo durante el upsert
+        // 3) Upsert masivo dentro de transacción, deshabilitando FKs sólo durante el upsert
         DB::transaction(function () use ($rows) {
             Schema::disableForeignKeyConstraints();
 
             DB::table('inventarios')->upsert(
                 $rows,
-                // columnas únicas para match
+                // columnas únicas
                 ['store_id', 'lote_id', 'product_id'],
                 // columnas a actualizar en caso de match
                 ['cantidad_inventario_inicial', 'updated_at']
@@ -75,9 +62,9 @@ class InventarioSeeder extends Seeder
             Schema::enableForeignKeyConstraints();
         });
 
-        // 6) Ajustar el AUTO_INCREMENT para futuros inserts
+        // 4) Ajustar AUTO_INCREMENT
         DB::statement('ALTER TABLE inventarios AUTO_INCREMENT = ' . ($lastId + 1));
 
-        $this->command->info('¡Inventarios importados/actualizados correctamente, sólo con lote_id válidos!');
+        $this->command->info('¡Inventarios importados/actualizados correctamente!');
     }
 }
