@@ -828,6 +828,12 @@ class PermissionsSeeder extends Seeder
 
             'ver_productos',
 
+            'ver_administracion',
+            'ver_terceros',
+            'acceder_terceros',
+            'crear_terceros',
+
+
             'ver_lista_de_precio',
             'acceder_lista_de_precio',
             'crear_lista_de_precio',
