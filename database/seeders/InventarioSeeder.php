@@ -22,7 +22,6 @@ class InventarioSeeder extends Seeder
                     continue;
                 }
                 $record = array_combine($header, $row);
-
                 $rows[] = [
                     'store_id'                    => $record['store_id'] ?? null,
                     'lote_id'                     => $record['lote_id'] ?? null,
@@ -40,31 +39,32 @@ class InventarioSeeder extends Seeder
             return;
         }
 
-        // 2) Calcular el próximo ID (para mantener secuencialidad en seed)
-        $lastId = DB::table('inventarios')->max('id') ?? 0;
-        foreach ($rows as $i => &$rec) {
-            $rec['id'] = ++$lastId;
-        }
-        unset($rec);
-
-        // 3) Upsert masivo dentro de transacción, deshabilitando FKs sólo durante el upsert
+        // 2) Procesar cada fila con updateOrInsert
         DB::transaction(function () use ($rows) {
+            // Deshabilitar temporalmente FKs
             Schema::disableForeignKeyConstraints();
 
-            DB::table('inventarios')->upsert(
-                $rows,
-                // columnas únicas
-                ['store_id', 'lote_id', 'product_id'],
-                // columnas a actualizar en caso de match
-                ['cantidad_inventario_inicial', 'updated_at']
-            );
+            foreach ($rows as $rec) {
+                DB::table('inventarios')->updateOrInsert(
+                    // Condición de búsqueda: si existe un inventario con estas 3 claves
+                    [
+                        'store_id'   => $rec['store_id'],
+                        'lote_id'    => $rec['lote_id'],
+                        'product_id' => $rec['product_id'],
+                    ],
+                    // Datos a insertar o actualizar
+                    [
+                        'cantidad_inventario_inicial' => $rec['cantidad_inventario_inicial'],
+                        'created_at'                  => $rec['created_at'],   // sólo usará esta fecha si inserta
+                        'updated_at'                  => $rec['updated_at'],
+                    ]
+                );
+            }
 
+            // Volver a habilitar FKs
             Schema::enableForeignKeyConstraints();
         });
 
-        // 4) Ajustar AUTO_INCREMENT
-        DB::statement('ALTER TABLE inventarios AUTO_INCREMENT = ' . ($lastId + 1));
-
-        $this->command->info('¡Inventarios importados/actualizados correctamente!');
+        $this->command->info('¡Inventarios sincronizados correctamente (insert/update)!');
     }
 }
