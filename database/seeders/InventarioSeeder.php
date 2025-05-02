@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\QueryException;
 
 class InventarioSeeder extends Seeder
 {
@@ -22,6 +24,7 @@ class InventarioSeeder extends Seeder
                     continue;
                 }
                 $record = array_combine($header, $row);
+
                 $rows[] = [
                     'store_id'                    => $record['store_id'] ?? null,
                     'lote_id'                     => $record['lote_id'] ?? null,
@@ -39,32 +42,59 @@ class InventarioSeeder extends Seeder
             return;
         }
 
-        // 2) Procesar cada fila con updateOrInsert
-        DB::transaction(function () use ($rows) {
-            // Deshabilitar temporalmente FKs
-            Schema::disableForeignKeyConstraints();
+        // 2) Preparar auditoría
+        $failed = [];
 
-            foreach ($rows as $rec) {
-                DB::table('inventarios')->updateOrInsert(
-                    // Condición de búsqueda: si existe un inventario con estas 3 claves
+        // 3) Deshabilitar FK y procesar cada fila individualmente
+        Schema::disableForeignKeyConstraints();
+
+        foreach ($rows as $rec) {
+            try {
+                $inserted = DB::table('inventarios')->updateOrInsert(
                     [
-                        'store_id'   => $rec['store_id'],
-                        'lote_id'    => $rec['lote_id'],
+                        'store_id'   => $rec['store_id'],  
+                        'lote_id'    => $rec['lote_id'],   
                         'product_id' => $rec['product_id'],
                     ],
-                    // Datos a insertar o actualizar
                     [
-                        'cantidad_inventario_inicial' => $rec['cantidad_inventario_inicial'],
-                        'created_at'                  => $rec['created_at'],   // sólo usará esta fecha si inserta
+                        'cantidad_inventario_inicial' => $rec['cantidad_inventario_inicial'],  
+                        'created_at'                  => $rec['created_at'],
                         'updated_at'                  => $rec['updated_at'],
                     ]
                 );
+
+                if (! $inserted) {
+                    // updateOrInsert returns false when an existing record is updated
+                    // Puedes usar esto para auditoría opcional si sólo te interesan inserts
+                    // $failed[] = ['rec' => $rec, 'reason' => 'Actualizado, no insertado'];
+                }
+            } catch (QueryException $e) {
+                $failed[] = [
+                    'record' => $rec,
+                    'error'  => $e->getMessage(),
+                ];
+                // Continuar con siguientes sin abortar todo el proceso
+            }
+        }
+
+        Schema::enableForeignKeyConstraints();
+
+        // 4) Reportar auditoría en consola y log
+        $countFailed = count($failed);
+        if ($countFailed > 0) {
+            $this->command->warn("Se detectaron {$countFailed} registros con inconsistencias:");
+            foreach ($failed as $f) {
+                $this->command->line(
+                    "store_id={$f['record']['store_id']}, ".
+                    "lote_id={$f['record']['lote_id']}, ".
+                    "product_id={$f['record']['product_id']} -> {$f['error']}"
+                );
             }
 
-            // Volver a habilitar FKs
-            Schema::enableForeignKeyConstraints();
-        });
-
-        $this->command->info('¡Inventarios sincronizados correctamente (insert/update)!');
+            // Adicional: guardar en un archivo de log
+            Log::channel('daily')->error('Errores al importar inventarios', $failed);
+        } else {
+            $this->command->info('Todos los registros importados/actualizados correctamente.');
+        }
     }
 }
