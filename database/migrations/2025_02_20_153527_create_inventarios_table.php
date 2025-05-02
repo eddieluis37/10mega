@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('inventarios', function (Blueprint $table) {
             $table->id();
+           
+            $table->unique(['store_id', 'lote_id', 'product_id'], 'inventario_unique');
+           
             $table->unsignedBigInteger('store_id')->nullable();
             $table->foreign('store_id')->references('id')->on('stores');
             
