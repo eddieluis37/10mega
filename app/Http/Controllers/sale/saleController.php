@@ -316,48 +316,7 @@ class saleController extends Controller
         $stores = Store::WhereIn('id', [1, 4, 5, 6, 8, 9, 10])
             ->orderBy('name', 'asc')
             ->get();
-        //        $stores = Store::all();
-
-        /*  $prod = Product::where('status', '1')
-        ->whereHas('inventarios', function ($query) {
-            $query->where('stock_ideal', '>', 0);
-        })
-        ->whereHas('lotesPorVencer') // Filtra solo productos con lotes próximos a vencer
-        ->with('lotesPorVencer') // Carga los lotes próximos a vencer para cada producto
-        ->orderBy('category_id', 'asc')
-        ->orderBy('name', 'asc')
-        ->get();
-
- */
-        /* 
-        $prod = Product::where('status', '1')
-            ->whereHas('inventarios', function ($query) {
-                $query->where('stock_ideal', '>', 0);
-            })
-            ->whereHas('lotesPorVencer') // Asegura que haya al menos un lote próximo a vencer
-            ->with(['lotesPorVencer' => function ($query) {
-                $query->select('lotes.*') // Evita problemas de alias duplicados
-                    ->orderBy('fecha_vencimiento', 'asc'); // Ordena por fecha más próxima
-            }])
-            ->orderBy('category_id', 'asc')
-            ->orderBy('name', 'asc')
-            ->get(); */
-
-
-
-        /*    $prod = Product::where('status', '1')
-            ->whereHas('inventarios', function ($query) {
-                $query->where('stock_ideal', '>', 0);
-            })
-            ->whereHas('lotesPorVencer') // Asegura que haya al menos un lote próximo a vencer
-
-            ->orderBy('category_id', 'asc')
-            ->orderBy('name', 'asc')
-            ->get();
- 
-
-        //  $storeId = [10];
-*/
+       
         //$storeIds = [1, 4, 5, 6, 8, 9, 10];
         $storeIds = \DB::table('store_user')
             ->where('user_id', auth()->id())
