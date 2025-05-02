@@ -46,7 +46,7 @@ class InventarioSeeder extends Seeder
         $failed = [];
 
         // 3) Deshabilitar FK y procesar cada fila individualmente
-        Schema::disableForeignKeyConstraints();
+       // Schema::disableForeignKeyConstraints();
 
         foreach ($rows as $rec) {
             try {
