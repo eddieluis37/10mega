@@ -1367,16 +1367,119 @@ class saleController extends Controller
 
 
 
+    /**
+     * Carga masiva de ventas al inventario usando fechas estáticas.
+     */
     public function cargarInventarioMasivo()
     {
-        for ($ventaId = 484; $ventaId <= 592; $ventaId++) {
-            $this->cargarInventariocr($ventaId);
-        }
+        // ——————————————————————————————
+        // Aquí “inyectamos” de forma fija el rango deseado:
+        $data = [
+            'start_date' => '2025-05-01',
+            'end_date'   => '2025-05-02',
+            'sale_ids'   => null,  // null para usar siempre fechas
+        ];
+        // ——————————————————————————————
+
+        // Construcción del query base
+        $query = Sale::with(['saleDetails' => function ($q) {
+            $q->where('status', '1');
+        }])
+            ->where('status', '1')
+            ->whereBetween('fecha_venta', [
+                $data['start_date'],
+                $data['end_date'],
+            ]);
+
+        // Procesamiento por lotes para no saturar memoria
+        $query->orderBy('id')
+            ->chunkById(100, function ($salesBatch) {
+
+                foreach ($salesBatch as $sale) {
+                    DB::beginTransaction();
+                    try {
+                        if ($sale->saleDetails->isEmpty()) {
+                            Log::debug("Venta {$sale->id} sin detalles activos. Se omite.");
+                            DB::rollBack();
+                            continue;
+                        }
+
+                        // Agrupamos detalles por producto|tienda|lote
+                        $grouped = $sale->saleDetails->groupBy(function ($d) {
+                            return "{$d->product_id}|{$d->store_id}|{$d->lote_id}";
+                        });
+
+                        $movimientosToInsert = [];
+
+                        foreach ($grouped as $key => $details) {
+                            [$productId, $storeId, $loteId] = explode('|', $key);
+
+                            $qty   = $details->sum('quantity');
+                            $costo = $details->sum('total_bruto');
+
+                            // Si ya existe el movimiento, saltamos
+                            $exists = MovimientoInventario::where([
+                                'sale_id'           => $sale->id,
+                                'product_id'        => $productId,
+                                'store_origen_id'   => $storeId,
+                                'tipo'              => 'venta',
+                                'lote_id'           => $loteId,
+                            ])->exists();
+                            if ($exists) continue;
+
+                            // Preparo array para bulk-insert
+                            $movimientosToInsert[] = [
+                                'product_id'       => $productId,
+                                'lote_id'          => $loteId,
+                                'store_origen_id'  => $storeId,
+                                'store_destino_id' => null,
+                                'tipo'             => 'venta',
+                                'sale_id'          => $sale->id,
+                                'cantidad'         => $qty,
+                                'costo_unitario'   => $costo,
+                                'created_at'       => now(),
+                                'updated_at'       => now(),
+                            ];
+
+                            // Actualizo inventario con un solo query
+                            Inventario::where([
+                                'product_id' => $productId,
+                                'store_id'   => $storeId,
+                                'lote_id'    => $loteId,
+                            ])->increment('cantidad_venta', $qty, [
+                                'costo_unitario' => DB::raw("costo_unitario + {$costo}")
+                            ]);
+                        }
+
+                        // Inserto todos los movimientos de golpe
+                        if (!empty($movimientosToInsert)) {
+                            MovimientoInventario::insert($movimientosToInsert);
+                        }
+
+                        // Si hay crédito pendiente, lo procesamos
+                        if ($sale->valor_a_pagar_credito > 0) {
+                            $this->cuentasPorCobrar($sale->id);
+                        }
+
+                        // Marcamos la venta como cerrada
+                        $sale->update([
+                            'status'       => '1',
+                            'fecha_cierre' => now(),
+                        ]);
+
+                        DB::commit();
+                        Log::info("Venta {$sale->id} procesada correctamente.");
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        Log::error("Error procesando venta {$sale->id}: {$e->getMessage()}");
+                    }
+                }
+            });
 
         return response()->json([
-            'status' => 1,
-            'message' => 'Cargado al inventario masivamente desde el ID 672 hasta el ID 1127'
-        ]);
+            'status'  => 0,
+            'message' => "Carga masiva completada para ventas entre {$data['start_date']} y {$data['end_date']}.",
+        ], 200);
     }
 
     public function annulSale($saleId)
