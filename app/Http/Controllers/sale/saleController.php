@@ -81,12 +81,14 @@ class saleController extends Controller
     {
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
         $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
-
+        
         $data = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
             ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto')
-            ->whereIn('c.id', $userCentrocostos) // Filtra por los centros de costo del usuario
+            ->whereIn('c.id', $userCentrocostos) // Filtra por los centros de costo del usuario 
+            ->whereYear('sa.fecha_venta', Carbon::now()->year)
+            ->whereMonth('sa.fecha_venta', Carbon::now()->month)
             ->get();
 
         return Datatables::of($data)->addIndexColumn()
@@ -313,15 +315,16 @@ class saleController extends Controller
     public function create($id)
     {
         $venta = Sale::find($id);
-        $stores = Store::WhereIn('id', [1, 4, 5, 6, 8, 9, 10])
+        /* $stores = Store::WhereIn('id', [1, 4, 5, 6, 8, 9, 10])
             ->orderBy('name', 'asc')
-            ->get();
+            ->get(); */
        
-        //$storeIds = [1, 4, 5, 6, 8, 9, 10];
-        $storeIds = \DB::table('store_user')
+        $storeIds = [0];
+       // $storeIds = [1, 4, 5, 6, 8, 9, 10];
+       /*  $storeIds = \DB::table('store_user')
             ->where('user_id', auth()->id())
             ->pluck('store_id')
-            ->toArray();
+            ->toArray(); */
 
         // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery = Product::query();
@@ -370,8 +373,6 @@ class saleController extends Controller
         }
 
 
-
-
         $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
         $arrayTotales = $this->sumTotales($id);
 
@@ -412,7 +413,7 @@ class saleController extends Controller
         $detalleVenta = $this->getventasdetail($id);
 
 
-        return view('sale.create', compact('datacompensado', 'results', 'stores', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('sale.create', compact('datacompensado','results','id','detalleVenta','ventasdetalle','arrayTotales','status','statusInventory','display'));
     }
 
     public function getventasdetalle($ventaId, $centrocostoId)

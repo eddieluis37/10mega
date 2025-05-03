@@ -55,4 +55,8 @@ class Inventario extends Model
         return $this->hasMany(MovimientoInventario::class);
     }
 
+    public function saleDetails()
+    {
+        return $this->hasMany(SaleDetail::class);
+    }
 }
