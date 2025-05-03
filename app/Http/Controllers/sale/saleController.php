@@ -31,6 +31,7 @@ use App\Models\Store;
 use App\Models\Subcentrocosto;
 use FontLib\Table\Type\name;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class saleController extends Controller
 {
@@ -81,7 +82,7 @@ class saleController extends Controller
     {
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
         $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
-        
+
         $data = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
@@ -259,17 +260,6 @@ class saleController extends Controller
                 $venta->cambio                   = $cambio;
                 $venta->status                   = $status;
 
-                // Si la venta corresponde a las tiendas 1 o 2, asignar resolución
-                if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
-                    $count1 = DB::table('sales')->where('status', '1')->count();
-                    $count2 = DB::table('notacreditos')->where('status', '1')->count();
-                    $count3 = DB::table('notadebitos')->where('status', '1')->count();
-                    $count  = $count1 + $count2 + $count3;
-                    $resolucion = 'ERPC ' . (1 + $count);
-                    // $venta->resolucion = $resolucion;
-                }
-                $venta->save();
-
                 // Llamar al método para cargar el inventario
                 $this->cargarInventariocr($ventaId);
 
@@ -318,10 +308,10 @@ class saleController extends Controller
         /* $stores = Store::WhereIn('id', [1, 4, 5, 6, 8, 9, 10])
             ->orderBy('name', 'asc')
             ->get(); */
-       
+
         $storeIds = [0];
-       // $storeIds = [1, 4, 5, 6, 8, 9, 10];
-       /*  $storeIds = \DB::table('store_user')
+        // $storeIds = [1, 4, 5, 6, 8, 9, 10];
+        /*  $storeIds = \DB::table('store_user')
             ->where('user_id', auth()->id())
             ->pluck('store_id')
             ->toArray(); */
@@ -413,7 +403,7 @@ class saleController extends Controller
         $detalleVenta = $this->getventasdetail($id);
 
 
-        return view('sale.create', compact('datacompensado','results','id','detalleVenta','ventasdetalle','arrayTotales','status','statusInventory','display'));
+        return view('sale.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
 
     public function getventasdetalle($ventaId, $centrocostoId)
@@ -1096,6 +1086,22 @@ class saleController extends Controller
         // Selecciona el primer centro de costo como valor por defecto (si existe)
         $defaultCentro = $centros->first();
 
+        $userId = Auth::id();
+        $cacheKey = "sale_in_process_user_{$userId}";
+
+        // 1) Si ya hay una venta en curso para este usuario, devolvemos la misma
+        if (Cache::has($cacheKey)) {
+            return response()->json([
+                'status'     => 2,
+                'message'    => 'Ya tienes una venta en curso',
+                'registroId' => Cache::get($cacheKey . '_id')
+            ], 200);
+        }
+
+        // 2) Marcamos que hay una venta en proceso 
+        Cache::put($cacheKey, true, now()->addSeconds(20));
+
+        DB::beginTransaction();
         try {
             $currentDateTime = Carbon::now();
             $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
@@ -1127,6 +1133,7 @@ class saleController extends Controller
             $venta->items = 0;
             $venta->valor_pagado = 0;
             $venta->cambio = 0;
+            $venta->in_process = true;       // si se usa columna en BD
 
             $venta->save();
 
@@ -1154,16 +1161,23 @@ class saleController extends Controller
 
             $venta->save();
 
+            DB::commit();
+
             return response()->json([
-                'status' => 1,
-                'message' => 'Inicio de venta por mostrador',
+                'status'     => 1,
+                'message'    => 'Inicio de venta por mostrador',
                 'registroId' => $venta->id
-            ]);
-        } catch (\Throwable $th) {
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // Limpiamos la bandera para que puedan reintentar
+            Cache::forget($cacheKey);
+            Cache::forget($cacheKey . '_id');
+
             return response()->json([
-                'status' => 0,
-                'array' => (array) $th
-            ]);
+                'status'  => 0,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 

@@ -6,7 +6,7 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b>Ventas | Listado </b>
+					<b>Ventas</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<!-- <li>
@@ -24,7 +24,12 @@
 					->where('estado', 'open')
 					->exists())
 					<li>
-						<a href="javascript:void(0)" class="tabmenu bg-dark ml-2" id="storeVentaMostradorBtn" title="Nueva venta por mostrador">POS</a>
+						<a href="javascript:void(0)"
+							class="tabmenu bg-dark ml-2"
+							id="storeVentaMostradorBtn"
+							title="Nueva venta por mostrador">
+							POS
+						</a>
 					</li>
 					@endif
 				</ul>
