@@ -13,11 +13,14 @@ class ReporteCierreCajaController extends Controller
         // Cargamos la caja con sus ventas, más las relaciones que necesites
         // (por ejemplo, el tercero o las formas de pago asociadas)
         $caja = Caja::with([
-            'sales.tercero', 
+            // Aplicamos un constraint para filtrar las ventas cuyo status sea 1
+            'sales' => function ($query) {
+                $query->where('status', '=', '1');
+            },
+            'sales.tercero',
             'sales.formaPagoTarjeta',
-            'sales.formaPagoCredito'
+            'sales.formaPagoCredito',
         ])->findOrFail($id);
-
         // Cargamos todas las formas de pago que sean de tipo TARJETA
         $tarjetas = Formapago::where('tipoformapago', 'TARJETA')->get();
 
