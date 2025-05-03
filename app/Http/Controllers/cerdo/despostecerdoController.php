@@ -400,27 +400,27 @@ class despostecerdoController extends Controller
         try {
             // 1. Obtener Beneficiocerdo y log inicial
             $beneficiocerdo = Beneficiocerdo::findOrFail($beneficioId);
-            Activity::causedBy(auth()->user())
+            /*   Activity::causedBy(auth()->user())
                 ->performedOn($beneficiocerdo)
                 ->withProperties(['beneficio_id' => $beneficioId])
-                ->log('Inicio de carga de inventario para beneficio cerdo');
+                ->log('Inicio de carga de inventario para beneficio cerdo'); */
 
             // 2. Determinar lote: por ID, por código o crear nuevo
             if ($beneficiocerdo->lotes_id) {
                 $lote = Lote::findOrFail($beneficiocerdo->lotes_id);
-                Activity::causedBy(auth()->user())
+                /* Activity::causedBy(auth()->user())
                     ->performedOn($lote)
                     ->withProperties(['lote_id' => $lote->id])
-                    ->log('Beneficio ya tenía lote asociado (por ID)');
+                    ->log('Beneficio ya tenía lote asociado (por ID)'); */
             } elseif ($existingLote = Lote::where('codigo', $beneficiocerdo->codigo_lote)->first()) {
                 $lote = $existingLote;
                 // Asociar al beneficiocerdo para futuras referencias
                 $beneficiocerdo->lotes_id = $lote->id;
                 $beneficiocerdo->save();
-                Activity::causedBy(auth()->user())
+                /* Activity::causedBy(auth()->user())
                     ->performedOn($lote)
                     ->withProperties(['lote_id' => $lote->id])
-                    ->log('Beneficio vinculado a lote existente (por código)');
+                    ->log('Beneficio vinculado a lote existente (por código)'); */
             } else {
                 // Crear nuevo lote si no existe ninguno
                 $lote = Lote::create([
@@ -432,18 +432,18 @@ class despostecerdoController extends Controller
                 $beneficiocerdo->lotes_id = $lote->id;
                 $beneficiocerdo->save();
 
-                Activity::causedBy(auth()->user())
+                /*  Activity::causedBy(auth()->user())
                     ->performedOn($lote)
                     ->withProperties(['lote_id' => $lote->id])
-                    ->log('Creado y asociado nuevo lote al beneficio');
+                    ->log('Creado y asociado nuevo lote al beneficio'); */
             }
 
             // 3. Obtener detalles de desposte y log
             $detalles = Despostecerdo::where('beneficiocerdos_id', $beneficioId)->get();
-            Activity::causedBy(auth()->user())
+            /*    Activity::causedBy(auth()->user())
                 ->withProperties(['detalles_count' => $detalles->count()])
                 ->log('Obtenidos detalles de desposte');
-
+ */
             // 4. Asociar productos al lote (sin duplicados)
             foreach ($detalles as $detalle) {
                 if ($detalle->peso <= 0) {
@@ -454,36 +454,33 @@ class despostecerdoController extends Controller
                         'cantidad' => $detalle->peso,
                         'costo'    => $detalle->costo,
                     ]);
-                    Activity::causedBy(auth()->user())
+                    /* Activity::causedBy(auth()->user())
                         ->performedOn($lote)
                         ->withProperties([
                             'product_id' => $detalle->products_id,
                             'cantidad'   => $detalle->peso,
                             'costo'      => $detalle->costo,
                         ])
-                        ->log('Producto asociado al lote');
+                        ->log('Producto asociado al lote'); */
                 }
             }
 
-            // 5. Actualizar o crear inventario
+            // 5. Reemplazar inventario: no incrementar, sino asignar nuevos valores
             foreach ($detalles as $detalle) {
                 if ($detalle->peso <= 0) {
                     continue;
                 }
-                $inventario = Inventario::firstOrCreate(
-                    [
-                        'product_id' => $detalle->products_id,
-                        'lote_id'    => $lote->id,
-                        'store_id'   => $beneficiocerdo->store_id,
-                    ],
-                    [
-                        'cantidad_compra_lote' => 0,
-                        'costo_unitario'       => $detalle->costo_kilo,
-                        'costo_total'          => 0,
-                    ]
-                );
-                $inventario->increment('cantidad_compra_lote', $detalle->peso);
-                $inventario->costo_total = $inventario->cantidad_compra_lote * $detalle->costo_kilo;
+                // Encontrar o crear registro de inventario
+                $inventario = Inventario::firstOrNew([
+                    'product_id' => $detalle->products_id,
+                    'lote_id'    => $lote->id,
+                    'store_id'   => $beneficiocerdo->store_id,
+                ]);
+
+                // Asignar reemplazo de cantidad y costo
+                $inventario->cantidad_compra_lote = $detalle->peso;
+                $inventario->costo_unitario       = $detalle->costo_kilo;
+                $inventario->costo_total          = $detalle->peso * $detalle->costo_kilo;
                 $inventario->save();
 
                 // Actualizar costo en Product
@@ -497,7 +494,7 @@ class despostecerdoController extends Controller
                         'cantidad'   => $detalle->peso,
                         'costo_kilo' => $detalle->costo_kilo,
                     ])
-                    ->log('Inventario actualizado');
+                    ->log('Inventario reemplazado con nuevos valores');
             }
 
             // 6. Registrar movimientos
@@ -518,10 +515,10 @@ class despostecerdoController extends Controller
                     'fecha'             => Carbon::now(),
                 ]);
 
-                Activity::causedBy(auth()->user())
+                /*   Activity::causedBy(auth()->user())
                     ->performedOn($mov)
                     ->withProperties(['movimiento_id' => $mov->id])
-                    ->log('Movimiento de inventario registrado');
+                    ->log('Movimiento de inventario registrado'); */
             }
 
             // 7. Cerrar beneficio
