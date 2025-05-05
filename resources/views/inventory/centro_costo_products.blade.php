@@ -23,10 +23,26 @@
     <div class="widget widget-chart-one">
       <div class="card text-center" style="background: #3B3F5C">
         <div class="m-2">
-          <h4 style="color:white;"><strong>Ingreso de stock</s> fisico</strong></h3>
+          <h4 style="color:white;"><strong>Conteo de Inventario</s>S</strong></h3>
         </div>
       </div>
       <div class="row g-3 mt-3">
+
+        <div class="col-md-4">
+          <div class="task-header">
+            <div class="form-group">
+              <label for="centrocosto" class="form-label">Bodega</label>
+              <select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
+                <option value="">Seleccione el centro de costo</option>
+                @foreach($centros as $option)
+                <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
+                @endforeach
+              </select>
+              <span class="text-danger error-message"></span>
+            </div>
+          </div>
+        </div>
+
         <div class="col-md-4">
           <div class="task-header">
             <div class="form-group">
@@ -42,31 +58,16 @@
           </div>
         </div>
 
-        <div class="col-md-4">
-          <div class="task-header">
-            <div class="form-group">
-              <label for="centrocosto" class="form-label">Centro de costo</label>
-              <select class="form-control form-control-sm input" name="centrocosto" id="centrocosto" required>
-                <option value="">Seleccione el centro de costo</option>
-                @foreach($centros as $option)
-                <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
-                @endforeach
-              </select>
-              <span class="text-danger error-message"></span>
-            </div>
-          </div>
-        </div>
-
         <div class="table-responsive mt-1">
-        <form method="GET" action="/descargar-reporte">
-          @csrf
-         
-          <!-- Botón de descarga de reporte en Excel -->
-          <div class="text-center mt-3">
-            <button type="submit" class="btn btn-primary">Descargar Reporte en Excel</button>
-          </div>
-        </form>
-      </div>
+          <form method="GET" action="/descargar-reporte">
+            @csrf
+
+            <!-- Botón de descarga de reporte en Excel -->
+            <div class="text-center mt-3">
+              <button type="submit" class="btn btn-primary">Descargar Reporte en Excel</button>
+            </div>
+          </form>
+        </div>
 
       </div>
       <div class="table-responsive mt-3">
@@ -78,7 +79,11 @@
                 <th class="table-th text-white">CAT</th>
                 <th class="table-th text-white">ID</th>
                 <th class="table-th text-white">PRODUCTO</th>
-                <th class="table-th text-white">STOCK FISICO</th>  
+                <th class="table-th text-white">STK°I</th>
+                <th class="table-th text-white">LOTE</th>
+                <th class="table-th text-white">FEC_VENC</th>
+                <th class="table-th text-white">STK°F</th>
+                <th class="table-th text-white">DIF</th>
                 <th class="table-th text-white">COSTO</th>
                 <th class="table-th text-white">SUBTOTAL</th>
               </tr>

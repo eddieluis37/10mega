@@ -76,7 +76,8 @@ class CreateSalesTable extends Migration
             $table->bigInteger('consec')->length(50)->nullable();
             $table->string('resolucion', 50, 0)->nullable();          
            
-            $table->enum('status',['0','1','2','3','4','5'])->default('0');                   
+            $table->enum('status',['0','1','2','3','4','5'])->default('0');
+            $table->boolean('in_process')->parent_select()->nullable(); // para controlar que no se hagan varias con varios clicks        
 
             $table->timestamps();
         });

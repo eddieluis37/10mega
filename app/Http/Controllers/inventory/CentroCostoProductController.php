@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\centros\Centrocosto;
 use App\Models\Centro_costo_product;
+use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Yajra\Datatables\Datatables;
@@ -25,7 +26,8 @@ class CentroCostoProductController extends Controller
     {
         /* $category = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get(); */
         $category = Category::orderBy('name', 'asc')->get();
-        $centros = Centrocosto::Where('status', 1)->get();
+      //  $centros = Store::Where('status', 1)->get();
+        $centros = Store::orderBy('name', 'asc')->get();
         $centroCostoProductos = Centro_costo_product::all();
 
         $newToken = Crypt::encrypt(csrf_token());
@@ -63,30 +65,6 @@ class CentroCostoProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    /* public function show(Request $request)
-    {
-        $centrocostoId = $request->input('centrocostoId');
-        $categoriaId = $request->input('categoriaId');
-        $data = DB::table('centro_costo_products as ccp')
-            ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
-            ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
-            ->select(
-                'cat.name as namecategoria',
-                'pro.name as nameproducto',
-                'ccp.invinicial as invinicial',              
-                'ccp.fisico as fisico'
-            )
-            ->where('ccp.centrocosto_id', $centrocostoId)
-            ->where('ccp.tipoinventario', 'inicial')
-            ->where('pro.category_id', $categoriaId)
-            ->where('pro.status', 1)
-            ->get();
-       
-
-        return datatables()->of($data)
-            ->addIndexColumn()
-            ->make(true);
-    } */
 
     /**
      * Show the form for editing the specified resource.
@@ -104,14 +82,9 @@ class CentroCostoProductController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Request $request)
-    {
-        $centrocostoId = $request->input('centrocostoId');
-        $categoriaId = $request->input('categoriaId');
-
-        $data = DB::table('centro_costo_products as ccp')
+     * 
+     * 
+     *   $data = DB::table('centro_costo_products as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->select(
@@ -127,8 +100,47 @@ class CentroCostoProductController extends Controller
             ->where('pro.status', 1)
             ->get();
 
-       // return response()->json(['data' => $data]);
-       return datatables()->of($data)
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Request $request)
+    {
+        $centrocostoId = $request->input('centrocostoId');
+        $categoriaId = $request->input('categoriaId');
+
+        $data = DB::table('inventarios as inv')
+            // Productos y su categoría
+            ->join('products as pro', 'pro.id', '=', 'inv.product_id')
+            ->join('categories as cat', 'cat.id', '=', 'pro.category_id')
+
+            // Para obtener el código de lote
+            ->join('lotes as lot', 'lot.id', '=', 'inv.lote_id')
+
+            // Para filtrar inventarios según el centro de costo de la tienda
+            ->join('stores as s', 's.id', '=', 'inv.store_id')
+
+            // Campos a seleccionar
+            ->select([
+                'cat.name as namecategoria',
+                'pro.name as nameproducto',
+                'pro.id as productId',
+                'inv.stock_ideal as stockideal',
+                'inv.stock_fisico as fisico',
+                'inv.cantidad_diferencia as diferencia',    
+                'pro.cost as costo',
+                'lot.codigo as lotecodigo',
+                'lot.fecha_vencimiento as lotevence'
+            ])
+
+            // Filtros
+            ->where('inv.store_id', $centrocostoId)
+            ->where('pro.category_id',   $categoriaId)
+            ->where('pro.status',        1)
+
+            ->get();
+
+
+        // return response()->json(['data' => $data]);
+        return datatables()->of($data)
             ->addIndexColumn()
             ->make(true);
     }
