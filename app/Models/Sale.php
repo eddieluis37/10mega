@@ -12,8 +12,7 @@ class Sale extends Model
     protected $table = 'sales';
 
     protected $fillable = [
-        'user_id',
-        'user_id',
+        'user_id',        
         'store_id',
         'third_id',
         'vendedor_id',

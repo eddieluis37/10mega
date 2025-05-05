@@ -259,6 +259,7 @@ class saleController extends Controller
                 $venta->valor_pagado             = $valor_pagado;
                 $venta->cambio                   = $cambio;
                 $venta->status                   = $status;
+                $venta->save();
 
                 // Llamar al método para cargar el inventario
                 $this->cargarInventariocr($ventaId);
