@@ -21,12 +21,14 @@ class Inventario extends Model
         'cantidad_venta',
         'cantidad_final',
         'stock_ideal',
+        'stock_fisico',
+        'cantidad_diferencia',
         'costo_unitario',
         'costo_total'
     ];
 
     protected $casts = [
-        'stock_ideal' => 'decimal:2',
+        'stock_ideal' => 'decimal:2',        
     ];
 
     /**

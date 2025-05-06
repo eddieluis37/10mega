@@ -37,9 +37,9 @@ return new class extends Migration
             $table->decimal('cantidad_venta', 10, 2)->default(0)->nullable();
             $table->decimal('cantidad_notacredito', 10, 2)->default(0)->nullable();
 
-            $table->decimal('stock_ideal', 10, 2)->default(0)->nullable()->comment('Cálculo de la suma de la compra compensada + inventario_inicial...');
-            $table->decimal('stock_fisico', 10, 2)->default(0)->nullable()->comment('cantidad real en fisico');
-            $table->decimal('cantidad_diferencia', 10, 2)->default(0)->nullable()->comment('es el resultado de restar el stock_ideal menos el stock fisico');
+            $table->decimal('stock_ideal', 15, 2)->default(0)->nullable()->comment('Cálculo de la suma de la compra compensada + inventario_inicial...');
+            $table->decimal('stock_fisico', 15, 2)->default(0)->nullable()->comment('cantidad real en fisico');
+            $table->decimal('cantidad_diferencia', 15, 2)->default(0)->nullable()->comment('es el resultado de restar el stock_ideal menos el stock fisico');
 
 
             $table->decimal('costo_unitario', 18, 2)->default(0)->nullable(); // Costo unitario promedio.

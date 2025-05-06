@@ -45,117 +45,124 @@ class inventarioController extends Controller
 
     public function showInvcierre(Request $request)
     {
-
-        $storeId = $request->input('storeId', -1); // Valor por defecto -1 si no está definido
-        $loteId = $request->input('loteId', -1);  // Valor por defecto -1 si no está definido
-
-        // Log::info('storeId:', ['storeId' => $storeId]); // larvel.log
-        // Log::info('loteId:', ['loteId' => $loteId]); // larvel.log
+        $storeId = $request->input('storeId', -1);
+        $loteId  = $request->input('loteId', -1);
 
         DB::beginTransaction();
 
-
         try {
-            // Obtener todos los inventarios activos con filtros de store y lote
             $inventarios = Inventario::with(['lote', 'product', 'store', 'store.centroCosto'])
-                ->when($storeId, function ($query, $storeId) {
-                    return $query->where('store_id', $storeId);
-                })
-                ->when($loteId, function ($query, $loteId) {
-                    return $query->where('lote_id', $loteId);
-                })
+                ->when($storeId, fn($q) => $q->where('store_id', $storeId))
+                ->when($loteId,  fn($q) => $q->where('lote_id', $loteId))
                 ->get();
 
             $resultados = [];
 
             foreach ($inventarios as $inventario) {
-                // Movimientos asociados a ingresos (incluye traslado_ingreso y otros movimientos que se registran en store_destino_id)
-                $movimientosIngreso = MovimientoInventario::where('lote_id', $inventario->lote_id)
+                // 1) Recalc. stock_ideal igual que antes
+                // ... (obtención y suma de movimientos)
+                $movIngreso  = MovimientoInventario::where('lote_id', $inventario->lote_id)
                     ->where('store_destino_id', $inventario->store_id)
                     ->where('product_id', $inventario->product_id)
-                    // ->where('status', 1) // Descomenta si necesitas filtrar por movimientos activos
                     ->select('tipo', DB::raw('SUM(cantidad) AS cantidad_total'))
                     ->groupBy('tipo')
                     ->get();
 
-                // Movimientos asociados a salidas (traslado_salida se registra en store_origen_id)
-                $movimientosSalida = MovimientoInventario::where('lote_id', $inventario->lote_id)
+                $movSalida   = MovimientoInventario::where('lote_id', $inventario->lote_id)
                     ->where('store_origen_id', $inventario->store_id)
                     ->where('product_id', $inventario->product_id)
-                    // ->where('status', 1) // Descomenta si necesitas filtrar por movimientos activos
                     ->select('tipo', DB::raw('SUM(cantidad) AS cantidad_total'))
                     ->groupBy('tipo')
                     ->get();
 
-                // Sumar otros movimientos que se encuentran en la consulta de ingresos
-                $desposteres    = $movimientosIngreso->where('tipo', 'desposteres')->sum('cantidad_total');
-                $despostecerdos = $movimientosIngreso->where('tipo', 'despostecerdos')->sum('cantidad_total');
-                $enlistments    = $movimientosIngreso->where('tipo', 'enlistments')->sum('cantidad_total');
-                $compensadores  = $movimientosIngreso->where('tipo', 'compensadores')->sum('cantidad_total');
+                // ejemplo de tipos, ajusta según tu negocio
+                $despostes    = $movIngreso->where('tipo', 'desposteres')->sum('cantidad_total');
+                $enlist      = $movIngreso->where('tipo', 'enlistments')->sum('cantidad_total');
+                $compensa    = $movIngreso->where('tipo', 'compensadores')->sum('cantidad_total');
+                $trasIn      = $movIngreso->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
+                $trasOut     = $movSalida->where('tipo', 'traslado_salida')->sum('cantidad_total');
+                $venta       = $movSalida->where('tipo', 'venta')->sum('cantidad_total');
+                $notacred    = $movSalida->where('tipo', 'notacredito')->sum('cantidad_total');
 
-                // Para los traslados, se toman de cada consulta según corresponda:
-                $trasladoIngreso = $movimientosIngreso->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
-                $trasladoSalida  = $movimientosSalida->where('tipo', 'traslado_salida')->sum('cantidad_total');
-
-                $totalVenta  = $movimientosSalida->where('tipo', 'venta')->sum('cantidad_total');
-                $totalNotaCredito  = $movimientosSalida->where('tipo', 'notacredito')->sum('cantidad_total');
-
-                // Calcular stock ideal:
-                $stockIdeal = ($inventario->cantidad_inventario_inicial
-                    + $desposteres
-                    + $despostecerdos
-                    + $enlistments
-                    + $compensadores
+                $stockIdealPrevio = (
+                    $inventario->cantidad_inventario_inicial
+                    + $despostes
+                    + $enlist
+                    + $compensa
                     + $inventario->cantidad_prod_term
-                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
+                    + $trasIn
+                ) - $trasOut - ($venta - $notacred);               
 
-                // Actualizar el inventario con el stock ideal calculado
+                $stockIdealPrevio -= $inventario->cantidad_diferencia;
+
+                // 2) Tomamos el stock físico actual del inventario
+                //    Asumimos que stock_fisico ya está cargado en la BD o bien viene en la petición.
+                $stockFisico = $inventario->stock_fisico;
+
+                // 3) Calculamos la diferencia
+                $diferencia = $stockIdealPrevio - $stockFisico;
+
+                // 4) Actualizamos el inventario con nueva información
                 $inventario->update([
-                    'stock_ideal' => $stockIdeal,
+                    'stock_ideal'        => $stockFisico,
+                    'cantidad_diferencia' => $diferencia,
                 ]);
 
-                // Preparar el resultado para visualización
+                // 5) Dejamos trazabilidad creando un movimiento de ajuste
+                MovimientoInventario::create([
+                    'lote_id'            => $inventario->lote_id,
+                    'product_id'         => $inventario->product_id,
+                    'store_origen_id'    => $inventario->store_id,     // de donde sale
+                    'store_destino_id'   => $inventario->store_id,     // a donde llega (mismo almacén)
+                    'tipo'               => 'ajuste',                  // nuevo tipo
+                    'cantidad'           => abs($diferencia),          // valor absoluto
+                    'observacion'        => 'Ajuste de inventario por cierre: '
+                        . ($diferencia > 0
+                            ? "sobrante de {$diferencia}"
+                            : "faltante de " . abs($diferencia)),
+                    // 'status' => 1, // si aplica
+                ]);
+
+                // Armar resultado para DataTables
                 $resultados[] = [
-                    'StoreNombre'           => $inventario->store->name,
-                    'codigoLote'            => $inventario->lote->codigo,
-                    'fechaVencimientoLote'  => $inventario->lote->fecha_vencimiento,
-                    'CategoriaNombre'       => $inventario->product->category->name,
-                    'ProductoNombre'        => $inventario->product->name,
-                    'CantidadInicial'       => $inventario->cantidad_inventario_inicial,
-                    'compraLote'            => $desposteres + $despostecerdos,
-                    'alistamiento'          => $enlistments,
-                    'compensados'           => $compensadores,
-                    'ProductoTerminado'     => $inventario->cantidad_prod_term,
-                    'trasladoing'           => $trasladoIngreso,
-                    'trasladosal'           => $trasladoSalida,
-                    'venta'                 => $totalVenta,
-                    'notacredito'           => $totalNotaCredito,
+                    'StoreNombre'          => $inventario->store->name,
+                    'codigoLote'           => $inventario->lote->codigo,
+                    'fechaVencimientoLote' => $inventario->lote->fecha_vencimiento,
+                    'CategoriaNombre'      => $inventario->product->category->name,
+                    'ProductoNombre'       => $inventario->product->name,
+                    'CantidadInicial'      => $inventario->cantidad_inventario_inicial,
+                    'compraLote'           => $despostes,
+                    'alistamiento'         => $enlist,
+                    'compensados'          => $compensa,
+                    'ProductoTerminado'    => $inventario->cantidad_prod_term,
+                    'trasladoing'          => $trasIn,
+                    'trasladosal'          => $trasOut,
+                    'venta'                => $venta,
+                    'notacredito'          => $notacred,
                     'notadebito'            => 0,
                     'venta_real'            => 0,
-                    'StockIdeal'            => $inventario->stock_ideal,
-                    'stock'                 => 0,
+                    'cantidad_diferencia'  => $diferencia,
+                    'StockIdeal' => $stockIdealPrevio,
+                    'stock'      => $stockFisico,
                     'fisico'                => 0,
                 ];
             }
 
-            //  Log::info('Inventarios:', ['inventarios' => $resultados]); // larvel.log
-
-
             DB::commit();
-            // Devolver $resultados en formato Datatables
+
             return datatables()->of(collect($resultados))
-                ->addIndexColumn() // Agregar un índice
+                ->addIndexColumn()
                 ->make(true);
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json([
-                'status' => 0,
+                'status'  => 0,
                 'message' => 'Error al realizar el cierre de inventario.',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
+
 
     public function getAllLotes()
     {

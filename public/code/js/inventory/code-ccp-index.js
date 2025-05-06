@@ -4,10 +4,10 @@ const token = document
     .getAttribute("content");
 
 $(document).ready(function () {
-    var dataTable;
+    let dataTable = initializeDataTable("-1", "-1");
 
-    function initializeDataTable(centrocostoId = "-1", categoriaId = "-1") {
-        dataTable = $("#tableInventory").DataTable({
+    function initializeDataTable(centrocostoId, categoriaId) {
+        return $("#tableInventory").DataTable({
             paging: true,
             pageLength: 15,
             autoWidth: false,
@@ -20,52 +20,50 @@ $(document).ready(function () {
             ajax: {
                 url: "/showCcpInventory",
                 type: "GET",
-                data: {
-                    centrocostoId: centrocostoId,
-                    categoriaId: categoriaId,
-                },
-                dataSrc: function (response) {
-                    // Modificar los datos antes de que se procesen en la tabla
-                    var modifiedData = response.data.map(function (item) {
-                        var subtotal =  (item.fisico * item.costo);
-                        return {
-                            namecategoria: item.namecategoria,
-                            nameproducto: item.nameproducto,
-                            fisico:
-                                '<input type="text" class="edit-fisico text-right" value="' +
-                                item.fisico +
-                                '" size="4" />',
-
-                            productId: item.productId,
-                            costo: item.costo,
-                            subtotal: subtotal,
-                        };
-                    });
-                    return modifiedData;
+                data: { centrocostoId, categoriaId },
+                dataSrc: function (resp) {
+                    return resp.data.map((item) => ({
+                        namecategoria: item.namecategoria,
+                        productId: item.productId,
+                        nameproducto: item.nameproducto,
+                        stockideal: item.stockideal,
+                        lotecodigo: item.lotecodigo,
+                        lotevence: item.lotevence,
+                        fisico: `<input type="text" class="edit-fisico" value="${item.fisico}" size="4" />`,
+                        diferencia: item.diferencia,
+                        costo: item.costo,
+                        subtotal: item.fisico * item.costo,
+                        loteId: item.loteId, // <-- nuevo campo
+                    }));
                 },
             },
             columns: [
-                { data: "namecategoria", name: "namecategoria" },
-                { data: "productId", name: "productId" },
-                { data: "nameproducto", name: "nameproducto" },
-                { data: "fisico", name: "fisico" },
+                { data: "namecategoria" },
+                { data: "productId" },
+                { data: "nameproducto" },
+                { data: "stockideal" },
+                { data: "lotecodigo" },
+                { data: "lotevence" },
+                { data: "fisico" },
+                { data: "diferencia" },
                 {
                     data: "costo",
-                    name: "costo",
-                    render: function (data, type, row) {
-                        return "$ " + formatCantidadSinCero(data);
-                    },
+                    render: (d) => "$ " + formatCantidadSinCero(d),
                 },
                 {
                     data: "subtotal",
-                    name: "subtotal",
-                    render: function (data, type, row) {
-                        return "$ " + formatCantidadSinCero(data);
-                    },
+                    render: (d) => "$ " + formatCantidadSinCero(d),
                 },
-                
+                {
+                    data: "loteId", // columna oculta
+                    visible: false,
+                    searchable: false,
+                },
             ],
-
+            createdRow: function (row, data) {
+                // agrego atributo para fácil acceso
+                $(row).attr("data-lote-id", data.loteId);
+            },
             order: [[2, "ASC"]],
             language: {
                 processing: "Procesando...",
@@ -86,78 +84,70 @@ $(document).ready(function () {
                     previous: "Anterior",
                 },
             },
-            /*  dom: "Bfrtip",
-            buttons: ["copy", "csv", "excel", "pdf"], */
         });
     }
 
-    function updateCcpInventory(productId, fisico, centrocostoId) {
-        console.log("productId:", productId);
-        console.log("fisico:", fisico);
-        console.log("centrocostoId:", centrocostoId);
+    function updateCcpInventory(productId, fisico, centrocostoId, loteId) {
+        console.log("Ajuste:", { productId, fisico, centrocostoId, loteId });
         $.ajax({
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
+            headers: { "X-CSRF-TOKEN": token },
             url: "/updateCcpInventory",
             type: "POST",
-            data: {
-                productId: productId,
-                fisico: fisico,
-                centrocostoId: centrocostoId,
+            data: { productId, fisico, centrocostoId, loteId },
+            success: (resp) => {
+                Swal.fire({
+                    icon: "success",
+                    title: "Ajuste registrado",
+                    text: resp.message,
+                });
+                dataTable.ajax.reload(null, false);
             },
-            success: function (response) {
-                console.log("Update successful");
-                dataTable.ajax.reload();
-            },
-            error: function (xhr, status, error) {
-                console.error("Error updating");
+            error: (xhr, status, err) => {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se pudo registrar el ajuste.",
+                });
+                console.error(err);
             },
         });
     }
 
-    $(document).ready(function () {
-        initializeDataTable("-1");
-
-        $("#centrocosto, #categoria").on("change", function () {
-            var centrocostoId = $("#centrocosto").val();
-            var categoriaId = $("#categoria").val();
-
-            dataTable.destroy();
-            initializeDataTable(centrocostoId, categoriaId);
-        });
-
-        $(document).on("keydown", ".edit-fisico", function (event) {
-            if (event.which === 13 || event.which === 9) {
-                event.preventDefault();
-                var fisico = $(this).val().replace(",", ".");
-
-                // Expresion Regular para validar que solo acepte numeros enteros y decimales
-                var regex = /^[0-9]+(\.[0-9]{1,2})?$/;
-
-                if (regex.test(fisico)) {
-                    var productId = $(this)
-                        .closest("tr")
-                        .find("td:eq(1)")
-                        .text();
-                    var centrocostoId = $("#centrocosto").val();
-                    updateCcpInventory(productId, fisico, centrocostoId);
-
-                    $(this)
-                        .closest("tr")
-                        .next()
-                        .find(".edit-fisico")
-                        .focus()
-                        .select();
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Número incorrecto",
-                        text: "Solo acepta Números enteros con decimales de (2) dos cifras, separados por . o por ,",
-                    });
-                    console.error("Solo acepta numero enteros y decimales");
-                }
+    // atajo para capturar ENTER o TAB en los inputs de fisico
+    $(document).on("keydown", ".edit-fisico", function (e) {
+        if (e.which === 13 || e.which === 9) {
+            e.preventDefault();
+            let $input = $(this);
+            let val = $input.val().replace(",", ".");
+            let regex = /^[0-9]+(?:\.[0-9]{1,2})?$/;
+            if (!regex.test(val)) {
+                return Swal.fire({
+                    icon: "error",
+                    title: "Número inválido",
+                    text: "Ingrese un número con hasta 2 decimales.",
+                });
             }
-        });
+            let $row = $input.closest("tr");
+            let productId = $row.find("td").eq(1).text().trim();
+            let centrocostoId = $("#centrocosto").val();
+            let loteId = $row.data("lote-id");
+            updateCcpInventory(
+                productId,
+                parseFloat(val),
+                centrocostoId,
+                loteId
+            );
+            // paso al siguiente
+            $row.next().find(".edit-fisico").focus().select();
+        }
+    });
+
+    // cambio de filtros
+    $("#centrocosto, #categoria").on("change", function () {
+        dataTable.destroy();
+        dataTable = initializeDataTable(
+            $("#centrocosto").val(),
+            $("#categoria").val()
+        );
     });
 });

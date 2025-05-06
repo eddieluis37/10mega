@@ -8,12 +8,14 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\centros\Centrocosto;
 use App\Models\Centro_costo_product;
+use App\Models\Inventario;
+use App\Models\MovimientoInventario;
 use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
-
+use Spatie\Activitylog\Facades\Activity;
 
 class CentroCostoProductController extends Controller
 {
@@ -26,7 +28,7 @@ class CentroCostoProductController extends Controller
     {
         /* $category = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get(); */
         $category = Category::orderBy('name', 'asc')->get();
-      //  $centros = Store::Where('status', 1)->get();
+        //  $centros = Store::Where('status', 1)->get();
         $centros = Store::orderBy('name', 'asc')->get();
         $centroCostoProductos = Centro_costo_product::all();
 
@@ -105,57 +107,109 @@ class CentroCostoProductController extends Controller
     public function show(Request $request)
     {
         $centrocostoId = $request->input('centrocostoId');
-        $categoriaId = $request->input('categoriaId');
+        $categoriaId   = $request->input('categoriaId');
 
         $data = DB::table('inventarios as inv')
-            // Productos y su categoría
-            ->join('products as pro', 'pro.id', '=', 'inv.product_id')
-            ->join('categories as cat', 'cat.id', '=', 'pro.category_id')
-
-            // Para obtener el código de lote
-            ->join('lotes as lot', 'lot.id', '=', 'inv.lote_id')
-
-            // Para filtrar inventarios según el centro de costo de la tienda
-            ->join('stores as s', 's.id', '=', 'inv.store_id')
-
-            // Campos a seleccionar
+            // Joins
+            ->join('products   as pro', 'pro.id',      '=', 'inv.product_id')
+            ->join('categories as cat', 'cat.id',      '=', 'pro.category_id')
+            ->join('lotes      as lot', 'lot.id',      '=', 'inv.lote_id')
+            ->join('stores     as s',   's.id',        '=', 'inv.store_id')
+            // Select (incluimos `lot.id as loteId`)
             ->select([
-                'cat.name as namecategoria',
-                'pro.name as nameproducto',
-                'pro.id as productId',
-                'inv.stock_ideal as stockideal',
-                'inv.stock_fisico as fisico',
-                'inv.cantidad_diferencia as diferencia',    
-                'pro.cost as costo',
+                'cat.name   as namecategoria',
+                'pro.name   as nameproducto',
+                'pro.id     as productId',
+                'inv.stock_ideal        as stockideal',
+                'inv.stock_fisico       as fisico',
+                'inv.cantidad_diferencia as diferencia',
+                'pro.cost   as costo',
+                'lot.id     as loteId',         // ← Lo agregamos
                 'lot.codigo as lotecodigo',
-                'lot.fecha_vencimiento as lotevence'
+                'lot.fecha_vencimiento as lotevence',
             ])
-
             // Filtros
-            ->where('inv.store_id', $centrocostoId)
-            ->where('pro.category_id',   $categoriaId)
-            ->where('pro.status',        1)
-
+            ->when($centrocostoId, fn($q) => $q->where('inv.store_id', $centrocostoId))
+            ->when($categoriaId,   fn($q) => $q->where('pro.category_id', $categoriaId))
+            ->where('pro.status', 1)
             ->get();
 
-
-        // return response()->json(['data' => $data]);
-        return datatables()->of($data)
+        /*   // Formateo de algunos campos
+        foreach ($data as $item) {
+            $item->stockideal = number_format($item->stockideal, 2, ',', '.');
+            $item->diferencia = number_format($item->diferencia, 2, ',', '.');
+            // si quisieras dar formato al físico o al costo, aquí también 
+        }
+*/
+        return datatables()
+            ->of($data)
             ->addIndexColumn()
             ->make(true);
     }
 
-    public function updateCcpInventory()
+    public function updateCcpInventory(Request $request)
     {
-        $productId = request('productId');
-        $centrocostoId = request('centrocostoId');
-        $fisico = request('fisico');
+        $data = $request->validate([
+            'productId'       => 'required|integer|exists:products,id',
+            'centrocostoId'   => 'required|integer|exists:stores,id',
+            'loteId'          => 'required|integer|exists:lotes,id',
+            'fisico'          => 'required|numeric|min:0',
+        ]);
 
-        DB::table('centro_costo_products')
-            ->where('products_id', $productId)
-            ->where('centrocosto_id', $centrocostoId)
-            ->update(['fisico' => $fisico]);
+        DB::beginTransaction();
+        try {
+            // 1) Obtengo el registro de inventario correspondiente
+            $inv = Inventario::where('product_id', $data['productId'])
+                ->where('store_id',   $data['centrocostoId'])
+                ->where('lote_id',    $data['loteId'])
+                ->firstOrFail();
 
-        return response()->json(['success' => 'true']);
+            // 2) Calculo diferencia contra el stock ideal previo
+            $stockIdealPrevio = $inv->stock_ideal;
+            $diferencia       = $stockIdealPrevio - $data['fisico'];
+
+            // 3) Actualizo el inventario
+            $inv->update([
+                'stock_fisico'        => $data['fisico'],
+                'cantidad_diferencia' => $diferencia,
+                'stock_ideal'         => $data['fisico'],
+            ]);
+
+            // 4) Registro en el log de auditoría con Spatie Activity Log
+            Activity()
+                ->causedBy(auth()->user())               // opcional: asigna el usuario autenticado
+                ->performedOn($inv)                      // el modelo Inventario afectado
+                ->withProperties([
+                    'before' => [
+                        'stock_ideal'   => $stockIdealPrevio,
+                    ],
+                    'after' => [
+                        'stock_fisico'        => $inv->stock_fisico,
+                        'stock_ideal'         => $inv->stock_ideal,
+                        'cantidad_diferencia' => $inv->cantidad_diferencia,
+                    ],
+                    'metadata' => [
+                        'product_id'     => $data['productId'],
+                        'store_id'       => $data['centrocostoId'],
+                        'lote_id'        => $data['loteId'],
+                    ],
+                ])
+                ->useLog('ajustes_inventario')          // nombre de log personalizado
+                ->log('Ajuste de inventario realizado');
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Inventario y movimiento de ajuste registrados correctamente.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Error al actualizar inventario.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
 }

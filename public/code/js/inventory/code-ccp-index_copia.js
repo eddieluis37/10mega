@@ -27,19 +27,15 @@ $(document).ready(function () {
                 dataSrc: function (response) {
                     // Modificar los datos antes de que se procesen en la tabla
                     var modifiedData = response.data.map(function (item) {
-                        var subtotal = item.fisico * item.costo;
+                        var subtotal =  (item.fisico * item.costo);
                         return {
                             namecategoria: item.namecategoria,
                             nameproducto: item.nameproducto,
-                            stockideal: item.stockideal,
-                            lotecodigo: item.lotecodigo,
-                            lotevence: item.lotevence,
                             fisico:
                                 '<input type="text" class="edit-fisico text-right" value="' +
                                 item.fisico +
                                 '" size="4" />',
 
-                            diferencia: item.diferencia,
                             productId: item.productId,
                             costo: item.costo,
                             subtotal: subtotal,
@@ -52,11 +48,7 @@ $(document).ready(function () {
                 { data: "namecategoria", name: "namecategoria" },
                 { data: "productId", name: "productId" },
                 { data: "nameproducto", name: "nameproducto" },
-                { data: "stockideal", name: "stockideal" },
-                { data: "lotecodigo", name: "lotecodigo" },
-                { data: "lotevence", name: "lotevence" },
                 { data: "fisico", name: "fisico" },
-                { data: "diferencia", name: "diferencia" },
                 {
                     data: "costo",
                     name: "costo",
@@ -71,6 +63,7 @@ $(document).ready(function () {
                         return "$ " + formatCantidadSinCero(data);
                     },
                 },
+                
             ],
 
             order: [[2, "ASC"]],

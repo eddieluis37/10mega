@@ -101,7 +101,7 @@ class inventarioController extends Controller
                 $totalNotaCredito  = $movimientosSalida->where('tipo', 'notacredito')->sum('cantidad_total');
 
                 // Calcular stock ideal:
-                $stockIdealPrevio  = ($inventario->cantidad_inventario_inicial
+                $stockIdeal = ($inventario->cantidad_inventario_inicial
                     + $desposteres
                     + $despostecerdos
                     + $enlistments
@@ -109,19 +109,11 @@ class inventarioController extends Controller
                     + $inventario->cantidad_prod_term
                     + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
 
-                // 2) Tomamos el stock físico actual del inventario
-                //    Asumimos que stock_fisico ya está cargado en la BD o bien viene en la petición.
-                $stockFisico = $inventario->stock_fisico;
-
-                // 3) Calculamos la diferencia
-                $diferencia = $stockIdealPrevio - $stockFisico;
-
-                // 4) Actualizamos el inventario con nueva información
+                // Actualizar el inventario con el stock ideal calculado
                 $inventario->update([
-                    'stock_ideal'        => $stockFisico,
-                    'cantidad_diferencia' => $diferencia,
+                    'stock_ideal' => $stockIdeal,
                 ]);
-                
+
                 // Preparar el resultado para visualización
                 $resultados[] = [
                     'StoreNombre'           => $inventario->store->name,
@@ -140,9 +132,9 @@ class inventarioController extends Controller
                     'notacredito'           => $totalNotaCredito,
                     'notadebito'            => 0,
                     'venta_real'            => 0,
-                    'StockIdeal'            => $stockFisico,
-                    'stock'                 => $stockFisico,
-                    'fisico'                => $stockFisico,
+                    'StockIdeal'            => $inventario->stock_ideal,
+                    'stock'                 => 0,
+                    'fisico'                => 0,
                 ];
             }
 
