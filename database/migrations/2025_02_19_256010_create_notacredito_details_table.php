@@ -14,44 +14,38 @@ class CreateNotacreditoDetailsTable extends Migration
     public function up()
     {
         Schema::create('notacredito_details', function (Blueprint $table) {
-            $table->id();
-            
-            $table->foreignId('notacredito_id')->constrained();
+            $table->bigIncrements('id');
+         //   $table->unsignedBigInteger('notacredito_id');
+            $table->unsignedBigInteger('product_id');
+           /*  $table->unsignedBigInteger('sale_detail_id')->nullable();
+            $table->unsignedBigInteger('store_id')->nullable();
+            $table->unsignedBigInteger('lote_id')->nullable();
+            $table->unsignedBigInteger('inventario_id')->nullable(); */
 
-            $table->unsignedBigInteger('sale_detail_id')->nullable()->after('product_id');
-            $table->foreign('sale_detail_id')->references('id')->on('sale_details');
-            
-            $table->unsignedBigInteger('store_id')->nullable()->after('sale_detail_id');
-            $table->foreign('store_id')->references('id')->on('stores');
-            
-            $table->unsignedBigInteger('lote_id')->nullable()->after('store_id');
-            $table->foreign('lote_id')->references('id')->on('lotes');
-            
-            $table->unsignedBigInteger('inventario_id')->nullable()->after('lote_id');
-            $table->foreign('inventario_id')->references('id')->on('inventarios');
-            
-
-            $table->foreignId('product_id')->constrained();
             $table->decimal('quantity', 10, 2);
             $table->decimal('price', 10, 2);
-            
-            $table->decimal('porc_desc', 10, 2)->default(0)->nullable();
-            $table->decimal('descuento', 12, 0)->default(0)->nullable();
-            $table->decimal('descuento_cliente', 10, 0)->default(0)->nullable();
-            $table->decimal('porc_iva', 10, 2)->default(0)->nullable();
-            $table->decimal('iva', 10, 0)->default(0)->nullable();
-            $table->decimal('porc_otro_impuesto', 10, 2)->default(0)->nullable();
-            $table->decimal('otro_impuesto', 12, 0)->default(0)->nullable();
-            $table->decimal('total_bruto', 12, 0)->default(0)->nullable();
-            $table->decimal('total', 12, 0)->default(0)->nullable();
+            $table->decimal('porc_desc', 10, 2)->default(0);
+            $table->decimal('descuento', 12, 0)->default(0);
+            $table->decimal('descuento_cliente', 10, 0)->default(0);
+            $table->decimal('porc_iva', 10, 2)->default(0);
+            $table->decimal('iva', 10, 0)->default(0);
+            $table->decimal('porc_otro_impuesto', 10, 2)->default(0);
+            $table->decimal('otro_impuesto', 12, 0)->default(0);
+            $table->decimal('total_bruto', 12, 0)->default(0);
+            $table->decimal('total', 12, 0)->default(0);
 
-            $table->boolean('status')->parent_select()->default(true)->nullable();
-
-            $table->boolean('inventory_processed')->default(false)
-            ->comment('Indica si ya se actualizó el inventario para este detalle')
-            ->after('inventario_id');
+            $table->tinyInteger('status')->nullable()->default(1);
+          /*   $table->tinyInteger('inventory_processed')
+                ->default(0)
+                ->comment('Indica si ya se actualizó el inventario para este detalle'); */
 
             $table->timestamps();
+
+          //  $table->foreignId('notacredito_id')->constrained();
+            /* $table->foreign('sale_detail_id')->references('id')->on('sale_details');
+            $table->foreign('store_id')->references('id')->on('stores');
+            $table->foreign('lote_id')->references('id')->on('lotes');
+            $table->foreign('inventario_id')->references('id')->on('inventarios'); */
         });
     }
 

@@ -188,8 +188,8 @@
               <th class="table-th text-white" title="Notas Debitos">ND</th>
               <th class="table-th text-white" title="Ventas Reales">VR</th>
               <th class="table-th text-white" title="Stock Ideal">SI</th>
-              <th class="table-th text-white" title="InventarioFinal">INF</th>
-              <th class="table-th text-white" title="Disponible">DIS</th>
+              <th class="table-th text-white" title="Stock Fisico">SF</th>
+              <th class="table-th text-white" title="Diferencia de Stock">DS</th>
               <th class="table-th text-white" title="Merma">MER</th>
               <th class="table-th text-white" title="Porcentaje Merma">%MER</th>
             </tr>
