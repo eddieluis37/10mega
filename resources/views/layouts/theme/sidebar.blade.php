@@ -161,8 +161,8 @@
             </li>
             @endcan
 
-           
-           <!--  <li class="">
+
+            <!--  <li class="">
                 <a href="{{url('caja')}}" class="menu-toggle" data-active="false">
                     <div class="base-menu">
                         <div class="base-icons">
@@ -176,7 +176,7 @@
                     </div>
                 </a>
             </li> -->
-        
+
 
             @can('ver_traslado')
             <li class="">
@@ -221,7 +221,7 @@
             </li>
             @endcan
 
-            @can('Admin_Menu')
+            @can('ver_contabilidad')
             <li class="menu">
                 <a href="#documentos" data-active="false" class="menu-toggle">
                     <div class="base-menu">
@@ -582,7 +582,7 @@
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg> Históricos de Utilidad</a>
                 </li>
-
+                @can('ver_inventario_stockfisico')
                 <li>
                     <a href="{{ url('inventory/centro_costo_products') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-plus">
@@ -592,6 +592,7 @@
                             <line x1="9" y1="15" x2="15" y2="15"></line>
                         </svg> Stock Fisico Real</a>
                 </li>
+                @endcan
                 @can('ver_cargue_productos_term')
                 <li>
                     <a href="{{ url('inventory/cargue_products_terminados') }}" style="display: flex; align-items: center">
@@ -1031,7 +1032,7 @@
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Relacionar Marcas </a>
                 </li>
-                @endcan                
+                @endcan
             </ul>
         </div>
         <div class="submenu" id="pages">
@@ -1116,7 +1117,7 @@
                     <a href="{{ url('meatcuts') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Productos Basicos </a>
-                </li>             
+                </li>
                 <li>
                     <a href="{{ url('centro_costo_prod') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
                                 <circle cx="12" cy="12" r="10"></circle>

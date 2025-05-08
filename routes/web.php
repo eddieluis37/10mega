@@ -248,7 +248,6 @@ Route::middleware(['auth', 'can:acceder_cargue_productos_term'])->group(function
     Route::get('totales', [inventoryController::class, 'totales'])->name('inventory.totales');
 
     Route::post('cargarInventariohist', [inventoryController::class, 'cargarInventariohist'])->name('cargarInventariohist');
-    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
 });
 
 /*****************************BENEFICIO-RES*******************************************/
@@ -424,7 +423,6 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::get('inventory/diary', [diaryController::class, 'index'])->name('inventory.diary');
     Route::get('inventory/consolidado', [inventoryController::class, 'index'])->name('inventory.consolidado');
     Route::get('showinventory', [diaryController::class, 'show'])->name('inventory.showlist');
-    Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
 
     /*****************************INVENTORIO NUEVO****************************************** */
     Route::get('inventario/cierre', [inventarioController::class, 'index'])->name('inventario.cierre');
@@ -448,7 +446,10 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
 });
 
-
+Route::middleware(['auth', 'can:acceder_inventario_stockfisico'])->group(function () {
+    Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
+    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
+});
 
 Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
     /**PRODUCTOS SIN LIVEWIRE**/

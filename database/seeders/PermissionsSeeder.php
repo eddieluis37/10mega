@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['administracion', 'combos', 'dishes', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas', 'CambiarPrecioVenta']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'contabilidad', 'combos', 'dishes', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'inventario_stockfisico', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas', 'CambiarPrecioVenta']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -214,6 +214,10 @@ class PermissionsSeeder extends Seeder
             'editar_traslado',
             'eliminar_traslado',
             'acceder_cargue_productos_term',
+
+            'ver_contabilidad',
+            'acceder_contabilidad',
+            'crear_contabilidad',
 
             'ver_inventario',
             'acceder_inventario',
@@ -833,6 +837,9 @@ class PermissionsSeeder extends Seeder
             'acceder_terceros',
             'crear_terceros',
 
+            'ver_contabilidad',
+            'acceder_contabilidad',
+            'crear_contabilidad',
 
             'ver_lista_de_precio',
             'acceder_lista_de_precio',
