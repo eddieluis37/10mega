@@ -80,18 +80,18 @@ class InventarioService
         Log::info('Movimientos de salida obtenidos', ['movimientosSalida' => $movimientosSalida->toArray()]);
 
         $totalVenta  = $movimientosSalida->where('tipo', 'venta')->sum('cantidad_total');
+        $totalNotaCredito  = $movimientosSalida->where('tipo', 'notacredito')->sum('cantidad_total');
+        
         Log::info('Total de ventas', ['totalVenta' => $totalVenta]);
 
         // Calcular el stock ideal según la fórmula definida
-        $stockIdeal = (
-            $inventario->cantidad_inventario_inicial +
-            $desposteres +
-            $despostecerdos +
-            $enlistments +
-            $compensadores +
-            $inventario->cantidad_prod_term +
-            $trasladoIngreso
-        ) - $trasladoSalida - $totalVenta;
+        $stockIdeal = ($inventario->cantidad_inventario_inicial
+                    + $desposteres
+                    + $despostecerdos
+                    + $enlistments
+                    + $compensadores
+                    + $inventario->cantidad_prod_term
+                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito) - ($inventario->cantidad_diferencia);
 
         Log::info('Stock ideal calculado', [
             'cantidad_inventario_inicial' => $inventario->cantidad_inventario_inicial,
