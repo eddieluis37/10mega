@@ -1,4 +1,4 @@
-0<div class="row">
+<div class="row">
     <div class="col-sm-12">
         <div class="connect-sorting-content">
             <div class="card simple-title-task ui-sortable-handle">
