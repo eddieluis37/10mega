@@ -1,0 +1,244 @@
+<?php
+
+namespace App\Http\Controllers\caja;
+
+use App\Http\Controllers\Controller;
+
+use App\Models\caja\Caja;
+use App\Models\Category;
+use App\Models\Centro_costo_product;
+use App\Models\centros\Centrocosto;
+use App\Models\Third;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Datatables;
+use Carbon\Carbon;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
+use App\Models\Product;
+use App\Models\Products\Meatcut;
+use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
+use App\Models\Brand;
+use App\Models\Brand_third;
+use App\Models\caja\Cajasalidaefectivo as CajaCajasalidaefectivo;
+use App\Models\Cajasalidaefectivo;
+use App\Models\Levels_products;
+use App\Models\Listaprecio;
+use App\Models\Listapreciodetalle;
+use App\Models\Products\Unitofmeasure;
+use App\Models\shopping\shopping_enlistment;
+use App\Models\shopping\shopping_enlistment_details;
+
+
+class cajasalidaefectivoController extends Controller
+{
+    public function getProductos()
+    {
+        $productos = Product::all(); // Asegúrate de tener el modelo correcto
+        return response()->json($productos);
+    }
+
+    public function index()
+    {
+        $categorias = Category::orderBy('id')->get();
+        $terceros = Third::orderBy('name')->get();
+        $niveles = Levels_products::Where('status', 1)->get();
+        $presentaciones = Unitofmeasure::Where('status', 1)->get();
+        $familias = Meatcut::Where('status', 1)->get();
+
+        $brandsThirds = Brand::orderBy('id')->get();
+
+        $usuario = User::WhereIn('id', [9, 11, 12])->get();
+
+        $centros = Centrocosto::WhereIn('id', [1])->get();
+        return view("caja_salida_efectivo.index", compact('usuario', 'brandsThirds', 'categorias', 'terceros', 'niveles', 'presentaciones', 'familias',  'centros'));
+    }
+
+    public function show(Request $request)
+    {
+        $data = DB::table('caja_salida_efectivo as csd')
+            ->join('cajas as c', 'c.id', '=', 'csd.caja_id')
+            ->leftJoin('thirds as t', 't.id', '=', 'csd.third_id')
+            ->join('centro_costo as centro', 'c.centrocosto_id', '=', 'centro.id')
+            ->join('users as u', 'c.cajero_id', '=', 'u.id')
+            ->select([
+                'csd.id',
+                'csd.fecha_hora_salida',
+                'c.id as turno',
+                'u.name as name_cajero',
+                'centro.name as name_centro_costo',
+                'csd.vr_efectivo',
+                't.name as recibe',    // el que recibe
+                'csd.status',
+            ])
+            //  ->where('c.status', 1)               // turno vigente
+            ->orderBy('csd.fecha_hora_salida', 'desc')
+            ->get();
+
+        return DataTables::of($data)
+            ->addIndexColumn()
+
+            // formateo de fecha/hora
+            ->editColumn('fecha_hora_salida', function ($row) {
+                return $row->fecha_hora_salida
+                    ? Carbon::parse($row->fecha_hora_salida)->format('Y-m-d H:i:s')
+                    : '';
+            })
+
+            // formateo de valor
+            ->editColumn('vr_efectivo', function ($row) {
+                return '$' . number_format($row->vr_efectivo, 0, ',', '.');
+            })
+
+            // columna de acciones
+            ->addColumn('action', function ($row) {
+                if ($row->status) {
+                    return '
+                    <div class="text-center">
+                      <button class="btn btn-sm btn-primary" onclick="editSalida(' . $row->id . ')">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-sm btn-danger" onclick="deleteSalida(' . $row->id . ')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>';
+                }
+
+                return '
+                <div class="text-center">
+                  <button class="btn btn-sm btn-secondary" disabled>
+                    <i class="fas fa-lock"></i>
+                  </button>
+                </div>';
+            })
+
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            // 1) Validaciones
+            $v = Validator::make($request->all(), [
+                'id'                   => ['nullable', 'exists:caja_salida_efectivo,id'],
+                'vr_efectivo'          => ['required', 'numeric', 'min:0'],
+                'concepto'             => ['required', 'string', 'min:5'],
+                'third_id'             => ['nullable', 'exists:thirds,id'],
+                'fecha_hora_salida'    => ['nullable', 'date'],
+            ]);
+
+            if ($v->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $v->errors(),
+                ]);
+            }
+
+            // 2) Obtener caja abierta del cajero
+            // en el controller
+            $cajero = $request->user();
+
+            $caja = $cajero->cajas()
+                ->where('estado', 'open')
+                ->latest()
+                ->first();
+
+            if (! $caja) {
+                $caja = $cajero->cajas()->create([
+                    'centrocosto_id' => 1,
+                    'estado'         => 'open',
+                    'status'         => 1,
+                ]);
+            }
+
+            // 3) Crear o actualizar
+            if (empty($request->id)) {
+                // CREAR
+                $salida = Caja::create([
+                    'caja_id'           => $caja->id,
+                    'vr_efectivo'       => $request->vr_efectivo,
+                    'concepto'          => $request->concepto,
+                    'fecha_hora_salida' => $request->fecha_hora_salida ?? Carbon::now(),
+                    'third_id'          => $request->third_id,
+                    'status'            => true,
+                ]);
+
+                // Log Spatie
+                activity()
+                    ->performedOn($salida)
+                    ->causedBy($request->user())
+                    ->withProperties(['ip' => $request->ip()])
+                    ->log('Creó salida de efectivo');
+
+                return response()->json([
+                    'status'     => 1,
+                    'message'    => "Salida de Efectivo Creada con ID: {$salida->id}",
+                    'registroId' => $salida->id,
+                ]);
+            } else {
+                // EDITAR
+                $salida = CajaCajasalidaefectivo::findOrFail($request->id);
+                $salida->update([
+                    'vr_efectivo'       => $request->vr_efectivo,
+                    'concepto'          => $request->concepto,
+                    'fecha_hora_salida' => $request->fecha_hora_salida,
+                    'third_id'          => $request->third_id,
+                ]);
+
+                // Log Spatie
+                activity()
+                    ->performedOn($salida)
+                    ->causedBy($request->user())
+                    ->withProperties(['ip' => $request->ip()])
+                    ->log('Actualizó salida de efectivo');
+
+                return response()->json([
+                    'status'     => 1,
+                    'message'    => "Salida de Efectivo ID {$salida->id} actualizada correctamente.",
+                    'registroId' => 0,
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'errors' => ['exception' => $th->getMessage()],
+            ]);
+        }
+    }
+
+
+    public function edit($id)
+    {
+        $productos = Product::where('id', $id)->first();
+        return response()->json([
+            "id" => $id,
+            "listadoproductos" => $productos,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Caja  $caja
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Caja $caja)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Caja  $caja
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Caja $caja)
+    {
+        //
+    }
+}

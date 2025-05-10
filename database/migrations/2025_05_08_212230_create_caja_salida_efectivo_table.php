@@ -26,6 +26,8 @@ return new class extends Migration
             $table->unsignedBigInteger('third_id')->nullable();           
             $table->foreign('third_id')->references('id')->on('thirds'); 
 
+            $table->boolean('status')->parent_select()->default(true)->nullable();
+
             $table->timestamps();
         });
     }

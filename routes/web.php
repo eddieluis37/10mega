@@ -73,6 +73,7 @@ use App\Http\Controllers\CentroCostoProdController;
 use App\Http\Controllers\AsignarPreciosProdController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\BrandCrudController;
+use App\Http\Controllers\caja\cajasalidaefectivoController;
 use App\Http\Controllers\caja\pdfCierreCajaController;
 use App\Http\Controllers\ComboController;
 use App\Http\Controllers\producto\productoController;
@@ -123,6 +124,12 @@ use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
 use App\Http\Controllers\RestaurantOrderController;
 use App\Http\Controllers\transfer\exportTransferController;
+
+
+Route::get('caja-salida-efectivo', [cajasalidaefectivoController::class, 'index'])->name('cajasalidaefectivo.index');
+Route::get('show-cse', [cajasalidaefectivoController::class, 'show'])->name('cajasalidaefectivo.show');
+Route::post('csesave', [cajasalidaefectivoController::class, 'store'])->name('cajasalidaefectivo.save');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('dishes', DishController::class)->middleware('can:viewAny,App\Models\Dish');
