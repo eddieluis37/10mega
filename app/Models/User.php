@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\caja\Caja;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -65,5 +67,10 @@ class User extends Authenticatable
     {
         // Obtiene las tiendas con su centro de costo y luego extrae el centro de costo
         return $this->stores->pluck('centroCosto')->unique('id');
+    }
+
+    public function cajas()
+    {
+        return $this->hasMany(Caja::class, 'cajero_id');
     }
 }

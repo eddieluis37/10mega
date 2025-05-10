@@ -22,8 +22,7 @@ use App\Models\Products\Meatcut;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\Brand;
 use App\Models\Brand_third;
-use App\Models\caja\Cajasalidaefectivo as CajaCajasalidaefectivo;
-use App\Models\Cajasalidaefectivo;
+use App\Models\caja\Cajasalidaefectivo;
 use App\Models\Levels_products;
 use App\Models\Listaprecio;
 use App\Models\Listapreciodetalle;
@@ -137,27 +136,23 @@ class cajasalidaefectivoController extends Controller
                 ]);
             }
 
-            // 2) Obtener caja abierta del cajero
-            // en el controller
-            $cajero = $request->user();
-
-            $caja = $cajero->cajas()
+            $user = $request->user();    
+            $caja = Caja::where('cajero_id', $user->id)  // filtra por su ID
                 ->where('estado', 'open')
                 ->latest()
                 ->first();
 
             if (! $caja) {
-                $caja = $cajero->cajas()->create([
-                    'centrocosto_id' => 1,
-                    'estado'         => 'open',
-                    'status'         => 1,
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'No se encontró una caja abierta para el cajero actual.'
                 ]);
             }
 
             // 3) Crear o actualizar
             if (empty($request->id)) {
                 // CREAR
-                $salida = Caja::create([
+                $salida = Cajasalidaefectivo::create([
                     'caja_id'           => $caja->id,
                     'vr_efectivo'       => $request->vr_efectivo,
                     'concepto'          => $request->concepto,
@@ -180,7 +175,7 @@ class cajasalidaefectivoController extends Controller
                 ]);
             } else {
                 // EDITAR
-                $salida = CajaCajasalidaefectivo::findOrFail($request->id);
+                $salida = Cajasalidaefectivo::findOrFail($request->id);
                 $salida->update([
                     'vr_efectivo'       => $request->vr_efectivo,
                     'concepto'          => $request->concepto,

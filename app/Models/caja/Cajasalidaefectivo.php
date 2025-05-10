@@ -3,6 +3,7 @@
 namespace App\Models\caja;
 
 use App\Models\caja\Caja;
+use App\Models\Third;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;

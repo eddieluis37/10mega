@@ -128,7 +128,7 @@ use App\Http\Controllers\transfer\exportTransferController;
 
 Route::get('caja-salida-efectivo', [cajasalidaefectivoController::class, 'index'])->name('cajasalidaefectivo.index');
 Route::get('show-cse', [cajasalidaefectivoController::class, 'show'])->name('cajasalidaefectivo.show');
-Route::post('csesave', [cajasalidaefectivoController::class, 'store'])->name('cajasalidaefectivo.save');
+Route::post('csesave', [cajasalidaefectivoController::class, 'store'])->middleware('auth')->name('caja_salida_efectivo.store');
 
 
 Route::middleware(['auth'])->group(function () {
