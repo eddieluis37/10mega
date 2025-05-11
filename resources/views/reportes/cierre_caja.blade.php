@@ -159,7 +159,7 @@
           <td>{{ $sale->tercero->name ?? 'Sin Nombre' }}</td>
           <td>{{ $sale->consecutivo }}</td>
           <td>$ {{ number_format($sale->total_valor_a_pagar, 0, ',', '.') }}</td>
-          <td>$ {{ number_format($sale->valor_a_pagar_efectivo, 0, ',', '.') }}</td>
+          <td>$ {{ number_format($sale->valor_a_pagar_efectivo - $sale->cambio, 0, ',', '.') }}</td>
 
           <!-- Para cada tarjeta, validamos si la venta coincide con esa forma de pago -->
           @foreach($tarjetas as $tarjeta)

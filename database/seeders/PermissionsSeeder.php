@@ -517,7 +517,7 @@ class PermissionsSeeder extends Seeder
                 'phone' => '3214154625',
                 'profile' => 'AdminBodega',
                 'status' => 'Active',
-                'password' => bcrypt('02NuevoGalanmega2025*.@')
+                'password' => bcrypt('CarnesFriasMega2025@')
             ]
         );
         User::updateOrCreate(
