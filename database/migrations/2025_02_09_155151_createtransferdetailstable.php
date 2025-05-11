@@ -24,6 +24,9 @@ class CreateTransferDetailsTable extends Migration
             $table->unsignedBigInteger('product_id')->nullable();
             $table->foreign('product_id')->references('id')->on('products');
 
+            $table->unsignedBigInteger('inventario_id')->nullable();
+            $table->foreign('inventario_id')->references('id')->on('inventarios'); 
+
             $table->decimal('actual_stock_origen', 18, 2)->nullable();
             
             $table->decimal('kgrequeridos', 18, 2)->nullable();

@@ -510,6 +510,16 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('01Galanmegabar2025*.')
             ]
         );
+          User::updateOrCreate(
+            ['email' => 'galanmega2@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'ADMIN GALAN 2',
+                'phone' => '3214154625',
+                'profile' => 'AdminBodega',
+                'status' => 'Active',
+                'password' => bcrypt('02NuevoGalanmega2025*.@')
+            ]
+        );
         User::updateOrCreate(
             ['email' => 'subamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
             [
@@ -522,7 +532,7 @@ class PermissionsSeeder extends Seeder
         );
 
         $usuarios = User::where('name', 'like', '%BAR%')
-            // ->orWhere('name', 'like', '%CAJERO%')
+              ->orWhere('name', 'like', '%ADMIN%')
             //  ->orWhereIn('id', $idsUsuarios)
             ->get();
 
@@ -542,6 +552,10 @@ class PermissionsSeeder extends Seeder
             'acceder_cargue_productos_term',
             'crear_compra_productos',
             'editar_compra_productos',
+            
+            'ver_contabilidad',
+            'acceder_contabilidad',
+            'crear_contabilidad',
 
             'acceder_ventas',
             'crear_venta_pos',
