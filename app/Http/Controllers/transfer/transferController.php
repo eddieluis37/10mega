@@ -213,7 +213,7 @@ class transferController extends Controller
                 // Si no, buscar por nombre, código de producto ó código de lote
                 $productsQuery->where(function ($q) use ($query) {
                     $q->where('name',   'LIKE', "%{$query}%")
-                        ->orWhere('code', 'LIKE', "%{$query}%")                            
+                        ->orWhere('code', 'LIKE', "%{$query}%")
                         ->orWhereHas('lotes', function ($q2) use ($query) {
                             $q2->where('codigo', 'LIKE', "%{$query}%");
                         });
@@ -242,7 +242,7 @@ class transferController extends Controller
             })
             // Unir con la tabla de lotes para poder ordenar por su fecha
             ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
-            ->orderBy('lotes.fecha_vencimiento', 'asc')                              
+            ->orderBy('lotes.fecha_vencimiento', 'asc')
             ->orderBy('stock_ideal', 'desc')
             ->select('inventarios.*')
             ->get();
@@ -281,7 +281,6 @@ class transferController extends Controller
 
     public function create($id) // http://2puracarnes.test:8080/transfer/create/2  llenado de la vista Translado | Categoria
     {
-        
         $dataTransfer = DB::table('transfers as tra')
             ->join('stores as storeOrigen', 'tra.bodega_origen_id', '=', 'storeOrigen.id')
             ->join('stores as storeDestino', 'tra.bodega_destino_id', '=', 'storeDestino.id')
@@ -295,11 +294,11 @@ class transferController extends Controller
             return redirect()->back()->with('error', 'No se encontró la transferencia');
         }
 
-       
         // Ahora ya podemos usar $dataTransfer[0] con la seguridad de que existe.
-        $storeOrigenId = $dataTransfer[0]->bodega_origen_id;
-        $storeDestinoId = $dataTransfer[0]->bodega_destino_id;
-
+        //  $storeOrigenId = $dataTransfer[0]->bodega_origen_id;
+        //  $storeDestinoId = $dataTransfer[0]->bodega_destino_id;
+        $storeOrigenId = [0];
+        $storeDestinoId = [0];
         // Consulta para productos de origen
         $arrayProductsOrigin = DB::table('products as p')
             ->join('inventarios as i', 'i.product_id', '=', 'p.id')
@@ -390,7 +389,7 @@ class transferController extends Controller
             }
         }
 
-        return view('transfer.create', compact(           
+        return view('transfer.create', compact(
             'dataTransfer',
             'transfers',
             'arrayProductsOrigin',
