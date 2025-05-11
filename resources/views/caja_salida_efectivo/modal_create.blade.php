@@ -3,45 +3,59 @@
       #formSalidaEfectivo label {
           color: #fff !important;
       }
-  </style>  
+  </style>
   <div class="row mb-3 align-items-center">
       <div class="col-md-6">
+
           <label for="vr_efectivo" class="form-label text-white fw-bold">VALOR</label>
       </div>
       <div class="col-md-6">
-          <div class="input-group">
-              <span class="input-group-text">$</span>
-              <input type="text" class="form-control" id="vr_efectivo" name="vr_efectivo" placeholder="0" required>
+          <div class="task-header">
+              <div class="form-group">
+                  <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input type="text" class="form-control" id="vr_efectivo" name="vr_efectivo" placeholder="0" required>
+                  </div>
+                  <span class="text-danger error-message"></span>
+              </div>
           </div>
-      </div>
-  </div> 
-  <div class="row mb-3">
-      <div class="col-12">
-          <div class="form-floating">
-              <label for="concepto" class=" text-white fw-bold">CONCEPTO</label>
-              <textarea
-                  class="form-control"
-                  placeholder="Descripción detallada del concepto"
-                  id="concepto"
-                  name="concepto"
-                  style="height: 150px"
-                  required></textarea>
-          </div>
-      </div>
-  </div>  
-  <div class="row mb-3">
-      <div class="col-md-12">
-          <label for="third_id" class="form-label text-white fw-bold">RECIBE</label>
-          <select class="form-select selectTercero" id="third_id" name="third_id" required>
-              <option value="">Buscar un tercero...</option>
-              @foreach ($terceros as $p)
-              <option value="{{ $p->id }}">{{ $p->name }}</option>
-              @endforeach
-          </select>
-          <span class="text-danger error-message"></span>
       </div>
   </div>
-
+  <div class="row mb-3">
+      <div class="col-12">
+          <div class="task-header">
+              <div class="form-group">
+                  <div class="form-floating">
+                      <label for="concepto" class=" text-white fw-bold">CONCEPTO</label>
+                      <textarea
+                          class="form-control"
+                          placeholder="Descripción detallada del concepto"
+                          id="concepto"
+                          name="concepto"
+                          style="height: 150px"
+                          required></textarea>
+                  </div>
+                  <span class="text-danger error-message"></span>
+              </div>
+          </div>
+      </div>
+  </div>
+  <div class="row mb-3">
+      <div class="col-md-12">
+          <div class="task-header">
+              <div class="form-group">
+                  <label for="third_id" class="form-label text-white fw-bold">RECIBE</label>
+                  <select class="form-select selectTercero" id="third_id" name="third_id" required>
+                      <option value="">Buscar un tercero...</option>
+                      @foreach ($terceros as $p)
+                      <option value="{{ $p->id }}">{{ $p->name }}</option>
+                      @endforeach
+                  </select>
+                  <span class="text-danger error-message"></span>
+              </div>
+          </div>
+      </div>
+  </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
@@ -50,14 +64,22 @@
           $('#modal-create-salida').on('hidden.bs.modal', function() {
               $(this).find('.error-message').text(''); // Limpiar mensaje de error
               $('#productoId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
-              $('#categoria').val(''); // Opcional: limpiar la selección del campo
+              $('#vr_efectivo').val(''); // Opcional: limpiar la selección del campo
+              $('#concepto').val('');
+              $('#third_id').val('');
 
           });
 
           // Limpiar mensajes de error al seleccionar un campo
-          $('#categoria').change(function() {
+          $('#vr_efectivo').change(function() {
               $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
           });
+          $('#concepto').change(function() {
+              $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+          });
+          $('#third_id').change(function() {
+              $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+          });          
 
       });
   </script>

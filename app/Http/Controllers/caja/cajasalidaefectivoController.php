@@ -119,24 +119,43 @@ class cajasalidaefectivoController extends Controller
 
     public function store(Request $request)
     {
+          // Limpia el campo "vr_efectivo" (elimina puntos y otros caracteres no numéricos)
+        $cleanVrEfectivo = str_replace('.', '', $request->vr_efectivo);
+
         try {
-            // 1) Validaciones
-            $v = Validator::make($request->all(), [
+            // 1) Reglas de validación
+            $rules = [
                 'id'                   => ['nullable', 'exists:caja_salida_efectivo,id'],
                 'vr_efectivo'          => ['required', 'numeric', 'min:0'],
                 'concepto'             => ['required', 'string', 'min:5'],
-                'third_id'             => ['nullable', 'exists:thirds,id'],
+                'third_id'             => ['required', 'exists:thirds,id'],
                 'fecha_hora_salida'    => ['nullable', 'date'],
-            ]);
+            ];
+
+            // 2) Mensajes personalizados
+            $messages = [
+                'vr_efectivo.required'     => 'Debes ingresar un valor de efectivo.',
+                'vr_efectivo.numeric'      => 'El valor debe ser numérico.',
+                'vr_efectivo.min'          => 'El valor no puede ser negativo.',
+                'concepto.required'        => 'El campo concepto es obligatorio.',
+                'concepto.string'          => 'El concepto debe ser texto.',
+                'concepto.min'             => 'El concepto debe tener al menos 5 caracteres.',
+                'third_id.required'        => 'Debes seleccionar quién recibe.',
+                'third_id.exists'          => 'El tercero seleccionado no es válido.',
+                'fecha_hora_salida.date'   => 'La fecha de salida debe tener un formato válido.',
+            ];
+
+            // 3) Validar
+            $v = Validator::make($request->all(), $rules, $messages);
 
             if ($v->fails()) {
                 return response()->json([
                     'status' => 0,
                     'errors' => $v->errors(),
-                ]);
+                ], 422);
             }
 
-            $user = $request->user();    
+            $user = $request->user();
             $caja = Caja::where('cajero_id', $user->id)  // filtra por su ID
                 ->where('estado', 'open')
                 ->latest()
@@ -154,7 +173,7 @@ class cajasalidaefectivoController extends Controller
                 // CREAR
                 $salida = Cajasalidaefectivo::create([
                     'caja_id'           => $caja->id,
-                    'vr_efectivo'       => $request->vr_efectivo,
+                    'vr_efectivo'       => $cleanVrEfectivo,
                     'concepto'          => $request->concepto,
                     'fecha_hora_salida' => $request->fecha_hora_salida ?? Carbon::now(),
                     'third_id'          => $request->third_id,
@@ -177,7 +196,7 @@ class cajasalidaefectivoController extends Controller
                 // EDITAR
                 $salida = Cajasalidaefectivo::findOrFail($request->id);
                 $salida->update([
-                    'vr_efectivo'       => $request->vr_efectivo,
+                    'vr_efectivo'       => $cleanVrEfectivo,
                     'concepto'          => $request->concepto,
                     'fecha_hora_salida' => $request->fecha_hora_salida,
                     'third_id'          => $request->third_id,
