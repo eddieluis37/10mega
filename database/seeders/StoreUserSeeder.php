@@ -38,7 +38,7 @@ class StoreUserSeeder extends Seeder
                 'stores' => Store::whereIn('id', [13])->pluck('id')->toArray(), // Bodegas específicas
             ],
             'AdminCerdoGuad' => [
-                'users' => [15],
+                'users' => [15,43],
                 'stores' => Store::whereIn('id', [22, 23])->pluck('id')->toArray(), // Bodegas específicas
             ],
             'AdminGuadCalle' => [
@@ -58,7 +58,10 @@ class StoreUserSeeder extends Seeder
                 'users' => [34],
                 'stores' => Store::whereIn('id', [16])->pluck('id')->toArray(), // Bodegas específicas
             ],
-
+            'Admin2Galan' => [
+                'users' => [42],
+                'stores' => Store::whereIn('id', [14,15,16])->pluck('id')->toArray(), // Bodegas específicas
+            ],
 
             'AdminSuba' => [
                 'users' => [19],

@@ -342,6 +342,16 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('Cajero04Soacha.*')
             ]
         );
+         User::updateOrCreate(
+            ['email' => 'cajero1cerdocentral@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'CAJERO 1 CERDO.CENTRAL',
+                'phone' => '3214154625',
+                'profile' => 'Cajero',
+                'status' => 'Active',
+                'password' => bcrypt('01CajaCerdoCentral.2025*')
+            ]
+        );
 
         $usuarios = User::where('name', 'like', '%CAJERO%')
             // ->orWhere('name', 'like', '%CAJERO%')
