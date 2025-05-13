@@ -37,13 +37,13 @@ class PermissionsSeeder extends Seeder
 
         // Crear o actualizar roles
         $liderAuditoria = Role::updateOrCreate(['name' => 'LiderAuditoria']);
-        $liderAuditoria->syncPermissions($allPermissions); 
+        $liderAuditoria->syncPermissions($allPermissions);
 
-          // Asignar rol "" a un usuario con el nombre ""
-          $user = User::where('name', 'LIDER AUDITORIA')->first();
-          if ($user) {
-              $user->assignRole($liderAuditoria);
-          }
+        // Asignar rol "" a un usuario con el nombre ""
+        $user = User::where('name', 'LIDER AUDITORIA')->first();
+        if ($user) {
+            $user->assignRole($liderAuditoria);
+        }
 
         /*  // Crear o actualizar roles
         $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
@@ -84,7 +84,8 @@ class PermissionsSeeder extends Seeder
         }
 
         $analistaCostos = Role::updateOrCreate(['name' => 'AnalistaCostos']);
-        $analistaCostos->syncPermissions([
+        $analistaCostos->syncPermissions($allPermissions);
+        /*   $analistaCostos->syncPermissions([
             'ver_compras',
             'ver_compra_lote',
             'acceder_compra_lote',
@@ -111,7 +112,7 @@ class PermissionsSeeder extends Seeder
             'crear_cargue_productos_term',
             'editar_cargue_productos_term',
             'eliminar_cargue_productos_term',
-        ]);
+        ]); */
 
         // Asignar rol "AnalistaCostos" a un usuario con el nombre "ANALISTA DE COSTOS"
         $user = User::where('name', 'ANALISTA DE COSTOS')->first();
@@ -344,7 +345,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('Cajero04Soacha.*')
             ]
         );
-         User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'cajero1cerdocentral@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'CAJERO 1 CERDO.CENTRAL',
@@ -522,7 +523,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('01Galanmegabar2025*.')
             ]
         );
-          User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'galanmega2@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'ADMIN GALAN 2',
@@ -544,7 +545,7 @@ class PermissionsSeeder extends Seeder
         );
 
         $usuarios = User::where('name', 'like', '%BAR%')
-              ->orWhere('name', 'like', '%ADMIN%')
+            ->orWhere('name', 'like', '%ADMIN%')
             //  ->orWhereIn('id', $idsUsuarios)
             ->get();
 
@@ -564,7 +565,7 @@ class PermissionsSeeder extends Seeder
             'acceder_cargue_productos_term',
             'crear_compra_productos',
             'editar_compra_productos',
-            
+
             'ver_contabilidad',
             'acceder_contabilidad',
             'crear_contabilidad',
