@@ -27,8 +27,8 @@
     /* Encabezado Principal */
     .header {
       background: linear-gradient(to right, #007bff, #00c8ff);
-      color: #fff; 
-    /*   padding: 1.5rem; */
+      color: #fff;
+      /*   padding: 1.5rem; */
       text-align: center;
     }
 
@@ -144,25 +144,34 @@
           <th>TOTAL FACTURA</th>
           <th>EFECTIVO</th>
 
-          <!-- Columnas dinámicas para cada forma de pago TARJETA -->
-          @foreach($tarjetas as $tarjeta)
+          {{-- Solo encabezados de TARJETA con ventas --}}
+          @foreach($activeTarjetas as $tarjeta)
           <th>{{ $tarjeta->nombre }}</th>
           @endforeach
 
-          <!-- Columna única para CRÉDITO -->
+          @if($showCredito)
           <th>CREDITO</th>
+          @endif
         </tr>
       </thead>
+
       <tbody>
-        @foreach ($caja->sales as $sale)
+        @foreach($caja->sales as $sale)
         <tr>
           <td>{{ $sale->tercero->name ?? 'Sin Nombre' }}</td>
           <td>{{ $sale->consecutivo }}</td>
           <td>$ {{ number_format($sale->total_valor_a_pagar, 0, ',', '.') }}</td>
-          <td>$ {{ number_format($sale->valor_a_pagar_efectivo - $sale->cambio, 0, ',', '.') }}</td>
 
-          <!-- Para cada tarjeta, validamos si la venta coincide con esa forma de pago -->
-          @foreach($tarjetas as $tarjeta)
+          {{-- Efectivo neto --}}
+          <td>
+            $ {{ number_format(
+            $sale->valor_a_pagar_efectivo - $sale->cambio,
+            0, ',', '.'
+          ) }}
+          </td>
+
+          {{-- Columnas de tarjeta existentes --}}
+          @foreach($activeTarjetas as $tarjeta)
           <td>
             @if(optional($sale->formaPagoTarjeta)->id === $tarjeta->id)
             ${{ number_format($sale->valor_a_pagar_tarjeta, 0, ',', '.') }}
@@ -172,58 +181,37 @@
           </td>
           @endforeach
 
-          <!-- Para la columna de CREDITO (consolidado) -->
+          {{-- Columna CRÉDITO solo si aplica --}}
+          @if($showCredito)
           <td>
-            {{-- Si la venta tiene una forma de pago crédito, mostramos valor_a_pagar_credito; de lo contrario 0 --}}
             @if($sale->formaPagoCredito)
-            ${{ number_format($sale->valor_a_pagar_credito, 0) }}
+            ${{ number_format($sale->valor_a_pagar_credito, 0, ',', '.') }}
             @else
             $0
             @endif
           </td>
+          @endif
         </tr>
         @endforeach
       </tbody>
 
       <tfoot>
-        @php
-        // Totales
-        $totalFactura = $caja->sales->sum('total_valor_a_pagar');
-        $totalEfectivo = $caja->sales->sum('valor_a_pagar_efectivo');
-
-        // Calculamos totales de cada tarjeta
-        $totalesTarjeta = [];
-        foreach($tarjetas as $tar) {
-        $totalesTarjeta[$tar->id] = 0;
-        }
-
-        // Total para créditos
-        $totalCredito = 0;
-
-        // Recorremos las ventas para sumar
-        foreach($caja->sales as $venta) {
-        // Sumar a la tarjeta correspondiente
-        if($venta->formaPagoTarjeta && array_key_exists($venta->formaPagoTarjeta->id, $totalesTarjeta)) {
-        $totalesTarjeta[$venta->formaPagoTarjeta->id] += $venta->valor_a_pagar_tarjeta;
-        }
-        // Sumar a crédito
-        if($venta->formaPagoCredito) {
-        $totalCredito += $venta->valor_a_pagar_credito;
-        }
-        }
-        @endphp
         <tr>
           <td colspan="2">TOTALES</td>
           <td>${{ number_format($totalFactura, 0, ',', '.') }}</td>
           <td>${{ number_format($totalEfectivo, 0, ',', '.') }}</td>
 
-          <!-- Mostramos la sumatoria para cada tarjeta en el mismo orden -->
-          @foreach($tarjetas as $tarjeta)
-          <td>${{ number_format($totalesTarjeta[$tarjeta->id], 0, ',', '.') }}</td>
+          {{-- Totales por tarjeta --}}
+          @foreach($activeTarjetas as $tarjeta)
+          <td>
+            ${{ number_format($totalesTarjeta[$tarjeta->id] ?? 0, 0, ',', '.') }}
+          </td>
           @endforeach
 
-          <!-- Total de crédito -->
+          {{-- Total crédito --}}
+          @if($showCredito)
           <td>${{ number_format($totalCredito, 0, ',', '.') }}</td>
+          @endif
         </tr>
       </tfoot>
     </table>

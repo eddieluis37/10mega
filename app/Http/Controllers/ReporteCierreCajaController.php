@@ -10,10 +10,8 @@ class ReporteCierreCajaController extends Controller
 {
     public function show($id)
     {
-        // Cargamos la caja con sus ventas, más las relaciones que necesites
-        // (por ejemplo, el tercero o las formas de pago asociadas)
+        // 1. Traer la caja y sus ventas activas con relaciones
         $caja = Caja::with([
-            // Aplicamos un constraint para filtrar las ventas cuyo status sea 1
             'sales' => function ($query) {
                 $query->where('status', '=', '1');
             },
@@ -21,10 +19,44 @@ class ReporteCierreCajaController extends Controller
             'sales.formaPagoTarjeta',
             'sales.formaPagoCredito',
         ])->findOrFail($id);
-        // Cargamos todas las formas de pago que sean de tipo TARJETA
+
+        // 2. Todas las formas de pago de tipo TARJETA
         $tarjetas = Formapago::where('tipoformapago', 'TARJETA')->get();
 
-        // Retornamos la vista, enviando la caja y las tarjetas
-        return view('reportes.cierre_caja', compact('caja', 'tarjetas'));
+        // 3. Totales generales
+        $totalFactura  = $caja->sales->sum('total_valor_a_pagar');
+        // Efectivo neto = efectivo recibido menos cambio entregado
+        $totalEfectivo = $caja->sales->sum('valor_a_pagar_efectivo')
+                       - $caja->sales->sum('cambio');
+        $totalCambio   = $caja->sales->sum('cambio');
+
+        // 4. Totales por tarjeta (agrupados por ID de formaPago)
+        $totalesTarjeta = $caja->sales
+            ->filter(fn($s) => $s->formaPagoTarjeta)
+            ->groupBy(fn($s) => $s->formaPagoTarjeta->id)
+            ->map(fn($group) => $group->sum('valor_a_pagar_tarjeta'))
+            ->toArray();
+
+        // 5. Filtrar solo las tarjetas que en totalesTarjeta tienen > 0
+        $activeTarjetas = $tarjetas->filter(fn($t) =>
+            (isset($totalesTarjeta[$t->id]) && $totalesTarjeta[$t->id] > 0)
+        );
+
+        // 6. Total y bandera para CRÉDITO
+        $totalCredito = $caja->sales->sum('valor_a_pagar_credito');
+        $showCredito  = ($totalCredito > 0);
+
+        // 7. Pasar todo a la vista
+        return view('reportes.cierre_caja', compact(
+            'caja',
+            'tarjetas',
+            'activeTarjetas',
+            'totalFactura',
+            'totalEfectivo',
+            'totalCambio',
+            'totalesTarjeta',
+            'totalCredito',
+            'showCredito'
+        ));
     }
 }
