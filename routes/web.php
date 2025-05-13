@@ -218,6 +218,11 @@ Route::middleware(['auth', 'can:acceder_brand'])->group(function () {
     ]);
 });
 
+Route::middleware(['auth', 'can:acceder_inventario_stockfisico'])->group(function () {
+    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
+    Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
+});
+
 /*****************************ORDENES DE PEDIDOS******************************************/
 Route::middleware(['auth', 'can:acceder_orders'])->group(function () {
     Route::get('orders', [orderController::class, 'index'])->name('order.index');
@@ -453,10 +458,7 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
 });
 
-Route::middleware(['auth', 'can:acceder_inventario_stockfisico'])->group(function () {
-    Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
-    Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
-});
+
 
 Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
     /**PRODUCTOS SIN LIVEWIRE**/
