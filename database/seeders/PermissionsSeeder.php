@@ -215,6 +215,8 @@ class PermissionsSeeder extends Seeder
             'eliminar_traslado',
             'acceder_cargue_productos_term',
 
+            'acceder_inventario_stockfisico',
+
             'ver_contabilidad',
             'acceder_contabilidad',
             'crear_contabilidad',
