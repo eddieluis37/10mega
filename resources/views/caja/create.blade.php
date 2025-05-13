@@ -255,9 +255,11 @@
 												</td>
 											</tr>
 											<tr>
-												<th scope="row" style="text-align: left">Retiro de caja</th>
+												<th scope="row" style="text-align: left">Salida de caja</th>
 												<td>
-													<!-- Se puede agregar el input correspondiente -->
+													<input type="text" id="salidaefectivo" name="salidaefectivo"
+														value=" {{ number_format($arrayTotales['valorTotalSalidaEfectivo'], 0, ',', '.') }}"
+														style="text-align: right; font-weight: bold; color: black" readonly>
 												</td>
 											</tr>
 											<tr>

@@ -59,6 +59,9 @@ class cajaController extends Controller
         $efectivo = $request->input('efectivo');
         $efectivo = str_replace(['.', ',', '$', '#'], '', $efectivo);
 
+        $salidaefectivo = $request->input('salidaefectivo');
+        $salidaefectivo = str_replace(['.', ',', '$', '#'], '', $salidaefectivo);
+
         $valor_real = $request->input('valor_real');
         $valor_real = str_replace(['.', ',', '$', '#'], '', $valor_real);
 
@@ -104,6 +107,7 @@ class cajaController extends Controller
             $caja = Caja::find($ventaId);
             $caja->user_id = $request->user()->id;
             $caja->efectivo = $efectivo;
+            $caja->retiro_caja = $salidaefectivo;
             $caja->valor_real = $valor_real;
             $caja->total = $total;
             $caja->diferencia = $diferencia;
@@ -229,15 +233,38 @@ class cajaController extends Controller
     protected function sumTotales(Caja $caja)
     {
         // Obtener las ventas del cajero para el turno vigente
-        $ventas = $caja->salesByCajero()->whereDate('fecha_venta', now()->toDateString())->get();
+        // $ventas = $caja->salesByCajero()->whereDate('fecha_cierre', now()->toDateString())->get();
+
+        // Extraemos sólo la parte Y-m-d de la fecha de inicio del turno
+        $fechaInicio = $caja->fecha_hora_inicio->toDateString(); // ej. "2025-05-12"
+
+        // Filtramos las ventas de este cajero en esa misma fecha de cierre
+        $ventas = $caja
+            ->salesByCajero()
+            ->whereDate('fecha_cierre', $fechaInicio)
+            ->get();
 
         $valorApagarEfectivo = $ventas->sum('valor_a_pagar_efectivo');
         $valorCambio         = $ventas->sum('cambio');
+
+        // efectivo neto antes de retiros
+        $valorEfectivoBruto  = $valorApagarEfectivo - $valorCambio;
+
         $valorEfectivo       = $valorApagarEfectivo - $valorCambio;
         $valorApagarTarjeta  = $ventas->sum('valor_a_pagar_tarjeta');
         $valorApagarOtros    = $ventas->sum('valor_a_pagar_otros');
         $valorApagarCredito  = $ventas->sum('valor_a_pagar_credito');
+
         $valorTotal          = $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito;
+
+        // 4) Suma de todos los retiros de efectivo (vr_efectivo)
+        $valorTotalSalidaEfectivo = $caja
+            ->salidasEfectivo()
+            ->sum('vr_efectivo');
+
+        // 5) Calculamos el efectivo disponible descontando retiros
+        $valorEfectivoNeto = $valorEfectivoBruto - $valorTotalSalidaEfectivo;
+
 
         return [
             'valorApagarEfectivo' => $valorApagarEfectivo,
@@ -247,6 +274,7 @@ class cajaController extends Controller
             'valorApagarOtros'    => $valorApagarOtros,
             'valorApagarCredito'  => $valorApagarCredito,
             'valorTotal'          => $valorTotal,
+            'valorTotalSalidaEfectivo'   => $valorTotalSalidaEfectivo,
         ];
     }
 

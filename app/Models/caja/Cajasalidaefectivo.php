@@ -28,7 +28,7 @@ class Cajasalidaefectivo extends Model
     {
         return LogOptions::defaults()
             ->useLogName('caja_salida_efectivo')
-            ->logOnly(['caja_id','vr_efectivo','concepto','fecha_hora_salida','third_id','status'])
+            ->logOnly(['caja_id', 'vr_efectivo', 'concepto', 'fecha_hora_salida', 'third_id', 'status'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Registro de salida de efectivo fue {$eventName}");
     }
@@ -36,7 +36,7 @@ class Cajasalidaefectivo extends Model
     // Relaciones
     public function caja()
     {
-        return $this->belongsTo(Caja::class);
+        return $this->belongsTo(Caja::class, 'caja_id');
     }
 
     public function tercero()

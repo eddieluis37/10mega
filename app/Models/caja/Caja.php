@@ -14,6 +14,8 @@ class Caja extends Model
 {
     use HasFactory;
 
+    protected $dates = ['fecha_hora_inicio', 'fecha_hora_cierre'];
+
     protected $fillable = [
         'user_id',
         'centrocosto_id',
@@ -59,13 +61,13 @@ class Caja extends Model
     public function centroCosto()
     {
         return $this->belongsTo(Centrocosto::class, 'centrocosto_id');
-    }    
+    }
 
-     // Relación con los recibos generados en este turno de caja
-     public function recibosDeCaja()
-     {
-         return $this->hasMany(Recibodecaja::class);
-     }
+    // Relación con los recibos generados en este turno de caja
+    public function recibosDeCaja()
+    {
+        return $this->hasMany(Recibodecaja::class);
+    }
 
     /**
      * Accessor para obtener el nombre del centro de costo.
@@ -81,7 +83,7 @@ class Caja extends Model
     public function getNamecajeroAttribute()
     {
         return $this->cajero ? $this->cajero->name : '';
-    }    
+    }
 
     /**
      * Relación con las ventas a través de la tabla pivote sale_caja.
@@ -108,5 +110,11 @@ class Caja extends Model
     public function salesByCajero()
     {
         return $this->hasMany(Sale::class, 'user_id', 'cajero_id');
+    }
+
+    /** Retiros de efectivo de esta caja */
+    public function salidasEfectivo()
+    {
+        return $this->hasMany(Cajasalidaefectivo::class, 'caja_id');
     }
 }

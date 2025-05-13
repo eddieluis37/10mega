@@ -11,8 +11,10 @@ class Sale extends Model
 {
     protected $table = 'sales';
 
+    protected $dates = ['fecha_cierre'];
+
     protected $fillable = [
-        'user_id',        
+        'user_id',
         'store_id',
         'third_id',
         'vendedor_id',
@@ -96,7 +98,7 @@ class Sale extends Model
     {
         return $this->belongsTo(\App\Models\Third::class, 'third_id');
     }
-    
+
     public function formaPagoTarjeta()
     {
         return $this->belongsTo(\App\Models\Formapago::class, 'forma_pago_tarjeta_id');
@@ -135,5 +137,11 @@ class Sale extends Model
     public function cuentaPorCobrar()
     {
         return $this->hasOne(CuentaPorCobrar::class);
+    }
+
+    // Qué cajero (usuario) hizo la venta
+    public function cajero()
+    {
+        return $this->belongsTo(User::class, 'cajero_id');
     }
 }
