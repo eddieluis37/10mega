@@ -189,8 +189,8 @@ class cajaController extends Controller
     public function create($id)
     {
         // Obtener la caja junto con las ventas del turno vigente del cajero
-        $caja = Caja::with(['salesByCajero' => function ($query) {
-            $query->turnoVigente();
+        $caja = Caja::with(['sales' => function ($query) {
+            // $query->turnoVigente();
         }])->find($id);
 
         if (!$caja) {
@@ -202,16 +202,25 @@ class cajaController extends Controller
         }
 
         // Ordenar las ventas por fecha de creación (ascendente)
-        $ventasOrdenadas = $caja->salesByCajero->sortBy('created_at');
+        $ventas = $caja->sales->sortBy('created_at');
 
-        // Calcular la cantidad de facturas y determinar la factura inicial y final
-        $cantidadFacturas = $ventasOrdenadas->count();
-        $facturaInicial   = $ventasOrdenadas->first()->consecutivo;
-        $facturaFinal     = $ventasOrdenadas->last()->consecutivo;
+        if ($ventas->isEmpty()) {
+            return redirect()->back()->with('warning', 'El cajero no tiene ventas asociadas en el turno vigente.');
+        }
+
+        // 3) Ordeno y extraigo consecutivos protegiéndome contra null
+        $ventasOrdenadas  = $ventas->sortBy('created_at');
+        $facturaInicial   = $ventasOrdenadas->first()?->consecutivo;
+        $facturaFinal     = $ventasOrdenadas->last()?->consecutivo;
+
+        if (is_null($facturaInicial) || is_null($facturaFinal)) {
+            return redirect()->back()->with('error', 'No se pudo determinar el consecutivo de las facturas.');
+        }
+
 
         // Actualizar los campos en la caja
         $caja->update([
-            'cantidad_facturas' => $cantidadFacturas,
+            'cantidad_facturas' => $ventas->count(),
             'factura_inicial'   => $facturaInicial,
             'factura_final'     => $facturaFinal,
         ]);
@@ -240,7 +249,7 @@ class cajaController extends Controller
 
         // Filtramos las ventas de este cajero en esa misma fecha de cierre
         $ventas = $caja
-            ->salesByCajero()
+            ->sales()
             ->whereDate('fecha_cierre', $fechaInicio)
             ->get();
 
