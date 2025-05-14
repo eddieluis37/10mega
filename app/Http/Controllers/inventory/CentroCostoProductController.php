@@ -168,46 +168,114 @@ class CentroCostoProductController extends Controller
             $stockIdealPrevio = $inv->stock_ideal;
             $diferencia       = $stockIdealPrevio - $data['fisico'];
 
-            // 3) Actualizo el inventario
+            // 3) Actualizo el inventario físico y stock ideal
             $inv->update([
                 'stock_fisico'        => $data['fisico'],
                 'cantidad_diferencia' => $diferencia,
                 'stock_ideal'         => $data['fisico'],
             ]);
 
-            // 4) Registro en el log de auditoría con Spatie Activity Log
+            // 4) Primer log de ajuste de inventario
             Activity()
-                ->causedBy(auth()->user())               // opcional: asigna el usuario autenticado
-                ->performedOn($inv)                      // el modelo Inventario afectado
+                ->causedBy(auth()->user())
+                ->performedOn($inv)
                 ->withProperties([
-                    'before' => [
-                        'stock_ideal'   => $stockIdealPrevio,
-                    ],
-                    'after' => [
+                    'before' => ['stock_ideal' => $stockIdealPrevio],
+                    'after'  => [
                         'stock_fisico'        => $inv->stock_fisico,
                         'stock_ideal'         => $inv->stock_ideal,
                         'cantidad_diferencia' => $inv->cantidad_diferencia,
                     ],
                     'metadata' => [
-                        'product_id'     => $data['productId'],
-                        'store_id'       => $data['centrocostoId'],
-                        'lote_id'        => $data['loteId'],
+                        'product_id' => $data['productId'],
+                        'store_id'   => $data['centrocostoId'],
+                        'lote_id'    => $data['loteId'],
                     ],
                 ])
-                ->useLog('ajustes_inventario')          // nombre de log personalizado
+                ->useLog('ajustes_inventario')
                 ->log('Ajuste de inventario realizado');
+
+            // 5) Limpieza de campos de inventario (reseteo a 0)
+            $beforeClean = $inv->only([
+                'cantidad_inventario_inicial',
+                'cantidad_compra_lote',
+                'cantidad_alistamiento',
+                'cantidad_compra_prod',
+                'cantidad_prod_term',
+                'cantidad_traslado',
+                'cantidad_venta',
+                'cantidad_notacredito',
+                'stock_ideal',
+                'stock_fisico',
+                'cantidad_diferencia',
+                'costo_unitario',
+                'costo_total'
+            ]);
+
+            $inv->update([
+                'cantidad_inventario_inicial' => 0.00,
+                'cantidad_compra_lote'        => 0.00,
+                'cantidad_alistamiento'       => 0.00,
+                'cantidad_compra_prod'        => 0.00,
+                'cantidad_prod_term'          => 0.00,
+                'cantidad_traslado'           => 0.00,
+                'cantidad_venta'              => 0.00,
+                'cantidad_notacredito'        => 0.00,
+                'stock_ideal'                 => 0.00,
+                'cantidad_diferencia'         => 0.00,
+                'costo_unitario'              => 0.00,
+                'costo_total'                 => 0.00,
+            ]);
+
+            // 6) Segundo log: limpieza de inventario
+            Activity()
+                ->causedBy(auth()->user())
+                ->performedOn($inv)
+                ->withProperties([
+                    'before' => $beforeClean,
+                    'after'  => array_fill_keys(array_keys($beforeClean), 0.00),
+                    'metadata' => [
+                        'action'    => 'limpieza_campos_inventario',
+                        'product_id' => $data['productId'],
+                        'store_id'  => $data['centrocostoId'],
+                        'lote_id'   => $data['loteId'],
+                    ],
+                ])
+                ->useLog('ajustes_inventario')
+                ->log('Campos de inventario reseteados a cero');
+
+            // 7) Eliminación de movimientos de inventario que coincidan con la triada
+            MovimientoInventario::where('store_destino_id', $data['centrocostoId'])
+                ->where('lote_id',       $data['loteId'])
+                ->where('product_id',    $data['productId'])
+                ->delete();
+
+            // 8) Tercer log: eliminación de movimientos
+            Activity()
+                ->causedBy(auth()->user())
+                ->performedOn($inv)
+                ->withProperties([
+                    'metadata' => [
+                        'action'    => 'eliminacion_movimientos',
+                        'product_id' => $data['productId'],
+                        'store_id'  => $data['centrocostoId'],
+                        'lote_id'   => $data['loteId'],
+                    ],
+                ])
+                ->useLog('ajustes_inventario')
+                ->log('Movimientos de inventario actualizados');
 
             DB::commit();
 
             return response()->json([
                 'status'  => 1,
-                'message' => 'Inventario y movimiento de ajuste registrados correctamente.'
+                'message' => 'Inventario actualizado, movimientos actualizados correctamente.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status'  => 0,
-                'message' => 'Error al actualizar inventario.',
+                'message' => 'Error al procesar la actualización.',
                 'error'   => $e->getMessage(),
             ], 500);
         }
