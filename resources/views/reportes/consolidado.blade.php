@@ -38,20 +38,7 @@
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $endDate ?? date('Y-m-d') }}T23:00" name="endDate" id="endDate" required>
           </div>
-        </div>
-
-        <!--   <div class="col-md-3 text-right ml-auto">
-          <div style="margin-top:28px;" clas="">
-            <button class="btn btn-success btn-lg" type="button" id="cargarInventarioBtn"></button>
-          </div>
-        </div>
-
-        @can('Cerrar_Inventario')
-
-
-        @endcan -->
-
-
+        </div>     
         <div class="table-responsive mt-1" style="overflow-x: auto;">
           <table id="tableInventory" class="table table-success table-striped mt-1">
             <thead class="text-white" style="background: #3B3F5C">
@@ -94,8 +81,6 @@
             </tfoot>
           </table>
         </div>
-
-
       </div>
     </div>
   </div>

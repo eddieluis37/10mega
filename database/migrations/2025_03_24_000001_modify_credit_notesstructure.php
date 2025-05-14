@@ -34,7 +34,7 @@ return new class extends Migration
         });
 
         // 3. Enhance notacredito_details to better track inventory items
-       Schema::table('notacredito_details', function (Blueprint $table) {
+      /*  Schema::table('notacredito_details', function (Blueprint $table) {
             // Add reference to original sale_detail_id
             $table->unsignedBigInteger('sale_detail_id')->nullable()->after('product_id');
             $table->foreign('sale_detail_id')->references('id')->on('sale_details');
@@ -52,7 +52,7 @@ return new class extends Migration
             // Add a field to track if this detail has been processed in inventory
             $table->boolean('inventory_processed')->default(false)
                 ->comment('Flag to track if inventory has been updated for this specific item');
-        }); 
+        });  */
 
        /*  // 4. Create a new table to track credit note inventory movements
         Schema::create('notacredito_inventory_movements', function (Blueprint $table) {
