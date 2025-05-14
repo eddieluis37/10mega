@@ -204,10 +204,8 @@ class CentroCostoProductController extends Controller
                 'cantidad_prod_term',
                 'cantidad_traslado',
                 'cantidad_venta',
-                'cantidad_notacredito',
-                'stock_ideal',
-                'stock_fisico',
-                'cantidad_diferencia',
+                'cantidad_notacredito',             
+                'stock_fisico',              
                 'costo_unitario',
                 'costo_total'
             ]);
@@ -220,9 +218,7 @@ class CentroCostoProductController extends Controller
                 'cantidad_prod_term'          => 0.00,
                 'cantidad_traslado'           => 0.00,
                 'cantidad_venta'              => 0.00,
-                'cantidad_notacredito'        => 0.00,
-                'stock_ideal'                 => 0.00,
-                'cantidad_diferencia'         => 0.00,
+                'cantidad_notacredito'        => 0.00,                              
                 'costo_unitario'              => 0.00,
                 'costo_total'                 => 0.00,
             ]);
