@@ -91,7 +91,7 @@ class InventarioService
                     + $enlistments
                     + $compensadores
                     + $inventario->cantidad_prod_term
-                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito) - ($inventario->cantidad_diferencia);
+                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
 
         Log::info('Stock ideal calculado', [
             'cantidad_inventario_inicial' => $inventario->cantidad_inventario_inicial,

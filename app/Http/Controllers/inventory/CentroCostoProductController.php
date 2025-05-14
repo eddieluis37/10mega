@@ -204,8 +204,7 @@ class CentroCostoProductController extends Controller
                 'cantidad_prod_term',
                 'cantidad_traslado',
                 'cantidad_venta',
-                'cantidad_notacredito',             
-                'stock_fisico',              
+                'cantidad_notacredito',           
                 'costo_unitario',
                 'costo_total'
             ]);

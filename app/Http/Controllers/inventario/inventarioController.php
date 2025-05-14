@@ -107,7 +107,7 @@ class inventarioController extends Controller
                     + $enlistments
                     + $compensadores
                     + $inventario->cantidad_prod_term
-                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito) - ($inventario->cantidad_diferencia);
+                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
 
                 // 2) Tomamos el stock físico actual del inventario
                 //    Asumimos que stock_fisico ya está cargado en la BD o bien viene en la petición.
