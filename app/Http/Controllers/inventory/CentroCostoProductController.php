@@ -245,11 +245,14 @@ class CentroCostoProductController extends Controller
                 ->log('Campos de inventario reseteados a cero');
 
             // 7) Eliminación de movimientos de inventario que coincidan con la triada
-            MovimientoInventario::where('store_destino_id', $data['centrocostoId'])
-                ->where('lote_id',       $data['loteId'])
-                ->where('product_id',    $data['productId'])
+            MovimientoInventario::where(function ($query) use ($data) {
+                $query->where('store_destino_id', $data['centrocostoId'])
+                    ->orWhere('store_origen_id',  $data['centrocostoId']);
+            })
+                ->where('lote_id',    $data['loteId'])
+                ->where('product_id', $data['productId'])
                 ->delete();
-
+                
             // 8) Tercer log: eliminación de movimientos
             Activity()
                 ->causedBy(auth()->user())
