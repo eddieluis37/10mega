@@ -213,7 +213,7 @@ class CentroCostoProductController extends Controller
             ]);
 
             $inv->update([
-                'cantidad_inventario_inicial' => 0.00,
+                'cantidad_inventario_inicial' => $inv->stock_fisico,
                 'cantidad_compra_lote'        => 0.00,
                 'cantidad_alistamiento'       => 0.00,
                 'cantidad_compra_prod'        => 0.00,
@@ -252,7 +252,7 @@ class CentroCostoProductController extends Controller
                 ->where('lote_id',    $data['loteId'])
                 ->where('product_id', $data['productId'])
                 ->delete();
-                
+
             // 8) Tercer log: eliminación de movimientos
             Activity()
                 ->causedBy(auth()->user())
