@@ -27,36 +27,59 @@
         </div>
       </div>
       <div class="row g-3 mt-3">
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="centrocosto" class="form-label">Centro costo</label>
+            <select class="form-control form-control-sm select2" name="centrocosto" id="centrocosto" required>
+              <option value="">Seleccione la categoría</option>
+              @foreach($centros as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select class="form-control form-control-sm select2" name="categoria" id="categoria" required>
+              <option value="">Seleccione la categoría</option>
+              @foreach($category as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-3">
           <h6>Fecha y hora inicial</h6>
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $startDate ?? date('Y-m-d') }}T00:00" name="startDate" id="startDate" required>
           </div>
         </div>
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-12 col-md-3">
           <h6>Fecha y hora final</h6>
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $endDate ?? date('Y-m-d') }}T23:00" name="endDate" id="endDate" required>
           </div>
-        </div>     
+        </div>
         <div class="table-responsive mt-1" style="overflow-x: auto;">
           <table id="tableInventory" class="table table-success table-striped mt-1">
             <thead class="text-white" style="background: #3B3F5C">
               <tr>
-                <th class="table-th text-white" title="Categoria" style="text-align: center;">COD</th>
-                <th class="table-th text-white" title="Productos" style="text-align: center;">PRODUCTO</th>
-                <th class="table-th text-white" title="Categoria" style="text-align: center;">CAT</th>
-                <th class="table-th text-white" title="Cantidades vendidas" style="text-align: center;">CV</th>
-                <th class="table-th text-white" title="Cantidades acreditadas" style="text-align: center;">CN</th>
-                <th class="table-th text-white" title="Cantidad debitadas" style="text-align: center;">CD</th>
-                <th class="table-th text-white" title="Cantidad real" style="text-align: center;">CR</th>
-                <th class="table-th text-white" title="Dinero venta real" style="text-align: center;">$VR</th>
-                <th class="table-th text-white" title="Descuento por producto" style="text-align: center;">DP</th>
-                <th class="table-th text-white" title="Descuento por cliente" style="text-align: center;">DC</th>
-                <th class="table-th text-white" title="" style="text-align: center;">SUBTOTAL</th>
-                <th class="table-th text-white" title="" style="text-align: center;">IS</th>
-                <th class="table-th text-white" title="Impuesto IVA" style="text-align: center;">IVA</th>
-                <th class="table-th text-white" title="" style="text-align: center;">TOTAL</th>
+                <th class="table-th text-white" title="product_id" style="text-align: center;">PRODUCTO</th>
+                <th class="table-th text-white" title="codigo de lote_id" style="text-align: center;">LOTE</th>
+                <th class="table-th text-white" title="Cantidad" style="text-align: center;">QT</th>
+                <th class="table-th text-white" title="precio antes de desc e impuesto" style="text-align: center;">$_base</th>              
+                <th class="table-th text-white" title="Dinero base" style="text-align: center;">T_base</th>
+                <th class="table-th text-white" title="Descuento por producto" style="text-align: center;">D_pr</th>
+                <th class="table-th text-white" title="Descuento por cliente" style="text-align: center;">D_cl</th>
+                <th class="table-th text-white" title="iva" style="text-align: center;">T_iva</th>
+                <th class="table-th text-white" title="impuesto ultra procesado" style="text-align: center;">T_up</th>
+                <th class="table-th text-white" title="Impuesto al consumo" style="text-align: center;">T_ic</th>
+                <th class="table-th text-white" title="Total venta" style="text-align: center;">T_venta</th>
               </tr>
             </thead>
             <tbody>
@@ -64,8 +87,7 @@
             <tfoot>
               <tr>
                 <th>Totales</th>
-                <td></td>
-                <td></td>
+                <td></td>               
                 <td>0.00</td>
                 <td>0.00</td>
                 <td>0.00</td>
@@ -73,9 +95,7 @@
                 <td>0.00</td>
                 <td>0.00</td>
                 <td>0.00</td>
-                <td>0.00</td>
-                <td>0.00</td>
-                <td>0.00</td>
+                <td>0.00</td>                
                 <td align="center">0.00</td>
               </tr>
             </tfoot>
