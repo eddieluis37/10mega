@@ -218,6 +218,9 @@ Route::middleware(['auth', 'can:acceder_brand'])->group(function () {
     ]);
 });
 
+Route::get('reportes/ventas_por_productos', [reporteventaprodController::class, 'index'])->name('reportes.ventas_por_productos');
+Route::get('showReportVentasPorProd', [reporteventaprodController::class, 'show'])->name('showReportVentasPorProd.showlist');
+
 Route::middleware(['auth', 'can:acceder_inventario_stockfisico'])->group(function () {
     Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
@@ -589,8 +592,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('reportes/ventas_por_productos_clientes', [reporteventaprodclientController::class, 'index'])->name('reportes.ventas_por_productos_clientes');
     Route::get('reportVentasPorProdClient', [reporteventaprodclientController::class, 'show'])->name('ReportVentasPorProdClient.showli');
 
-    Route::get('reportes/ventas_por_productos', [reporteventaprodController::class, 'index'])->name('reportes.ventas_por_productos');
-    Route::get('showReportVentasPorProd', [reporteventaprodController::class, 'show'])->name('showReportVentasPorProd.showlist');
+
 
     Route::get('reportes/compras_por_productos', [reportecompraprodController::class, 'index'])->name('reportes.compras_por_productos');
     Route::get('reportes/compras_requeridas', [reportecomprarequeridaController::class, 'index'])->name('reportes.compras_requeridas');
