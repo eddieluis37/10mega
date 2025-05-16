@@ -218,12 +218,14 @@ Route::middleware(['auth', 'can:acceder_brand'])->group(function () {
     ]);
 });
 
-Route::get('reportes/ventas_por_productos', [reporteventaprodController::class, 'index'])->name('reportes.ventas_por_productos');
-Route::get('showReportVentasPorProd', [reporteventaprodController::class, 'show'])->name('showReportVentasPorProd.showlist');
 
 Route::middleware(['auth', 'can:acceder_inventario_stockfisico'])->group(function () {
     Route::post('/updateCcpInventory', [CentroCostoProductController::class, 'updateCcpInventory'])->name('inventory.updateCcpInventory999');
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
+
+    Route::get('reportes/ventas_por_productos', [reporteventaprodController::class, 'index'])->name('reportes.ventas_por_productos');
+
+    Route::get('showReportVentasPorProd', [reporteventaprodController::class, 'show'])->name('showReportVentasPorProd.showlist');
 });
 
 /*****************************ORDENES DE PEDIDOS******************************************/
