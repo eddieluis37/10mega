@@ -19,27 +19,28 @@
 
 <link href="{{ asset('css/custom.css') }}" rel="stylesheet" type="text/css" />
 
-<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/widgets/modules-widgets.css') }}">   
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/widgets/modules-widgets.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/forms/theme-checkbox-radio.css') }}">
 
 <link href="{{ asset('assets/css/apps/scrumboard.css') }}" rel="stylesheet" type="text/css" />
-<link href="{{ asset('assets/css/apps/notes.css') }}" rel="stylesheet" type="text/css" /> 
- 
+<link href="{{ asset('assets/css/apps/notes.css') }}" rel="stylesheet" type="text/css" />
+
 <link rel="stylesheet" href="{{ asset('css/apexcharts.css') }}" />
 
-<link href="{{ asset('plugins/flatpickr/flatpickr.dark.css') }}" rel="stylesheet" type="text/css" /> 
+<link href="{{ asset('plugins/flatpickr/flatpickr.dark.css') }}" rel="stylesheet" type="text/css" />
 
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css">
+<link rel="stylesheet"  href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css" />
 
 
 
 
 <style>
 	aside {
-		display: none!important;
+		display: none !important;
 	}
+
 	.page-item.active .page-link {
 		z-index: 3;
 		color: #fff;
@@ -47,17 +48,19 @@
 		border-color: #3b3f5c;
 	}
 
-	@media (max-width: 480px) 
-	{
+	@media (max-width: 480px) {
 		.mtmobile {
-			margin-bottom: 20px!important;
+			margin-bottom: 20px !important;
 		}
+
 		.mbmobile {
-			margin-bottom: 10px!important;
+			margin-bottom: 10px !important;
 		}
+
 		.hideonsm {
-			display: none!important;
+			display: none !important;
 		}
+
 		.inblock {
 			display: block;
 		}
@@ -65,17 +68,17 @@
 
 	/*sidebar background*/
 	.sidebar-theme #compactSidebar {
-		background: #191e3a!important;
+		background: #191e3a !important;
 	}
 
 	/*sidebar collapse background */
 	.header-container .sidebarCollapse {
-		color: #3B3F5C!important;
+		color: #3B3F5C !important;
 	}
 
 	.navbar .navbar-item .nav-item form.form-inline input.search-form-control {
 		font-size: 15px;
-		background-color: #3B3F5C!important;
+		background-color: #3B3F5C !important;
 		padding-right: 40px;
 		padding-top: 12px;
 		border: none;
@@ -83,15 +86,13 @@
 		box-shadow: none;
 		border-radius: 30px;
 	}
-
-
 </style>
 
 
 <style>
-    .hidden{
-        display: none;
-    } 
+	.hidden {
+		display: none;
+	}
 </style>
 
 

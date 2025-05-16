@@ -10,16 +10,18 @@ import {
 
 console.log("Starting");
 
-function formatCantidad(value, decimals = 2) {
-    const n = parseFloat(value) || 0;
-    return n.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
 const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-var dataTable;
+function formatCantidad(value, decimals = 2) {
+  const n = parseFloat(value) || 0;
+  return n
+    .toFixed(decimals)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+ var dataTable;
 
 function initializeDataTable({
     centroId = "",
@@ -49,47 +51,101 @@ function initializeDataTable({
             {
                 data: "cantidad",
                 name: "cantidad",
-                render: (d) => formatCantidad(d),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidad(data) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "precio_base",
                 name: "precio_base",
-                render: (d) => formatCantidad(d, 0),
+                render: function (d, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(d) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "total_base",
                 name: "total_base",
-                render: (d) => formatCantidad(d, 0),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "descuento_productos",
                 name: "descuento_productos",
-                render: (d) => formatCantidad(d, 0),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "descuento_clientes",
                 name: "descuento_clientes",
-                render: (d) => formatCantidad(d, 0),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "total_iva",
                 name: "total_iva",
-                render: (d) => formatCantidad(d, 0),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "total_up",
                 name: "total_up",
-                render: (d) => formatCantidad(d, 0),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "total_ic",
                 name: "total_ic",
-                render: (d) => formatCantidad(d, 0),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
             },
             {
                 data: "total_venta",
                 name: "total_venta",
-                render: (d) => formatCantidad(d, 0),
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
             },
         ],
         order: [[1, "ASC"]],
@@ -121,7 +177,7 @@ function initializeDataTable({
                 .data()
                 .reduce((a, b) => a + parseFloat(b || 0), 0);
             $(api.column("cantidad:name").footer()).html(
-                formatCantidad(totalCant)
+                formatCantidadSinCero(totalCant)
             );
         },
     });
