@@ -42,7 +42,7 @@ class reporteventaprodController extends Controller
                 'p.name as producto',
                 'l.codigo as lote',
                 DB::raw('SUM(sd.quantity) as cantidad'),
-                DB::raw('ROUND(AVG(sd.price), 2) as precio_base'),
+                DB::raw('ROUND(AVG(sd.price), 0) as precio_base'),
                 DB::raw('SUM(sd.total_bruto) as total_base'),
                 DB::raw('SUM(sd.descuento) as descuento_productos'),
                 DB::raw('SUM(sd.descuento_cliente) as descuento_clientes'),

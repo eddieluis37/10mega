@@ -15,13 +15,11 @@ const token = document
     .getAttribute("content");
 
 function formatCantidad(value, decimals = 2) {
-  const n = parseFloat(value) || 0;
-  return n
-    .toFixed(decimals)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const n = parseFloat(value) || 0;
+    return n.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
- var dataTable;
+var dataTable;
 
 function initializeDataTable({
     centroId = "",
@@ -178,6 +176,62 @@ function initializeDataTable({
                 .reduce((a, b) => a + parseFloat(b || 0), 0);
             $(api.column("cantidad:name").footer()).html(
                 formatCantidadSinCero(totalCant)
+            );
+            const totalPrecioBase = api
+                .column("precio_base:name", { search: "applied" })
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("precio_base:name").footer()).html(
+                formatCantidadSinCero(totalPrecioBase)
+            );
+            const totalBase = api
+                .column("total_base:name")
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("total_base:name").footer()).html(
+                formatCantidadSinCero(totalBase)
+            );
+            const totalDescProd = api
+                .column("descuento_productos:name")
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("descuento_productos:name").footer()).html(
+                formatCantidadSinCero(totalDescProd)
+            );
+            const totalDescCli = api
+                .column("descuento_clientes:name")
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("descuento_clientes:name").footer()).html(
+                formatCantidadSinCero(totalDescCli)
+            );
+            const totalIVA = api
+                .column("total_iva:name")
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("total_iva:name").footer()).html(
+                formatCantidadSinCero(totalIVA)
+            );
+            const totalUP = api
+                .column("total_up:name")
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("total_up:name").footer()).html(
+                formatCantidadSinCero(totalUP)
+            );
+            const totalIC = api
+                .column("total_ic:name")
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("total_ic:name").footer()).html(
+                formatCantidadSinCero(totalIC)
+            );
+            const totalVenta = api
+                .column("total_venta:name")
+                .data()
+                .reduce((a, b) => a + parseFloat(b || 0), 0);
+            $(api.column("total_venta:name").footer()).html(
+                formatCantidadSinCero(totalVenta)
             );
         },
     });
