@@ -37,7 +37,7 @@ class reporteventaprodController extends Controller
         $endDate      = Carbon::parse($request->input('endDate'))->format('Y-m-d H:i:s');
 
         // 2) Armamos la consulta con joins y agrupamientos
-        $data = SaleDetail::from('sale_details as sd')
+        $data = DB::table('sale_details as sd')       
             ->select([
                 'p.name as producto',
                 'l.codigo as lote',
