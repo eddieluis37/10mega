@@ -1858,18 +1858,104 @@ class saleController extends Controller
                     Log::info("Inventario actualizado para producto ID: {$detail->product_id}");
                 }
 
-                // Opcional: actualizar el detalle de la venta restando la cantidad devuelta
-                // $detail->quantity -= $returnQuantity;
-                // $detail->save();
-                // Log::info("Detalle de venta ID: {$detail->id} actualizado. Nueva cantidad: {$detail->quantity}");
+                // --- Funcionalidad 1: si tras restar queda cantidad = 0, marcamos status = '0' ---
+                $detail->quantity -= $returnQuantity;
+                if ($detail->quantity <= 0) {
+                    // Si quedó en 0 (o negativo por seguridad), forzamos a 0 y desactivamos
+                    $detail->quantity = 0;
+                    $detail->status   = '0';
+                }
+                $detail->save();
+                Log::info("Detalle de venta actualizado para producto ID: {$detail->product_id}, cantidad restante: {$detail->quantity}");
+                // --- Fin de la funcionalidad 1 ---
+
             }
-            // Actualizar el estado de la venta a '3' indicando que la devolución parcial se procesó correctamente
-            $sale->status = '3';
+
+            // —— Funcionalidad 2: recalcular y guardar cada detalle con status = '1'
+            $activeDetails = SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->get();
+
+            foreach ($activeDetails as $d) {
+                // 1) Recalcular bruto
+                $d->total_bruto       = round($d->quantity * $d->price, 2);
+
+                // 2) Recalcular descuento (por % + fijo)
+                $calcDescuento        = ($d->total_bruto * ($d->porc_desc / 100))
+                    + $d->descuento_cliente;
+                $d->descuento         = round($calcDescuento, 2);
+
+                // 3) Neto base para impuestos
+                $neto                 = $d->total_bruto - $d->descuento;
+
+                // 4) Recalcular cada impuesto
+                $d->iva               = round($neto * ($d->porc_iva           / 100), 2);
+                $d->otro_impuesto     = round($neto * ($d->porc_otro_impuesto / 100), 2);
+                $d->impoconsumo       = round($neto * ($d->porc_impoconsumo   / 100), 2);
+
+                // 5) Total final del detalle
+                $d->total             = round(
+                    $neto
+                        + $d->iva
+                        + $d->otro_impuesto
+                        + $d->impoconsumo,
+                    2
+                );
+
+                // 6) Forzar timestamp de actualización
+                $d->updated_at        = now();
+
+                // 7) Guardar cambios
+                $d->save();
+            }
+
+            // —— Ahora, recalcular y guardar los totales de la venta
+            $TotalBruto        = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('total_bruto');
+            $TotalIva          = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('iva');
+            $TotalOtroImp      = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('otro_impuesto');
+            $TotalImpConsumo   = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('impoconsumo');
+            $TotalAPagar       = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('total');
+
+            // Mantener descuentos globales
+            $TotalDescuentos   = (float) $sale->descuentos;
+
+            $sale->total_bruto           = $TotalBruto;
+            $sale->subtotal              = $TotalBruto - $TotalDescuentos;
+            $sale->total_iva             = $TotalIva;
+            $sale->total_otros_impuestos = $TotalOtroImp + $TotalImpConsumo;
+            $sale->total                 = $TotalAPagar;
+
+
+            // —— Nuevo: recalcular y asignar 'cambio'
+            $sale->cambio = round(
+                ($sale->valor_a_pagar_efectivo
+                    + $sale->valor_a_pagar_tarjeta
+                    + $sale->valor_a_pagar_credito)
+                    - $sale->total,
+                2
+            );
+
+            $sale->status                = '3';
+
+            // Forzar timestamp de la venta
+            $sale->updated_at            = now();
+
+            // Guardar venta
             $sale->save();
-            Log::info("Venta ID {$sale->id} actualizada a status '3' con {$sale->credit_notes_count} notas de crédito.");
+
             DB::commit();
-            Log::info("Devolución parcial procesada exitosamente para la venta ID: {$sale->id}");
-            return redirect()->route('sale.index')->with('success', 'Devolución parcial procesada exitosamente.');
+            return redirect()->route('sale.index')
+                ->with('success', 'Devolución parcial y recalculo de totales completados.');
         } catch (\Exception $e) {
             DB::rollback();
             Log::error("Error en devolución parcial para venta ID {$sale->id}: " . $e->getMessage());
