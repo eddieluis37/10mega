@@ -1937,12 +1937,14 @@ class saleController extends Controller
             $sale->total                 = $TotalAPagar;
             $sale->total_valor_a_pagar = $TotalAPagar;
 
+            if ($sale->valor_a_pagar_credito > 0) {
+                $sale->valor_a_pagar_credito = $TotalAPagar;
+            }
 
             // —— Nuevo: recalcular y asignar 'cambio'
             $sale->cambio = round(
                 ($sale->valor_a_pagar_efectivo
-                    + $sale->valor_a_pagar_tarjeta
-                    + $sale->valor_a_pagar_credito)
+                    + $sale->valor_a_pagar_tarjeta)
                     - $sale->total,
                 2
             );
