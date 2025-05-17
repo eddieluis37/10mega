@@ -1927,13 +1927,15 @@ class saleController extends Controller
                 ->sum('total');
 
             // Mantener descuentos globales
-            $TotalDescuentos   = (float) $sale->descuentos;
+            $TotalDescuentos   = (float) $sale->descuentos + $sale->descuento_cliente;
 
             $sale->total_bruto           = $TotalBruto;
             $sale->subtotal              = $TotalBruto - $TotalDescuentos;
             $sale->total_iva             = $TotalIva;
             $sale->total_otros_impuestos = $TotalOtroImp + $TotalImpConsumo;
+
             $sale->total                 = $TotalAPagar;
+            $sale->total_valor_a_pagar = $TotalAPagar;
 
 
             // —— Nuevo: recalcular y asignar 'cambio'

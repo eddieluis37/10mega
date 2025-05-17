@@ -13,7 +13,7 @@ class ReporteCierreCajaController extends Controller
         // 1. Traer la caja y sus ventas activas con relaciones
         $caja = Caja::with([
             'sales' => function ($query) {
-                $query->where('status', '=', '1');
+                $query->whereIn('status', ['1', '3']); // para incluir status 1 y 3
             },
             'sales.tercero',
             'sales.formaPagoTarjeta',
@@ -27,7 +27,7 @@ class ReporteCierreCajaController extends Controller
         $totalFactura  = $caja->sales->sum('total_valor_a_pagar');
         // Efectivo neto = efectivo recibido menos cambio entregado
         $totalEfectivo = $caja->sales->sum('valor_a_pagar_efectivo')
-                       - $caja->sales->sum('cambio');
+            - $caja->sales->sum('cambio');
         $totalCambio   = $caja->sales->sum('cambio');
 
         // 4. Totales por tarjeta (agrupados por ID de formaPago)
@@ -38,8 +38,8 @@ class ReporteCierreCajaController extends Controller
             ->toArray();
 
         // 5. Filtrar solo las tarjetas que en totalesTarjeta tienen > 0
-        $activeTarjetas = $tarjetas->filter(fn($t) =>
-            (isset($totalesTarjeta[$t->id]) && $totalesTarjeta[$t->id] > 0)
+        $activeTarjetas = $tarjetas->filter(
+            fn($t) => (isset($totalesTarjeta[$t->id]) && $totalesTarjeta[$t->id] > 0)
         );
 
         // 6. Total y bandera para CRÉDITO
