@@ -251,6 +251,7 @@ class cajaController extends Controller
         $ventas = $caja
             ->sales()
             ->whereDate('fecha_cierre', $fechaInicio)
+            ->whereIn('status', ['1', '3'])
             ->get();
 
         $valorApagarEfectivo = $ventas->sum('valor_a_pagar_efectivo');

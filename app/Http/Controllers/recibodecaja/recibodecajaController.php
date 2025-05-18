@@ -130,12 +130,12 @@ class recibodecajaController extends Controller
                          <button class="btn btn-warning" title="DetalleRecibo" onclick="openReport(' . $data->id . ');">
 						    DE
 					     </button> 
-                         <a href="recibodecaja/showRecibodecaja/' . $data->id . '" class="btn btn-dark" title="RecibodecajaCerrado" target="_blank">
+                         <a href="recibodecaja/showRecibodecaja/' . $data->id . '" class="btn btn-dark" title="RecibodecajaFormatoGrande" target="_blank">
                          <i class="far fa-file-pdf"></i>
                          </a>				
-                         <button class="btn btn-dark" title="Borrar venta" disabled>
-                             <i class="fas fa-trash"></i>
-                         </button>
+                        <a href="recibodecaja/showFormatopos/' . $data->id . '" class="btn btn-red" title="FormatoPOS" target="_blank">
+                         <i class="far fa-file-pdf"></i>
+                         </a>
                         
                          </div>
                          ';

@@ -689,6 +689,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('/obtener-valores', [recibodecajaController::class, 'obtenerValores'])->name('recibodecaja.obtener-valores');
     Route::post('gurdarrecibodecaja', [recibodecajaController::class, 'gurdarrecibodecaja'])->name('recibodecaja.gurdarrecibodecaja');
     Route::get('recibodecaja/showRecibodecaja/{id}', [pdfRecibodecajaController::class,  'showRecibodecaja'])->name('recibodecaja.showRecibodecaja');
+    Route::get('recibodecaja/showFormatopos/{id}', [pdfRecibodecajaController::class,  'showFormatopos'])->name('recibodecaja.showFormatopos');
 
     Route::get('/facturasByCliente/{cliente_id}', [recibodecajaController::class, 'facturasByCliente'])->name('recibodecaja.facturasByCliente');
 

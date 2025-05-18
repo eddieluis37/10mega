@@ -37,4 +37,22 @@ class pdfRecibodecajaController extends Controller
 
         return $pdf->stream("recibo_caja_{$recibo->id}.pdf");
     }
+
+    public function showFormatopos($id)
+    {
+       // Cargar recibo con relaciones y detalles
+         $recibo = Recibodecaja::with([
+            'user', 'third',
+            'details.paymentMethod',
+            'details.cuentaPorCobrar.sale.third',
+        ])->findOrFail($id);
+
+        // Opcional: calcular totales si no están precargados
+        $recibo->vr_total_pago   = $recibo->details->sum('vr_pago');
+        $recibo->nvo_total_saldo = $recibo->details->sum('nvo_saldo');
+       
+        $showFactura = PDF::loadView('recibodecaja.show_formato_pos', compact('recibo'));
+        return $showFactura->stream('caja.pdf');
+    }
+
 }
