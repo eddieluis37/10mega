@@ -73,17 +73,21 @@ class exportFacturaController extends Controller
         // Se calcula la cantidad de Peso o unidades del total de productos de la venta.
         $totalQuantity = $saleDetails->sum('quantity');
 
-       
+
         $totalIva = $saleDetails->sum('iva');
 
         $totalOtroImp = $saleDetails->sum('otro_impuesto');
 
         $totalIC = $saleDetails->sum('impoconsumo');
 
+        $totalDesProd = $saleDetails->sum('descuento');
+
+        $totalDesClient= $saleDetails->sum('descuento_cliente');        
+
         $totalApagar = $saleDetails->sum('total');
 
 
-        $pdf = PDF::loadView('sale.reporte', compact('sale', 'saleDetails', 'saleDetailCount', 'totalQuantity', 'totalIva', 'totalOtroImp', 'totalIC', 'totalApagar'));
+        $pdf = PDF::loadView('sale.reporte', compact('sale', 'saleDetails', 'saleDetailCount', 'totalQuantity', 'totalIva', 'totalOtroImp', 'totalIC', 'totalDesProd', 'totalDesClient', 'totalApagar'));
         return $pdf->stream('sale.pdf');
     }
 }

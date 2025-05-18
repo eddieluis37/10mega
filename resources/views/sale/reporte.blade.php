@@ -154,6 +154,30 @@
 				</td>
 			</tr>
 			@endif
+			@if($totalDesProd != 0)
+			<tr>
+				<td>
+					<span><b>Desc_Producto</b></span>
+				</td>
+				<td></td>
+				<td></td>
+				<td align="right">
+					<span><strong>-{{ number_format($totalDesProd, 0, '.', '.' )}}</strong></span>
+				</td>
+			</tr>
+			@endif
+			@if($totalDesClient != 0)
+			<tr>
+				<td>
+					<span><b>Desc_Cliente</b></span>
+				</td>
+				<td></td>
+				<td></td>
+				<td align="right">
+					<span><strong>-{{ number_format($totalDesClient, 0, '.', '.' )}}</strong></span>
+				</td>
+			</tr>
+			@endif
 			<tr>
 				<td>
 					<span><b>TOTAL</b></span>
