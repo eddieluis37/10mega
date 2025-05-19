@@ -102,6 +102,9 @@ class cajasalidaefectivoController extends Controller
                       <button class="btn btn-sm btn-danger" onclick="deleteSalida(' . $row->id . ')">
                         <i class="fas fa-trash"></i>
                       </button>
+                       <a href="caja-salida-efectivo/pdfFormatopos/' . $row->id . '" class="btn btn-dark" title="FormatoPOS" target="_blank">
+                         <i class="far fa-file-pdf"></i>
+                         </a>
                     </div>';
                 }
 
