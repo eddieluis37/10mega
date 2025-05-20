@@ -122,8 +122,9 @@ class cajasalidaefectivoController extends Controller
 
     public function store(Request $request)
     {
-          // Limpia el campo "vr_efectivo" (elimina puntos y otros caracteres no numéricos)
+        // 0) Limpio el valor **antes** de validar
         $cleanVrEfectivo = str_replace('.', '', $request->vr_efectivo);
+        $request->merge(['vr_efectivo' => $cleanVrEfectivo]);
 
         try {
             // 1) Reglas de validación
