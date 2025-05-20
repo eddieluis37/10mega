@@ -27,7 +27,7 @@
 				<td class="text-center">
 					<span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 2;">NIT 900.490.684-3</span>
-				 	<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{ $sale->direccion }}</span>			
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{ $sale->direccion }}</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Bogotá - Tels: 01-3178302986</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{ $sale->namecentrocosto }}</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">HABILITACION CON</span>
@@ -36,7 +36,7 @@
 						DE: {{ \Carbon\Carbon::parse($sale->fecha_inicial)->format('d-m-Y') }} DESDE {{ $sale->prefijo }} {{ $sale->desde }}
 					</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">
-						 HASTA {{ $sale->hasta }}
+						HASTA {{ $sale->hasta }}
 					</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">CON VIGENCIA DE 24 MESES</span>
 					<!-- <span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">
@@ -60,7 +60,8 @@
 			</tr>
 			<tr>
 				<td width="100%" class="text-left text-company" style="vertical-align: top; padding-top: 7px">
-					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Fecha y hora:<strong> {{\Carbon\Carbon::now()->format('Y-m-d H:i')}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Fecha hora actual:<strong> {{\Carbon\Carbon::now()->format('Y-m-d H:i')}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Fecha hora ventas:<strong> {{$sale->created_at->format('Y-m-d H:i')}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cajero:<strong> {{$sale->nameuser}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cliente:<strong> {{$sale->namethird}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Nit / C.C.:<strong> {{ number_format($sale->identification,0, ',', '.')}}</strong></span>
