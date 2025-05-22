@@ -22,13 +22,14 @@ use App\Models\Products\Meatcut;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\Brand;
 use App\Models\Brand_third;
+use App\Models\Category_comerciales;
 use App\Models\Levels_products;
 use App\Models\Listaprecio;
 use App\Models\Listapreciodetalle;
 use App\Models\Products\Unitofmeasure;
 use App\Models\shopping\shopping_enlistment;
 use App\Models\shopping\shopping_enlistment_details;
-
+use App\Models\Subcategory_comerciales;
 
 class productoController extends Controller
 {
@@ -41,6 +42,8 @@ class productoController extends Controller
     public function index()
     {
         $categorias = Category::orderBy('id')->get();
+        $categoriasComerciales = Category_comerciales::orderBy('id')->get();
+        $SubcategoriasComerciales = Subcategory_comerciales::orderBy('id')->get();
         $proveedores = Third::Where('proveedor', 1)->get();
         $niveles = Levels_products::Where('status', 1)->get();
         $presentaciones = Unitofmeasure::Where('status', 1)->get();
@@ -51,7 +54,7 @@ class productoController extends Controller
         $usuario = User::WhereIn('id', [9, 11, 12])->get();
 
         $centros = Centrocosto::WhereIn('id', [1])->get();
-        return view("producto.index", compact('usuario', 'brandsThirds', 'categorias', 'proveedores', 'niveles', 'presentaciones', 'familias',  'centros'));
+        return view("producto.index", compact('usuario', 'brandsThirds', 'categorias', 'categoriasComerciales', 'SubcategoriasComerciales', 'proveedores', 'niveles', 'presentaciones', 'familias',  'centros'));
     }
 
     public function show()

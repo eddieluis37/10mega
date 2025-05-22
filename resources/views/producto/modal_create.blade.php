@@ -10,11 +10,43 @@
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>Categoria</label>
+                                    <label>Categoria ERP</label>
                                     <div>
                                         <select class="form-control selectCategory" name="categoria" id="categoria" required="">
                                             <option value="">Seleccione la categoria</option>
                                             @foreach ($categorias as $c)
+                                            <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="text-danger error-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="col-sm-12 col-md-3">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label>Categoria WEB</label>
+                                    <div>
+                                        <select class="form-control selectCategory" name="categoria" id="categoria" required="">
+                                            <option value="">Seleccione</option>
+                                            @foreach ($categoriasComerciales as $c)
+                                            <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="text-danger error-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="col-sm-12 col-md-3">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label>SubCategoria WEB</label>
+                                    <div>
+                                        <select class="form-control selectCategory" name="categoria" id="categoria" required="">
+                                            <option value="">Seleccione</option>
+                                            @foreach ($SubcategoriasComerciales as $c)
                                             <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
                                             @endforeach
                                         </select>
