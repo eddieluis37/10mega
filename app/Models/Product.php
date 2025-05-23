@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
 	use HasFactory;
 
 
-	protected $fillable = ['category_id', 'meatcut_id', 'level_product_id', 'unitofmeasure_id', 'quantity', 'name', 'code', 'barcode', 'status', 'cost', 'price_fama', 'price_insti', 'price_horeca', 'price_hogar', 'iva', 'otro_impuesto', 'stock', 'alerts', 'image'];
+	protected $fillable = ['category_id', 'meatcut_id', 'level_product_id', 'unitofmeasure_id', 'type', 'quantity', 'name', 'code', 'barcode', 'description', 'status', 'cost', 'price_fama', 'price_insti', 'price_horeca', 'price_hogar', 'iva', 'otro_impuesto', 'stock', 'alerts', 'image'];
 
 	protected $table = 'products';
 
@@ -151,8 +152,54 @@ class Product extends Model
 		return $this->belongsToMany(Store::class, 'product_store');
 	}
 	// Relación: un producto pertenece a una marca
-    public function brand()
-    {
-        return $this->belongsTo(Brand::class);
-    }
+	public function brand()
+	{
+		return $this->belongsTo(Brand::class);
+	}
+
+	// --- COMBOS ---
+	public function components(): BelongsToMany
+	{
+		return $this->belongsToMany(
+			Product::class,
+			'combo_product',
+			'combo_id',
+			'product_id'
+		)->withPivot('quantity')
+			->withTimestamps();
+	}
+
+	public function combos(): BelongsToMany
+	{
+		return $this->belongsToMany(
+			Product::class,
+			'combo_product',
+			'product_id',
+			'combo_id'
+		)->withPivot('quantity')
+			->withTimestamps();
+	}
+
+	// --- DISHES / RECETAS ---
+	public function recipeItems(): BelongsToMany
+	{
+		return $this->belongsToMany(
+			Product::class,
+			'dish_product',
+			'dish_id',
+			'product_id'
+		)->withPivot(['quantity', 'unitofmeasure_id'])
+			->withTimestamps();
+	}
+
+	public function dishes(): BelongsToMany
+	{
+		return $this->belongsToMany(
+			Product::class,
+			'dish_product',
+			'product_id',
+			'dish_id'
+		)->withPivot(['quantity', 'unitofmeasure_id'])
+			->withTimestamps();
+	}
 }

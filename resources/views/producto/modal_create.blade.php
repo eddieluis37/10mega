@@ -146,29 +146,7 @@
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label for="" class="form-label">%IVA</label>
-                                    <div class="input-group flex-nowrap"">
-                                        <select class=" form-control form-control-sm" id="impuestoiva" name="impuestoiva" required="true" oninput="updatePercentage()">
-                                        <option value="">Seleccione</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        |</select>
-                                        <span class="input-group-text" id="addon-wrapping">%</span>
-                                    </div>
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                                <div>
-                                    <p id="percentageDisplay"></p> <!-- Aquí se mostrará el porcentaje 
-                                </div>
-                            </div>
-                        </div> -->
+                        </div>                   
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">

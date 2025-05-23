@@ -45,5 +45,15 @@ class UnitofmeasureSeeder extends Seeder
         	'description' => '',
         	'status' => true
         ]);
+        Unitofmeasure::create([
+        	'name' => 'COMBO',
+        	'description' => '',
+        	'status' => true
+        ]);
+        Unitofmeasure::create([
+        	'name' => 'COMPUESTO',
+        	'description' => '',
+        	'status' => true
+        ]);
     }
 }

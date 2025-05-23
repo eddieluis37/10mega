@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 
 use App\Models\caja\Caja;
 use App\Models\Category;
-use App\Models\Centro_costo_product;
 use App\Models\centros\Centrocosto;
 use App\Models\Third;
 use App\Models\User;
@@ -27,8 +26,7 @@ use App\Models\Levels_products;
 use App\Models\Listaprecio;
 use App\Models\Listapreciodetalle;
 use App\Models\Products\Unitofmeasure;
-use App\Models\shopping\shopping_enlistment;
-use App\Models\shopping\shopping_enlistment_details;
+
 use App\Models\Subcategory_comerciales;
 
 class productoController extends Controller
@@ -70,38 +68,6 @@ class productoController extends Controller
         //     return $data;
         //$data = Compensadores::orderBy('id','desc');
         return Datatables::of($data)->addIndexColumn()
-            /* ->addColumn('fecha1', function ($data) {
-                $fecha1 = Carbon::parse($data->fecha_hora_inicio);
-                $formattedDate1 = $fecha1->format('M-d. H:i');
-                return $formattedDate1;
-            })
-            ->addColumn('fecha2', function ($data) {
-                $fecha2 = Carbon::parse($data->fecha_hora_cierre);
-                $formattedDate = $fecha2->format('M-d. H:i');
-                return $formattedDate;
-            }) */
-            /*  ->addColumn('inventory', function ($data) {
-                if ($data->estado == 'close') {
-                    $statusInventory = '<span class="badge bg-warning">Cerrado</span>';
-                } else {
-                    $statusInventory = '<span class="badge bg-success">Abierto</span>';
-                }
-                return $statusInventory;
-            }) */
-
-            /*      <div class="text-center">
-            <a href="caja/create/' . $data->id . '" class="btn btn-dark" title="RetiroDinero" >
-                <i class="fas fa-money-bill-alt"></i>
-            </a>
-            <a href="caja/create/' . $data->id . '" class="btn btn-dark" title="CuadreCaja" ' . $status . '>
-                <i class="fas fa-money-check-alt"></i>
-            </a>					
-            <a href="caja/showReciboCaja/' . $data->id . '" class="btn btn-dark" title="VerReciboCaja">
-                <i class="fas fa-eye"></i>
-            </a> 
-             <a href="javascript:void(0)" data-toggle="tooltip"  data-id="' . $data->id . '" data-original-title="Delete" class="btn btn-danger btn-sm deleteBook">E</a>
-            */
-
             ->addColumn('action', function ($data) {
                 $currentDateTime = Carbon::now();
 
@@ -161,211 +127,6 @@ class productoController extends Controller
             ->rawColumns(['fecha1', 'fecha2', 'inventory', 'action'])
             ->make(true);
     }
-
-    public function pdf($id)
-    {
-        $caja = Caja::findOrFail($id);
-
-        $pdf = PDF::loadView('cajas.pdf', compact('caja'));
-
-        return $pdf->download('caja.pdf');
-    }
-
-    public function showReciboCaja($id)
-    {
-        $caja = Caja::findOrFail($id)
-            ->join('users as u', 'cajas.cajero_id', '=', 'u.id')
-            /*   ->join('meatcuts as cut', 'cajas.meatcut_id', '=', 'cut.id')*/
-            ->join('centro_costo as centro', 'cajas.centrocosto_id', '=', 'centro.id')
-            ->select('cajas.*', 'centro.name as namecentrocosto', 'u.name as namecajero')
-            ->where('cajas.status', 1)
-            ->where('cajas.id', $id)
-            ->get();
-
-        //  dd($caja);
-
-        return view('caja.showReciboCaja', compact('caja'));
-    }
-
-    public function storeCierreCaja(Request $request, $ventaId)
-    {
-
-        // Obtener los valores
-
-        $efectivo = $request->input('efectivo');
-        $efectivo = str_replace(['.', ',', '$', '#'], '', $efectivo);
-
-        $valor_real = $request->input('valor_real');
-        $valor_real = str_replace(['.', ',', '$', '#'], '', $valor_real);
-
-        $total = $request->input('total');
-        $total = str_replace(['.', ',', '$', '#'], '', $total);
-
-        $diferencia = $request->input('diferencia');
-        $diferencia = str_replace(['.', ',', '$', '#'], '', $diferencia);
-
-        $total = $request->input('total');
-        $total = str_replace(['.', ',', '$', '#'], '', $total);
-
-        $forma_pago_tarjeta_id = $request->input('forma_pago_tarjeta_id');
-        $forma_pago_otros_id = $request->input('forma_pago_otros_id');
-        $forma_pago_credito_id = $request->input('forma_pago_credito_id');
-
-        $codigo_pago_tarjeta = $request->input('codigo_pago_tarjeta');
-        $codigo_pago_otros = $request->input('codigo_pago_otros');
-        $codigo_pago_credito = $request->input('codigo_pago_credito');
-
-        $valor_a_pagar_tarjeta = $request->input('valor_a_pagar_tarjeta');
-        $valor_a_pagar_tarjeta = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_tarjeta);
-
-        $valor_a_pagar_otros = $request->input('valor_a_pagar_otros');
-        $valor_a_pagar_otros = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_otros);
-
-        $valor_a_pagar_credito = $request->input('valor_a_pagar_credito');
-        if (is_null($valor_a_pagar_credito)) {
-            $valor_a_pagar_credito = 0;
-        }
-        $valor_a_pagar_credito = str_replace(['.', ',', '$', '#'], '', $valor_a_pagar_credito);
-
-        $valor_pagado = $request->input('valor_pagado');
-        $valor_pagado = str_replace(['.', ',', '$', '#'], '', $valor_pagado);
-
-        $cambio = $request->input('cambio');
-        $cambio = str_replace(['.', ',', '$', '#'], '', $cambio);
-
-        $estado = 'close';
-        $status = '1'; //1 = close
-
-        try {
-            $caja = Caja::find($ventaId);
-            $caja->user_id = $request->user()->id;
-            $caja->efectivo = $efectivo;
-            $caja->valor_real = $valor_real;
-            $caja->total = $total;
-            $caja->diferencia = $diferencia;
-            $caja->estado = $estado;
-            $caja->status = $status;
-            $caja->fecha_hora_cierre = now();
-            $caja->save();
-
-            if ($caja->status == 1) {
-                return redirect()->route('caja.index');
-            }
-
-            return response()->json([
-                'status' => 1,
-                'message' => 'Guardado correctamente',
-                "registroId" => $caja->id,
-                'redirect' => route('caja.index')
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 0,
-                'array' => (array) $th
-            ]);
-        }
-    }
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     *    ->whereDate('sa.fecha_venta', now())
-     * @return \Illuminate\Http\Response
-     * 
-     * /*   $valorApagarEfectivo = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->where('sa.third_id', 33)
-            ->sum('sa.cambio');
-
-        dd($valorApagarEfectivo); 
-     */
-
-    public function create($id)
-    {
-        // Validar si el cajero_id de la tabla cajas es igual al user_id de la tabla sales
-        $dataAlistamiento = DB::table('cajas as ca')
-            ->join('sales as sa', function ($join) {
-                $join->on('ca.cajero_id', '=', 'sa.user_id');
-            })
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
-            ->select('ca.*', 'centro.name as namecentrocosto', 'u.name as namecajero')
-            ->where('ca.id', $id)
-            ->get();
-
-        if ($dataAlistamiento->isEmpty()) {
-            return redirect()->back()->with('warning', 'El cajero no tiene ventas asociadas en la tabla sales.');
-        }
-
-        $status = '';
-        $estadoVenta = $dataAlistamiento[0]->status ? 'true' : 'false';
-
-        //Suma el total de efectivo, totalTarjetas, totalOtros de la venta del día de ese cajero.
-        $arrayTotales = $this->sumTotales($id);
-
-        return view('producto.create', compact('dataAlistamiento', 'status', 'arrayTotales'));
-    }
-
-    public function sumTotales($id)
-    {
-        $valorApagarEfectivo = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
-            ->sum('sa.valor_a_pagar_efectivo');
-
-        $valorCambio = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
-            ->sum('sa.cambio');
-
-        $valorEfectivo = $valorApagarEfectivo - $valorCambio;
-
-        $valorApagarTarjeta = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
-            ->sum('sa.valor_a_pagar_tarjeta');
-
-        $valorApagarOtros = DB::table('cajas as ca')
-            ->join('sales as sa', 'ca.cajero_id', '=', 'sa.user_id')
-            ->join('users as u', 'ca.cajero_id', '=', 'u.id')
-            ->join('centro_costo as centro', 'ca.centrocosto_id', '=', 'centro.id')
-            ->where('ca.id', $id)
-            ->whereDate('sa.fecha_venta', now())
-            ->where('sa.tipo', '0')
-            ->sum('sa.valor_a_pagar_otros');
-
-        $valorTotal = $valorApagarTarjeta + $valorApagarOtros;
-
-
-        $array = [
-            'valorApagarEfectivo' => $valorApagarEfectivo,
-            'valorCambio' => $valorCambio,
-            'valorEfectivo' => $valorEfectivo,
-            'valorApagarTarjeta' => $valorApagarTarjeta,
-            'valorApagarOtros' => $valorApagarOtros,
-            'valorTotal' => $valorTotal,
-        ];
-
-        return $array;
-    }
-
 
     /**
      * Store a newly created resource in storage.
@@ -451,7 +212,6 @@ class productoController extends Controller
                 $prod->save();
 
                 // Llamadas a métodos para registrar el producto en otros módulos
-                $this->CrearProductoEnCentroCosto();
                 $this->CrearProductoEnListapreciodetalle();
 
                 return response()->json([
@@ -490,33 +250,6 @@ class productoController extends Controller
         }
     }
 
-
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Caja  $caja
-     * @return \Illuminate\Http\Response
-     */
-
-    public function CrearProductoEnCentroCosto()
-    {
-        // Obtener el último ID del producto
-        $ultimoId = Product::latest('id')->first()->id;
-
-        // Obtener todos los centros de costo Centrocosto::all(); 
-        $centrosCosto = Centrocosto::whereIn('id', [1, 2])->orderBy('id', 'asc')->get();
-
-        // Iterar sobre cada centro de costo y crear un producto
-        foreach ($centrosCosto as $centroCosto) {
-            Centro_costo_product::create([
-                'centrocosto_id' => $centroCosto->id,
-                'products_id' => $ultimoId,
-                'tipoinventario' => 'inicial',
-            ]);
-        }
-    }
-
     public function CrearProductoEnListapreciodetalle()
     {
         $ultimoId = Product::latest('id')->first()->id;
@@ -530,12 +263,6 @@ class productoController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Caja  $caja
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $productos = Product::where('id', $id)->first();
@@ -543,28 +270,5 @@ class productoController extends Controller
             "id" => $id,
             "listadoproductos" => $productos,
         ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Caja  $caja
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Caja $caja)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Caja  $caja
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Caja $caja)
-    {
-        //
     }
 }
