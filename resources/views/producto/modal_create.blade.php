@@ -7,6 +7,46 @@
                         <div>
                             <input type="hidden" value="0" name="productoId" id="productoId">
                         </div>
+                          <!-- Toolbar inicial -->
+                        <div class="mb-3 d-flex flex-column flex-md-row justify-content-between">
+                            <input type="hidden" value="0" name="productoId" id="productoId">
+
+                            <div class="mb-2 mb-md-0 w-100 me-md-2">
+                                <label for="product_type" class="form-label">Tipo de producto:</label>
+                                <select name="product_type" id="product_type" class="form-control">
+                                    <option value="simple">Simple</option>
+                                    <option value="combo">Combo</option>
+                                    <option value="receta">Receta</option>
+                                </select>
+                            </div>
+
+                            <div class="w-100">
+                                <label for="product-selector">Agregar producto</label>
+                                <select id="product-selector" class="form-control"></select>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de productos -->
+                        <div class="table-responsive mb-4">
+                            <table class="table" id="product-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Acordeón: Campos adicionales dependiendo del tipo de producto -->
+                        <div id="simpleFields" class="product-type-fields hidden mt-4">
+                            <h4>Datos de producto simple</h4>
+                            
+                        </div>
+
+                 
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">

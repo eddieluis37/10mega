@@ -37,6 +37,18 @@ class productoController extends Controller
         return response()->json($productos);
     }
 
+    public function select2(Request $request)
+    {
+        $search = $request->q;
+        $products = Product::where('status', 1)
+            ->where('name', 'like', "%$search%")
+            ->select('id', 'name as text')
+            ->limit(10)
+            ->get();
+        return response()->json($products);
+    }
+
+
     public function index()
     {
         $categorias = Category::orderBy('id')->get();

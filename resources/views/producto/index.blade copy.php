@@ -38,15 +38,6 @@
 			</div>
 		</div>
 	</div>
-	<style>
-		/* Agrega un estilo para hacer scroll en el cuerpo del modal */
-		.modal-body-scrollable {
-			max-height: 70vh;
-			/* Ajusta la altura máxima como desees */
-			overflow-y: auto;
-		}
-	</style>
-
 	<!-- modal -->
 	<div class="modal fade" id="modal-create-producto" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
@@ -59,7 +50,7 @@
 								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
-						<div class="modal-body modal-body-scrollable">
+						<div class="modal-body">
 							@include('producto.modal_create')
 						</div>
 						<div class="modal-footer">
@@ -69,9 +60,11 @@
 					</form>
 				</fieldset>
 			</div>
+			<!-- /.modal-content -->
 		</div>
+		<!-- /.modal-dialog -->
 	</div>
-
+	<!-- /.modal -->
 </div>
 @endsection
 @section('script')

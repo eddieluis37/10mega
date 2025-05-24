@@ -476,6 +476,8 @@ Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
     Route::post('producto/create/{id}', [productoController::class, 'storeCierreCaja'])->name('producto.cierre');
     Route::get('producto/showReciboCaja/{id}', [productoController::class, 'showReciboCaja'])->name('producto.showReciboProducto');
     Route::get('/producto-edit/{id}', [productoController::class, 'edit'])->name('producto.edit');
+
+    Route::get('/productos/select2', [productoController::class, 'select2'])->name('producto.select2');
 });
 
 Route::middleware(['auth', 'can:acceder_lista_de_precio'])->group(function () {
