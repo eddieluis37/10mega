@@ -202,4 +202,9 @@ class Product extends Model
 		)->withPivot(['quantity', 'unitofmeasure_id'])
 			->withTimestamps();
 	}
+
+	public function componentes()
+	{
+		return $this->hasMany(ProductComposition::class, 'product_id');
+	}
 }

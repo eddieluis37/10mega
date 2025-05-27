@@ -194,88 +194,128 @@ $("#modal-create-producto").on("hidden.bs.modal", function () {
 });
 
 // script.js
+// script.js
 $(document).ready(function () {
-    const selectedProducts = new Set();
-   
+    const productosCombo = [];
 
-    // Mostrar acordeones según tipo de producto
-    $("#product_type").change(function () {
+    // Mostrar acordeones según tipo
+    $('#product_type').change(function () {
         const type = $(this).val();
-        $(".product-type-fields").hide();
-        if (type === "simple") {
-            $("#simpleFields").show();
-        } else if (type === "combo") {
-            $("#combo_fields").show();
-        } else if (type === "receta") {
-            $("#receta_fields").show();
+        $('.product-type-fields').hide();
+        if (type === 'simple') {
+            $('#simpleFields').show();
+        } else if (type === 'combo') {
+            $('#combo_fields').show();
+        } else if (type === 'receta') {
+            $('#receta_fields').show();
         }
-    }).trigger('change'); // Para mostrar el acordeón si ya hay valor
+    }).trigger('change');
 
-    // Agregar producto a la tabla con cantidad y eliminar
-    $("#product-selector").select2({
+    // Initialize Select2
+    $('#product-selector').select2({
         ajax: {
-            url: "/productos/select2",
-            dataType: "json",
+            url: '/productos/select2',
+            dataType: 'json',
             delay: 250,
             data: params => ({ q: params.term }),
             processResults: data => ({ results: data }),
             cache: true
         },
-        placeholder: "Agregar producto...",
+        placeholder: 'Agregar producto...',
         minimumInputLength: 1,
         width: '100%',
-        theme: "bootstrap-5",
-        allowClear: true,
-    }).on("select2:select", function (e) {
-        const product = e.params.data;
-        if (!selectedProducts.has(product.id)) {
-            selectedProducts.add(product.id);
-            const row = `
-                <tr data-id="${product.id}">
-                    <td>${product.text}</td>
-                    <td>
-                        <input type="number" name="products[${product.id}][quantity]" 
-                               class="form-control" min="1" value="1" required>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm remove-product">Eliminar</button>
-                    </td>
-                </tr>`;
-            $("#product-table tbody").append(row);
+        theme: 'bootstrap-5',
+        allowClear: true
+    }).on('select2:select', function (e) {
+        const { id: productId, text: productName } = e.params.data;
+        if (productosCombo.includes(productId)) {
+            alert('Este producto ya ha sido agregado al combo.');
+            return;
         }
-        $(this).val(null).trigger("change");
+        productosCombo.push(productId);
+
+        const index = productosCombo.length - 1;
+        const row = `
+            <tr data-id="${productId}">
+                <td>${productName}
+                    <input type="hidden" data-index="${index}" name="componentes[${index}][product_id]" value="${productId}">
+                </td>
+                <td>
+                    <input type="number" data-index="${index}"
+                           name="componentes[${index}][cantidad]"
+                           class="form-control component-qty" value="1" min="1" required>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-product">Eliminar</button>
+                </td>
+            </tr>`;
+        $('#product-table tbody').append(row);
+        $(this).val(null).trigger('change');
     });
 
-    $("#product-table").on("click", ".remove-product", function () {
-        const row = $(this).closest("tr");
-        const id = row.data("id");
-        selectedProducts.delete(id);
+    // Remover producto
+    $('#product-table').on('click', '.remove-product', function () {
+        const row = $(this).closest('tr');
+        const productId = row.data('id');
+        const idx = row.find('input[type=hidden]').data('index');
+
+        // Eliminar del array
+        const pos = productosCombo.indexOf(productId);
+        if (pos > -1) productosCombo.splice(pos, 1);
+
         row.remove();
+
+        // Reindexar filas e inputs
+        $('#product-table tbody tr').each(function (i) {
+            $(this).attr('data-id', productosCombo[i]);
+            $(this).find('input[type=hidden]').
+                attr('data-index', i).
+                attr('name', `componentes[${i}][product_id]`);
+            $(this).find('.component-qty').
+                attr('data-index', i).
+                attr('name', `componentes[${i}][cantidad]`);
+        });
     });
 
-    // Agregar productos al combo
-    window.addProductToCombo = function () {
-        const selected = $("#combo_product_selector").select2("data")[0];
-        if (selected) {
-            const li = `<li>${selected.text} 
-                <input type="hidden" name="combo_products[]" value="${selected.id}">
-                <button type="button" onclick="$(this).parent().remove()">Eliminar</button>
-            </li>`;
-            $("#combo_list").append(li);
-            $("#combo_product_selector").val(null).trigger("change");
-        }
-    };
+    // Envío de formulario con FormData
+    $('#form-producto').on('submit', function (e) {
+        e.preventDefault();
 
-    // Agregar ingredientes a la receta
-    window.addProductToReceta = function () {
-        const selected = $("#receta_product_selector").select2("data")[0];
-        if (selected) {
-            const li = `<li>${selected.text} 
-                <input type="hidden" name="receta_ingredients[]" value="${selected.id}">
-                <button type="button" onclick="$(this).parent().remove()">Eliminar</button>
-            </li>`;
-            $("#receta_list").append(li);
-            $("#receta_product_selector").val(null).trigger("change");
-        }
-    };
+        const form = this;
+        const formData = new FormData(form);
+
+        // Reagregar componentes (si algún cambio manual)
+        $('#product-table tbody tr').each(function (i) {
+            const productId = $(this).data('id');
+            const qty = $(this).find('input.component-qty').val();
+            formData.set(`componentes[${i}][product_id]`, productId);
+            formData.set(`componentes[${i}][cantidad]`, qty);
+        });
+
+        // Agregar tipo de producto
+        formData.set('product_type', $('#product_type').val());
+
+        sendData('/productosave', formData, token)
+            .then(resp => {
+                if (resp.status === 1) {
+                    form.reset();
+                    $('#modal-create-producto').modal('hide');
+                    successToastMessage(resp.message);
+                    refresh_table();
+                } else {
+                    // Mostrar errores
+                    $('.error-message').text('');
+                    $.each(resp.errors || {}, (field, messages) => {
+                        const $input = $(`[name="${field}"]`);
+                        $input.closest('.form-group').find('.error-message').text(messages[0]);
+                    });
+                }
+            })
+            .catch(err => errorMessage('Error procesando la petición'));
+    });
+
+    // Limpieza de errores al cerrar modal
+    $('#modal-create-producto').on('hidden.bs.modal', () => $('.error-message').text(''));
 });
+
+

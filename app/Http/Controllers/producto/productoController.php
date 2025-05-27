@@ -146,7 +146,7 @@ class productoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function storeOriginal(Request $request)
     {
         try {
             // Regla para el campo code
@@ -191,6 +191,15 @@ class productoController extends Controller
                 'impoconsumo.required'   => 'El Impoconsumo es requerido',
                 'impoconsumo.numeric'    => 'El Impoconsumo debe ser un número',
             ];
+            // Validación adicional para combos/recetas
+            if (in_array($request->product_type, ['combo', 'receta'])) {
+                if (!is_array($request->componentes) || count($request->componentes) === 0) {
+                    return response()->json([
+                        'status' => 0,
+                        'errors' => ['componentes' => ['Debe agregar al menos un producto al ' . $request->product_type]],
+                    ], 422);
+                }
+            }
 
             $validator = Validator::make($request->all(), $rules, $messages);
 
@@ -261,6 +270,196 @@ class productoController extends Controller
             ]);
         }
     }
+
+
+    public function storeEnDesarrollo(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            // Validación previa (ya la tienes)
+
+            // Validación adicional para combos/recetas
+            if (in_array($request->product_type, ['combo', 'receta'])) {
+                if (!is_array($request->componentes) || count($request->componentes) === 0) {
+                    return response()->json([
+                        'status' => 0,
+                        'errors' => ['componentes' => ['Debe agregar al menos un producto al ' . $request->product_type]],
+                    ], 422);
+                }
+            }
+
+            $getReg = Product::find($request->productoId);
+            $prod = $getReg ?? new Product();
+
+            // Datos generales del producto (como ya lo haces)
+            $prod->category_id       = $request->categoria;
+            $prod->brand_id          = $request->marca;
+            $prod->level_product_id  = $request->nivel;
+            $prod->unitofmeasure_id  = $request->presentacion;
+            $prod->quantity          = $request->quantity;
+            $prod->meatcut_id        = $request->familia;
+            $prod->name              = $request->subfamilia;
+            $prod->code              = $request->code;
+            $prod->barcode           = $request->codigobarra;
+            $prod->iva               = $request->impuestoiva;
+            $prod->otro_impuesto     = $request->isa;
+            $prod->impoconsumo       = $request->impoconsumo;
+            $prod->status            = '1';
+            $prod->alerts            = '10';
+            $prod->type              = $request->product_type; // Debes tener esta columna
+            $prod->save();
+
+            // Guardar componentes si es combo o receta
+            if (in_array($prod->type, ['combo', 'receta'])) {
+                // Eliminar componentes anteriores si existe
+                DB::table('product_compositions')->where('product_id', $prod->id)->delete();
+
+                foreach ($request->componentes as $componente) {
+                    // Si en el formulario el campo se llama product_id:
+                    $componentId = $componente['product_id'] ?? null;
+                    $cantidad    = $componente['cantidad']   ?? null;
+
+                    if (! $componentId || ! $cantidad) {
+                        // saltar o lanzar error
+                        continue;
+                    }
+
+                    DB::table('product_compositions')->insert([
+                        'product_id'   => $prod->id,
+                        'component_id' => $componentId,
+                        'quantity'     => $cantidad,
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'status'     => 1,
+                'message'    => 'Producto ' . ($getReg ? 'actualizado' : 'creado') . ' con éxito',
+                'registroId' => $prod->id,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 0,
+                'error'  => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            $isEditing = !empty($request->productoId);
+
+            // Reglas dinámicas
+            $rules = [
+                'productoId'    => 'required',
+                'categoria'     => 'required',
+                'marca'         => 'required',
+                'familia'       => 'required',
+                'subfamilia'    => 'required|unique:products,name,' . ($request->productoId ?? 'NULL') . ',id',
+                'code'          => 'required|unique:products,code,' . ($request->productoId ?? 'NULL') . ',id',
+                'impuestoiva'   => 'required|numeric',
+                'isa'           => 'required|numeric',
+                'impoconsumo'   => 'required|numeric',
+            ];
+
+            // Mensajes personalizados
+            $messages = [
+                'productoId.required'    => 'El producto es requerido',
+                'categoria.required'     => 'La categoría es requerida',
+                'marca.required'         => 'La marca proveedora es requerida',
+                'familia.required'       => 'El nombre de la familia es requerido',
+                'subfamilia.required'    => 'El nombre del producto es requerido',
+                'subfamilia.unique'      => 'El nombre del producto ya existe, por favor ingrese uno diferente',
+                'code.required'          => 'El código es requerido',
+                'code.unique'            => 'El código ya existe, por favor ingrese uno diferente',
+                'impuestoiva.required'   => 'El IVA es requerido',
+                'impuestoiva.numeric'    => 'El IVA debe ser un número',
+                'isa.required'           => 'El Imp. Saludable es requerido',
+                'isa.numeric'            => 'El ISA debe ser un número',
+                'impoconsumo.required'   => 'El Impoconsumo es requerido',
+                'impoconsumo.numeric'    => 'El Impoconsumo debe ser un número',
+            ];
+
+            // Validar campos base
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Validación adicional si es combo o receta
+            if (in_array($request->product_type, ['combo', 'receta'])) {
+                if (!is_array($request->componentes) || count($request->componentes) === 0) {
+                    return response()->json([
+                        'status' => 0,
+                        'errors' => ['componentes' => ['Debe agregar al menos un producto al ' . $request->product_type]],
+                    ], 422);
+                }
+            }
+
+            // Obtener o crear producto
+            $producto = Product::find($request->productoId) ?? new Product();
+
+            $producto->category_id       = $request->categoria;
+            $producto->brand_id          = $request->marca;
+            $producto->level_product_id  = $request->nivel;
+            $producto->unitofmeasure_id  = $request->presentacion;
+            $producto->quantity          = $request->quantity;
+            $producto->meatcut_id        = $request->familia;
+            $producto->name              = $request->subfamilia;
+            $producto->code              = $request->code;
+            $producto->barcode           = $request->codigobarra;
+            $producto->iva               = $request->impuestoiva;
+            $producto->otro_impuesto     = $request->isa;
+            $producto->impoconsumo       = $request->impoconsumo;
+            $producto->status            = '1';
+            $producto->alerts            = '10';
+            $producto->type              = $request->product_type;
+
+            $producto->save();
+
+            // Guardar componentes si aplica
+            if (in_array($producto->type, ['combo', 'receta'])) {
+                DB::table('product_compositions')->where('product_id', $producto->id)->delete();
+
+                foreach ($request->componentes as $componente) {
+                    $componentId = $componente['product_id'] ?? null;
+                    $cantidad    = $componente['cantidad']   ?? null;
+
+                    if (!$componentId || !$cantidad) continue;
+
+                    DB::table('product_compositions')->insert([
+                        'product_id'   => $producto->id,
+                        'component_id' => $componentId,
+                        'quantity'     => $cantidad,
+                    ]);
+                }
+            }
+
+            // Lógica para nuevos registros
+            if (!$isEditing) {
+                $this->CrearProductoEnListapreciodetalle();
+            }
+
+            return response()->json([
+                'status'     => 1,
+                'message'    => 'Producto ' . ($isEditing ? 'editado' : 'creado') . ' con éxito',
+                'registroId' => $isEditing ? 0 : $producto->id,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'error'  => $th->getMessage(), // puedes usar ->getTrace() si necesitas más detalle
+            ], 500);
+        }
+    }
+
+
 
     public function CrearProductoEnListapreciodetalle()
     {
