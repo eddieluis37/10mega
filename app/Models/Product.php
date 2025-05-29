@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Products\Meatcut;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -203,8 +204,32 @@ class Product extends Model
 			->withTimestamps();
 	}
 
-	public function componentes()
+/* 	public function componentes()
 	{
 		return $this->hasMany(ProductComposition::class, 'product_id');
-	}
+	} */
+
+	// Relación con corte de carne (si aplica)
+    public function meatCut()
+    {
+        return $this->belongsTo(Meatcut::class, 'meatcut_id');
+    }
+
+	// Relación con unidad de medida
+    public function unitOfMeasure()
+    {
+        return $this->belongsTo(UnitOfMeasure::class, 'unitofmeasure_id');
+    }
+
+	// Relación con nivel de producto
+    public function levelProduct()
+    {
+        return $this->belongsTo(Levels_products::class, 'level_product_id');
+    }
+
+	/** Componentes asociados (para combos) **/
+    public function compositions()
+    {
+        return $this->hasMany(ProductComposition::class, 'product_id');
+    }
 }

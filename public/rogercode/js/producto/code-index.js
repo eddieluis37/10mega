@@ -15,6 +15,7 @@ const producto_id = document.querySelector("#productoId");
 const contentform = document.querySelector("#contentDisable");
 
 const fechaalistamiento = document.querySelector("#fecha");
+const productosCombo = [];
 
 $(document).ready(function () {
     $(function () {
@@ -94,23 +95,25 @@ $(document).ready(function () {
     });
 });
 
+// El llenado de `productosCombo` depende del contenido de `data.componentes` que proviene del backend
+// Validemos paso a paso el proceso y puntos clave donde puede estar fallando:
+
 const edit = async (id) => {
     console.log(id);
-    const response = await fetch(`/producto-edit/${id}`);
-    const data = await response.json();
+    const response = await fetch(`/producto-edit/${id}`); // 1. Petición al controlador
+    const data = await response.json();                   // 2. Espera estructura: { listadoproductos: {...}, componentes: [...] }
     console.log(data);
     if (contentform.hasAttribute("disabled")) {
         contentform.removeAttribute("disabled");
-
         $("#cliente").prop("disabled", false);
     }
-    showForm(data);
+    showForm(data);                                       // 3. Enviamos la data al form
 };
 
 const showForm = (data) => {
     let resp = data.listadoproductos;
     console.log(resp);
-
+    
     // Log de tipos y valores antes de la conversion
     console.log("Antes de conversion:");
     console.log("alerta:", resp.alerts, "Type:", typeof resp.alerts);
@@ -148,7 +151,7 @@ const showForm = (data) => {
         "Type:",
         typeof impoconsumoNumber
     );
-
+    
     producto_id.value = resp.id;
     $("#categoria").val(resp.category_id).trigger("change");
     $("#marca").val(resp.brand_id).trigger("change");
@@ -164,29 +167,42 @@ const showForm = (data) => {
     $("#isa").val(otroImpuestoNumber).trigger("change");
     $("#impoconsumo").val(impoconsumoNumber).trigger("change");
 
+    // Cargar productos en la tabla si existen
+    // Asegúrate que data.componentes tenga estructura
+    console.log("componentes recibidos:", data.componentes);
+
+    const productos = data.componentes || [];             // 4. Asegura que sea array
+    const tbody = $('#product-table tbody');
+    tbody.empty();
+    productosCombo.length = 0;                            // 5. Limpia array global antes de rellenar
+
+    productos.forEach((producto, index) => {
+        productosCombo.push(producto.product_id);        // 6. Relleno del array
+        const row = `
+            <tr data-id="${producto.product_id}">
+                <td>${producto.product_name}
+                    <input type="hidden" data-index="${index}" name="componentes[${index}][product_id]" value="${producto.product_id}">
+                </td>
+                <td>
+                    <input type="number" data-index="${index}"
+                           name="componentes[${index}][cantidad]"
+                           class="form-control component-qty" value="${producto.cantidad}" min="1" required>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-product">Eliminar</button>
+                </td>
+            </tr>`;
+        tbody.append(row);                               // 7. Inserta en tabla
+    });
+
     const modal = new bootstrap.Modal(
         document.getElementById("modal-create-producto")
     );
     modal.show();
 };
 
-const send = async (dataform, ruta) => {
-    let response = await fetch(ruta, {
-        headers: {
-            "X-CSRF-TOKEN": token,
-        },
-        method: "POST",
-        body: dataform,
-    });
-    let data = await response.json();
-    //console.log(data);
-    return data;
-};
 
-const refresh_table = () => {
-    let table = $("#tableProducto").dataTable();
-    table.fnDraw(false);
-};
+
 
 // Limpiar mensajes de error al cerrar la ventana modal
 $("#modal-create-producto").on("hidden.bs.modal", function () {
@@ -194,48 +210,49 @@ $("#modal-create-producto").on("hidden.bs.modal", function () {
 });
 
 // script.js
-// script.js
 $(document).ready(function () {
-    const productosCombo = [];
-
     // Mostrar acordeones según tipo
-    $('#product_type').change(function () {
-        const type = $(this).val();
-        $('.product-type-fields').hide();
-        if (type === 'simple') {
-            $('#simpleFields').show();
-        } else if (type === 'combo') {
-            $('#combo_fields').show();
-        } else if (type === 'receta') {
-            $('#receta_fields').show();
-        }
-    }).trigger('change');
+    $("#product_type")
+        .change(function () {
+            const type = $(this).val();
+            $(".product-type-fields").hide();
+            if (type === "simple") {
+                $("#simpleFields").show();
+            } else if (type === "combo") {
+                $("#combo_fields").show();
+            } else if (type === "receta") {
+                $("#receta_fields").show();
+            }
+        })
+        .trigger("change");
 
     // Initialize Select2
-    $('#product-selector').select2({
-        ajax: {
-            url: '/productos/select2',
-            dataType: 'json',
-            delay: 250,
-            data: params => ({ q: params.term }),
-            processResults: data => ({ results: data }),
-            cache: true
-        },
-        placeholder: 'Agregar producto...',
-        minimumInputLength: 1,
-        width: '100%',
-        theme: 'bootstrap-5',
-        allowClear: true
-    }).on('select2:select', function (e) {
-        const { id: productId, text: productName } = e.params.data;
-        if (productosCombo.includes(productId)) {
-            alert('Este producto ya ha sido agregado al combo.');
-            return;
-        }
-        productosCombo.push(productId);
+    $("#product-selector")
+        .select2({
+            ajax: {
+                url: "/productos/select2",
+                dataType: "json",
+                delay: 250,
+                data: (params) => ({ q: params.term }),
+                processResults: (data) => ({ results: data }),
+                cache: true,
+            },
+            placeholder: "Agregar producto...",
+            minimumInputLength: 1,
+            width: "100%",
+            theme: "bootstrap-5",
+            allowClear: true,
+        })
+        .on("select2:select", function (e) {
+            const { id: productId, text: productName } = e.params.data;
+            if (productosCombo.includes(productId)) {
+                alert("Este producto ya ha sido agregado al combo.");
+                return;
+            }
+            productosCombo.push(productId);
 
-        const index = productosCombo.length - 1;
-        const row = `
+            const index = productosCombo.length - 1;
+            const row = `
             <tr data-id="${productId}">
                 <td>${productName}
                     <input type="hidden" data-index="${index}" name="componentes[${index}][product_id]" value="${productId}">
@@ -249,15 +266,15 @@ $(document).ready(function () {
                     <button type="button" class="btn btn-danger btn-sm remove-product">Eliminar</button>
                 </td>
             </tr>`;
-        $('#product-table tbody').append(row);
-        $(this).val(null).trigger('change');
-    });
+            $("#product-table tbody").append(row);
+            $(this).val(null).trigger("change");
+        });
 
     // Remover producto
-    $('#product-table').on('click', '.remove-product', function () {
-        const row = $(this).closest('tr');
-        const productId = row.data('id');
-        const idx = row.find('input[type=hidden]').data('index');
+    $("#product-table").on("click", ".remove-product", function () {
+        const row = $(this).closest("tr");
+        const productId = row.data("id");
+        const idx = row.find("input[type=hidden]").data("index");
 
         // Eliminar del array
         const pos = productosCombo.indexOf(productId);
@@ -266,56 +283,63 @@ $(document).ready(function () {
         row.remove();
 
         // Reindexar filas e inputs
-        $('#product-table tbody tr').each(function (i) {
-            $(this).attr('data-id', productosCombo[i]);
-            $(this).find('input[type=hidden]').
-                attr('data-index', i).
-                attr('name', `componentes[${i}][product_id]`);
-            $(this).find('.component-qty').
-                attr('data-index', i).
-                attr('name', `componentes[${i}][cantidad]`);
+        $("#product-table tbody tr").each(function (i) {
+            $(this).attr("data-id", productosCombo[i]);
+            $(this)
+                .find("input[type=hidden]")
+                .attr("data-index", i)
+                .attr("name", `componentes[${i}][product_id]`);
+            $(this)
+                .find(".component-qty")
+                .attr("data-index", i)
+                .attr("name", `componentes[${i}][cantidad]`);
         });
     });
 
     // Envío de formulario con FormData
-    $('#form-producto').on('submit', function (e) {
+    $("#form-producto").on("submit", function (e) {
         e.preventDefault();
 
         const form = this;
         const formData = new FormData(form);
 
         // Reagregar componentes (si algún cambio manual)
-        $('#product-table tbody tr').each(function (i) {
-            const productId = $(this).data('id');
-            const qty = $(this).find('input.component-qty').val();
+        $("#product-table tbody tr").each(function (i) {
+            const productId = $(this).data("id");
+            const qty = $(this).find("input.component-qty").val();
             formData.set(`componentes[${i}][product_id]`, productId);
             formData.set(`componentes[${i}][cantidad]`, qty);
         });
 
         // Agregar tipo de producto
-        formData.set('product_type', $('#product_type').val());
+        formData.set("product_type", $("#product_type").val());
 
-        sendData('/productosave', formData, token)
-            .then(resp => {
+        sendData("/productosave", formData, token)
+            .then((resp) => {
                 if (resp.status === 1) {
                     form.reset();
-                    $('#modal-create-producto').modal('hide');
+                    $("#modal-create-producto").modal("hide");
                     successToastMessage(resp.message);
                     refresh_table();
                 } else {
                     // Mostrar errores
-                    $('.error-message').text('');
+                    $(".error-message").text("");
                     $.each(resp.errors || {}, (field, messages) => {
                         const $input = $(`[name="${field}"]`);
-                        $input.closest('.form-group').find('.error-message').text(messages[0]);
+                        $input
+                            .closest(".form-group")
+                            .find(".error-message")
+                            .text(messages[0]);
                     });
                 }
             })
-            .catch(err => errorMessage('Error procesando la petición'));
+            .catch((err) => errorMessage("Error procesando la petición"));
     });
 
-    // Limpieza de errores al cerrar modal
-    $('#modal-create-producto').on('hidden.bs.modal', () => $('.error-message').text(''));
+    // Limpieza de errores y tabla al cerrar modal
+    $("#modal-create-producto").on("hidden.bs.modal", () => {
+        $(".error-message").text("");
+        $("#product-table tbody").empty();
+        productosCombo.length = 0;
+    });
 });
-
-

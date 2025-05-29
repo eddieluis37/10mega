@@ -7,9 +7,8 @@
                         <div>
                             <input type="hidden" value="0" name="productoId" id="productoId">
                         </div>
-                          <!-- Toolbar inicial -->
+                        <!-- Toolbar inicial -->
                         <div class="mb-3 d-flex flex-column flex-md-row justify-content-between">
-                            <input type="hidden" value="0" name="productoId" id="productoId">
 
                             <div class="mb-2 mb-md-0 w-100 me-md-2">
                                 <label for="product_type" class="form-label">Tipo de producto:</label>
@@ -43,10 +42,10 @@
                         <!-- Acordeón: Campos adicionales dependiendo del tipo de producto -->
                         <div id="simpleFields" class="product-type-fields hidden mt-4">
                             <h4>Datos de producto simple</h4>
-                            
+
                         </div>
 
-                 
+
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
@@ -63,7 +62,7 @@
                                 </div>
                             </div>
                         </div>
-                         <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Categoria WEB</label>
@@ -79,7 +78,7 @@
                                 </div>
                             </div>
                         </div>
-                         <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>SubCategoria WEB</label>
@@ -186,7 +185,7 @@
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
-                        </div>                   
+                        </div>
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
@@ -194,8 +193,8 @@
                                     <div>
                                         <select class="form-control form-control-sm" name="impuestoiva" id="impuestoiva" required="">
                                             <option value="">Seleccione</option>
-                                            <option value="0">0%</option>   
-                                            <option value="5">5%</option>                                              
+                                            <option value="0">0%</option>
+                                            <option value="5">5%</option>
                                             <option value="19">19%</option>
                                         </select>
                                         <span class="text-danger error-message"></span>
@@ -210,7 +209,7 @@
                                     <div>
                                         <select class="form-control form-control-sm" name="isa" id="isa" required="">
                                             <option value="">Seleccione</option>
-                                            <option value="0">0%</option>                                           
+                                            <option value="0">0%</option>
                                             <option value="20">20%</option>
                                         </select>
                                         <span class="text-danger error-message"></span>
@@ -229,7 +228,7 @@
                                             <option value="5">5%</option>
                                             <option value="8">8%</option>
                                             <option value="19">19%</option>
-                                            <option value="20">20%</option>                                            
+                                            <option value="20">20%</option>
                                         </select>
                                         <span class="text-danger error-message"></span>
                                     </div>
@@ -266,10 +265,11 @@
             $('#familia').val('');
             $('#subfamilia').val('');
             $('#code').val('');
-            $('#codigobarra').val('');          
+            $('#codigobarra').val('');
             $('#impuestoiva').val('');
-            $('#isa').val('');                        
+            $('#isa').val('');
             $('#impoconsumo').val('');
+            $('#product-table').val('');
         });
 
         // Limpiar mensajes de error al seleccionar un campo

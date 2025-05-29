@@ -25,6 +25,7 @@ use App\Models\Category_comerciales;
 use App\Models\Levels_products;
 use App\Models\Listaprecio;
 use App\Models\Listapreciodetalle;
+use App\Models\ProductComposition;
 use App\Models\Products\Unitofmeasure;
 
 use App\Models\Subcategory_comerciales;
@@ -350,7 +351,20 @@ class productoController extends Controller
     public function store(Request $request)
     {
         try {
-            $isEditing = !empty($request->productoId);
+            // Regla para el campo code
+            if ($request->productoId) {
+                $codeRule = 'required|unique:products,code,' . $request->productoId;
+            } else {
+                $codeRule = 'required|unique:products,code';
+            }
+
+            // Regla para el campo name (subfamilia)
+            if ($request->productoId) {
+                $nameRule = 'required|unique:products,name,' . $request->productoId;
+            } else {
+                $nameRule = 'required|unique:products,name';
+            }
+
 
             // Reglas dinámicas
             $rules = [
@@ -358,8 +372,8 @@ class productoController extends Controller
                 'categoria'     => 'required',
                 'marca'         => 'required',
                 'familia'       => 'required',
-                'subfamilia'    => 'required|unique:products,name,' . ($request->productoId ?? 'NULL') . ',id',
-                'code'          => 'required|unique:products,code,' . ($request->productoId ?? 'NULL') . ',id',
+                'subfamilia'    => $nameRule,
+                'code'          => $codeRule,
                 'impuestoiva'   => 'required|numeric',
                 'isa'           => 'required|numeric',
                 'impoconsumo'   => 'required|numeric',
@@ -385,6 +399,7 @@ class productoController extends Controller
 
             // Validar campos base
             $validator = Validator::make($request->all(), $rules, $messages);
+
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 0,
@@ -402,60 +417,86 @@ class productoController extends Controller
                 }
             }
 
-            // Obtener o crear producto
-            $producto = Product::find($request->productoId) ?? new Product();
+            // Se busca si existe un producto con el id proporcionado
+            $getReg = Product::firstWhere('id', $request->productoId);
 
-            $producto->category_id       = $request->categoria;
-            $producto->brand_id          = $request->marca;
-            $producto->level_product_id  = $request->nivel;
-            $producto->unitofmeasure_id  = $request->presentacion;
-            $producto->quantity          = $request->quantity;
-            $producto->meatcut_id        = $request->familia;
-            $producto->name              = $request->subfamilia;
-            $producto->code              = $request->code;
-            $producto->barcode           = $request->codigobarra;
-            $producto->iva               = $request->impuestoiva;
-            $producto->otro_impuesto     = $request->isa;
-            $producto->impoconsumo       = $request->impoconsumo;
-            $producto->status            = '1';
-            $producto->alerts            = '10';
-            $producto->type              = $request->product_type;
+            if ($getReg == null) {
+                // Creación de un nuevo producto
+                $prod = new Product();
+                $prod->category_id       = $request->categoria;
+                $prod->brand_id          = $request->marca;
+                $prod->level_product_id  = $request->nivel;
+                $prod->unitofmeasure_id  = $request->presentacion;
+                $prod->quantity          = $request->quantity;
+                $prod->meatcut_id        = $request->familia;
+                $prod->name              = $request->subfamilia;
+                $prod->code              = $request->code;
+                $prod->barcode           = $request->codigobarra;
+                $prod->iva               = $request->impuestoiva;
+                $prod->otro_impuesto     = $request->isa;
+                $prod->impoconsumo       = $request->impoconsumo;
+                $prod->status            = '1'; // Activo
+                $prod->alerts            = '10';
+                $prod->type              = $request->product_type;
 
-            $producto->save();
+                $prod->save();
 
-            // Guardar componentes si aplica
-            if (in_array($producto->type, ['combo', 'receta'])) {
-                DB::table('product_compositions')->where('product_id', $producto->id)->delete();
+                // Llamadas a métodos para registrar el producto en otros módulos
 
-                foreach ($request->componentes as $componente) {
-                    $componentId = $componente['product_id'] ?? null;
-                    $cantidad    = $componente['cantidad']   ?? null;
-
-                    if (!$componentId || !$cantidad) continue;
-
-                    DB::table('product_compositions')->insert([
-                        'product_id'   => $producto->id,
-                        'component_id' => $componentId,
-                        'quantity'     => $cantidad,
-                    ]);
-                }
-            }
-
-            // Lógica para nuevos registros
-            if (!$isEditing) {
                 $this->CrearProductoEnListapreciodetalle();
-            }
 
-            return response()->json([
-                'status'     => 1,
-                'message'    => 'Producto ' . ($isEditing ? 'editado' : 'creado') . ' con éxito',
-                'registroId' => $isEditing ? 0 : $producto->id,
-            ]);
+                // Guardar componentes si aplica
+                if (in_array($prod->type, ['combo', 'receta'])) {
+                    DB::table('product_compositions')->where('product_id', $prod->id)->delete();
+
+                    foreach ($request->componentes as $componente) {
+                        $componentId = $componente['product_id'] ?? null;
+                        $cantidad    = $componente['cantidad']   ?? null;
+
+                        if (!$componentId || !$cantidad) continue;
+
+                        DB::table('product_compositions')->insert([
+                            'product_id'   => $prod->id,
+                            'component_id' => $componentId,
+                            'quantity'     => $cantidad,
+                        ]);
+                    }
+                }
+
+                return response()->json([
+                    'status'      => 1,
+                    'message'     => "Producto: " . $prod->name . ' ' . 'Creado con ID: ' . $prod->id,
+                    "registroId"  => $prod->id
+                ]);
+            } else {
+                // Actualización del producto existente
+                $updateProd = $getReg;
+                $updateProd->category_id       = $request->categoria;
+                $updateProd->brand_id          = $request->marca;
+                $updateProd->level_product_id  = $request->nivel;
+                $updateProd->unitofmeasure_id  = $request->presentacion;
+                $updateProd->quantity          = $request->quantity;
+                $updateProd->meatcut_id        = $request->familia;
+                $updateProd->name              = $request->subfamilia;
+                $updateProd->code              = $request->code;
+                $updateProd->barcode           = $request->codigobarra;
+                $updateProd->iva               = $request->impuestoiva;
+                $updateProd->otro_impuesto     = $request->isa;
+                $updateProd->impoconsumo       = $request->impoconsumo;
+                $updateProd->type              = $request->product_type;
+                $updateProd->save();
+
+                return response()->json([
+                    "status"      => 1,
+                    "message"     => "Producto: " . $updateProd->name . ' ' . 'Editado con ID: ' . $updateProd->id,
+                    "registroId"  => 0
+                ]);
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 0,
-                'error'  => $th->getMessage(), // puedes usar ->getTrace() si necesitas más detalle
-            ], 500);
+                'array'  => (array) $th
+            ]);
         }
     }
 
@@ -476,10 +517,27 @@ class productoController extends Controller
 
     public function edit($id)
     {
-        $productos = Product::where('id', $id)->first();
+        $producto = Product::with([
+            'category',
+            'brand',
+            'levelProduct',
+            'unitOfMeasure',
+            'meatCut',
+            'compositions.component'
+        ])->findOrFail($id);
+
+        // Transformar compositions para el frontend
+        $componentes = $producto->compositions->map(function ($item) {
+            return [
+                'product_id'   => $item->component_id,
+                'product_name' => $item->component->name ?? 'Sin nombre',
+                'cantidad'     => $item->quantity,
+            ];
+        });
+
         return response()->json([
-            "id" => $id,
-            "listadoproductos" => $productos,
+            'listadoproductos' => $producto,
+            'componentes'      => $componentes,
         ]);
     }
 }
