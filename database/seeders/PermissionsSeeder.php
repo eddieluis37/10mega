@@ -923,7 +923,7 @@ class PermissionsSeeder extends Seeder
             }
         }
 
-         /* ******************** CARTERA Y TESORERIA ***************** */
+        /* ******************** CARTERA Y TESORERIA ***************** */
         // 1. Crear o actualizar el rol "FacturacionPlanta"
 
         User::updateOrCreate(
@@ -949,10 +949,16 @@ class PermissionsSeeder extends Seeder
         }
 
         // 3. Definir el listado de permisos a sincronizar
-        $tesoreria->syncPermissions([        
-
+        $tesoreria->syncPermissions([
             'ver_ventas',
             'ver_venta_domicilio',
+            'ver_venta_pos',
+            'ver_venta_autoservicio',
+            'ver_venta_bar',
+
+            'acceder_venta_pos',
+            'crear_venta_pos',
+            'editar_venta_pos',
 
             'Pos_Create',
             'acceder_ventas',
@@ -961,14 +967,13 @@ class PermissionsSeeder extends Seeder
             'acceder_cargue_productos_term',
             'crear_venta_domicilio',
             'editar_venta_domicilio',
-            
+
             'ver_contabilidad',
-            'acceder_contabilidad',            
+            'acceder_contabilidad',
             'crear_contabilidad',
             'editar_contabilidad',
-            'eliminar_contabilidad',                        
-            
-        ]);
+            'eliminar_contabilidad',
 
+        ]);
     }
 }
