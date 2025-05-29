@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Productcomposition extends Model
 {
+    protected $table = 'product_compositions';
     protected $fillable = ['product_id', 'component_id', 'quantity'];
 
     public function component()
