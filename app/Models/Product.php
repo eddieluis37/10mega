@@ -216,9 +216,9 @@ class Product extends Model
     }
 
 	// Relación con unidad de medida
-    public function unitOfMeasure()
+    public function unitofmeasure()
     {
-        return $this->belongsTo(UnitOfMeasure::class, 'unitofmeasure_id');
+        return $this->belongsTo(Unitofmeasure::class, 'unitofmeasure_id');
     }
 
 	// Relación con nivel de producto

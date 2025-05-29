@@ -521,7 +521,7 @@ class productoController extends Controller
             'category',
             'brand',
             'levelProduct',
-            'unitOfMeasure',
+            'unitofmeasure',
             'meatCut',
             'compositions.component'
         ])->findOrFail($id);
