@@ -922,5 +922,53 @@ class PermissionsSeeder extends Seeder
                 $user->assignRole($role);
             }
         }
+
+         /* ******************** CARTERA Y TESORERIA ***************** */
+        // 1. Crear o actualizar el rol "FacturacionPlanta"
+
+        User::updateOrCreate(
+            ['email' => 'auxiliar_cartera@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'AUX CARTERA',
+                'phone' => '3004154625',
+                'profile' => 'Tesoreria',
+                'status' => 'Active',
+                'password' => bcrypt('AuxLi@rCart3r@2025*')
+            ]
+        );
+
+        $tesoreria = Role::updateOrCreate(['name' => 'Tesoreria']);
+
+        $usuarios = User::where('name', 'like', '%CARTERA%')
+            // ->orWhere('name', 'like', '%CAJERO%')
+            //  ->orWhereIn('id', $idsUsuarios)
+            ->get();
+
+        foreach ($usuarios as $usuario) {
+            $usuario->assignRole($tesoreria);
+        }
+
+        // 3. Definir el listado de permisos a sincronizar
+        $tesoreria->syncPermissions([        
+
+            'ver_ventas',
+            'ver_venta_domicilio',
+
+            'Pos_Create',
+            'acceder_ventas',
+
+            'acceder_venta_domicilio',
+            'acceder_cargue_productos_term',
+            'crear_venta_domicilio',
+            'editar_venta_domicilio',
+            
+            'ver_contabilidad',
+            'acceder_contabilidad',            
+            'crear_contabilidad',
+            'editar_contabilidad',
+            'eliminar_contabilidad',                        
+            
+        ]);
+
     }
 }
