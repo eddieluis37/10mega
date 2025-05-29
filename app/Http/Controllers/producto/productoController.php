@@ -25,7 +25,7 @@ use App\Models\Category_comerciales;
 use App\Models\Levels_products;
 use App\Models\Listaprecio;
 use App\Models\Listapreciodetalle;
-use App\Models\ProductComposition;
+use App\Models\Productcomposition;
 use App\Models\Products\Unitofmeasure;
 
 use App\Models\Subcategory_comerciales;

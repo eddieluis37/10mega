@@ -206,7 +206,7 @@ class Product extends Model
 
 /* 	public function componentes()
 	{
-		return $this->hasMany(ProductComposition::class, 'product_id');
+		return $this->hasMany(Productcomposition::class, 'product_id');
 	} */
 
 	// Relación con corte de carne (si aplica)
@@ -230,6 +230,6 @@ class Product extends Model
 	/** Componentes asociados (para combos) **/
     public function compositions()
     {
-        return $this->hasMany(ProductComposition::class, 'product_id');
+        return $this->hasMany(Productcomposition::class, 'product_id');
     }
 }
