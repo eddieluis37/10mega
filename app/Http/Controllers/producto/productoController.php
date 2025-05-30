@@ -441,27 +441,13 @@ class productoController extends Controller
 
                 $prod->save();
 
+                // Registrar componentes si aplica
+                $this->syncCompositions($prod->id, $request);
+
                 // Llamadas a métodos para registrar el producto en otros módulos
 
                 $this->CrearProductoEnListapreciodetalle();
 
-                // Guardar componentes si aplica
-                if (in_array($prod->type, ['combo', 'receta'])) {
-                    DB::table('product_compositions')->where('product_id', $prod->id)->delete();
-
-                    foreach ($request->componentes as $componente) {
-                        $componentId = $componente['product_id'] ?? null;
-                        $cantidad    = $componente['cantidad']   ?? null;
-
-                        if (!$componentId || !$cantidad) continue;
-
-                        DB::table('product_compositions')->insert([
-                            'product_id'   => $prod->id,
-                            'component_id' => $componentId,
-                            'quantity'     => $cantidad,
-                        ]);
-                    }
-                }
 
                 return response()->json([
                     'status'      => 1,
@@ -486,6 +472,9 @@ class productoController extends Controller
                 $updateProd->type              = $request->product_type;
                 $updateProd->save();
 
+                // Sincronizar componentes: eliminar los que no existan y actualizar/agregar nuevos
+                $this->syncCompositions($updateProd->id, $request);
+
                 return response()->json([
                     "status"      => 1,
                     "message"     => "Producto: " . $updateProd->name . ' ' . 'Editado con ID: ' . $updateProd->id,
@@ -500,6 +489,40 @@ class productoController extends Controller
         }
     }
 
+    /**
+     * Sincroniza la tabla product_compositions según los componentes enviados.
+     *
+     * @param int     $productId
+     * @param Request $request
+     */
+    protected function syncCompositions(int $productId, Request $request)
+    {
+        /* // Solo aplica para combos y recetas
+        if (!in_array($request->product_type, ['combo', 'receta'])) {
+            // Si previamente tenía componentes, los eliminamos
+            DB::table('product_compositions')->where('product_id', $productId)->delete();
+            return;
+        } */
+
+        // IDs de componentes enviados
+        $incoming = collect($request->componentes)
+            ->filter(fn($c) => !empty($c['product_id']) && !empty($c['cantidad']))
+            ->mapWithKeys(fn($c) => [$c['product_id'] => $c['cantidad']]);
+
+        // Eliminar composiciones que no están en la nueva lista
+        DB::table('product_compositions')
+            ->where('product_id', $productId)
+            ->whereNotIn('component_id', $incoming->keys()->toArray())
+            ->delete();
+
+        // Insertar o actualizar cada componente
+        foreach ($incoming as $componentId => $cantidad) {
+            DB::table('product_compositions')->updateOrInsert(
+                ['product_id' => $productId, 'component_id' => $componentId],
+                ['quantity'   => $cantidad]
+            );
+        }
+    }
 
 
     public function CrearProductoEnListapreciodetalle()
