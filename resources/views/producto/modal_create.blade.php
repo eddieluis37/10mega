@@ -8,10 +8,10 @@
                             <input type="hidden" value="0" name="productoId" id="productoId">
                         </div>
                         <!-- Toolbar inicial -->
-                        <div class="mb-3 d-flex flex-column flex-md-row justify-content-between">
+                        <div class="col-sm-12 mb-3 d-flex flex-column flex-md-row justify-content-between">
 
-                            <div class="mb-2 mb-md-0 w-100 me-md-2">
-                                <label for="product_type" class="form-label">Tipo de producto:</label>
+                            <div class="mb-2 mb-md-0 w-30 me-md-2">
+                                <label for="product_type" class="form-label">Tipo</label>
                                 <select name="product_type" id="product_type" class="form-control">
                                     <option value="simple">Simple</option>
                                     <option value="combo">Combo</option>
@@ -19,7 +19,7 @@
                                 </select>
                             </div>
 
-                            <div class="w-100">
+                            <div class="w-70">
                                 <label for="product-selector">Agregar producto</label>
                                 <select id="product-selector" class="form-control"></select>
                             </div>
