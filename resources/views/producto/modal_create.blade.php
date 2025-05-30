@@ -21,7 +21,7 @@
 
                             <div class="w-70">
                                 <label for="product-selector">Agregar producto</label>
-                                <select id="product-selector" class="form-control"></select>
+                                <select id="product-selector" class="form-control form-control-sm"></select>
                             </div>
                         </div>
 
@@ -98,10 +98,10 @@
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Marca</label>
-                                    <select class="form-control selectMarca" name="marca" id="marca" required="">
+                                    <select class="form-control form-control-sm select2Marca" name="marca" id="marca" required>
                                         <option value="">Buscar un proveedor</option>
-                                        @foreach ($brandsThirds as $p)
-                                        <option value="{{$p->id}}">{{$p->name}}</option>
+                                        @foreach ($brandsThirds as $option)
+                                       <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
                                         @endforeach
                                     </select>
                                     <span class="text-danger error-message"></span>
@@ -257,7 +257,8 @@
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
             $('#productoId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
             $('#categoria').val(''); // Opcional: limpiar la selección del campo
-            $('#selectMarca').val('');
+          
+            $("#selectMarca").val("");
             $('#marca').val('');
             $('#nivel').val('');
             $('#presentacion').val('');

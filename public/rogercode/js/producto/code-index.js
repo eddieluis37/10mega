@@ -8,8 +8,6 @@ const btnClose = document.querySelector("#btnModalClose");
 
 const selectCategory = document.querySelector("#categoria");
 
-const selectMarca = document.querySelector("#marca");
-
 const selectCentrocosto = document.querySelector("#centrocosto");
 const producto_id = document.querySelector("#productoId");
 const contentform = document.querySelector("#contentDisable");
@@ -87,7 +85,7 @@ $(document).ready(function () {
             },
         });
     });
-    $(".selectMarca").select2({
+    $(".select2Marca").select2({
         placeholder: "Busca un proveedor",
         width: "100%",
         theme: "bootstrap-5",
@@ -101,19 +99,19 @@ $(document).ready(function () {
 const edit = async (id) => {
     console.log(id);
     const response = await fetch(`/producto-edit/${id}`); // 1. Petición al controlador
-    const data = await response.json();                   // 2. Espera estructura: { listadoproductos: {...}, componentes: [...] }
+    const data = await response.json(); // 2. Espera estructura: { listadoproductos: {...}, componentes: [...] }
     console.log(data);
     if (contentform.hasAttribute("disabled")) {
         contentform.removeAttribute("disabled");
         $("#cliente").prop("disabled", false);
     }
-    showForm(data);                                       // 3. Enviamos la data al form
+    showForm(data); // 3. Enviamos la data al form
 };
 
 const showForm = (data) => {
     let resp = data.listadoproductos;
     console.log(resp);
-    
+
     // Log de tipos y valores antes de la conversion
     console.log("Antes de conversion:");
     console.log("alerta:", resp.alerts, "Type:", typeof resp.alerts);
@@ -151,7 +149,7 @@ const showForm = (data) => {
         "Type:",
         typeof impoconsumoNumber
     );
-    
+
     producto_id.value = resp.id;
     $("#categoria").val(resp.category_id).trigger("change");
     $("#marca").val(resp.brand_id).trigger("change");
@@ -166,18 +164,19 @@ const showForm = (data) => {
     $("#impuestoiva").val(ivaNumber).trigger("change");
     $("#isa").val(otroImpuestoNumber).trigger("change");
     $("#impoconsumo").val(impoconsumoNumber).trigger("change");
+    $("#product_type").val(resp.type).trigger("change");
 
     // Cargar productos en la tabla si existen
     // Asegúrate que data.componentes tenga estructura
     console.log("componentes recibidos:", data.componentes);
 
-    const productos = data.componentes || [];             // 4. Asegura que sea array
-    const tbody = $('#product-table tbody');
+    const productos = data.componentes || []; // 4. Asegura que sea array
+    const tbody = $("#product-table tbody");
     tbody.empty();
-    productosCombo.length = 0;                            // 5. Limpia array global antes de rellenar
+    productosCombo.length = 0; // 5. Limpia array global antes de rellenar
 
     productos.forEach((producto, index) => {
-        productosCombo.push(producto.product_id);        // 6. Relleno del array
+        productosCombo.push(producto.product_id); // 6. Relleno del array
         const row = `
             <tr data-id="${producto.product_id}">
                 <td>${producto.product_name}
@@ -192,7 +191,7 @@ const showForm = (data) => {
                     <button type="button" class="btn btn-danger btn-sm remove-product">Eliminar</button>
                 </td>
             </tr>`;
-        tbody.append(row);                               // 7. Inserta en tabla
+        tbody.append(row); // 7. Inserta en tabla
     });
 
     const modal = new bootstrap.Modal(
@@ -200,9 +199,6 @@ const showForm = (data) => {
     );
     modal.show();
 };
-
-
-
 
 // Limpiar mensajes de error al cerrar la ventana modal
 $("#modal-create-producto").on("hidden.bs.modal", function () {
@@ -341,5 +337,6 @@ $(document).ready(function () {
         $(".error-message").text("");
         $("#product-table tbody").empty();
         productosCombo.length = 0;
+        formProducto.reset();
     });
 });
