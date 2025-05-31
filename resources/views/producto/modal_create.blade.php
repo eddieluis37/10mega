@@ -7,36 +7,39 @@
                         <div>
                             <input type="hidden" value="0" name="productoId" id="productoId">
                         </div>
-                        <!-- Toolbar inicial -->
-                        <div class="col-sm-12 mb-3 d-flex flex-column flex-md-row justify-content-between">
 
-                            <div class="mb-2 mb-md-0 w-30 me-md-2">
-                                <label for="product_type" class="form-label">Tipo</label>
-                                <select name="product_type" id="product_type" class="form-control">
-                                    <option value="simple">Simple</option>
-                                    <option value="combo">Combo</option>
-                                    <option value="receta">Receta</option>
-                                </select>
-                            </div>
-
-                            <div class="w-70">
-                                <label for="product-selector">Agregar producto</label>
-                                <select id="product-selector" class="form-control form-control-sm"></select>
-                            </div>
+                        <div class="mb-2 mb-md-0 w-30 me-md-2">
+                            <label for="product_type" class="form-label">Tipo</label>
+                            <select name="product_type" id="product_type" class="form-control">
+                                <option value="simple">Simple</option>
+                                <option value="combo">Combo</option>
+                                <option value="receta">Receta</option>
+                            </select>
                         </div>
 
-                        <!-- Tabla de productos -->
-                        <div class="table-responsive mb-4">
-                            <table class="table" id="product-table">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Cantidad</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                        <!-- Toolbar inicial -->
+                        <div id="combo_fields" class="product-type-fields hidden mt-4 col-sm-12">
+                             <h4>Datos de producto combo</h4>
+                            <div class="col-sm-12 mb-3 d-flex flex-column flex-md-row justify-content-between">
+                                <div class="w-70">
+                                    <label for="product-selector">Agregar producto</label>
+                                    <select id="product-selector" class="form-control form-control-sm"></select>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de productos -->
+                            <div class="table-responsive mb-4">
+                                <table class="table" id="product-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- Acordeón: Campos adicionales dependiendo del tipo de producto -->
@@ -101,7 +104,7 @@
                                     <select class="form-control form-control-sm select2Marca" name="marca" id="marca" required>
                                         <option value="">Buscar un proveedor</option>
                                         @foreach ($brandsThirds as $option)
-                                       <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
+                                        <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
                                         @endforeach
                                     </select>
                                     <span class="text-danger error-message"></span>
@@ -257,7 +260,7 @@
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
             $('#productoId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
             $('#categoria').val(''); // Opcional: limpiar la selección del campo
-          
+
             $("#selectMarca").val("");
             $('#marca').val('');
             $('#nivel').val('');
