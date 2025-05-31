@@ -241,21 +241,27 @@ $("#modal-create-producto").on("hidden.bs.modal", function () {
 
 // script.js
 $(document).ready(function () {
-    // Mostrar acordeones según tipo
-    $("#product_type")
-        .change(function () {
-            const type = $(this).val();
-            $(".product-type-fields").hide();
-            if (type === "simple") {
-                $("#simpleFields").show();
-            } else if (type === "combo") {
-                $("#combo_fields").show();
-            } else if (type === "receta") {
-                $("#receta_fields").show();
-            }
-        })
-        .trigger("change");
+     $('#product_type').on('change', function () {
+        const tipo = $(this).val();
 
+        // Ocultar todos los campos
+        $('.product-type-fields').addClass('hidden');
+
+        if (tipo === 'combo' || tipo === 'receta') {
+            $('#combo_receta_fields').removeClass('hidden');
+
+            // Cambiar título según el tipo
+            const titulo = tipo === 'combo' ? 'Datos de producto combo' : 'Datos de producto receta';
+            $('#combo_receta_title').text(titulo);
+
+            // cargar productos específicos por tipo si es necesario
+        } else if (tipo === 'simple') {
+            $('#simpleFields').removeClass('hidden');
+        }
+    });
+
+    // Activar el estado inicial si ya hay un tipo preseleccionado
+    $('#product_type').trigger('change');
     // Initialize Select2
     $("#product-selector")
         .select2({

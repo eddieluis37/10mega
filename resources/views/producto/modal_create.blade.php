@@ -17,9 +17,10 @@
                             </select>
                         </div>
 
-                        <!-- Toolbar inicial -->
-                        <div id="combo_fields" class="product-type-fields hidden mt-4 col-sm-12">
-                            <h4>Datos de producto combo</h4>
+                        <!-- Bloque único para combo y receta -->
+                        <div id="combo_receta_fields" class="product-type-fields hidden mt-4 col-sm-12">
+                            <h4 id="combo_receta_title">Datos de producto</h4>
+
                             <div class="col-sm-12 mb-3 d-flex flex-column flex-md-row justify-content-between">
                                 <div class="w-70">
                                     <label for="product-selector">Agregar producto</label>
@@ -27,32 +28,6 @@
                                 </div>
                             </div>
 
-                            <!-- Tabla de productos -->
-                            <div class="table-responsive mb-4">
-                                <table class="table" id="product-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Producto</th>
-                                            <th>Cantidad</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                         <!-- Toolbar inicial -->
-                        <div id="receta_fields" class="product-type-fields hidden mt-4 col-sm-12">
-                            <h4>Datos de producto receta</h4>
-                            <div class="col-sm-12 mb-3 d-flex flex-column flex-md-row justify-content-between">
-                                <div class="w-70">
-                                    <label for="product-selector">Agregar producto</label>
-                                    <select id="product-selector" class="form-control"></select>
-                                </div>
-                            </div>
-
-                            <!-- Tabla de productos -->
                             <div class="table-responsive mb-4">
                                 <table class="table" id="product-table">
                                     <thead>
@@ -178,7 +153,7 @@
                                 </div>
                             </div>
                         </div>
-                       <!--  <div class="col-sm-12 col-md-3">
+                        <!--  <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Cantidad</label>
@@ -264,7 +239,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-6">
+                        <div class="col-sm-12 col-md-3">
                             <div class="mb-3">
                                 <label for="formFile" class="form-label">Seleccione la imagen</label>
                                 <input class="form-control" type="file" id="formFile">
@@ -330,7 +305,7 @@
         $('#nivel').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
-         $('#presentacion').change(function() {
+        $('#presentacion').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
         $('#nameproducto').change(function() {
