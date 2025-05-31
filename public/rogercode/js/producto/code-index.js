@@ -190,7 +190,7 @@ const showForm = (data) => {
     $("#nivel").val(resp.level_product_id).trigger("change");
     $("#presentacion").val(resp.unitofmeasure_id).trigger("change");
     $("#quantity").val(resp.quantity).trigger("change");
-   
+
     $("#nameproducto").val(resp.name).trigger("change");
     $("#code").val(resp.code).trigger("change");
     $("#codigobarra").val(resp.barcode).trigger("change");
@@ -373,5 +373,7 @@ $(document).ready(function () {
         $("#product-table tbody").empty();
         productosCombo.length = 0;
         formProducto.reset();
+        // Activar el estado inicial si ya hay un tipo preseleccionado
+        $("#product_type").trigger("change");
     });
 });

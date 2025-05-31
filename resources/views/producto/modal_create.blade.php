@@ -42,6 +42,31 @@
                             </div>
                         </div>
 
+                         <!-- Toolbar inicial -->
+                        <div id="receta_fields" class="product-type-fields hidden mt-4 col-sm-12">
+                            <h4>Datos de producto receta</h4>
+                            <div class="col-sm-12 mb-3 d-flex flex-column flex-md-row justify-content-between">
+                                <div class="w-70">
+                                    <label for="product-selector">Agregar producto</label>
+                                    <select id="product-selector" class="form-control"></select>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de productos -->
+                            <div class="table-responsive mb-4">
+                                <table class="table" id="product-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
                         <!-- Acordeón: Campos adicionales dependiendo del tipo de producto -->
                         <div id="simpleFields" class="product-type-fields hidden mt-4">
                             <h4>Datos de producto simple</h4>
