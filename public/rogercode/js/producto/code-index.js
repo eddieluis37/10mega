@@ -90,6 +90,7 @@ $(document).ready(function () {
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,
+        dropdownParent: $("#modal-create-producto"),
     });
 });
 
@@ -238,6 +239,7 @@ $(document).ready(function () {
             width: "100%",
             theme: "bootstrap-5",
             allowClear: true,
+            dropdownParent: $("#modal-create-producto"),
         })
         .on("select2:select", function (e) {
             const { id: productId, text: productName } = e.params.data;

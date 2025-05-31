@@ -19,11 +19,11 @@
 
                         <!-- Toolbar inicial -->
                         <div id="combo_fields" class="product-type-fields hidden mt-4 col-sm-12">
-                             <h4>Datos de producto combo</h4>
+                            <h4>Datos de producto combo</h4>
                             <div class="col-sm-12 mb-3 d-flex flex-column flex-md-row justify-content-between">
                                 <div class="w-70">
                                     <label for="product-selector">Agregar producto</label>
-                                    <select id="product-selector" class="form-control form-control-sm"></select>
+                                    <select id="product-selector" class="form-control"></select>
                                 </div>
                             </div>
 
@@ -100,8 +100,8 @@
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>Marca</label>
-                                    <select class="form-control form-control-sm select2Marca" name="marca" id="marca" required>
+                                    <label for="" class="form-label">Marca</label>
+                                    <select class="form-control select2Marca" name="marca" id="marca" required>
                                         <option value="">Buscar un proveedor</option>
                                         @foreach ($brandsThirds as $option)
                                         <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
@@ -261,8 +261,9 @@
             $('#productoId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
             $('#categoria').val(''); // Opcional: limpiar la selección del campo
 
-            $("#selectMarca").val("");
-            $('#marca').val('');
+            const mySelectMarca = $("#marca");
+            mySelectMarca.val("").trigger("change");
+
             $('#nivel').val('');
             $('#presentacion').val('');
             $('#quantity').val('');
