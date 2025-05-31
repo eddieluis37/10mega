@@ -48,16 +48,31 @@
 
                         </div>
 
-
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Categoria ERP</label>
                                     <div>
-                                        <select class="form-control selectCategory" name="categoria" id="categoria" required="">
+                                        <select class="form-control select2CategoryErp" name="categoriaerp" id="categoriaerp" required>
                                             <option value="">Seleccione la categoria</option>
-                                            @foreach ($categorias as $c)
-                                            <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
+                                            @foreach ($categorias as $option)
+                                            <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="text-danger error-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            <div class="task-header">
+                                <div class="form-group">
+                                    <label>SubCategoria ERP</label>
+                                    <div>
+                                        <select class="form-control select2SubCategoryErp" name="subcategoriaerp" id="subcategoriaerp" required>
+                                            <option value="">Seleccione</option>
+                                            @foreach ($familias as $option)
+                                            <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger error-message"></span>
@@ -70,10 +85,10 @@
                                 <div class="form-group">
                                     <label>Categoria WEB</label>
                                     <div>
-                                        <select class="form-control selectCategory" name="categoria" id="categoria" required="">
+                                        <select class="form-control select2CategoryWeb" name="categoriaweb" id="categoriaweb" required>
                                             <option value="">Seleccione</option>
-                                            @foreach ($categoriasComerciales as $c)
-                                            <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
+                                            @foreach ($categoriasComerciales as $option)
+                                            <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
                                             @endforeach
                                         </select>
                                         <span class="text-danger error-message"></span>
@@ -84,19 +99,18 @@
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>SubCategoria WEB</label>
-                                    <div>
-                                        <select class="form-control selectCategory" name="categoria" id="categoria" required="">
-                                            <option value="">Seleccione</option>
-                                            @foreach ($SubcategoriasComerciales as $c)
-                                            <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
-                                            @endforeach
-                                        </select>
-                                        <span class="text-danger error-message"></span>
-                                    </div>
+                                    <label for="" class="form-label">SubCategoria WEB</label>
+                                    <select class="form-control select2SubCategoryWeb" name="subcategoriaweb" id="subcategoriaweb" required>
+                                        <option value="">Seleccione</option>
+                                        @foreach ($SubcategoriasComerciales as $option)
+                                        <option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span class="text-danger error-message"></span>
                                 </div>
                             </div>
                         </div>
+
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
@@ -115,7 +129,7 @@
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Nivel</label>
-                                    <select class="form-control selectPieles" name="nivel" id="nivel">
+                                    <select class="form-control" name="nivel" id="nivel">
                                         <option value="2">No aplica</option>
                                         @foreach ($niveles as $p)
                                         <option value="{{$p->id}}">{{$p->name}}</option>
@@ -139,7 +153,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
+                       <!--  <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
                                     <label>Cantidad</label>
@@ -148,25 +162,12 @@
                                 </div>
                             </div>
                         </div>
+ -->
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
-                                    <label>Familia</label>
-                                    <select class="form-control selectProvider" name="familia" id="familia" required="">
-                                        <option value="">Buscar una familia</option>
-                                        @foreach ($familias as $p)
-                                        <option value="{{$p->id}}">{{$p->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    <span class="text-danger error-message"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="task-header">
-                                <div class="form-group">
-                                    <label>Subfamilia</label>
-                                    <input type="text" class="form-control" name="subfamilia" id="subfamilia" placeholder="ej: Chorizo" required="">
+                                    <label>NombreProducto</label>
+                                    <input type="text" class="form-control" name="nameproducto" id="nameproducto" placeholder="ej: Chorizo" required>
                                     <span class="text-danger error-message"></span>
                                 </div>
                             </div>
@@ -259,7 +260,18 @@
         $('#modal-create-producto').on('hidden.bs.modal', function() {
             $(this).find('.error-message').text(''); // Limpiar mensaje de error
             $('#productoId').val(0); // Para evitar que al crear nuevo producto se edite el registro anterior editado
-            $('#categoria').val(''); // Opcional: limpiar la selección del campo
+
+            const mySelectCategoriaerp = $("#categoriaerp");
+            mySelectCategoriaerp.val("").trigger("change");
+
+            const mySelectSubcategoriaerp = $("#subcategoriaerp");
+            mySelectSubcategoriaerp.val("").trigger("change");
+
+            const mySelectCategoriaweb = $("#categoriaweb");
+            mySelectCategoriaweb.val("").trigger("change");
+
+            const mySelectSubcategoriaweb = $("#subcategoriaweb");
+            mySelectSubcategoriaweb.val("").trigger("change");
 
             const mySelectMarca = $("#marca");
             mySelectMarca.val("").trigger("change");
@@ -267,7 +279,6 @@
             $('#nivel').val('');
             $('#presentacion').val('');
             $('#quantity').val('');
-            $('#familia').val('');
             $('#subfamilia').val('');
             $('#code').val('');
             $('#codigobarra').val('');
@@ -278,16 +289,26 @@
         });
 
         // Limpiar mensajes de error al seleccionar un campo
-        $('#categoria').change(function() {
+        $('#categoriaerp').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
-        $('#familia').change(function() {
+        $('#subcategoriaerp').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
+        $('#categoriaweb').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });
+        $('#subcategoriaweb').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });
+
         $('#nivel').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
-        $('#subfamilia').change(function() {
+         $('#presentacion').change(function() {
+            $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
+        });
+        $('#nameproducto').change(function() {
             $(this).siblings('.error-message').text(''); // Limpiar mensaje de error
         });
         $('#code').change(function() {
@@ -310,16 +331,3 @@
         });
     });
 </script>
-<!-- <script>
-    function updatePercentage() {
-        const ivaInput = document.getElementById('impuestoiva').value;
-        const percentageDisplay = document.getElementById('percentageDisplay');
-
-        // Verifica si el input no está vacío
-        if (ivaInput) {
-            percentageDisplay.textContent = ivaInput + '%'; // Muestra el valor seguido del símbolo de porcentaje
-        } else {
-            percentageDisplay.textContent = ''; // Limpia el display si no hay valor
-        }
-    }
-</script> -->

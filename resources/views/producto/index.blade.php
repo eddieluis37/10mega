@@ -21,8 +21,8 @@
 							<tr>
 								<th class="table-th text-white">ID</th>
 								<th class="table-th text-white ">CAT</th>
-								<th class="table-th text-white ">FAMILIA</th>
-								<th class="table-th text-white ">SUBFAMILIA</th>
+								<th class="table-th text-white ">TIPO</th>
+								<th class="table-th text-white ">NOMBRE</th>
 								<th class="table-th text-white ">CODE</th>
 								<th class="table-th text-white">PRECIO_M</th>
 								<th class="table-th text-white">IVA</th>

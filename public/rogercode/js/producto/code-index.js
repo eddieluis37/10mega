@@ -30,7 +30,7 @@ $(document).ready(function () {
             columns: [
                 { data: "id", name: "id" },
                 { data: "namecategorias", name: "namecategorias" },
-                { data: "namefamilia", name: "namefamilia" },
+                { data: "type", name: "type" },
                 { data: "name", name: "name" },
                 { data: "code", name: "code" },
                 {
@@ -84,6 +84,34 @@ $(document).ready(function () {
                 },
             },
         });
+    });
+    $(".select2CategoryErp").select2({
+        placeholder: "Busca una categoria Erp",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+        dropdownParent: $("#modal-create-producto"),
+    });
+    $(".select2SubCategoryErp").select2({
+        placeholder: "Busca una Subcategoria Erp",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+        dropdownParent: $("#modal-create-producto"),
+    });
+    $(".select2CategoryWeb").select2({
+        placeholder: "Busca un proveedor",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+        dropdownParent: $("#modal-create-producto"),
+    });
+    $(".select2SubCategoryWeb").select2({
+        placeholder: "Busca un proveedor",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+        dropdownParent: $("#modal-create-producto"),
     });
     $(".select2Marca").select2({
         placeholder: "Busca un proveedor",
@@ -152,13 +180,18 @@ const showForm = (data) => {
     );
 
     producto_id.value = resp.id;
-    $("#categoria").val(resp.category_id).trigger("change");
+    $("#categoriaerp").val(resp.category_id).trigger("change");
+    $("#subcategoriaerp").val(resp.meatcut_id).trigger("change");
+    $("#categoriaweb").val(resp.categories_comerciales_id).trigger("change");
+    $("#subcategoriaweb")
+        .val(resp.subcategory_comerciales_id)
+        .trigger("change");
     $("#marca").val(resp.brand_id).trigger("change");
     $("#nivel").val(resp.level_product_id).trigger("change");
     $("#presentacion").val(resp.unitofmeasure_id).trigger("change");
     $("#quantity").val(resp.quantity).trigger("change");
-    $("#familia").val(resp.meatcut_id).trigger("change");
-    $("#subfamilia").val(resp.name).trigger("change");
+   
+    $("#nameproducto").val(resp.name).trigger("change");
     $("#code").val(resp.code).trigger("change");
     $("#codigobarra").val(resp.barcode).trigger("change");
     $("#alerta").val(resp.alerts).trigger("change");
