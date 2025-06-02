@@ -64,6 +64,7 @@ use App\Http\Controllers\sale\saleController;
 
 use App\Http\Controllers\compensado\compensadoController;
 use App\Http\Controllers\alistamiento\alistamientoController;
+use App\Http\Controllers\alistartopping\alistartoppingController;
 use App\Http\Controllers\pollo\beneficiopolloController;
 use App\Http\Controllers\pollo\despostepolloController;
 use App\Http\Controllers\inventory\CargarVentasController;
@@ -359,6 +360,27 @@ Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
 
     Route::get('/get-lotes/{storeId}', [alistamientoController::class, 'getLotes'])->name('get.lotes');
     Route::get('/get-productos/{loteId}', [alistamientoController::class, 'getProductos'])->name('get.productos');
+});
+
+// Proteger todas las rutas dentro del modulo de alistamiento
+Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
+    /**ALISTAMIENTO*/
+    Route::get('alistartopping', [alistartoppingController::class, 'index'])->name('alistartopping.index');
+    Route::post('alistartoppingsave', [alistartoppingController::class, 'store'])->name('alistartopping.save');
+    Route::get('showalistartopping', [alistartoppingController::class, 'show'])->name('alistartopping.showlist');
+    Route::get('alistartopping/create/{id}', [alistartoppingController::class, 'create'])->name('alistartopping.create');
+    Route::post('getproductos', [alistartoppingController::class, 'getproducts'])->name('alistartopping.getproductos');
+    Route::post('alistartoppingsavedetail', [alistartoppingController::class, 'savedetail'])->name('alistartopping.savedetail');
+    Route::post('/alistartoppingUpdate', [alistartoppingController::class, 'updatedetail'])->name('alistartopping.update');
+    Route::post('alistartoppingdown', [alistartoppingController::class, 'destroy'])->name('alistartopping.down');
+    Route::post('alistartoppingById', [alistartoppingController::class, 'editAlistamiento'])->name('alistartopping.edit');
+    Route::post('getproductospadre', [alistartoppingController::class, 'getProductsCategoryPadre'])->name('alistartopping.getproductospadre');
+    Route::post('/downmmainalistartopping', [alistartoppingController::class, 'destroyAlistamiento'])->name('alistartopping.downAlistamiento');
+    Route::post('/downmmainalistartopping', [alistartoppingController::class, 'destroyAlistamiento'])->name('alistartopping.downAlistamiento');
+    Route::post('alistartoppingAddShoping', [alistartoppingController::class, 'add_shopping'])->name('alistartopping.addShopping');
+
+    Route::get('/get-lotes/{storeId}', [alistartoppingController::class, 'getLotes'])->name('get.lotes');
+    Route::get('/get-productos/{loteId}', [alistartoppingController::class, 'getProductos'])->name('get.productos');
 });
 
 // Proteger todas las rutas dentro del modulo de traslados
