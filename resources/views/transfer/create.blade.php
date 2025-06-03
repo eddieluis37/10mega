@@ -61,15 +61,15 @@
 						<form id="form-detail">
 							<input type="hidden" id="transferId" name="transferId" value="{{$dataTransfer[0]->id}}">
 							<div class="row g-3"> <!-- Añadido justify-content-center para centrar los campos horizontalmente -->
-							<div class="col-md-8">
+								<div class="col-md-8">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="producto" class="form-label">Buscar producto</label>											
+											<label for="producto" class="form-label">Buscar producto</label>
 
 											<!-- Campos ocultos para enviar datos adicionales -->
 											<input type="hidden" id="lote_id" name="lote_id" value="">
 											<input type="hidden" id="inventario_id" name="inventario_id" value="">
-											<input type="hidden" id="stock_ideal" name="stock_ideal" value="">										
+											<input type="hidden" id="stock_ideal" name="stock_ideal" value="">
 
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
@@ -78,7 +78,7 @@
 													data-product-id="{{ $result['product_id'] }}"
 													data-lote-id="{{ $result['lote_id'] }}"
 													data-inventario-id="{{ $result['inventario_id'] }}"
-													data-stock-ideal="{{ $result['stock_ideal'] }}"												
+													data-stock-ideal="{{ $result['stock_ideal'] }}"
 													data-info="{{ $result['text'] }}">
 													{{ $result['text'] }}
 												</option>
@@ -89,7 +89,7 @@
 										</div>
 									</div>
 								</div>
-								
+
 								<div class="col-md-2">
 									<div class="form-group">
 										<label for="" class="form-label">KG|UND|trasladar</label>
@@ -270,10 +270,10 @@
 </div>
 <script>
 	// Definimos la variable en JavaScript
-	const isAuthorized = @json(DB::table('store_user')
-	    ->where('user_id', auth()->user()->id)
-	    ->where('store_id', $dataTransfer[0]->bodega_destino_id)
-	    ->exists());
+	const isAuthorized = @json(DB::table('store_user') -
+		> where('user_id', auth() - > user() - > id) -
+		> where('store_id', $dataTransfer[0] - > bodega_destino_id) -
+		> exists());
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
