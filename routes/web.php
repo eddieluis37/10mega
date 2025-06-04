@@ -369,7 +369,7 @@ Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
     Route::post('alistartoppingsave', [alistartoppingController::class, 'store'])->name('alistartopping.save');
     Route::get('showalistartopping', [alistartoppingController::class, 'show'])->name('alistartopping.showlist');
     Route::get('alistartopping/create/{id}', [alistartoppingController::class, 'create'])->name('alistartopping.create');
-    Route::post('getproductos', [alistartoppingController::class, 'getproducts'])->name('alistartopping.getproductos');
+    Route::post('alistargetproductos', [alistartoppingController::class, 'getproducts'])->name('alistartopping.getproductos');
     Route::post('alistartoppingsavedetail', [alistartoppingController::class, 'savedetail'])->name('alistartopping.savedetail');
     Route::post('/alistartoppingUpdate', [alistartoppingController::class, 'updatedetail'])->name('alistartopping.update');
     Route::post('alistartoppingdown', [alistartoppingController::class, 'destroy'])->name('alistartopping.down');

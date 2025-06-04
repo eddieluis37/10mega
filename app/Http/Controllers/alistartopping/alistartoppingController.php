@@ -57,8 +57,8 @@ class alistartoppingController extends Controller
                 'alistamientoId' => 'nullable',
                 'fecha' => 'required|date',
                 'inputstore' => 'required|exists:stores,id',
-                'inputlote' => 'required|exists:lotes,id',
-                'select2corte' => 'required|exists:products,id',
+                'lote_id' => 'required|exists:lotes,id',
+                'producto' => 'required|exists:products,id',
                 'cantidadprocesar' => [
                     'required',
                     'numeric',
@@ -70,11 +70,11 @@ class alistartoppingController extends Controller
             $messages = [
                 'fecha.required' => 'La fecha es requerida.',
                 'inputstore.required' => 'La bodega es requerida.',
-                'inputlote.required' => 'El lote es requerido.',
-                'select2corte.required' => 'El corte padre es requerido.',
+                'lote_id.required' => 'El lote es requerido.',
+                'producto.required' => 'El corte padre es requerido.',
                 'inputstore.exists' => 'La bodega seleccionada no existe.',
                 'inputlote.exists' => 'El lote seleccionado no existe.',
-                'select2corte.exists' => 'El corte padre seleccionado no existe.',
+                'producto.exists' => 'El corte padre seleccionado no existe.',
                 'cantidadprocesar.required' => 'La cantidad a procesar es requerida.',
                 'cantidadprocesar.numeric' => 'La cantidad a procesar debe ser un número.',
                 'cantidadprocesar.min' => 'La cantidad a procesar debe ser mayor a 0.1.',
@@ -91,7 +91,7 @@ class alistartoppingController extends Controller
             }
 
             // Obtener la categoría del producto seleccionado
-            $product = Product::find($request->select2corte);
+            $product = Product::find($request->producto);
             if (!$product) {
                 return response()->json([
                     'status' => 0,
@@ -108,11 +108,11 @@ class alistartoppingController extends Controller
             $reg = Alistar_topping::select()->first();
 
             if ($reg === null) {
-                $newLote = $day . $month . $year . "AL1";
+                $newLote = $day . $month . $year . "AT1";
             } else {
                 $regUltimo = Alistar_topping::latest()->first();
                 $consecutivo = $regUltimo ? $regUltimo->id + 1 : 1;
-                $newLote = $day . $month . $year . "AL" . $consecutivo;
+                $newLote = $day . $month . $year . "AT" . $consecutivo;
             }
 
             // Crear el nuevo lote
@@ -131,8 +131,8 @@ class alistartoppingController extends Controller
 
             // Obtener el costo unitario desde el modelo Inventario
             $inventario = Inventario::where('store_id', $request->inputstore)
-                ->where('lote_id', $request->inputlote)
-                ->where('product_id', $request->select2corte)
+                ->where('lote_id', $request->lote_id)
+                ->where('product_id', $request->producto)
                 ->first();
 
             $costoUnitarioPadre = $inventario ? $inventario->costo_unitario : 0;
@@ -140,8 +140,8 @@ class alistartoppingController extends Controller
 
             // Asignar los datos
             $alistartopping->store_id = $request->input('inputstore');
-            $alistartopping->lote_id = $request->input('inputlote');
-            $alistartopping->product_id = $request->input('select2corte');
+            $alistartopping->lote_id = $request->input('lote_id');
+            $alistartopping->product_id = $request->input('producto');
             $alistartopping->fecha_alistamiento = $request->input('fecha');
             $alistartopping->lote_hijos_id = $nuevoLote->id;
             $alistartopping->costo_unitario_padre = $costoUnitarioPadre;
@@ -392,12 +392,13 @@ class alistartoppingController extends Controller
             ->join('stores as s', 'ali.store_id', '=', 's.id')
             ->join('lotes as l', 'ali.lote_id', '=', 'l.id')
             ->join('lotes as lh', 'ali.lote_hijos_id', '=', 'lh.id')
-            ->join('lote_products as lp', 'ali.product_id', '=', 'lp.product_id')
+           // ->join('lote_products as lp', 'ali.product_id', '=', 'lp.product_id')
             ->join('products as p', 'ali.product_id', '=', 'p.id')
-            ->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
+            //->join('meatcuts as m', 'p.meatcut_id', '=', 'm.id')
             ->join('inventarios as i', 'p.id', '=', 'i.product_id')
             ->select(
                 'ali.*',
+                'ali.fecha_cierre as fecha_cierre',
                 'p.id as productopadreId',
                 'p.name as name',
                 'ali.stock_actual_padre as stockPadre',
@@ -412,22 +413,9 @@ class alistartoppingController extends Controller
             ->where('ali.id', $id)
             ->get();
 
-        /* 
-        $cortes = DB::table('products as p')
-            ->join('inventarios as i', 'p.id', '=', 'i.product_id')
-            ->select('p.*', 'i.stock_ideal', 'i.cantidad_inicial', 'p.id as productopadreId')
-            ->selectRaw('i.stock_ideal stockPadre')
-            /*  ->selectRaw('i.inventario_inicial + i.compraLote + i.alistartopping +
-            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stockPadre') 
-            ->where([
-                ['p.level_product_id', 1],
-                ['p.id', $dataAlistamiento[0]->product_id],
-                ['p.status', 1],
-                ['i.store_id', $dataAlistamiento[0]->store_id],
-            ])->get(); */
+       
 
-
-        //  dd($dataAlistamiento);
+       //  dd($dataAlistamiento);
 
         /*****************************************/
 
@@ -484,9 +472,9 @@ class alistartoppingController extends Controller
     public function getproducts(Request $request)
     {
         $prod = Product::Where([
-            ['meatcut_id', $request->categoriaId],
+            // ['meatcut_id', $request->categoriaId],
             ['status', 1],
-            ['level_product_id', 2]
+            ['category_id', 23]
         ])->get();
         return response()->json(['products' => $prod]);
     }
@@ -611,9 +599,9 @@ class alistartoppingController extends Controller
             $details->merma = $CantidadPadreProcesar - $kgTotalRequeridos;
             $details->save();
 
-            $newStockPadre = $request->stockPadre - $kgTotalRequeridos;
+          //  $newStockPadre = $request->stockPadre - $CantidadPadreProcesar;
             $alist = Alistar_topping::firstWhere('id', $request->alistamientoId);
-            $alist->nuevo_stock_padre = $newStockPadre;
+       //     $alist->nuevo_stock_padre = $newStockPadre;
             $alist->save();
 
             // Recalcular y actualizar valores en alistar_topping_details para todos los registros con el mismo alistar_toppings_id
@@ -762,8 +750,9 @@ class alistartoppingController extends Controller
             // Actualizar el campo newkgrequeridos
             $detail->kgrequeridos = $newkgrequeridos;
             $totalVenta = $detail->precio_minimo * $newkgrequeridos;
+          //  $totalNuevoStockPadre = $detail->stock_actual_padre - $detail->cantidad_padre_a_procesar;
             $detail->total_venta = $totalVenta;
-            $detail->newstock = $newkgrequeridos;
+            $detail->newstock = $newkgrequeridos;         
             $detail->save();
 
             // Recalcular los valores de todos los detalles
@@ -942,7 +931,7 @@ class alistartoppingController extends Controller
 
                 // **Registrar movimiento en la tabla de movimientos para el lote padre**
                 MovimientoInventario::create([
-                    'tipo' => 'alistar_toppings',
+                    'tipo' => 'enlistments',
                     'alistar_toppings_id' => $alistamientoId,
                     'store_origen_id' => null,
                     'store_destino_id' => $alistartopping->store_id,
@@ -959,7 +948,7 @@ class alistartoppingController extends Controller
             foreach ($detallesAlistamiento as $detalle) {
                 if ($detalle->kgrequeridos > 0) {
                     MovimientoInventario::create([
-                        'tipo' => 'alistar_toppings',
+                        'tipo' => 'enlistments',
                         'alistar_toppings_id' => $detalle->alistar_toppings_id,
                         'store_origen_id' => null,
                         'store_destino_id' => $alistartopping->store_id,
@@ -1001,7 +990,7 @@ class alistartoppingController extends Controller
 
 
 
-    public function add_shoppingOriginal(Request $request)
+  /*   public function add_shoppingOriginal(Request $request)
     {
         try {
             $id_user = Auth::user()->id;
@@ -1090,5 +1079,5 @@ class alistartoppingController extends Controller
                 'array' => (array) $th
             ]);
         }
-    }
+    } */
 }

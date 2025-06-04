@@ -39,14 +39,14 @@ $(".select2Prod").select2({
     allowClear: true,
 });
 $(".select2ProdHijos").select2({
-    placeholder: "Busca hijos",
+    placeholder: "Busca topping",
     width: "100%",
     theme: "bootstrap-5",
     allowClear: true,
 });
 const dataform = new FormData();
 dataform.append("categoriaId", Number(meatcutId.value));
-sendData("/getproductos", dataform, token).then((result) => {
+sendData("/alistargetproductos", dataform, token).then((result) => {
     console.log(result);
     let prod = result.products;
     console.log(prod);
@@ -66,7 +66,7 @@ btnAddAlist.addEventListener("click", async (e) => {
     const dataform = new FormData(formDetail);
     dataform.append("stockPadre", stockPadre.value);
     dataform.append("costoPadre", costoPadre.value);
-    sendData("/alistamientosavedetail", dataform, token).then((result) => {
+    sendData("/alistartoppingsavedetail", dataform, token).then((result) => {
         console.log(result);
         if (result.status == 1) {
             $("#producto").val("").trigger("change");
@@ -152,8 +152,8 @@ const showData = (data) => {
             <th>%Merma:${(arrayTotales.porcMerma)}%</th>
         </tr>
     `;
-    let newTotalStockPadre = stockPadre.value - arrayTotales.kgTotalRequeridos;
-    newStockPadre.value = newTotalStockPadre;
+ /*    let newTotalStockPadre = stockPadre.value - arrayTotales.kgTotalRequeridos;
+    newStockPadre.value = newTotalStockPadre; */
 };
 
 kgrequeridos.addEventListener("change", function () {
@@ -189,7 +189,7 @@ tableAlistamiento.addEventListener("keydown", function (event) {
             dataform.append("storeId", Number(storeId.value));
             dataform.append("stockPadre", stockPadre.value);
 
-            sendData("/alistamientoUpdate", dataform, token).then((result) => {
+            sendData("/alistartoppingUpdate", dataform, token).then((result) => {
                 console.log(result);
                 showData(result);
             });
@@ -256,7 +256,7 @@ tfootTable.addEventListener("click", async (e) => {
                 dataform.append("productoPadre", Number(productoPadre.value));
                 dataform.append("storeId", Number(storeId.value));
 
-                const response = await sendData("/alistamientoAddShoping", dataform, token);
+                const response = await sendData("/alistartoppingAddShoping", dataform, token);
                 console.log("Resultado de la petición:", response);
                 
                 if (response.status === 1) {

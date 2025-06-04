@@ -70,7 +70,7 @@
 								<div class="col-md-4">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="" class="form-label">Buscar corte padre</label>
+											<label for="" class="form-label">Producto a covertir</label>
 											<input type="hidden" id="meatcutId" name="meatcutId" value="{{$dataAlistamiento[0]->meatcut_id}}">
 											<input type="hidden" id="productopadreId" name="productopadreId" value="{{$dataAlistamiento[0]->productopadreId}}">
 											<input type="hidden" id="storeId" name="storeId" value="{{$dataAlistamiento[0]->store_id}}">
@@ -82,14 +82,14 @@
 										</div>
 									</div>
 								</div>
-								<div class="col-md-3">
-									<label for="" class="form-label">Seleccionar hijo </label>
+								<div class="col-md-4">
+									<label for="" class="form-label">Seleccionar topping </label>
 									<select class="form-control form-control-sm select2ProdHijos" name="producto" id="producto" required="">
 									</select>
 									<span class="text-danger error-message"></span>
 								</div>
-								<div class="col-md-3">
-									<label for="" class="form-label">KG requeridos</label>
+								<div class="col-md-2">
+									<label for="" class="form-label">FactConversión</label>
 									<div class="input-group flex-nowrap">
 										<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control input" placeholder="EJ: 10.00">
 										<span class="input-group-text" id="addon-wrapping">KG</span>
@@ -117,14 +117,14 @@
 								<label for="" class="form-label">StockActual</label>
 								<div class="input-group flex-nowrap">
 									<input type="text" id="stockCortePadre" name="stockCortePadre" value="{{$dataAlistamiento[0]->stockPadre}}" class="form-control" placeholder="10,00 kg" readonly>
-									<span class="input-group-text" id="addon-wrapping">KG</span>
+									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-md-3">
-								<label for="" class="form-label">NuevoStockPadre</label>
+								<label for="" class="form-label">NuevoStock</label>
 								<div class="input-group flex-nowrap">
-									<input type="text" id="newStockPadre" name="newStockPadre" value="{{$dataAlistamiento[0]->nuevo_stock_padre}}" class="form-control" placeholder="30,00 kg" readonly>
-									<span class="input-group-text" id="addon-wrapping">KG</span>
+									<input type="text" id="newStockPadre" name="newStockPadre" value="{{$dataAlistamiento[0]->stock_actual_padre - $dataAlistamiento[0]->cantidad_padre_a_procesar}}" class="form-control" placeholder="30,00 kg" readonly>
+									<span class="input-group-text" id="addon-wrapping">QT</span>
 								</div>
 							</div>
 							<div class="col-md-3">
@@ -162,18 +162,18 @@
 										<!--th class="table-th text-white">Item</th>-->
 										<th class="table-th text-white">#</th>
 										<th class="table-th text-white">Codigo</th>
-										<th class="table-th text-white">Prodhijo</th>
+										<th class="table-th text-white">Prod_TOPPING</th>
 									<!-- 	<th class="table-th text-white">Stactual</th>
 										<th class="table-th text-white">Fisico</th> -->
-										<th class="table-th text-white">kgREQ</th>
+										<th class="table-th text-white">QTREQ</th>
 										<th class="table-th text-white">PRICEMIN</th>
 										<th class="table-th text-white">TVENTA</th>
 										<th class="table-th text-white">%VENTA</th>
 										<th class="table-th text-white">CostoT</th>
-										<th class="table-th text-white">CostKG</th>
+										<th class="table-th text-white">CostQT</th>
 										<th class="table-th text-white">UTILID</th>
 										<th class="table-th text-white">%UTL</th>
-										<th class="table-th text-white">N_st_hj</th>
+										<th class="table-th text-white">N_st_PT</th>
 										<th class="table-th text-white text-center">Acciones</th>
 									</tr>
 								</thead>

@@ -25,13 +25,14 @@
 					<span class="text-danger error-message"></span>
 				</div>
 			</div>
-			<div class="col-md-8">
+			<div class="col-md-10">
 				<div class="task-header">
 					<div class="form-group">
 						<label for="producto" class="form-label">Buscar producto</label>
 
 						<!-- Campos ocultos para enviar datos adicionales -->
 						<input type="hidden" id="lote_id" name="lote_id" value="">
+						<input type="hidden" id="product_id" name="product_id" value="">
 						<input type="hidden" id="inventario_id" name="inventario_id" value="">
 						<input type="hidden" id="stock_ideal" name="stock_ideal" value="">
 
@@ -54,7 +55,7 @@
 				</div>
 			</div>
 
-			<div class="col-md-4">
+			<div class="col-md-2">
 				<div class="task-header">
 					<div class="form-group">
 						<label for="sell_price" class="form-label mt-0">QT a convertir</label>
