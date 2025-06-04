@@ -58,7 +58,7 @@ class alistartoppingController extends Controller
                 'fecha' => 'required|date',
                 'inputstore' => 'required|exists:stores,id',
                 'inputlote' => 'required|exists:lotes,id',
-                'select2corte' => 'required|exists:products,id',               
+                'select2corte' => 'required|exists:products,id',
                 'cantidadprocesar' => [
                     'required',
                     'numeric',
@@ -266,14 +266,120 @@ class alistartoppingController extends Controller
     public function index()
     {
         $category = Category::WhereIn('id', [13, 2, 3])->get();
-        //$centros = Centrocosto::Where('status', 1)->get();
-        //$centros = Store::whereNotIn('id', [1, 4, 5, 6, 7])
-        $stores = Store::whereIn('id', [8, 9, 10, 22])
+        $stores = Store::whereIn('id', [15, 19, 28])
             ->orderBy('id', 'asc')
             ->get();
+
+        $storeIds = \DB::table('store_user')
+            ->where('user_id', auth()->id())
+            ->whereIn('store_id', [15, 19, 28])
+            ->pluck('store_id')
+            ->toArray();
+
+        $storeIds = [0];
+
+        // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
+        $productsQuery = Product::query();
+        $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
+            $q->whereIn('store_id', $storeIds)
+                ->where('stock_ideal', '>', 0);
+        });
+        $products = $productsQuery->get();
+
+        // Se obtienen todos los inventarios que cumplan la condición, cargando las relaciones 'store' y 'lote'
+        $inventarios = Inventario::with('store', 'lote')
+            ->whereIn('store_id', $storeIds)
+            ->where('stock_ideal', '>', 0)
+            ->get();
+
+        $results = [];
+
+        foreach ($products as $prod) {
+            // Filtrar todos los inventarios que correspondan al producto actual
+            $inventariosProducto = $inventarios->where('product_id', $prod->id);
+
+            foreach ($inventariosProducto as $inventario) {
+                // Validar la fecha de vencimiento del lote
+                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
+                    $text = "Lt: " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
+                        . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
+                        . " - " . $prod->name
+                        . " - Stk: " . $inventario->stock_ideal;
+
+                    $results[] = [
+                        // Se utiliza el id del inventario para que cada registro sea único
+                        'id'             => $inventario->id,
+                        'text'           => $text,
+                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
+                        'inventario_id'  => $inventario->id,
+                        'stock_ideal'    => $inventario->stock_ideal,
+                        'barcode'        => $prod->barcode,
+                        // Se conserva el id del producto en otra propiedad para otros usos
+                        'product_id'     => $prod->id,
+                    ];
+                }
+            }
+        }
         $lotes = Lote::orderBy('id', 'asc')->get();
-        return view("alistartopping.index", compact('category', 'stores', 'lotes'));
+        return view("alistartopping.index", compact('category', 'stores', 'lotes', 'results'));
     }
+
+    public function search(Request $request, $store)
+    {
+        // +++++ LOGGING: entrada al método search +++++
+        Log::info('Entrando en search, store recibido: ' . $store . ', query: ' . $request->q);
+
+        $term = $request->q;
+        $storeId = (int) $store;
+
+        if (!$storeId) {
+            Log::warning('search: storeId inválido o cero, devolviendo array vacío');
+            return response()->json([]);
+        }
+
+        $products = Product::whereHas('inventarios', function ($q) use ($storeId) {
+            $q->where('store_id', $storeId)->where('stock_ideal', '>', 0);
+        })
+            ->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%$term%")
+                    ->orWhere('barcode', 'like', "%$term%")
+                    ->orWhere('code', 'like', "%$term%");
+            })
+            ->get();
+
+        Log::info('search: productos encontrados (' . $products->count() . ') para storeId ' . $storeId);
+
+        $inventarios = Inventario::with('lote')
+            ->where('store_id', $storeId)
+            ->where('stock_ideal', '>', 0)
+            ->get();
+
+        $results = [];
+        foreach ($products as $prod) {
+            $inventariosProducto = $inventarios->where('product_id', $prod->id);
+            foreach ($inventariosProducto as $inventario) {
+                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(now())) {
+                    $results[] = [
+                        'product_id'     => $prod->id,
+                        'text'           => "Lt: " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código') .
+                            " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y') .
+                            " - " . $prod->name .
+                            " - Stk: " . $inventario->stock_ideal,
+                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
+                        'inventario_id'  => $inventario->id,
+                        'stock_ideal'    => $inventario->stock_ideal,
+                        'store_id'       => $inventario->store_id,
+                        'store_name'     => $inventario->store->name ?? '---',
+                    ];
+                }
+            }
+        }
+
+        Log::info('search: resultados antes de enviar JSON: ' . json_encode($results));
+        return response()->json($results);
+    }
+
+
 
     /**
      * Show the form for creating a new resource.

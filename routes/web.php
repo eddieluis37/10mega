@@ -381,6 +381,9 @@ Route::middleware(['auth', 'can:acceder_alistamiento'])->group(function () {
 
     Route::get('/get-lotes/{storeId}', [alistartoppingController::class, 'getLotes'])->name('get.lotes');
     Route::get('/get-productos/{loteId}', [alistartoppingController::class, 'getProductos'])->name('get.productos');
+
+    Route::get('/alistartopping/search/{store}', [alistartoppingController::class, 'search'])->name('alistartopping.search');
+
 });
 
 // Proteger todas las rutas dentro del modulo de traslados

@@ -6,7 +6,6 @@ const token = document
     .getAttribute("content");
 const btnClose = document.querySelector("#btnModalClose");
 
-const inputlote = document.querySelector("#inputlote");
 const selectStore = document.querySelector("#inputstore");
 const selectCategory = document.querySelector("#categoria");
 const selectCentrocosto = document.querySelector("#centrocosto");
@@ -15,112 +14,69 @@ const contentform = document.querySelector("#contentDisable");
 const selectCortePadre = document.querySelector("#selectCortePadre");
 const fechaalistamiento = document.querySelector("#fecha");
 
-// JavaScript para manejar selección de bodega y búsqueda de productos por storeId
-// JavaScript para manejar selección de bodega y búsqueda de productos por storeId
 $(document).ready(function () {
-    // Inicializar Select2 en bodega
+    // Inicializar Select2
     $(".select2").select2({
-        placeholder: "Busca bodega",
+        theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
         width: "100%",
-        theme: "bootstrap-5",
         allowClear: true,
     });
 
-    // Deshabilitar inicialmente el selector de productos
-    $(".select2Prod").prop("disabled", true);
-
-    // Al cambiar la bodega
-    $("#inputstore").on("change", function () {
+    // Evento para cargar lotes al seleccionar una bodega
+    $('#inputstore').on('change', function () {
         const storeId = $(this).val();
-        console.log("Cambio de bodega, storeId:", storeId);
+        $('#inputlote').empty().append('<option value="">Cargando...</option>');
+        $('#select2corte').empty().append('<option value="">Seleccione un lote primero</option>');
 
-        // Limpiar selector de productos
-        $("#producto").val(null).trigger("change");
+        if (storeId) {
+            $.ajax({
+                url: `/get-lotes/${storeId}`,
+                type: 'GET',
+                success: function (data) {
+                    $('#inputlote').empty().append('<option value="">Seleccione un lote</option>');
+                    $.each(data, function (key, value) {
+                        $('#inputlote').append(`<option value="${key}">${value}</option>`);
+                    });
+                },
+                error: function () {
+                    alert('Error al cargar los lotes.');
+                },
+            });
+        }
+    });
 
-        if (!storeId) {
-            console.log(
-                "No hay bodega seleccionada, deshabilitando select2Prod"
-            );
-            $(".select2Prod").prop("disabled", true);
-        } else {
-            console.log("Bodega seleccionada, habilitando select2Prod");
-            $(".select2Prod").prop("disabled", false);
+    // Evento para cargar productos al seleccionar un lote
+    $("#inputlote").on("change", function () {
+        const loteId = $(this).val();
+        $("#select2corte")
+            .empty()
+            .append('<option value="">Cargando...</option>');
 
-            // Inicializar Select2 en productos con transporte AJAX personalizado
-            $(".select2Prod")
-                .select2({
-                    placeholder: "Seleccione un producto",
-                    theme: "bootstrap-5",
-                    width: "100%",
-                    allowClear: true,
-                    minimumInputLength: 1,
-                    ajax: {
-                        transport: function (params, success, failure) {
-                            const storeId = $("#inputstore").val();
-                            console.log(
-                                "Petición AJAX, storeId:",
-                                storeId,
-                                "term:",
-                                params.data.term
-                            );
-
-                            if (!storeId) {
-                                console.log(
-                                    "No storeId, devolviendo resultados vacíos"
-                                );
-                                return success({ results: [] });
-                            }
-
-                            return $.ajax({
-                                url: `/alistartopping/search/${storeId}`,
-                                data: { q: params.data.term },
-                                dataType: "json",
-                                success: function (data) {
-                                    console.log(
-                                        "Respuesta AJAX recibida:",
-                                        data
-                                    );
-                                    success(data);
-                                },
-                                error: function (xhr, status, error) {
-                                    console.error(
-                                        "Error en AJAX:",
-                                        status,
-                                        error
-                                    );
-                                    failure();
-                                },
-                            });
-                        },
-                        processResults: function (data) {
-                            return {
-                                results: data.map((item) => ({
-                                    id: item.product_id,
-                                    text: item.text,
-                                    lote_id: item.lote_id,
-                                    inventario_id: item.inventario_id,
-                                    stock_ideal: item.stock_ideal,
-                                    store_id: item.store_id,
-                                    store_name: item.store_name,
-                                })),
-                            };
-                        },
-                    },
-                    templateResult: (item) =>
-                        item.loading ? item.text : item.text,
-                    templateSelection: (item) => item.text,
-                    escapeMarkup: (m) => m,
-                })
-                .on("select2:select", function (e) {
-                    const d = e.params.data;
-                    console.log("Producto seleccionado:", d);
-                    $("#lote_id").val(d.lote_id);
-                    $("#inventario_id").val(d.inventario_id);
-                    $("#stock_ideal").val(d.stock_ideal);
-                });
+        if (loteId) {
+            $.ajax({
+                url: `/get-productos/${loteId}`,
+                type: "GET",
+                success: function (data) {
+                    $("#select2corte")
+                        .empty()
+                        .append(
+                            '<option value="">Seleccione un producto</option>'
+                        );
+                    $.each(data, function (key, value) {
+                        $("#select2corte").append(
+                            `<option value="${key}">${value}</option>`
+                        );
+                    });
+                },
+                error: function () {
+                    alert("Error al cargar los productos.");
+                },
+            });
         }
     });
 });
+
+
 
 $(document).ready(function () {
     $(function () {
@@ -137,8 +93,8 @@ $(document).ready(function () {
             columns: [
                 { data: "id", name: "id" },
                 { data: "namebodega", name: "namebodega" },
-                { data: "codigolote", name: "codigolote" },
-                { data: "codigolotehijo", name: "codigolotehijo" },
+                { data: "codigolote", name: "codigolote" }, 
+                { data: "codigolotehijo", name: "codigolotehijo" },            
                 { data: "namecut", name: "namecut" },
                 { data: "nuevo_stock_padre", name: "nuevo_stock_padre" },
                 { data: "inventory", name: "inventory" },
@@ -167,7 +123,7 @@ $(document).ready(function () {
             },
         });
     });
-    $(".select2Prod").select2({
+    $(".select2corte").select2({
         placeholder: "Busca un producto",
         width: "100%",
         theme: "bootstrap-5",
@@ -178,12 +134,28 @@ $(document).ready(function () {
 const showModalcreate = () => {
     if (contentform.hasAttribute("disabled")) {
         contentform.removeAttribute("disabled");
-        $(".select2Prod").prop("disabled", false);
+        $(".select2corte").prop("disabled", false);
     }
-    $(".select2Prod").val("").trigger("change");
+    $(".select2corte").val("").trigger("change");
+    selectCortePadre.innerHTML = "";
     formAlistamiento.reset();
     alistamiento_id.value = 0;
 };
+
+//const editAlistamiento = (id) => {
+//console.log(id);
+//const dataform = new FormData();
+//dataform.append('id', id);
+//send(dataform,'/alistamientoById').then((resp) => {
+//console.log(resp);
+//console.log(resp.reg);
+//showData(resp);
+//if(contentform.hasAttribute('disabled')){
+//contentform.removeAttribute('disabled');
+//$('#provider').prop('disabled', false);
+//}
+//});
+//}
 
 const showDataForm = (id) => {
     console.log(id);
@@ -204,11 +176,11 @@ const showDataForm = (id) => {
 const showData = (resp) => {
     let register = resp.reg;
     //alistamiento_id.value = register.id;
-    // fechaalistamiento.value = register.fecha_alistamiento;
+   // fechaalistamiento.value = register.fecha_alistamiento;
     selectStore.value = register.inputstore;
     selectCategory.value = register.categoria_id;
     selectCentrocosto.value = register.centrocosto_id;
-
+   
     getCortes(register.categoria_id);
 
     const modal = new bootstrap.Modal(
@@ -228,6 +200,32 @@ const send = async (dataform, ruta) => {
     let data = await response.json();
     //console.log(data);
     return data;
+};
+
+selectCategory.addEventListener("change", function () {
+    const selectedValue = this.value;
+    console.log("Selected value:", selectedValue);
+    getCortes(selectedValue);
+});
+
+getCortes = (storeId) => {
+    const dataform = new FormData();
+    dataform.append("categoriaId", Number(storeId));
+    send(dataform, "/getproductospadre").then((result) => {
+        console.log(result);
+        let prod = result.products;
+        console.log(prod);
+        //showDataTable(result);
+        selectCortePadre.innerHTML = "";
+        selectCortePadre.innerHTML += `<option value="">Seleccione el producto</option>`;
+        // Create and append options to the select element
+        prod.forEach((option) => {
+            const optionElement = document.createElement("option");
+            optionElement.value = option.id;
+            optionElement.text = option.name;
+            selectCortePadre.appendChild(optionElement);
+        });
+    });
 };
 
 const downAlistamiento = (id) => {

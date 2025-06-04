@@ -25,39 +25,32 @@
 					<span class="text-danger error-message"></span>
 				</div>
 			</div>
-			<div class="col-md-8">
+			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
-						<label for="producto" class="form-label">Buscar producto</label>
-
-						<!-- Campos ocultos para enviar datos adicionales -->
-						<input type="hidden" id="lote_id" name="lote_id" value="">
-						<input type="hidden" id="inventario_id" name="inventario_id" value="">
-						<input type="hidden" id="stock_ideal" name="stock_ideal" value="">
-
-						<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
-							<option value="">Seleccione el producto</option>
-							@foreach ($results as $result)
-							<option value="{{ $result['inventario_id'] }}"
-								data-product-id="{{ $result['product_id'] }}"
-								data-lote-id="{{ $result['lote_id'] }}"
-								data-inventario-id="{{ $result['inventario_id'] }}"
-								data-stock-ideal="{{ $result['stock_ideal'] }}"
-								data-info="{{ $result['text'] }}">
-								{{ $result['text'] }}
-							</option>
-							@endforeach
+						<label for="inputlote" class="form-label mt-3">Lote</label>
+						<select id="inputlote" name="inputlote" class="form-select select2">
+							<option value="">Seleccione un lote</option>
 						</select>
-
 						<span class="text-danger error-message"></span>
 					</div>
 				</div>
 			</div>
-
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
-						<label for="sell_price" class="form-label mt-0">QT a convertir</label>
+						<label for="select2corte" class="form-label mt-3">Selecciona producto</label>
+						<select id="select2corte" name="select2corte" class="form-select select2">
+							<option value="">Seleccione un producto</option>
+						</select>
+						<span class="text-danger error-message"></span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="task-header">
+					<div class="form-group">
+						<label for="sell_price" class="form-label mt-3">QT a convertir</label>
 						<div class="input-group flex-nowrap">
 							<input type="text" name="cantidadprocesar" id="cantidadprocesar" class="form-control" value="0" placeholder="0" aria-describedby="helpId" step="0.01">
 							<span class="input-group-text" id="addon-wrapping">QT</span>
