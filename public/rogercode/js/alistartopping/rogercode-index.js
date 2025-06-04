@@ -189,7 +189,7 @@ const showDataForm = (id) => {
     console.log(id);
     const dataform = new FormData();
     dataform.append("id", id);
-    send(dataform, "/alistamientoById").then((resp) => {
+    send(dataform, "/alistartoppingById").then((resp) => {
         console.log(resp);
         console.log(resp.reg);
         showData(resp);
@@ -245,7 +245,7 @@ const downAlistamiento = (id) => {
             console.log(id);
             const dataform = new FormData();
             dataform.append("id", id);
-            send(dataform, "/downmmainalistamiento").then((resp) => {
+            send(dataform, "/downmmainalistartopping").then((resp) => {
                 console.log(resp);
                 refresh_table();
             });
