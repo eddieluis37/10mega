@@ -1326,29 +1326,36 @@ class saleController extends Controller
                 $userName   = auth()->user()->name;
                 $nameWords  = preg_split('/\s+/', $userName, -1, PREG_SPLIT_NO_EMPTY);
 
+                // Valor enviado desde la vista: AUTOMÁTICAMENTE será 'AUTOSERVICIO', 'BAR' o 'PARRILLA'
+                $bodegaTipo = $request->input('tipobodega');
+
                 // Busco todas las bodegas asignadas al usuario
                 $userStoreIds = DB::table('store_user')
                     ->where('user_id', auth()->id())
                     ->pluck('store_id');
 
-                // Query para encontrar la primera bodega cuyo nombre contenga alguna palabra del usuario
+                /* // Query para encontrar la primera bodega cuyo nombre contenga alguna palabra del usuario
                 $store = Store::whereIn('id', $userStoreIds)
                     ->where(function ($q) use ($nameWords) {
                         foreach ($nameWords as $word) {
                             $q->orWhere('name', 'LIKE', "%{$word}%");
                         }
                     })
+                    ->first(); */
+
+                // Busco la primera bodega cuyo nombre contenga la palabra enviada
+                $store = Store::whereIn('id', $userStoreIds)
+                    ->where('name', 'LIKE', "%{$bodegaTipo}%")
                     ->first();
 
                 if (!$store) {
                     Log::warning('No se encontró bodega con nombre que coincida con palabras del usuario', [
                         'user_id'   => auth()->id(),
-                        'nameWords' => $nameWords,
                         'store_ids' => $userStoreIds->all(),
                     ]);
                     return response()->json([
                         'status'  => 0,
-                        'message' => 'No se encontró ninguna bodega cuyo nombre coincida con tu nombre.'
+                        'message' => "No tienes asignada ninguna bodega que contenga '{$bodegaTipo}'."
                     ], 422);
                 }
 

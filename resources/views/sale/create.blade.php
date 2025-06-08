@@ -38,10 +38,10 @@
 										<label>Bodega</label>
 										<div>
 											<select class="form-control form-control-sm" name="tipobodega" id="tipobodega" required="">
-												<option value="">Seleccione</option>
-												<option value="autoservicio">AUTOSERVICIO</option>
-												<option value="bar">BAR</option>
-												<option value="Parrilla">PARRILLA</option>
+											<!-- 	<option value="">Seleccione</option> -->
+												<option value="AUTOSERVICIO">AUTOSERVICIO</option>
+												<option value="BAR">BAR</option>
+												<option value="PARRILLA">PARRILLA</option>
 											</select>
 											<span class="text-danger error-message"></span>
 										</div>
