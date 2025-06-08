@@ -1292,7 +1292,6 @@ class saleController extends Controller
         }
     } */
 
-
     public function savedetail(Request $request)
     {
         try {
@@ -1302,11 +1301,11 @@ class saleController extends Controller
             $inventario = null;
             $stockDisponible = null;
 
-            // 1) Detectar si vienen productos tipo combo/receta SIN inventario
+            // Detectar si viene un producto combo/receta sin inventario
             if (is_string($prodParam) && Str::startsWith($prodParam, 'CR-')) {
                 $isComboRecetaSinInventario = true;
                 $productId = (int) Str::after($prodParam, 'CR-');
-                $product = Product::find($productId);
+                $product   = Product::find($productId);
 
                 Log::info('Procesando producto combo/receta sin inventario', [
                     'producto_param' => $prodParam,
@@ -1314,36 +1313,51 @@ class saleController extends Controller
                 ]);
 
                 if (!$product || !in_array($product->type, ['combo', 'receta'])) {
-                    Log::warning('Producto combo/receta no encontrado o tipo inválido', [
-                        'product_id' => $productId,
-                    ]);
                     return response()->json([
                         'status'  => 0,
                         'message' => 'No se encontró el producto combo/receta.'
                     ], 422);
                 }
 
-                // Obtener dinámicamente la primera bodega asignada al usuario autenticado
-                $storeId = DB::table('store_user')
-                    ->where('user_id', auth()->id())
-                    ->value('store_id'); // esto devuelve el primer store_id que encuentre
+                //
+                // === 1) ASIGNAR DINÁMICAMENTE LA BODEGA QUE CONTENGA PALABRAS DEL NOMBRE DE USUARIO ===
+                //
+                // Tomo el nombre completo del usuario autenticado, lo separo en palabras
+                $userName   = auth()->user()->name;
+                $nameWords  = preg_split('/\s+/', $userName, -1, PREG_SPLIT_NO_EMPTY);
 
-                if (!$storeId) {
-                    Log::warning('Usuario sin bodega asignada', [
-                        'user_id' => auth()->id(),
+                // Busco todas las bodegas asignadas al usuario
+                $userStoreIds = DB::table('store_user')
+                    ->where('user_id', auth()->id())
+                    ->pluck('store_id');
+
+                // Query para encontrar la primera bodega cuyo nombre contenga alguna palabra del usuario
+                $store = Store::whereIn('id', $userStoreIds)
+                    ->where(function ($q) use ($nameWords) {
+                        foreach ($nameWords as $word) {
+                            $q->orWhere('name', 'LIKE', "%{$word}%");
+                        }
+                    })
+                    ->first();
+
+                if (!$store) {
+                    Log::warning('No se encontró bodega con nombre que coincida con palabras del usuario', [
+                        'user_id'   => auth()->id(),
+                        'nameWords' => $nameWords,
+                        'store_ids' => $userStoreIds->all(),
                     ]);
                     return response()->json([
                         'status'  => 0,
-                        'message' => 'No tienes ninguna bodega asignada.'
+                        'message' => 'No se encontró ninguna bodega cuyo nombre coincida con tu nombre.'
                     ], 422);
                 }
 
-                // (Opcional) Si quieres asignar un lote por defecto, puedes hacer algo similar:
-                // $loteId = Alguna lógica para determinar un lote por defecto,
-                //    o simplemente dejarlo en  null o 1 según tu modelo de negocio:
+                $storeId = $store->id;
+
+                // Asignar lote por defecto (por ejemplo, 1)
                 $loteId = 1;
             } else {
-                // 2) Caso normal: 'producto' corresponde a un inventario_id existente
+                // Caso normal: producto ya es inventario_id válido
                 Log::info('Iniciando proceso de guardado de detalle de venta', [
                     'ventaId'       => $request->ventaId,
                     'inventario_id' => $prodParam,
@@ -1353,39 +1367,25 @@ class saleController extends Controller
 
                 $inventario = Inventario::with('lote')->find($prodParam);
                 if (!$inventario) {
-                    Log::warning('Inventario no encontrado', [
-                        'inventario_id' => $prodParam
-                    ]);
                     return response()->json([
                         'status'  => 0,
                         'message' => 'No se encontró el inventario seleccionado.'
                     ], 422);
                 }
 
-                $product = $inventario->product;
+                $product         = $inventario->product;
                 $stockDisponible = $inventario->stock_ideal;
-                Log::info('Stock disponible recuperado', [
-                    'product_id'  => $inventario->product_id,
-                    'store_id'    => $inventario->store_id,
-                    'lote_id'     => $inventario->lote_id,
-                    'stock_ideal' => $stockDisponible,
-                ]);
 
                 if (is_null($stockDisponible)) {
-                    Log::warning('Stock disponible no encontrado para producto en bodega y lote', [
-                        'producto' => $inventario->product_id,
-                        'store'    => $inventario->store_id,
-                        'lote_id'  => $inventario->lote_id,
-                    ]);
                     return response()->json([
                         'status'  => 0,
-                        'message' => 'No se encontró stock disponible para el producto en la bodega y lote seleccionados.'
+                        'message' => 'No hay stock disponible para este producto en la bodega y lote seleccionados.'
                     ], 422);
                 }
             }
 
             //
-            // 3) Validación de datos comunes
+            // 2) Validación de datos comunes
             //
             $rules = [
                 'ventaId'  => 'required',
@@ -1393,7 +1393,6 @@ class saleController extends Controller
                 'price'    => 'required',
                 'quantity' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,2})?$/', 'min:0.1'],
             ];
-
             $messages = [
                 'ventaId.required'  => 'El compensado es requerido',
                 'producto.required' => 'El producto es requerido',
@@ -1404,88 +1403,58 @@ class saleController extends Controller
             ];
 
             if ($isComboRecetaSinInventario) {
-                // No validamos lote ni bodega ni max stock
+                // no validar lote ni bodega ni max stock aquí
             } else {
-                $rules['lote_id'] = 'required';
-                $rules['store']   = 'required';
+                $rules['lote_id']    = 'required';
+                $rules['store']      = 'required';
                 $rules['quantity'][] = 'max:' . $stockDisponible;
-
                 $messages['lote_id.required'] = 'El lote es requerido';
                 $messages['store.required']   = 'La bodega es requerida';
-                $messages['quantity.max'] = 'La cantidad no puede ser mayor al stock disponible (' . $stockDisponible . ').';
+                $messages['quantity.max']     = 'La cantidad no puede superar el stock disponible (' . $stockDisponible . ').';
             }
 
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
-                Log::warning('Validación fallida en savedetail', [
-                    'errors' => $validator->errors(),
-                    'data'   => $request->all()
-                ]);
                 return response()->json([
                     'status' => 0,
                     'errors' => $validator->errors()
                 ], 422);
             }
 
-            if (!$isComboRecetaSinInventario) {
-                if ($request->quantity > $stockDisponible) {
-                    Log::warning('La cantidad ingresada supera el stock disponible', [
-                        'quantity'        => $request->quantity,
-                        'stockDisponible' => $stockDisponible
-                    ]);
-                    return response()->json([
-                        'status'  => 0,
-                        'message' => 'La cantidad ingresada supera el stock disponible (' . $stockDisponible . ').'
-                    ], 422);
-                }
+            if (!$isComboRecetaSinInventario && $request->quantity > $stockDisponible) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'La cantidad supera el stock disponible (' . $stockDisponible . ').'
+                ], 422);
             }
 
-            Log::info('Validación de datos exitosa', [
-                'data' => $request->all(),
-                'isComboRecetaSinInventario' => $isComboRecetaSinInventario,
-            ]);
-
             //
-            // 4) Cálculos (idénticos para ambos casos)
+            // 3) Cálculos de precios, descuentos e impuestos
             //
             $formatCantidad = new metodosrogercodeController();
-            $price = $formatCantidad->MoneyToNumber($request->price);
+            $price    = $formatCantidad->MoneyToNumber($request->price);
             $quantity = $request->quantity;
 
-            $precioUnitarioBruto = $price * $quantity;
-            $porcDescuento = $request->get('porc_desc', 0);
-            $descuentoProducto = $precioUnitarioBruto * ($porcDescuento / 100);
-            $porc_descuento_cliente = $request->get('porc_descuento_cliente', 0);
-            $descuentoCliente = $precioUnitarioBruto * ($porc_descuento_cliente / 100);
-            $totalDescuento = $descuentoProducto + $descuentoCliente;
-            $netoSinImpuesto = $precioUnitarioBruto - $totalDescuento;
+            $precioBruto  = $price * $quantity;
+            $porcDesc     = $request->get('porc_desc', 0);
+            $descProd     = $precioBruto * ($porcDesc / 100);
+            $porcDescClie = $request->get('porc_descuento_cliente', 0);
+            $descClie     = $precioBruto * ($porcDescClie / 100);
+            $totalDesc    = $descProd + $descClie;
+            $netoSinImp   = $precioBruto - $totalDesc;
 
-            $porcIva = $request->get('porc_iva', 0);
-            $porcOtroImpuesto = $request->get('porc_otro_impuesto', 0);
+            $porcIva         = $request->get('porc_iva', 0);
+            $porcOtroImpto   = $request->get('porc_otro_impuesto', 0);
             $porcImpoconsumo = $request->get('porc_impoconsumo', 0);
-            $iva = $netoSinImpuesto * ($porcIva / 100);
-            $otroImpuesto = $netoSinImpuesto * ($porcOtroImpuesto / 100);
-            $impoconsumo = $netoSinImpuesto * ($porcImpoconsumo / 100);
-            $totalImpuestos = $iva + $otroImpuesto + $impoconsumo;
-
-            Log::info('Cálculos realizados', [
-                'precioUnitarioBruto' => $precioUnitarioBruto,
-                'descuentoProducto'   => $descuentoProducto,
-                'descuentoCliente'    => $descuentoCliente,
-                'totalDescuento'      => $totalDescuento,
-                'netoSinImpuesto'     => $netoSinImpuesto,
-                'iva'                 => $iva,
-                'otroImpuesto'        => $otroImpuesto,
-                'impoconsumo'         => $impoconsumo,
-                'totalImpuestos'      => $totalImpuestos,
-            ]);
+            $iva             = $netoSinImp * ($porcIva / 100);
+            $otroImpto       = $netoSinImp * ($porcOtroImpto / 100);
+            $impoconsumo     = $netoSinImp * ($porcImpoconsumo / 100);
+            $totalImpuestos  = $iva + $otroImpto + $impoconsumo;
 
             //
-            // 5) Preparar datos para guardar en sale_details
+            // 4) Preparar datos para guardar sale_detail
             //
             if ($isComboRecetaSinInventario) {
-                // 5.a) Asignamos dinámicamente la primera bodega del usuario
-                //     y un lote por defecto (por ejemplo, id = 1)
                 $dataDetail = [
                     'sale_id'           => $request->ventaId,
                     'inventario_id'     => null,
@@ -1493,28 +1462,20 @@ class saleController extends Controller
                     'product_id'        => $product->id,
                     'price'             => $price,
                     'quantity'          => $quantity,
-                    'lote_id'           => $loteId,   
-                    'porc_desc'         => $porcDescuento,
-                    'descuento'         => $descuentoProducto,
-                    'descuento_cliente' => $descuentoCliente,
+                    'lote_id'           => $loteId,
+                    'porc_desc'         => $porcDesc,
+                    'descuento'         => $descProd,
+                    'descuento_cliente' => $descClie,
                     'porc_iva'          => $porcIva,
                     'iva'               => $iva,
-                    'porc_otro_impuesto' => $porcOtroImpuesto,
-                    'otro_impuesto'     => $otroImpuesto,
+                    'porc_otro_impuesto' => $porcOtroImpto,
+                    'otro_impuesto'     => $otroImpto,
                     'porc_impoconsumo'  => $porcImpoconsumo,
                     'impoconsumo'       => $impoconsumo,
-                    'total_bruto'       => $precioUnitarioBruto,
-                    'total'             => $netoSinImpuesto + $totalImpuestos,
+                    'total_bruto'       => $precioBruto,
+                    'total'             => $netoSinImp + $totalImpuestos,
                 ];
-
-                Log::info('Detalle de venta para combo/receta sin inventario listo para almacenar', [
-                    'product_id' => $product->id,
-                    'store_id'   => $storeId,
-                    'lote_id'    => $loteId,
-                    'dataDetail' => $dataDetail,
-                ]);
             } else {
-                // 5.b) Caso normal: existe inventario
                 $dataDetail = [
                     'sale_id'           => $request->ventaId,
                     'inventario_id'     => $inventario->id,
@@ -1523,89 +1484,44 @@ class saleController extends Controller
                     'price'             => $price,
                     'quantity'          => $quantity,
                     'lote_id'           => $inventario->lote_id,
-                    'porc_desc'         => $porcDescuento,
-                    'descuento'         => $descuentoProducto,
-                    'descuento_cliente' => $descuentoCliente,
+                    'porc_desc'         => $porcDesc,
+                    'descuento'         => $descProd,
+                    'descuento_cliente' => $descClie,
                     'porc_iva'          => $porcIva,
                     'iva'               => $iva,
-                    'porc_otro_impuesto' => $porcOtroImpuesto,
-                    'otro_impuesto'     => $otroImpuesto,
+                    'porc_otro_impuesto' => $porcOtroImpto,
+                    'otro_impuesto'     => $otroImpto,
                     'porc_impoconsumo'  => $porcImpoconsumo,
                     'impoconsumo'       => $impoconsumo,
-                    'total_bruto'       => $precioUnitarioBruto,
-                    'total'             => $netoSinImpuesto + $totalImpuestos,
+                    'total_bruto'       => $precioBruto,
+                    'total'             => $netoSinImp + $totalImpuestos,
                 ];
-
-                Log::info('Detalle de venta para producto con inventario listo para almacenar', [
-                    'inventario_id' => $inventario->id,
-                    'dataDetail'    => $dataDetail,
-                ]);
             }
 
-            // 6) Guardar o actualizar sale_detail
+            // 5) Guardar o actualizar detalle
             if ($request->regdetailId > 0) {
-                $detail = SaleDetail::find($request->regdetailId);
-                $detail->update($dataDetail);
-                Log::info('Detalle de venta actualizado', [
-                    'regdetailId' => $request->regdetailId,
-                    'dataDetail'  => $dataDetail
-                ]);
+                SaleDetail::find($request->regdetailId)->update($dataDetail);
             } else {
-                $newDetail = SaleDetail::create($dataDetail);
-                Log::info('Detalle de venta creado', [
-                    'newDetailId' => $newDetail->id,
-                    'dataDetail'  => $dataDetail
-                ]);
+                SaleDetail::create($dataDetail);
             }
 
-            //
-            // 7) Actualizar totales de la venta (igual que antes)
-            //
-            $sale = Sale::find($request->ventaId);
-            $saleDetails = SaleDetail::where('sale_id', $sale->id)->get();
-            $sale->items = $saleDetails->count();
-
-            $totalBruto = $saleDetails->sum(function ($detail) {
-                return $detail->quantity * $detail->price;
-            });
-            $totalDesc  = $saleDetails->sum(function ($detail) {
-                return $detail->descuento + $detail->descuento_cliente;
-            });
-            $totalValor = $saleDetails->sum('total');
-
-            $sale->total_bruto = $totalBruto;
-            $sale->descuentos = $totalDesc;
-            $sale->total_valor_a_pagar = $totalValor;
-            $sale->total_iva = $saleDetails->sum(function ($detail) {
-                return $detail->iva;
-            });
-            $sale->total_otros_impuestos = $saleDetails->sum(function ($detail) {
-                return $detail->otro_impuesto;
-            });
+            // 6) Actualizar totales de la venta
+            $sale        = Sale::find($request->ventaId);
+            $detalles    = $sale->details;
+            $sale->items = $detalles->count();
+            $sale->total_bruto           = $detalles->sum(fn($d) => $d->quantity * $d->price);
+            $sale->descuentos            = $detalles->sum(fn($d) => $d->descuento + $d->descuento_cliente);
+            $sale->total_valor_a_pagar   = $detalles->sum('total');
+            $sale->total_iva             = $detalles->sum('iva');
+            $sale->total_otros_impuestos = $detalles->sum('otro_impuesto');
             $sale->save();
 
-            Log::info('Venta actualizada', [
-                'sale_id'               => $sale->id,
-                'items'                 => $sale->items,
-                'total_bruto'           => $totalBruto,
-                'descuento'             => $totalDesc,
-                'total_valor_a_pagar'   => $totalValor,
-                'total_iva'             => $sale->total_iva,
-                'total_otros_impuestos' => $sale->total_otros_impuestos,
-            ]);
-
-            $arraydetail = $this->getventasdetail($request->ventaId);
-            $arrayTotales = $this->sumTotales($request->ventaId);
-
-            Log::info('Proceso savedetail completado exitosamente', [
-                'ventaId' => $request->ventaId
-            ]);
-
+            // 7) Respuesta exitosa
             return response()->json([
                 'status'       => 1,
-                'message'      => "Agregado correctamente",
-                'array'        => $arraydetail,
-                'arrayTotales' => $arrayTotales
+                'message'      => 'Agregado correctamente',
+                'array'        => $this->getventasdetail($request->ventaId),
+                'arrayTotales' => $this->sumTotales($request->ventaId),
             ]);
         } catch (\Throwable $th) {
             Log::error('Error en savedetail', [
@@ -1614,8 +1530,8 @@ class saleController extends Controller
             ]);
             return response()->json([
                 'status'  => 0,
-                'message' => (array) $th
-            ]);
+                'message' => 'Ocurrió un error interno.'
+            ], 500);
         }
     }
 
