@@ -73,7 +73,7 @@
 		</tr>
 		<tr>
 			<th style="text-align: left;">Retiro de Caja:</th>
-			<td style="text-align: right; font-weight: bold;">$ {{ $sale[0]->retiro_caja }}</td>
+			<td style="text-align: right; font-weight: bold;">$ {{number_format($sale[0]->retiro_caja, 0, ',', '.')}}</td>
 		</tr>
 		<tr>
 			<th style="text-align: left;">TOTAL:</th>
