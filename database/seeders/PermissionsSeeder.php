@@ -355,6 +355,16 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('01CajaCerdoCentral.2025*')
             ]
         );
+         User::updateOrCreate(
+            ['email' => 'subamega2@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'CAJERO 2 SUBA',
+                'phone' => '3214154625',
+                'profile' => 'Cajero',
+                'status' => 'Active',
+                'password' => bcrypt('02CajaSub@.2025*')
+            ]
+        );
 
         $usuarios = User::where('name', 'like', '%CAJERO%')
             // ->orWhere('name', 'like', '%CAJERO%')
@@ -792,6 +802,16 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('Com3rC1@l1.*')
             ]
         );
+         User::updateOrCreate(
+            ['email' => 'analistacomercialmega@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'ANALISTA COMERCIAL 1',
+                'phone' => '3004154625',
+                'profile' => 'Vendedor',
+                'status' => 'Active',
+                'password' => bcrypt('@naC0m3rC1@l1.*')
+            ]
+        );
 
         $vendedor = Role::updateOrCreate(['name' => 'Vendedor']);
 
@@ -934,6 +954,26 @@ class PermissionsSeeder extends Seeder
                 'profile' => 'Tesoreria',
                 'status' => 'Active',
                 'password' => bcrypt('AuxLi@rCart3r@2025*')
+            ]
+        );
+         User::updateOrCreate(
+            ['email' => 'auxiliar_contable1@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'AUX CONTABLE1',
+                'phone' => '3004154625',
+                'profile' => 'Tesoreria',
+                'status' => 'Active',
+                'password' => bcrypt('AuxLi@rC0nt@1Mega2025*')
+            ]
+        );
+         User::updateOrCreate(
+            ['email' => 'auxiliar_contable2@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'AUX CONTABLE2',
+                'phone' => '3004154625',
+                'profile' => 'Tesoreria',
+                'status' => 'Active',
+                'password' => bcrypt('AuxLi@rC0nt@2*')
             ]
         );
 
