@@ -23,6 +23,7 @@ use App\Models\Formapago;
 use App\Models\Inventario;
 use App\Models\Product;
 use App\Models\Listapreciodetalle;
+use App\Models\Lote;
 use App\Models\MovimientoInventario;
 use App\Models\Notacredito;
 use App\Models\NotaCreditoDetalle;
@@ -2414,11 +2415,20 @@ class saleController extends Controller
 
                         // 4.b.v) Descontar inventario de componentes
                         $compositions = ProductComposition::where('product_id', $productId)->get();
+
                         foreach ($compositions as $comp) {
                             // Total a descontar = cantidad vendida del combo * cantidad en la composición
                             $qtyToDeduct = $acumQty * $comp->quantity;
 
-                            // Buscar inventario del componente
+                            // 1) Obtener el lote con fecha de vencimiento más próxima para este componente
+                            $lote = Lote::where('id', $loteId )                                
+                                ->where('fecha_vencimiento', '>=', Carbon::now())
+                                ->orderBy('fecha_vencimiento', 'asc')
+                                ->firstOrFail();
+
+                            $loteId = $lote->id;
+
+                            // 2) Buscar o crear inventario del componente con ese lote
                             $compInv = Inventario::firstOrCreate([
                                 'product_id' => $comp->component_id,
                                 'store_id'   => $storeId,
@@ -2429,7 +2439,7 @@ class saleController extends Controller
                                 'costo_unitario' => 0,
                             ]);
 
-                            // Crear movimiento de inventario para el componente
+                            // 3) Crear movimiento de inventario para el componente usando ese lote
                             MovimientoInventario::create([
                                 'product_id'       => $comp->component_id,
                                 'lote_id'          => $loteId,
@@ -2438,10 +2448,11 @@ class saleController extends Controller
                                 'tipo'             => 'venta',
                                 'sale_id'          => $ventaId,
                                 'cantidad'         => $qtyToDeduct,
+                                // Costeo: precio unitario promedio o definido en inventario
                                 'costo_unitario'   => ($compInv->costo_unitario / max($compInv->cantidad_venta, 1)),
                             ]);
 
-                            // Actualizar inventario del componente
+                            // 4) Actualizar inventario del componente
                             $compInv->cantidad_venta += $qtyToDeduct;
                             $compInv->save();
                         }
