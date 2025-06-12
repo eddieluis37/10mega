@@ -55,17 +55,17 @@ class reportecomprarequeridaController extends Controller
                     orders.id AS pedido,
                 orders.fecha_order,
                 SUM(order_details.quantity) AS total_cant,
-                centro_costo_products.stock
+                inventarios.stock_ideal
             FROM
-                zjgifbmb_carnicossv.orders
+                vnyvxqvs_erp.orders
                     JOIN
-                zjgifbmb_carnicossv.order_details ON orders.id = order_details.order_id
+                vnyvxqvs_erp.order_details ON orders.id = order_details.order_id
                     JOIN
-                zjgifbmb_carnicossv.products ON order_details.product_id = products.id
+                vnyvxqvs_erp.products ON order_details.product_id = products.id
                     JOIN
-                zjgifbmb_carnicossv.categories ON products.category_id = categories.id
+                vnyvxqvs_erp.categories ON products.category_id = categories.id
                     JOIN
-                zjgifbmb_carnicossv.centro_costo_products ON products.id = centro_costo_products.products_id
+                vnyvxqvs_erp.inventarios ON products.id = inventarios.product_id
             WHERE
                 orders.fecha_order BETWEEN '$dateFrom' AND '$dateTo'
                     AND orders.status = '1'

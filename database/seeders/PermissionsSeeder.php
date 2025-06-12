@@ -809,7 +809,7 @@ class PermissionsSeeder extends Seeder
                 'phone' => '3004154625',
                 'profile' => 'Vendedor',
                 'status' => 'Active',
-                'password' => bcrypt('@naC0m3rC1@l1.*')
+                'password' => bcrypt('1@naC0m3rC1@l.*')
             ]
         );
 
