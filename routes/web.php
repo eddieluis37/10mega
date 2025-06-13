@@ -124,6 +124,7 @@ use App\Http\Controllers\ProductLoteController;
 use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
+use App\Http\Controllers\reportes\reporteajusteinventariosController;
 use App\Http\Controllers\RestaurantOrderController;
 use App\Http\Controllers\transfer\exportTransferController;
 
@@ -227,6 +228,7 @@ Route::middleware(['auth', 'can:acceder_inventario_stockfisico'])->group(functio
     Route::get('inventory/centro_costo_products', [CentroCostoProductController::class, 'index'])->name('inventory.showccp');
 
     Route::get('reportes/ventas_por_productos', [reporteventaprodController::class, 'index'])->name('reportes.ventas_por_productos');
+    Route::get('reportes/ajuste_de_inventarios', [reporteajusteinventariosController::class, 'index'])->name('reportes.ajuste_de_inventarios');
 
     Route::get('showReportVentasPorProd', [reporteventaprodController::class, 'show'])->name('showReportVentasPorProd.showlist');
 });
@@ -632,6 +634,8 @@ Route::group(['middleware' => [('auth')]], function () {
 
     Route::get('reportes/compras_por_proveedores', [reportecompraproveedorController::class, 'index'])->name('reportes.compras_por_proveedores');
     Route::get('showReportComprasPorProvee', [reportecompraproveedorController::class, 'show'])->name('showReportComprasPorProvee.showlist');
+
+    Route::get('showReportAjusteDeInv', [reporteajusteinventariosController::class, 'show'])->name('showReportAjusteDeInv.showajustedeinv');
 
 
 

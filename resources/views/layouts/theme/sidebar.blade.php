@@ -516,6 +516,9 @@
                     </a>
                     <ul id="inventory" class="collapse" data-parent="#compact_submenuSidebar">
                         <li>
+                            <a href="{{ url('reportes/ajuste_de_inventarios') }}"> Ajuste de Inventarios </a>
+                        </li>
+                        <li>
                             <a href="{{ url('excel-analisis-kg') }}"> Análisis de KG </a>
                         </li>
                         <li>
