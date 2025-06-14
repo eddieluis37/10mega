@@ -27,45 +27,61 @@
         </div>
       </div>
       <div class="row g-3 mt-3">
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="centrocosto" class="form-label">Bodega</label>
+            <select class="form-control form-control-sm select2" name="centrocosto" id="centrocosto" required>
+              <option value="">Seleccione la bodega</option>
+              @foreach($centros as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select class="form-control form-control-sm select2" name="categoria" id="categoria" required>
+              <option value="">Seleccione la categoría</option>
+              @foreach($category as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-3">
           <h6>Fecha y hora inicial</h6>
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $dateFrom ?? date('Y-m-d') }}T00:00" name="dateFrom" id="dateFrom" required data-bs-toggle="tooltip" title="Selecciona la fecha y hora inicial desde el calendario">
           </div>
         </div>
-        <div class="col-sm-6 col-md-3">
+       <div class="col-sm-12 col-md-3">
           <h6>Fecha y hora final</h6>
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $dateTo ?? date('Y-m-d') }}T23:59" name="dateTo" id="dateTo" required data-bs-toggle="tooltip" title="Selecciona la fecha y hora final desde el calendario">
           </div>
         </div>
 
-        <div class="col-sm-6 col-md-2 mt-3">
-          <button class="btn btn-dark btn-block" onclick="exportarExcel()">
-            <i class="far fa-file-excel"></i> Exportar a Excel
-          </button>
-        </div>
-
-        <div class="col-sm-6 col-md-2 mt-3">
-          <button onclick="window.location.reload();" class="btn btn-danger" data-bs-toggle="tooltip" title="Solo en caso que requiera">Limpiar</button>
-        </div>
-
-        @can('Cerrar_Inventario')
-
-        @endcan
-
         <div class="table-responsive mt-1" style="overflow-x: auto;">
           <table id="tableInventory" class="table table-success table-striped mt-1">
             <thead class="text-white" style="background: #3B3F5C">
               <tr>
-                <th class="table-th text-white" title="Codigo producto" style="text-align: center;">COD</th>
-                <th class="table-th" title="Productos" style="text-align: center;">PRODUCTO</th>
-                <th class="table-th" title="Bodega" style="text-align: center;">BODEGA</th>
+                <th class="table-th text-white" title="Codigo producto" style="text-align: center;">DIA.HORA.AJUST</th>
+                <th class="table-th" title="Categoria de productos" style="text-align: center;">CATEGORIA</th>
+                <th class="table-th" title="Identificador del Producto" style="text-align: center;">ID.P</th>
+                <th class="table-th" title="Nombre del Producto" style="text-align: center;">PRODUCTO</th>
+                <th class="table-th" title="Stock Ideal antes de Ajuste" style="text-align: center;">SI</th>
                 <th class="table-th text-white" title="Codigo lote" style="text-align: center;">LOTE</th>
-                <th class="table-th text-white" title="Cantidad inicial" style="text-align: center;">C_INI</th>
-                <th class="table-th text-white" title="Costo inicial total" style="text-align: center;">COST_INI</th>
-                <th class="table-th text-white" title="Cantidad diferencia" style="text-align: center;">CANT_DIF</th>
-                <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">$C_T_A</th>             
+                <th class="table-th text-white" title="Fecha de vencimiento del lote" style="text-align: center;">FEC_VENC</th>
+                <th class="table-th" title="Stock Fisica" style="text-align: center;">SF</th>
+                <th class="table-th text-white" title="Cantidad diferencia" style="text-align: center;">DIF</th>
+                <th class="table-th text-white" title="Costo inicial total" style="text-align: center;">COSTO</th>                
+                <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">SUBTOTAL</th>  
+                <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">USUARIO</th>             
               </tr>
             </thead>
             <tbody>
