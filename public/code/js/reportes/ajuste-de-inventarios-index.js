@@ -65,8 +65,8 @@ function initializeDataTable({
                 },
             },
             {
-                data: "cantidad_inicial",
-                name: "cantidad_inicial",
+                data: "stock_ideal_antes",
+                name: "stock_ideal_antes",
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>" +
@@ -95,8 +95,19 @@ function initializeDataTable({
             },
              { data: "fecha_vencimientolote", name: "fecha_vencimientolote" }, 
             {
-                data: "cantidad_inicial",
-                name: "cantidad_inicial",
+                data: "stock_fisico_despues",
+                name: "stock_fisico_despues",
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidad(data) +
+                        "</div>"
+                    );
+                },
+            },            
+            {
+                data: "cantidad_diferencia",
+                name: "cantidad_diferencia",
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>" +
@@ -111,17 +122,6 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidad(data) +
-                        "</div>"
-                    );
-                },
-            },
-            {
-                data: "cantidad_diferencia",
-                name: "cantidad_diferencia",
-                render: function (data, type, row) {
-                    return (
-                        "<div style='text-align: right;'>" +
                         formatCantidad(data) +
                         "</div>"
                     );
@@ -166,7 +166,7 @@ function initializeDataTable({
 
            
             var totalCant = api
-                .column("cantidad_inicial:name", { search: "applied" })
+                .column("stock_fisico_despues:name", { search: "applied" })
                 .data()
                 .reduce(function (a, b) {
                     var value = parseFloat(b);
@@ -199,7 +199,7 @@ function initializeDataTable({
 
          
 
-            $(api.column("cantidad_inicial:name").footer())
+            $(api.column("stock_fisico_despues:name").footer())
                 .html(totalCantFormatted)
                 .css("text-align", "right");
 

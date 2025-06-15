@@ -56,14 +56,18 @@ class reporteajusteinventariosController extends Controller
                 'c.name as category_name',
                 'p.id as product_id',
                 'p.code as product_code',
-                'p.name as product_name',                   
+                'p.name as product_name',
                 's.name as store_name',
                 'l.codigo as lote_code',
                 'l.fecha_vencimiento as fecha_vencimientolote',
+                'u.name as user_name',
                 // Valor inicial desde registro de limpieza
-                DB::raw("MAX(CASE WHEN al.description = 'Campos de inventario reseteados a cero' 
-            THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.before.cantidad_inventario_inicial')) 
-            AS DECIMAL(10,2)) END) AS cantidad_inicial"),
+                DB::raw("MAX(CASE WHEN al.description = 'Ajuste de inventario realizado' 
+            THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.before.stock_ideal')) 
+            AS DECIMAL(10,2)) END) AS stock_ideal_antes"),
+                DB::raw("MAX(CASE WHEN al.description = 'Ajuste de inventario realizado' 
+            THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.stock_fisico')) 
+            AS DECIMAL(10,2)) END) AS stock_fisico_despues"),
                 // Valor costo total desde registro de limpieza
                 DB::raw("MAX(CASE WHEN al.description = 'Campos de inventario reseteados a cero' 
             THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.costo_total')) 
@@ -101,6 +105,12 @@ class reporteajusteinventariosController extends Controller
                 '=',
                 'l.id'
             )
+            ->leftJoin(
+                'users as u',   
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.causer_id'))"),
+                '=',
+                'u.id'
+            )
             ->where('al.log_name', 'ajustes_inventario')
             ->when($centroCostoId, function ($q) use ($centroCostoId) {
                 return $q->where('s.id', $centroCostoId);
@@ -118,7 +128,8 @@ class reporteajusteinventariosController extends Controller
                 'p.name',
                 'c.name',      // <-- agregar categoría al agrupar
                 's.name',
-                'l.codigo'
+                'l.codigo',
+                'u.name'
             );
 
 
