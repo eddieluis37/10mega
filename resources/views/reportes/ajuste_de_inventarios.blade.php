@@ -75,6 +75,7 @@
                 <th class="table-th" title="Identificador del Producto" style="text-align: center;">ID.P</th>
                 <th class="table-th" title="Nombre del Producto" style="text-align: center;">PRODUCTO</th>
                 <th class="table-th" title="Stock Ideal antes de Ajuste" style="text-align: center;">SI</th>
+                 <th class="table-th" title="Bodega" style="text-align: center;">BODEGA</th>
                 <th class="table-th text-white" title="Codigo lote" style="text-align: center;">LOTE</th>
                 <th class="table-th text-white" title="Fecha de vencimiento del lote" style="text-align: center;">FEC_VENC</th>
                 <th class="table-th" title="Stock Fisica" style="text-align: center;">SF</th>

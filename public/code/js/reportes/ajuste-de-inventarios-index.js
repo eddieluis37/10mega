@@ -16,7 +16,12 @@ const token = document
 
 var dataTable;
 
-function initializeDataTable(dateFrom = "-1", dateTo = "-1") {
+function initializeDataTable({
+    centroId = "",
+    categoriaId = "",
+    dateFrom = "",
+    dateTo = "",
+} = {}) {
     dataTable = $("#tableInventory").DataTable({
         paging: false,
         pageLength: 150,
@@ -27,18 +32,22 @@ function initializeDataTable(dateFrom = "-1", dateTo = "-1") {
             url: "/showReportAjusteDeInv",
             type: "GET",
             data: {
+                centrocosto: centroId,
+                categoria: categoriaId,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
             },
         },
         columns: [
+            { data: "diahora_ajuste", name: "diahora_ajuste" },    
             {
-                data: "product_code",
-                name: "product_code",
+                data: "category_name",
+                name: "category_name",
                 render: function (data, type, row) {
                     return "<div style='text-align: right;'>" + data + "</div>";
                 },
             },
+            { data: "product_id", name: "product_id" }, 
             {
                 data: "product_name",
                 name: "product_name",
@@ -53,6 +62,17 @@ function initializeDataTable(dateFrom = "-1", dateTo = "-1") {
                         /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
                         return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
                     }
+                },
+            },
+            {
+                data: "cantidad_inicial",
+                name: "cantidad_inicial",
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidad(data) +
+                        "</div>"
+                    );
                 },
             },
             {
@@ -73,6 +93,7 @@ function initializeDataTable(dateFrom = "-1", dateTo = "-1") {
                     );
                 },
             },
+             { data: "fecha_vencimientolote", name: "fecha_vencimientolote" }, 
             {
                 data: "cantidad_inicial",
                 name: "cantidad_inicial",
@@ -218,7 +239,7 @@ function initializeDataTable(dateFrom = "-1", dateTo = "-1") {
         ],
     });
 
-    // Agregar campos de búsqueda para la primera y cuarta columna de la tabla
+    /* // Agregar campos de búsqueda para la primera y cuarta columna de la tabla
     $("#tableInventory thead th").each(function (index) {
         if (index === 1 || index === 2) {
             var title = $(this).text();
@@ -238,11 +259,11 @@ function initializeDataTable(dateFrom = "-1", dateTo = "-1") {
                 }
             });
         }
-    });
+    }); */
    
 }
 
-$(document).ready(function () {
+/* $(document).ready(function () {
     initializeDataTable("-1");
 
     $("#dateFrom, #dateTo").on("change", function () {
@@ -254,6 +275,28 @@ $(document).ready(function () {
         cargarTotales(dateFrom, dateTo);
     });
 });
+ */
+
+$(document).ready(function () {
+    // 1) Inicializamos con valores vacíos
+    initializeDataTable();
+
+    // 2) Cada vez que cambie cualquier filtro, destruimos y recreamos la tabla
+    $("#centrocosto, #categoria, #dateFrom, #dateTo").on(
+        "change",
+        function () {
+            const filtros = {
+                centroId: $("#centrocosto").val(),
+                categoriaId: $("#categoria").val(),
+                dateFrom: $("#dateFrom").val(),
+                dateTo: $("#dateTo").val(),
+            };
+            dataTable.destroy();
+            initializeDataTable(filtros);
+        }
+    );
+});
+
 
 document
     .getElementById("cargarInventarioBtn")

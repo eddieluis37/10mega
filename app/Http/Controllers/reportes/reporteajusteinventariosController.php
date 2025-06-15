@@ -14,8 +14,7 @@ use App\Models\Product;
 use Maatwebsite\Excel\Facades\Excel;
 
 use App\Exports\ComprasXProdExport;
-
-
+use App\Models\Store;
 
 class reporteajusteinventariosController extends Controller
 {
@@ -34,7 +33,7 @@ class reporteajusteinventariosController extends Controller
          */
 
         $category = Category::orderBy('name', 'asc')->get();
-        $centros = Centrocosto::Where('status', 1)->get();
+        $centros = Store::Where('status', 1)->get();
 
         return view('reportes.ajuste_de_inventarios', compact('category', 'centros', 'dateFrom', 'dateTo'));
     }
@@ -42,45 +41,86 @@ class reporteajusteinventariosController extends Controller
 
     public function show(Request $request)
     {
+        $centroCostoId = $request->input('centrocosto');
+        $categoryId   = $request->input('categoria');
         $dateFrom = $request->input('dateFrom');
         $dateTo = $request->input('dateTo');
         // Guardar los valores en la sesión
         session(['dateFrom' => $dateFrom, 'dateTo' => $dateTo]);
 
-        // Consulta consolidada de ajuste: inicial + ajuste
+        // Consulta consolidada de ajuste: inicial + ajuste, incluyendo categoría
         $table = config('activitylog.table_name');
         $query = DB::table("{$table} as al")
             ->select(
+                'al.created_at as diahora_ajuste',
+                'c.name as category_name',
+                'p.id as product_id',
                 'p.code as product_code',
-                'p.name as product_name',
+                'p.name as product_name',                   
                 's.name as store_name',
                 'l.codigo as lote_code',
+                'l.fecha_vencimiento as fecha_vencimientolote',
                 // Valor inicial desde registro de limpieza
                 DB::raw("MAX(CASE WHEN al.description = 'Campos de inventario reseteados a cero' 
-                THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.before.cantidad_inventario_inicial')) AS DECIMAL(10,2)) END) 
-                AS cantidad_inicial"),
+            THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.before.cantidad_inventario_inicial')) 
+            AS DECIMAL(10,2)) END) AS cantidad_inicial"),
                 // Valor costo total desde registro de limpieza
                 DB::raw("MAX(CASE WHEN al.description = 'Campos de inventario reseteados a cero' 
-                THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.costo_total')) AS DECIMAL(12,2)) END) 
-                AS costo_inicial_total"),
+            THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.costo_total')) 
+            AS DECIMAL(12,2)) END) AS costo_inicial_total"),
                 // Valor tras ajuste realizado
                 DB::raw("MAX(CASE WHEN al.description = 'Ajuste de inventario realizado' 
-                THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.cantidad_diferencia')) AS DECIMAL(10,2)) END) 
-                AS cantidad_diferencia"),
+            THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.cantidad_diferencia')) 
+            AS DECIMAL(10,2)) END) AS cantidad_diferencia"),
                 DB::raw("MAX(CASE WHEN al.description = 'Ajuste de inventario realizado' 
-                THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.costo_total')) AS DECIMAL(12,2)) END) 
-                AS costo_total_ajuste")
+            THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.after.costo_total')) 
+            AS DECIMAL(12,2)) END) AS costo_total_ajuste")
             )
-            ->join('products as p', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.product_id'))"), '=', 'p.id')
-            ->join('stores as s', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.store_id'))"), '=', 's.id')
-            ->join('lotes as l', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.lote_id'))"), '=', 'l.id')
+            // Uniones para extraer IDs desde JSON y traer datos relacionados
+            ->join(
+                'products as p',
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.product_id'))"),
+                '=',
+                'p.id'
+            )
+            ->join(
+                'categories as c',     // <-- nueva unión
+                'p.category_id',
+                '=',
+                'c.id'
+            )
+            ->join(
+                'stores as s',
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.store_id'))"),
+                '=',
+                's.id'
+            )
+            ->join(
+                'lotes as l',
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.lote_id'))"),
+                '=',
+                'l.id'
+            )
             ->where('al.log_name', 'ajustes_inventario')
+            ->when($centroCostoId, function ($q) use ($centroCostoId) {
+                return $q->where('s.id', $centroCostoId);
+            })
+            ->when($categoryId, function ($q) use ($categoryId) {
+                return $q->where('p.category_id', $categoryId);
+            })
             ->whereIn('al.description', [
                 'Campos de inventario reseteados a cero',
                 'Ajuste de inventario realizado'
             ])
             ->whereBetween('al.created_at', [$dateFrom, $dateTo])
-            ->groupBy('p.code', 'p.name', 's.name', 'l.codigo');
+            ->groupBy(
+                'p.code',
+                'p.name',
+                'c.name',      // <-- agregar categoría al agrupar
+                's.name',
+                'l.codigo'
+            );
+
 
         return datatables()->of($query)
             ->addIndexColumn()
