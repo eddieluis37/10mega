@@ -593,7 +593,7 @@
                             <polyline points="14 2 14 8 20 8"></polyline>
                             <line x1="12" y1="18" x2="12" y2="12"></line>
                             <line x1="9" y1="15" x2="15" y2="15"></line>
-                        </svg> Stock Fisico Real</a>
+                        </svg> Conteo Fisico Real</a>
                 </li>
                 @endcan
                 @can('ver_cargue_productos_term')
