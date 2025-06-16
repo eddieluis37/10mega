@@ -71,14 +71,14 @@
             <thead class="text-white" style="background: #3B3F5C">
               <tr>
                 <th class="table-th text-white" title="Codigo producto" style="text-align: center;">DIA.HORA.AJUST</th>
-                <th class="table-th" title="Categoria de productos" style="text-align: center;">CATEGORIA</th>
-                <th class="table-th" title="Identificador del Producto" style="text-align: center;">ID.P</th>
-                <th class="table-th" title="Nombre del Producto" style="text-align: center;">PRODUCTO</th>
-                <th class="table-th" title="Stock Ideal antes de Ajuste" style="text-align: center;">SI</th>
-                 <th class="table-th" title="Bodega" style="text-align: center;">BODEGA</th>
+                <th class="table-th text-white" title="Categoria de productos" style="text-align: center;">CATEGORIA</th>
+                <th class="table-th text-white" title="Identificador del Producto" style="text-align: center;">ID.P</th>
+                <th class="table-th text-white" title="Nombre del Producto" style="text-align: center;">PRODUCTO</th>
+                <th class="table-th text-white" title="Stock Ideal antes de Ajuste" style="text-align: center;">SI</th>
+                 <th class="table-th text-white" title="Bodega" style="text-align: center;">BODEGA</th>
                 <th class="table-th text-white" title="Codigo lote" style="text-align: center;">LOTE</th>
                 <th class="table-th text-white" title="Fecha de vencimiento del lote" style="text-align: center;">FEC_VENC</th>
-                <th class="table-th" title="Stock Fisica" style="text-align: center;">SF</th>
+                <th class="table-th text-white" title="Stock Fisica" style="text-align: center;">SF</th>
                 <th class="table-th text-white" title="Cantidad diferencia" style="text-align: center;">DIF</th>
                 <th class="table-th text-white" title="Costo inicial total" style="text-align: center;">COSTO</th>                
                 <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">SUBTOTAL</th>  

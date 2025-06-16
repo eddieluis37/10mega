@@ -60,7 +60,8 @@ class reporteajusteinventariosController extends Controller
                 's.name as store_name',
                 'l.codigo as lote_code',
                 'l.fecha_vencimiento as fecha_vencimientolote',
-                'u.name as user_name',
+                // Usa COALESCE para caer a '—' si no hay usuario
+                DB::raw("COALESCE(u.name, '—') as user_name"),
                 // Valor inicial desde registro de limpieza
                 DB::raw("MAX(CASE WHEN al.description = 'Ajuste de inventario realizado' 
             THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.before.stock_ideal')) 
@@ -105,12 +106,13 @@ class reporteajusteinventariosController extends Controller
                 '=',
                 'l.id'
             )
-            ->leftJoin(
-                'users as u',   
-                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.causer_id'))"),
-                '=',
-                'u.id'
-            )
+            // LEFT JOIN a users, probando dos posibles ID:
+            ->leftJoin('users as u', function ($join) {
+                $join->on('al.causer_id', '=', 'u.id')
+                    ->orOn(DB::raw(
+                        "CAST(JSON_UNQUOTE(JSON_EXTRACT(al.properties, '$.metadata.causer_id')) AS UNSIGNED)"
+                    ), '=', 'u.id');
+            })
             ->where('al.log_name', 'ajustes_inventario')
             ->when($centroCostoId, function ($q) use ($centroCostoId) {
                 return $q->where('s.id', $centroCostoId);

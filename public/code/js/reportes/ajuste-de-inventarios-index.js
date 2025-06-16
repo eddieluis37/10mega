@@ -137,7 +137,23 @@ function initializeDataTable({
                         "</div>"
                     );
                 },
-            },           
+            },
+             {
+                data: "user_name",
+                name: "user_name",
+                render: function (data) {
+                    let subStringData = data.substring(0, 25).toLowerCase();
+                    let capitalizedSubString =
+                        subStringData.charAt(0).toUpperCase() +
+                        subStringData.slice(1);
+                    if (data.length > 25) {
+                        return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
+                    } else {
+                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
+                        return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
+                    }
+                },
+            },          
         ],
         order: [[1, "ASC"]],
         language: {
