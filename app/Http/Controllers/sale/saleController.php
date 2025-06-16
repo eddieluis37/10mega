@@ -2371,10 +2371,10 @@ class saleController extends Controller
                         'incremento_qty'    => $acumQty,
                         'incremento_costo'  => $acumCosto
                     ]);
-                } else {
+
                     // Producto SIN inventario registrado
                     if ($product && in_array($product->type, ['combo', 'receta'])) {
-                        // 4.b.i) Crear Inventario
+                        /*   // 4.b.i) Crear Inventario
                         $inventario = Inventario::create([
                             'product_id'     => $productId,
                             'store_id'       => $storeId,
@@ -2411,7 +2411,7 @@ class saleController extends Controller
                         // 4.b.iv) Actualizar Inventario del combo/receta
                         $inventario->cantidad_venta = $acumQty;
                         $inventario->costo_unitario = $acumCosto;
-                        $inventario->save();
+                        $inventario->save(); */
 
                         // 4.b.v) Descontar inventario de componentes
                         $compositions = ProductComposition::where('product_id', $productId)->get();
@@ -2431,6 +2431,12 @@ class saleController extends Controller
                                 ->firstOrFail();
 
                             $loteId = $lote->id;
+                            Log::debug('Lote seleccionado para componente', [
+                                'component_id'      => $comp->component_id,
+                                'store_id'          => $storeId,
+                                'lote_id'           => $loteId,
+                                'fecha_vencimiento' => $lote->fecha_vencimiento,
+                            ]);
 
                             // 2) Buscar o crear inventario del componente con ese lote
                             $compInv = Inventario::firstOrCreate([
@@ -2442,9 +2448,17 @@ class saleController extends Controller
                                 'cantidad_venta' => 0,
                                 'costo_unitario' => 0,
                             ]);
+                            Log::debug('Inventario del componente obtenido/creado', [
+                                'inventario_id'      => $compInv->id,
+                                'product_id'         => $comp->component_id,
+                                'store_id'           => $storeId,
+                                'lote_id'            => $loteId,
+                                'cantidad_venta_ini' => $compInv->cantidad_venta,
+                                'costo_unitario_ini' => $compInv->costo_unitario,
+                            ]);
 
                             // 3) Crear movimiento de inventario para el componente usando ese lote
-                            MovimientoInventario::create([
+                            $movimientoComp = MovimientoInventario::create([
                                 'product_id'       => $comp->component_id,
                                 'lote_id'          => $loteId,
                                 'store_origen_id'  => $storeId,
@@ -2452,13 +2466,22 @@ class saleController extends Controller
                                 'tipo'             => 'venta',
                                 'sale_id'          => $ventaId,
                                 'cantidad'         => $qtyToDeduct,
-                                // Costeo: precio unitario promedio o definido en inventario
                                 'costo_unitario'   => ($compInv->costo_unitario / max($compInv->cantidad_venta, 1)),
+                            ]);
+                            Log::debug('Movimiento de inventario creado para componente', [
+                                'movimiento_id' => $movimientoComp->id,
+                                'cantidad'      => $qtyToDeduct,
+                                'costo_unitario' => $movimientoComp->costo_unitario,
                             ]);
 
                             // 4) Actualizar inventario del componente
                             $compInv->cantidad_venta += $qtyToDeduct;
                             $compInv->save();
+                            Log::debug('Inventario del componente actualizado', [
+                                'inventario_id'      => $compInv->id,
+                                'incremento_cantidad' => $qtyToDeduct,
+                                'cantidad_venta_fin' => $compInv->cantidad_venta,
+                            ]);
                         }
                     } else {
                         // 4.c) No existe Inventario y no es combo/receta → se omite
