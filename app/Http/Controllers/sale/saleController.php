@@ -2420,10 +2420,14 @@ class saleController extends Controller
                             // Total a descontar = cantidad vendida del combo * cantidad en la composición
                             $qtyToDeduct = $acumQty * $comp->quantity;
 
-                            // 1) Obtener el lote con fecha de vencimiento más próxima para este componente
-                            $lote = Lote::where('id', $loteId )                                
-                                ->where('fecha_vencimiento', '>=', Carbon::now())
-                                ->orderBy('fecha_vencimiento', 'asc')
+                            // 1) Obtener el lote con fecha de vencimiento más próxima
+                            //    y que tenga inventario en esta bodega para este componente
+                            $lote = Lote::join('inventarios as i', 'lotes.id', '=', 'i.lote_id')
+                                ->where('i.product_id', $comp->component_id)
+                                ->where('i.store_id', $storeId)
+                                ->whereDate('lotes.fecha_vencimiento', '>=', Carbon::now()->toDateString())
+                                ->orderBy('lotes.fecha_vencimiento', 'asc')
+                                ->select('lotes.*')
                                 ->firstOrFail();
 
                             $loteId = $lote->id;
