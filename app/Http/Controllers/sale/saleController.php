@@ -2290,232 +2290,168 @@ class saleController extends Controller
     {
         DB::beginTransaction();
         try {
+            Log::debug('Inicio de cargarInventariocr', ['ventaId' => $ventaId]);
+
             // 1) Obtener la venta con sus detalles
-            $sale = Sale::with('saleDetails')
+            $sale = Sale::with('saleDetails.product')
                 ->where('id', $ventaId)
                 ->where('status', '0')
                 ->first();
 
             if (!$sale) {
-                return response()->json([
-                    'status'  => 1,
-                    'message' => 'Venta no encontrada o cerrada.'
-                ], 404);
+                Log::debug('Venta no encontrada o ya cerrada', ['ventaId' => $ventaId]);
+                return response()->json(['status' => 1, 'message' => 'Venta no encontrada o cerrada.'], 404);
+            }
+            Log::debug('Venta encontrada', ['sale_id' => $sale->id]);
+
+            // 2) Filtrar detalles activos
+            $details = $sale->saleDetails->where('status', '1');
+            if ($details->isEmpty()) {
+                Log::debug('No hay detalles de venta activos', ['sale_id' => $sale->id]);
+                return response()->json(['status' => 0, 'message' => 'No hay detalles de venta activos.'], 404);
             }
 
-            // 2) Detalles activos
-            $saleDetails = $sale->saleDetails->where('status', '1');
-            if ($saleDetails->isEmpty()) {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => 'No hay detalles de venta activos.'
-                ], 404);
-            }
+            // 3) Procesar cada detalle según tipo
+            foreach ($details as $d) {
+                $prod   = $d->product;
+                $store  = $d->store_id;
+                $qty    = $d->quantity;
+                $costo  = $d->total_bruto;
 
-            // 3) Agrupar por producto, tienda y lote
-            $groupedDetails = $saleDetails->groupBy(function ($detail) {
-                return $detail->product_id . '-' . $detail->store_id . '-' . $detail->lote_id;
-            });
+                Log::debug('Procesando detalle', ['detail_id' => $d->id, 'product_id' => $prod->id, 'type' => $prod->type, 'store_id' => $store, 'quantity' => $qty]);
 
-            foreach ($groupedDetails as $key => $detailsGroup) {
-                list($productId, $storeId, $loteId) = explode('-', $key);
-                $acumQty   = $detailsGroup->sum('quantity');
-                $acumCosto = $detailsGroup->sum('total_bruto');
+                switch ($prod->type) {
+                    case 'combo':
+                        $this->procesarMovimiento($ventaId, $prod->id, $store, $d->lote_id, $qty, $costo, 'COMBO');
+                        $this->descontarComponentes($ventaId, $prod->id, $store, $qty, 'COMPONENTE-COMBO');
+                        break;
 
-                $inventario = Inventario::where('product_id', $productId)
-                    ->where('store_id', $storeId)
-                    ->where('lote_id', $loteId)
-                    ->first();
-
-                $product = Product::find($productId);
-
-                if ($inventario) {
-                    // 4.a) Producto con inventario existente:
-                    //     Verificar que no exista ya un movimiento de tipo venta
-                    $existingMovimiento = MovimientoInventario::where('sale_id', $ventaId)
-                        ->where('product_id', $productId)
-                        ->where('store_origen_id', $storeId)
-                        ->where('tipo', 'venta')
-                        ->where('lote_id', $loteId)
-                        ->first();
-
-                    if ($existingMovimiento) {
-                        Log::debug('Movimiento ya existe para este inventario', [
-                            'movimiento_id' => $existingMovimiento->id
-                        ]);
-                        continue;
-                    }
-
-                    // Crear nuevo movimiento de inventario (tipo venta)
-                    $movimiento = MovimientoInventario::create([
-                        'product_id'       => $productId,
-                        'lote_id'          => $loteId,
-                        'store_origen_id'  => $storeId,
-                        'store_destino_id' => null,
-                        'tipo'             => 'venta',
-                        'sale_id'          => $ventaId,
-                        'cantidad'         => $acumQty,
-                        'costo_unitario'   => $acumCosto,
-                    ]);
-                    Log::debug('Movimiento de inventario creado (inventario existente)', [
-                        'movimiento' => $movimiento->toArray()
-                    ]);
-
-                    // Actualizar el inventario: incrementar campos de venta
-                    $inventario->cantidad_venta += $acumQty;
-                    $inventario->costo_unitario += $acumCosto;
-                    $inventario->save();
-
-                    Log::debug('Inventario actualizado (inventario existente)', [
-                        'inventario_id'     => $inventario->id,
-                        'incremento_qty'    => $acumQty,
-                        'incremento_costo'  => $acumCosto
-                    ]);
-
-                    // Producto SIN inventario registrado
-                    if ($product && in_array($product->type, ['combo', 'receta'])) {
-                        /*   // 4.b.i) Crear Inventario
-                        $inventario = Inventario::create([
-                            'product_id'     => $productId,
-                            'store_id'       => $storeId,
-                            'lote_id'        => $loteId,
-                            'stock_ideal'    => 0,
-                            'cantidad_venta' => 0,
-                            'costo_unitario' => 0,
-                        ]);
-
-                        // 4.b.ii) Verificar movimiento previo
-                        $existingMovimientoCR = MovimientoInventario::where('sale_id', $ventaId)
-                            ->where('product_id', $productId)
-                            ->where('store_origen_id', $storeId)
-                            ->where('tipo', 'venta')
-                            ->where('lote_id', $loteId)
-                            ->first();
-
-                        if ($existingMovimientoCR) {
-                            continue;
+                    case 'receta':
+                        // buscar lote para receta
+                        $loteRec = $this->buscarLoteMasCercano($prod->id, $store);
+                        if (!$loteRec) {
+                            Log::warning('No hay lote válido para receta, asignando lote_id=1', ['product_id' => $prod->id, 'store_id' => $store]);
+                            $loteId = 1;
+                        } else {
+                            $loteId = $loteRec->id;
+                            Log::debug('Lote asignado para receta', ['product_id' => $prod->id, 'lote_id' => $loteId]);
                         }
+                        $this->procesarMovimiento($ventaId, $prod->id, $store, $loteId, $qty, $costo, 'RECETA');
+                        $this->descontarComponentes($ventaId, $prod->id, $store, $qty, 'COMPONENTE-RECETA');
+                        break;
 
-                        // 4.b.iii) Crear movimiento para el combo/receta
-                        $movimientoCR = MovimientoInventario::create([
-                            'product_id'       => $productId,
-                            'lote_id'          => $loteId,
-                            'store_origen_id'  => $storeId,
-                            'store_destino_id' => null,
-                            'tipo'             => 'venta',
-                            'sale_id'          => $ventaId,
-                            'cantidad'         => $acumQty,
-                            'costo_unitario'   => $acumCosto,
-                        ]);
-
-                        // 4.b.iv) Actualizar Inventario del combo/receta
-                        $inventario->cantidad_venta = $acumQty;
-                        $inventario->costo_unitario = $acumCosto;
-                        $inventario->save(); */
-
-                        // 4.b.v) Descontar inventario de componentes
-                        $compositions = ProductComposition::where('product_id', $productId)->get();
-
-                        foreach ($compositions as $comp) {
-                            // Total a descontar = cantidad vendida del combo * cantidad en la composición
-                            $qtyToDeduct = $acumQty * $comp->quantity;
-
-                            // 1) Obtener el lote con fecha de vencimiento más próxima
-                            //    y que tenga inventario en esta bodega para este componente
-                            $lote = Lote::join('inventarios as i', 'lotes.id', '=', 'i.lote_id')
-                                ->where('i.product_id', $comp->component_id)
-                                ->where('i.store_id', $storeId)
-                                ->whereDate('lotes.fecha_vencimiento', '>=', Carbon::now()->toDateString())
-                                ->orderBy('lotes.fecha_vencimiento', 'asc')
-                                ->select('lotes.*')
-                                ->firstOrFail();
-
-                            $loteId = $lote->id;
-                            Log::debug('Lote seleccionado para componente', [
-                                'component_id'      => $comp->component_id,
-                                'store_id'          => $storeId,
-                                'lote_id'           => $loteId,
-                                'fecha_vencimiento' => $lote->fecha_vencimiento,
-                            ]);
-
-                            // 2) Buscar o crear inventario del componente con ese lote
-                            $compInv = Inventario::firstOrCreate([
-                                'product_id' => $comp->component_id,
-                                'store_id'   => $storeId,
-                                'lote_id'    => $loteId,
-                            ], [
-                                'stock_ideal'    => 0,
-                                'cantidad_venta' => 0,
-                                'costo_unitario' => 0,
-                            ]);
-                            Log::debug('Inventario del componente obtenido/creado', [
-                                'inventario_id'      => $compInv->id,
-                                'product_id'         => $comp->component_id,
-                                'store_id'           => $storeId,
-                                'lote_id'            => $loteId,
-                                'cantidad_venta_ini' => $compInv->cantidad_venta,
-                                'costo_unitario_ini' => $compInv->costo_unitario,
-                            ]);
-
-                            // 3) Crear movimiento de inventario para el componente usando ese lote
-                            $movimientoComp = MovimientoInventario::create([
-                                'product_id'       => $comp->component_id,
-                                'lote_id'          => $loteId,
-                                'store_origen_id'  => $storeId,
-                                'store_destino_id' => null,
-                                'tipo'             => 'venta',
-                                'sale_id'          => $ventaId,
-                                'cantidad'         => $qtyToDeduct,
-                                'costo_unitario'   => ($compInv->costo_unitario / max($compInv->cantidad_venta, 1)),
-                            ]);
-                            Log::debug('Movimiento de inventario creado para componente', [
-                                'movimiento_id' => $movimientoComp->id,
-                                'cantidad'      => $qtyToDeduct,
-                                'costo_unitario' => $movimientoComp->costo_unitario,
-                            ]);
-
-                            // 4) Actualizar inventario del componente
-                            $compInv->cantidad_venta += $qtyToDeduct;
-                            $compInv->save();
-                            Log::debug('Inventario del componente actualizado', [
-                                'inventario_id'      => $compInv->id,
-                                'incremento_cantidad' => $qtyToDeduct,
-                                'cantidad_venta_fin' => $compInv->cantidad_venta,
-                            ]);
-                        }
-                    } else {
-                        // 4.c) No existe Inventario y no es combo/receta → se omite
-                        continue;
-                    }
+                    default:
+                        $this->procesarMovimiento($ventaId, $prod->id, $store, $d->lote_id, $qty, $costo, 'ESTÁNDAR');
                 }
             }
 
-            // 5) Cuentas por cobrar si aplica
+            // Cuentas por cobrar
             if ($sale->valor_a_pagar_credito > 0) {
+                Log::debug('Generando cuentas por cobrar');
                 $this->cuentasPorCobrar($sale->id);
             }
 
-            // 6) Marcar venta cerrada
-            $sale->status = '1';
-            $sale->fecha_cierre = Carbon::now();
-            $sale->save();
+            // Marcar cierre
+            $sale->update(['status' => '1', 'fecha_cierre' => Carbon::now()]);
+            Log::debug('Venta cerrada', ['sale_id' => $sale->id]);
 
             DB::commit();
+            Log::debug('Transacción completada');
 
-            return redirect()->route('sale.index')
-                ->with('success', 'Cargado al inventario exitosamente');
+            return redirect()->route('sale.index')->with('success', 'Cargado exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al cargar inventario de venta', [
-                'error'   => $e->getMessage(),
-                'ventaId' => $ventaId
-            ]);
-            return redirect()->route('sale.index')
-                ->with('error', 'Error al cargar inventario: ' . $e->getMessage());
+            Log::error('Error cargarInventariocr', ['error' => $e->getMessage(), 'ventaId' => $ventaId]);
+            return redirect()->route('sale.index')->with('error', 'Error: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Busca lote más próximo a vencer con inventario
+     */
+    protected function buscarLoteMasCercano($productId, $storeId)
+    {
+        return Lote::join('inventarios as i', 'lotes.id', '=', 'i.lote_id')
+            ->where('i.product_id', $productId)
+            ->where('i.store_id', $storeId)
+            ->whereDate('lotes.fecha_vencimiento', '>=', Carbon::now()->toDateString())
+            ->orderBy('lotes.fecha_vencimiento')
+            ->select('lotes.*')
+            ->first();
+    }
 
+    /**
+     * Procesa movimiento e inventario
+     */
+    protected function procesarMovimiento($saleId, $productId, $storeId, $loteId, $qty, $costo = null, $ctx = '')
+    {
+        $tag = "[{$ctx}]";
+        // previene duplicados usando nombres de columna correctos
+        if (MovimientoInventario::where('sale_id', $saleId)
+            ->where('product_id', $productId)
+            ->where('store_origen_id', $storeId)
+            ->where('lote_id', $loteId)
+            ->where('tipo', 'venta')
+            ->exists()
+        ) {
+            Log::debug("{$tag} Movimiento ya existe", ['product_id' => $productId, 'lote_id' => $loteId, 'store_id' => $storeId]);
+            return;
+        }
+        $mov = MovimientoInventario::create([
+            'product_id'      => $productId,
+            'lote_id'         => $loteId,
+            'store_origen_id' => $storeId,
+            'tipo'            => 'venta',
+            'sale_id'         => $saleId,
+            'cantidad'        => $qty,
+            'costo_unitario'  => $costo ?? 0,
+        ]);
+        Log::debug("{$tag} Movimiento creado", ['movimiento_id' => $mov->id]);
+
+        $inv = Inventario::firstOrNew([
+            'product_id' => $productId,
+            'store_id'   => $storeId,
+            'lote_id'    => $loteId,
+        ]);
+        if (!$inv->exists) {
+            $inv->stock_ideal    = 0;
+            $inv->cantidad_venta = 0;
+            $inv->costo_unitario = 0;
+        }
+        $inv->cantidad_venta += $qty;
+        if (!is_null($costo)) {
+            $inv->costo_unitario += $costo;
+        }
+        $inv->save();
+        Log::debug("{$tag} Inventario actualizado", ['inventario_id' => $inv->id, 'qty' => $inv->cantidad_venta]);
+    }
+
+    /**
+     * Descuenta componentes, maneja recetas recursivamente
+     */
+    protected function descontarComponentes($saleId, $productId, $storeId, $qty, $ctx)
+    {
+        $comps = ProductComposition::where('product_id', $productId)->get();
+        foreach ($comps as $c) {
+            $cid = $c->component_id;
+            $ded = $qty * $c->quantity;
+            Log::debug("{$ctx} Descontando componente", ['component_id' => $cid, 'qty' => $ded]);
+
+            $p = Product::find($cid);
+            if ($p && $p->type === 'receta') {
+                Log::debug('Sub-receta detectada', ['component_id' => $cid]);
+                $this->descontarComponentes($saleId, $cid, $storeId, $ded, 'SUB-' . $ctx);
+                continue;
+            }
+
+            $l = $this->buscarLoteMasCercano($cid, $storeId);
+            if (!$l) {
+                Log::error('No lote para componente', compact('cid', 'storeId'));
+                continue;
+            }
+            $this->procesarMovimiento($saleId, $cid, $storeId, $l->id, $ded, null, $ctx);
+        }
+    }
 
 
     /**
