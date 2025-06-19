@@ -126,6 +126,7 @@ use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
 use App\Http\Controllers\reportes\reporteajusteinventariosController;
 use App\Http\Controllers\RestaurantOrderController;
+use App\Http\Controllers\sale\exportComandaController;
 use App\Http\Controllers\transfer\exportTransferController;
 
 
@@ -445,6 +446,8 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('sale/showFactura/{id}', [exportFacturaController::class, 'showFactura'])->name('sale.showFactura');
     Route::get('sale/showDespacho/{id}', [exportDespachoController::class, 'showDespacho'])->name('sale.showDespacho');
     Route::get('sale/showRemision/{id}', [exportRemisionController::class, 'showRemision'])->name('sale.showRemision');
+
+    Route::get('sale/showComanda/{id}', [exportComandaController::class, 'showComanda'])->name('sale.showComanda');
 
     Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
 

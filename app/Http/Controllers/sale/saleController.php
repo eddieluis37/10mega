@@ -90,11 +90,23 @@ class saleController extends Controller
         $data = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
-            ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto')
-            ->whereIn('c.id', $userCentrocostos) // Filtra por los centros de costo del usuario 
+            ->select([
+                'sa.*',
+                'tird.name as namethird',
+                'c.name as namecentrocosto',
+                // Sub-select para detectar si hay detalles de tipo combo o receta
+                DB::raw("(SELECT COUNT(*) 
+                  FROM sale_details sd 
+                  JOIN products p ON sd.product_id = p.id
+                  WHERE sd.sale_id = sa.id
+                    AND p.type IN ('combo','receta')
+                ) > 0 as has_comanda")
+            ])
+            ->whereIn('c.id', $userCentrocostos)
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
             ->whereMonth('sa.fecha_venta', Carbon::now()->month)
             ->get();
+
 
         return Datatables::of($data)->addIndexColumn()
             ->addColumn('status', function ($data) {
@@ -128,6 +140,15 @@ class saleController extends Controller
             })
             ->addColumn('action', function ($data) {
                 $btn = '<div class="text-center">';
+
+                if ($data->has_comanda) {
+                    $btn .= '<a href="sale/showComanda/' . $data->id . '" 
+                     class="btn btn-primary" 
+                     title="Ver Comanda" 
+                     target="_blank">
+                    <i class="fas fa-receipt"></i>
+                 </a>';
+                }
 
                 // Si el campo tipo es '1', se muestran los botones de Despacho y Remisión
                 if ($data->tipo == '1') {

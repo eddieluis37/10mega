@@ -150,6 +150,7 @@ class PermissionsSeeder extends Seeder
             'ver_ventas',
             'ver_venta_autoservicio',
             'ver_venta_bar',
+            'ver_venta_parrilla',
             'acceder_venta_pos',
             'crear_venta_pos',
             'editar_venta_pos',
