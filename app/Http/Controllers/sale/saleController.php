@@ -82,6 +82,42 @@ class saleController extends Controller
         return view('sale.index', compact('ventas', 'direccion', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
     }
 
+     public function index_parrilla()
+    {
+        $direccion = Third::where(function ($query) {
+            $query->whereNotNull('direccion')
+                ->orWhereNotNull('direccion1')
+                ->orWhereNotNull('direccion2')
+                ->orWhereNotNull('direccion3')
+                ->orWhereNotNull('direccion4')
+                ->orWhereNotNull('direccion5')
+                ->orWhereNotNull('direccion6')
+                ->orWhereNotNull('direccion7')
+                ->orWhereNotNull('direccion8')
+                ->orWhereNotNull('direccion9');
+        })
+            ->select('direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9')
+            ->get();
+
+        $ventas = Sale::get();
+        //   $centros = Centrocosto::WhereIn('id', [1])->get();
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
+
+        // Obtiene los modelos de centros de costo usando los IDs obtenidos
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
+        // Selecciona el primer centro de costo como valor por defecto (si existe)
+        $defaultCentro = $centros->first();
+
+        $clientes = Third::Where('cliente', 1)->get();
+        $vendedores = Third::Where('vendedor', 1)->get();
+        $domiciliarios = Third::Where('domiciliario', 1)->get();
+        $subcentrodecostos = Subcentrocosto::get();
+
+        return view('sale_parrilla.index', compact('ventas', 'direccion', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
+    }
+
     public function show()
     {
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
@@ -169,6 +205,129 @@ class saleController extends Controller
                 // Según el estado de la venta se muestran otras acciones:
                 if ($data->status == 0) {
                     $btn .= '<a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
+                                <i class="fas fa-directions"></i>
+                             </a>';
+                } elseif ($data->status == 1) {
+                    // Venta cerrada: mostrar botón de devolución parcial y anulación total.
+                    // Verificar si ya se alcanzó el límite de notas de crédito (máximo 2)
+                    $creditNotesCount = isset($data->credit_notes_count) ? $data->credit_notes_count : 0;
+                    if ($creditNotesCount < 2) {
+                        $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
+                                   <i class="fas fa-undo-alt"></i>
+                                 </a>';
+                    }
+                    // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
+                    if ($creditNotesCount == 0 || $creditNotesCount == 1) {
+                        $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
+                                    <i class="fas fa-trash"></i>
+                                 </a>';
+                    }
+                } elseif ($data->status == 2) {
+                    $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
+                                <i class="fas fa-ban"></i>
+                             </button>';
+                } elseif ($data->status == 3) {
+                    // Venta con devolución parcial: verificar si todavía se pueden hacer más devoluciones
+                    $creditNotesCount = isset($data->credit_notes_count) ? $data->credit_notes_count : 0;
+                    if ($creditNotesCount < 2) {
+                        $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
+                                   <i class="fas fa-undo-alt"></i>
+                                 </a>';
+                    } else {
+                        $btn .= '<button class="btn btn-dark" title="Máximo de devoluciones alcanzado" disabled>
+                                    <i class="fas fa-undo"></i>
+                                 </button>';
+                    }
+                    if ($creditNotesCount == 1) {
+                        $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
+                                    <i class="fas fa-trash"></i>
+                                 </a>';
+                    }
+                }
+                $btn .= '</div>';
+                return $btn;
+            })
+            ->rawColumns(['status', 'date', 'action'])
+            ->make(true);
+    }
+
+      public function showParrilla()
+    {
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
+
+        $data = DB::table('sales as sa')
+            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
+            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
+            ->select([
+                'sa.*',
+                'tird.name as namethird',
+                'c.name as namecentrocosto',
+                // Sub-select para detectar si hay detalles de tipo combo o receta
+                DB::raw("(SELECT COUNT(*) 
+                  FROM sale_details sd 
+                  JOIN products p ON sd.product_id = p.id
+                  WHERE sd.sale_id = sa.id
+                    AND p.type IN ('combo','receta')
+                ) > 0 as has_comanda")
+            ])
+            ->whereIn('c.id', $userCentrocostos)
+            ->whereYear('sa.fecha_venta', Carbon::now()->year)
+            ->whereMonth('sa.fecha_venta', Carbon::now()->month)
+            ->get();
+
+
+        return Datatables::of($data)->addIndexColumn()
+            ->addColumn('status', function ($data) {
+                $statusText = '';
+                switch ($data->status) {
+                    case 0:
+                        $statusText = '<span class="badge bg-info">Open</span>';
+                        break;
+                    case 1:
+                        $statusText = '<span class="badge bg-success">Close</span>';
+                        break;
+                    case 2:
+                        $statusText = '<span class="badge bg-danger">Annulled</span>';
+                        break;
+                    case 3:
+                        // Mostrar estado de devolución con el contador de notas de crédito
+                        $creditNotesInfo = isset($data->credit_notes_count) && $data->credit_notes_count > 0
+                            ? ' (' . $data->credit_notes_count . '/2)'
+                            : '';
+                        $statusText = '<span class="badge bg-warning">Returned' . $creditNotesInfo . '</span>';
+                        break;
+                    default:
+                        $statusText = '<span class="badge bg-secondary">Unknown</span>';
+                        break;
+                }
+                return $statusText;
+            })
+            ->addColumn('date', function ($data) {
+                $date = Carbon::parse($data->created_at);
+                return $date->format('M-d. H:i');
+            })
+            ->addColumn('action', function ($data) {
+                $btn = '<div class="text-center">';
+
+                if ($data->has_comanda) {
+                    $btn .= '<a href="sale/showComanda/' . $data->id . '" 
+                     class="btn btn-primary" 
+                     title="Ver Comanda" 
+                     target="_blank">
+                    <i class="fas fa-receipt"></i>
+                 </a>';
+                }            
+
+                // Botón para ver la factura (siempre visible)
+                $btn .= '<a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="Ver Factura" target="_blank">
+                            <i class="far fa-file-pdf"></i>
+                         </a>';
+
+
+                // Según el estado de la venta se muestran otras acciones:
+                if ($data->status == 0) {
+                    $btn .= '<a href="sale_parrilla/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
                                 <i class="fas fa-directions"></i>
                              </a>';
                 } elseif ($data->status == 1) {
@@ -429,7 +588,7 @@ class saleController extends Controller
         $detalleVenta = $this->getventasdetail($id);
 
 
-        return view('sale.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('sale_parrilla.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
 
     public function getventasdetalle($ventaId, $centrocostoId)
@@ -1858,6 +2017,114 @@ class saleController extends Controller
 
             $venta = new Sale();
             $venta->user_id = $id_user;
+            $venta->centrocosto_id = $defaultCentro->id;
+            $venta->subcentrocostos_id = 2;
+            $venta->third_id = ($defaultCentro->id == 8) ? 157 : 1;
+            $venta->vendedor_id = 1;
+
+            $venta->fecha_venta = $currentDateFormat;
+            $venta->fecha_cierre = $dateNextMonday;
+            $venta->total_bruto = 0;
+            $venta->descuentos = 0;
+            $venta->subtotal = 0;
+            $venta->total = 0;
+            $venta->total_otros_descuentos = 0;
+            $venta->valor_a_pagar_efectivo = 0;
+            $venta->valor_a_pagar_tarjeta = 0;
+            $venta->valor_a_pagar_otros = 0;
+            $venta->valor_a_pagar_credito = 0;
+            $venta->valor_pagado = 0;
+            $venta->cambio = 0;
+            $venta->items = 0;
+            $venta->valor_pagado = 0;
+            $venta->cambio = 0;
+            $venta->in_process = true;       // si se usa columna en BD
+
+            $venta->save();
+
+            // --- INICIO: Generación de consecutivo para la facturacion de venta ---
+            // Recuperar el centro de costo y su prefijo
+            $centroCosto = CentroCosto::find($request->centrocosto);
+            if (!$centroCosto) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Centro de costo no encontrado'
+                ], 404);
+            }
+            $prefijo = $centroCosto->prefijo;
+            // Consultar la última venta creada para este centro de costo para determinar el consecutivo
+            $lastSale = Sale::where('centrocosto_id', $request->centrocosto)
+                ->orderBy('consec', 'desc')
+                ->first();
+            $consecutivo = $lastSale ? $lastSale->consec + 1 : 1;
+            // Generar la resolución con el formato {prefijo}-{consecutivo} (con 5 dígitos)
+            $generaConsecutivo = $prefijo . '-' . str_pad($consecutivo, 5, '0', STR_PAD_LEFT);
+
+            $venta->consecutivo = $generaConsecutivo;
+            $venta->consec = $consecutivo;     // Campo para llevar el número secuencial numérico
+            // --- FIN: Generación de consecutivo ---
+
+            $venta->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status'     => 1,
+                'message'    => 'Inicio de venta por mostrador',
+                'registroId' => $venta->id
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // Limpiamos la bandera para que puedan reintentar
+            Cache::forget($cacheKey);
+            Cache::forget($cacheKey . '_id');
+
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+     public function storeParrillaMostrador(Request $request) // Parrilla-Mostrador
+    {
+        //   $centros = Centrocosto::WhereIn('id', [1])->get();
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
+
+        // Obtiene los modelos de centros de costo usando los IDs obtenidos
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
+        // Selecciona el primer centro de costo como valor por defecto (si existe)
+        $defaultCentro = $centros->first();
+
+        $userId = Auth::id();
+        $cacheKey = "sale_in_process_user_{$userId}";
+
+        // 1) Si ya hay una venta en curso para este usuario, devolvemos la misma
+        if (Cache::has($cacheKey)) {
+            return response()->json([
+                'status'     => 2,
+                'message'    => 'Ya tienes una venta en curso',
+                'registroId' => Cache::get($cacheKey . '_id')
+            ], 200);
+        }
+
+        // 2) Marcamos que hay una venta en proceso 
+        Cache::put($cacheKey, true, now()->addSeconds(20));
+
+        DB::beginTransaction();
+        try {
+            $currentDateTime = Carbon::now();
+            $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
+            $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
+            $current_date->modify('next monday'); // Move to the next Monday
+            $dateNextMonday = $current_date->format('Y-m-d');
+            $id_user = Auth::user()->id;
+
+            $venta = new Sale();
+            $venta->user_id = $id_user;
+            $venta->tipo = "2"; // Mostrador parrilla
             $venta->centrocosto_id = $defaultCentro->id;
             $venta->subcentrocostos_id = 2;
             $venta->third_id = ($defaultCentro->id == 8) ? 157 : 1;

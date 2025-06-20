@@ -412,7 +412,7 @@
                     </a>
                     <ul id="submenuparrilla" class="collapse" data-parent="#compact_submenuSidebar">
                         <li>
-                            <a href="{{ url('sales') }}"> VENTAS </a>
+                            <a href="{{ url('sales_parrilla') }}"> VENTAS </a>
                         </li>
                         <li>
                             <a href="{{ url('sales') }}"> CIERRE DE CAJA </a>

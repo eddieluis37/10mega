@@ -429,15 +429,19 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::post('getproductosv', [SaleController::class, 'getproducts'])->name('sale.getproductos');
 
     Route::get('sales', [saleController::class, 'index'])->name('sale.index');
+    Route::get('sales_parrilla', [saleController::class, 'index_parrilla'])->name('sale.index_parrilla');
     Route::get('showlistVentas', [saleController::class, 'show'])->name('sale.showlistVentas');
+     Route::get('showParrillaVentas', [saleController::class, 'showParrilla'])->name('sale.showParrilla');
     Route::post('ventasave', [saleController::class, 'store'])->name('sale.save');
     Route::post('store-venta-mostrador', [saleController::class, 'storeVentaMostrador'])->name('sale.storeVentaMostrador');
+    Route::post('store-parrilla-mostrador', [saleController::class, 'storeParrillaMostrador'])->name('sale.storeParrillaMostrador');
     Route::post('salesavedetail', [saleController::class, 'savedetail'])->name('sale.savedetail');
     Route::post('saleById', [saleController::class, 'editCompensado'])->name('sale.editCompensado');
     Route::post('ventadown', [saleController::class, 'destroy'])->name('sale.down');
     Route::post('/destroyVenta', [saleController::class, 'destroyVenta'])->name('sale.destroyVenta');
 
     Route::get('sale/create/{id}', [saleController::class, 'create'])->name('sale.create');
+     Route::get('sale_parrilla/create/{id}', [saleController::class, 'create'])->name('sale.create');
     Route::get('/sa-obtener-precios-producto', [saleController::class, 'SaObtenerPreciosProducto'])->name('sale.sa-obtener-precios-producto');
 
     Route::get('sale/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');

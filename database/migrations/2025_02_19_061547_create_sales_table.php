@@ -19,7 +19,7 @@ class CreateSalesTable extends Migration
             $table->unsignedBigInteger('user_id');           
             $table->foreign('user_id')->references('id')->on('users');
 
-            $table->enum('tipo',['0','1','2','3','4','5'])->default('0'); // 0 = POS-Mostrador , 1 =  Domicilio  
+            $table->enum('tipo',['0','1','2','3','4','5'])->default('0'); // 0 = POS-Mostrador, 1 =  Domicilio, 2 = Parrilla - Mostrador - para EN EL LOCAL,  3 = Parrilla - Domicilio - PARA LLEVAR A CASA 
 
             $table->unsignedBigInteger('centrocosto_id')->nullable();
             $table->foreign('centrocosto_id')->references('id')->on('centro_costo'); 

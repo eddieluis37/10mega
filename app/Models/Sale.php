@@ -20,6 +20,7 @@ class Sale extends Model
         'vendedor_id',
         'domiciliario_id',
         'centrocosto_id',
+        'tipo',
         'consecutivo',
         'fecha_venta',
         'valor_a_pagar_efectivo',
