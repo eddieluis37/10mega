@@ -82,7 +82,7 @@ class saleController extends Controller
         return view('sale.index', compact('ventas', 'direccion', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
     }
 
-     public function index_parrilla()
+    public function index_parrilla()
     {
         $direccion = Third::where(function ($query) {
             $query->whereNotNull('direccion')
@@ -251,7 +251,7 @@ class saleController extends Controller
             ->make(true);
     }
 
-      public function showParrilla()
+    public function showParrilla()
     {
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
         $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
@@ -317,7 +317,7 @@ class saleController extends Controller
                      target="_blank">
                     <i class="fas fa-receipt"></i>
                  </a>';
-                }            
+                }
 
                 // Botón para ver la factura (siempre visible)
                 $btn .= '<a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="Ver Factura" target="_blank">
@@ -2086,7 +2086,7 @@ class saleController extends Controller
         }
     }
 
-     public function storeParrillaMostrador(Request $request) // Parrilla-Mostrador
+    public function storeParrillaMostrador(Request $request) // Parrilla-Mostrador
     {
         //   $centros = Centrocosto::WhereIn('id', [1])->get();
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
@@ -2584,7 +2584,13 @@ class saleController extends Controller
             $sale = Sale::with('saleDetails.product')
                 ->where('id', $ventaId)
                 ->where('status', '0')
-                ->first();
+                ->firstOrFail();
+
+            Log::debug('Turno diario de la venta', [
+                'sale_id'      => $sale->id,
+                'turno_diario' => $sale->turno_diario,
+                'centrocosto'  => $sale->centrocosto_id,
+            ]);
 
             if (!$sale) {
                 Log::debug('Venta no encontrada o ya cerrada', ['ventaId' => $ventaId]);

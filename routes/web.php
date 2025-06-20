@@ -447,6 +447,9 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('sale/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
     Route::post('sale/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
 
+    Route::get('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
+    Route::post('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
+
     Route::get('sale/showFactura/{id}', [exportFacturaController::class, 'showFactura'])->name('sale.showFactura');
     Route::get('sale/showDespacho/{id}', [exportDespachoController::class, 'showDespacho'])->name('sale.showDespacho');
     Route::get('sale/showRemision/{id}', [exportRemisionController::class, 'showRemision'])->name('sale.showRemision');

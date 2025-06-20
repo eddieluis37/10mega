@@ -21,14 +21,15 @@
 </head>
 
 <body>
-	<section class="" style="top: 0px;">
+	<section class="" style="top: 20px;">
 		<table cellpadding="0" cellspacing="0" width="100%">
 			<tr>
 				<td class="text-center">
 					<span style="font-size: 29px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS</span>
 					<span style="font-size: 27px; font-weight: bold; display: block; margin: 0;">COMANDA</span>
-
+					<br>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">{{$sale->namecentrocosto}}</span>
+					<span style="font-size: 27px; font-weight: bold; display: block; margin: 0;">#{{$sale->turno_diario}}</span>
 
 
 
@@ -41,7 +42,7 @@
 			<tr>
 
 			</tr>
-			
+
 			<tr>
 				<td width="100%" class="text-left text-company" style="vertical-align: top; padding-top: 7px">
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Fecha y hora:<strong> {{\Carbon\Carbon::now()->format('Y-m-d H:i')}}</strong></span>
@@ -74,49 +75,38 @@
 	</section>
 	<hr>
 
-	<table align="left">
-		<thead>
-			<tr>
-				<th width="70%">Descripción</th>
-				<th width="7%">Cant.</th>				
-			
-			</tr>
-		</thead>
+	<table>
 		<tbody>
 			@foreach($saleDetails as $item)
-			<tr>
+			<tr @if($item->is_component) class="ps-4 text-muted" @endif>
 				<td align="left">
-					<strong>{{$item->nameprod}}</strong>
-					@if($item->lote_codigo)
-					Lt:{{$item->lote_codigo}}<br>
-					Fv:{{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}
+					@if($item->is_component) &mdash; @endif
+					<strong>{{ $item->nameprod }}</strong>
+
+					{{-- Solo para líneas “base” mostramos lote y vencimiento --}}
+					@if(!$item->is_component && $item->lote_codigo)
+					<br>Lt: {{ $item->lote_codigo }}
+					<br>Fv: {{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}
 					@endif
 				</td>
-				<td align="center"><strong>{{$item->quantity}}</strong></td>
-			
+				<td align="center"><strong>{{ number_format($item->quantity, 0, ',', '.') }}</strong></td>
+
 				
 			</tr>
 			@endforeach
 		</tbody>
 		<tfoot>
 			<tr>
-				<td>
-					<span><b>TOTAL</b></span>
-				</td>
-				<td align="left">
-					<span><strong>{{ $totalQuantity }}</strong></span>
-				</td>
-				<td></td>
-				<td align="left">
-					
-				</td>
+				<td><b>TOTAL</b></td>
+				<td align="center"><strong>{{ $totalQuantity }}</strong></td>
 			</tr>
 		</tfoot>
 	</table>
 
+
 	<br>
 	<br>
-	
+
 
 
 	<section class="footer">
@@ -126,10 +116,10 @@
 					<span>OBSERVACIONES: </span>
 				</td>
 				<td width="60%" class="text-center">
-					
+
 				</td>
 				<td class="text-center" width="20%">
-					
+
 				</td>
 
 			</tr>

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\caja\Caja;
 use App\Models\centros\Centrocosto;
-
+use App\Services\TurnoDiarioService;
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
@@ -43,6 +43,18 @@ class Sale extends Model
     protected $casts = [
         'fecha_venta' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (Sale $sale) {
+            // Solo para ventas Parrilla (2 y 3) y si tengo centro de costo
+            if (in_array($sale->tipo, ['2','3']) && $sale->centrocosto_id) {
+                $sale->turno_diario = TurnoDiarioService::generarParaCentro($sale->centrocosto_id);
+            }
+        });
+    }
 
     public function user()
     {
