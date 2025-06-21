@@ -250,7 +250,7 @@ class cajaController extends Controller
         // Filtramos las ventas de este cajero en esa misma fecha de cierre
         $ventas = $caja
             ->sales()
-            ->whereDate('fecha_venta', $fechaInicio)
+            ->whereDate('fecha_cierre', $fechaInicio)
             ->whereIn('status', ['1', '3'])
             ->get();
 

@@ -2023,7 +2023,7 @@ class saleController extends Controller
             $venta->vendedor_id = 1;
 
             $venta->fecha_venta = $currentDateFormat;
-            $venta->fecha_cierre = $dateNextMonday;
+            $venta->fecha_cierre = $currentDateFormat;
             $venta->total_bruto = 0;
             $venta->descuentos = 0;
             $venta->subtotal = 0;
@@ -2131,7 +2131,7 @@ class saleController extends Controller
             $venta->vendedor_id = 1;
 
             $venta->fecha_venta = $currentDateFormat;
-            $venta->fecha_cierre = $dateNextMonday;
+            $venta->fecha_cierre = $currentDateFormat;
             $venta->total_bruto = 0;
             $venta->descuentos = 0;
             $venta->subtotal = 0;
