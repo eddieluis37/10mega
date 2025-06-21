@@ -441,7 +441,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::post('/destroyVenta', [saleController::class, 'destroyVenta'])->name('sale.destroyVenta');
 
     Route::get('sale/create/{id}', [saleController::class, 'create'])->name('sale.create');
-     Route::get('sale_parrilla/create/{id}', [saleController::class, 'create'])->name('sale.create');
+     Route::get('sale_parrilla/create/{id}', [saleController::class, 'create_parrilla'])->name('sale.create_parrilla');
     Route::get('/sa-obtener-precios-producto', [saleController::class, 'SaObtenerPreciosProducto'])->name('sale.sa-obtener-precios-producto');
 
     Route::get('sale/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');

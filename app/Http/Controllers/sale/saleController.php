@@ -485,8 +485,6 @@ class saleController extends Controller
         $cXc->save();
     }
 
-
-
     public function create($id)
     {
         $venta = Sale::find($id);
@@ -588,80 +586,27 @@ class saleController extends Controller
         $detalleVenta = $this->getventasdetail($id);
 
 
-        return view('sale_parrilla.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('sale.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
 
-    public function getventasdetalle($ventaId, $centrocostoId)
+       public function create_parrilla($id)
     {
-        $detail = DB::table('sale_details as sd')
-            ->join('products as pro', 'sd.product_id', '=', 'pro.id')
-            ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
-            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')
-            /*  ->selectRaw('i.invinicial + i.compraLote + i.alistamiento +
-            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stock') */
-            ->where([
-                ['i.store_id', $centrocostoId],
-                ['sd.sale_id', $ventaId],
-            ])->orderBy('sd.id', 'DESC')->get();
+        $venta = Sale::find($id);       
 
-        return $detail;
-    }
+        $storeIds = [0];       
 
-    /*  public function search(Request $request)
-    {
-        $query = $request->input('q');
-        // $storeIds = [1, 4, 5, 6, 8, 9, 10];
-        $storeIds = \DB::table('store_user')
-            ->where('user_id', auth()->id())
-            ->pluck('store_id')
-            ->toArray();
-
-
-        $query = $request->input('q');
-
-        // Consulta de productos. Se busca por barcode o por nombre o por el código del lote (mediante la relación "lotes")
+        // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery = Product::query();
-
-        if ($query) {
-            if (preg_match('/^\d{13}$/', $query)) {
-                // Si es un EAN-13, buscar por barcode
-                $productsQuery->where('barcode', $query);
-            } else {
-                // Si no, buscar por nombre, código de producto ó código de lote
-                $productsQuery->where(function ($q) use ($query) {
-                    $q->where('name',   'LIKE', "%{$query}%")
-                        ->orWhere('code', 'LIKE', "%{$query}%")
-                        ->orWhereHas('lotes', function ($q2) use ($query) {
-                            $q2->where('codigo', 'LIKE', "%{$query}%");
-                        });
-                });
-            }
-        }
-
-        // Se filtran los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
             $q->whereIn('store_id', $storeIds)
                 ->where('stock_ideal', '>', 0);
         });
-
-        // Obtener los IDs de productos válidos
         $products = $productsQuery->get();
-        // Obtener los IDs de productos válidos
-        $productIds = $productsQuery->pluck('id')->toArray();
 
-        // Se obtienen todos los inventarios que cumplan la condición, cargando además la relación "lote" y "store"
-        $inventarios = Inventario::with(['store', 'lote'])
-            ->whereIn('store_id',    $storeIds)
+        // Se obtienen todos los inventarios que cumplan la condición, cargando las relaciones 'store' y 'lote'
+        $inventarios = Inventario::with('store', 'lote')
+            ->whereIn('store_id', $storeIds)
             ->where('stock_ideal', '>', 0)
-            ->whereIn('product_id', $productIds)
-            ->whereHas('lote', function ($q) {
-                $q->where('fecha_vencimiento', '>=', now());
-            })
-            // Unir con la tabla de lotes para poder ordenar por su fecha
-            ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
-            ->orderBy('lotes.fecha_vencimiento', 'asc')
-            ->orderBy('stock_ideal', 'desc')
-            ->select('inventarios.*')
             ->get();
 
         $results = [];
@@ -696,8 +641,66 @@ class saleController extends Controller
             }
         }
 
-        return response()->json($results);
-    } */
+
+        $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
+        $arrayTotales = $this->sumTotales($id);
+
+        $datacompensado = DB::table('sales as sa')
+            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
+            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
+            ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto', 'tird.porc_descuento as porc_descuento_cliente')
+            ->where('sa.id', $id)
+            ->get();
+        $status = '';
+        $estadoVenta = ($datacompensado[0]->status);
+
+        if ($estadoVenta) {
+            //'Date 1 is greater than Date 2';
+            $status = 'false';
+        } elseif ($estadoVenta) {
+            //'Date 1 is less than Date 2';
+            $status = 'true';
+        } else {
+            //'Date 1 and Date 2 are equal';
+            $status = 'false';
+        }
+
+        $statusInventory = "";
+        if ($datacompensado[0]->status == "true") {
+            $statusInventory = "true";
+        } else {
+            $statusInventory = "false";
+        }
+
+
+        $display = "";
+        if ($status == "false" || $statusInventory == "true") {
+            $display = "display:none;";
+        }
+
+
+        $detalleVenta = $this->getventasdetail($id);
+
+
+        return view('sale_parrilla.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+    }
+
+
+    public function getventasdetalle($ventaId, $centrocostoId)
+    {
+        $detail = DB::table('sale_details as sd')
+            ->join('products as pro', 'sd.product_id', '=', 'pro.id')
+            ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
+            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')
+            /*  ->selectRaw('i.invinicial + i.compraLote + i.alistamiento +
+            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stock') */
+            ->where([
+                ['i.store_id', $centrocostoId],
+                ['sd.sale_id', $ventaId],
+            ])->orderBy('sd.id', 'DESC')->get();
+
+        return $detail;
+    }
 
     public function search(Request $request)
     {
