@@ -17,7 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\metodosgenerales\metodosrogercodeController;
 use App\Models\caja\Caja;
-use App\Models\Cuentas_por_cobrar;
+use App\Models\CuentaPorCobrar;
 use App\Models\Formapago;
 use App\Models\Inventario;
 use App\Models\Listapreciodetalle;
@@ -31,12 +31,34 @@ use App\Models\Store;
 use App\Models\Subcentrocosto;
 use FontLib\Table\Type\name;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class saleController extends Controller
 {
 
+    public function getDireccionesByClienteSale($cliente_id)
+    {
+        $direcciones = Third::where('id', $cliente_id)->orderBy('id', 'desc')->get(); // despliega las mas reciente
+        return response()->json($direcciones);
+    }
+
     public function index()
     {
+        $direccion = Third::where(function ($query) {
+            $query->whereNotNull('direccion')
+                ->orWhereNotNull('direccion1')
+                ->orWhereNotNull('direccion2')
+                ->orWhereNotNull('direccion3')
+                ->orWhereNotNull('direccion4')
+                ->orWhereNotNull('direccion5')
+                ->orWhereNotNull('direccion6')
+                ->orWhereNotNull('direccion7')
+                ->orWhereNotNull('direccion8')
+                ->orWhereNotNull('direccion9');
+        })
+            ->select('direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9')
+            ->get();
+
         $ventas = Sale::get();
         //   $centros = Centrocosto::WhereIn('id', [1])->get();
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
@@ -53,7 +75,7 @@ class saleController extends Controller
         $domiciliarios = Third::Where('domiciliario', 1)->get();
         $subcentrodecostos = Subcentrocosto::get();
 
-        return view('sale.index', compact('ventas', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
+        return view('sale.index', compact('ventas', 'direccion', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
     }
 
     public function show()
@@ -65,23 +87,36 @@ class saleController extends Controller
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
             ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto')
-            ->whereIn('c.id', $userCentrocostos) // Filtra por los centros de costo del usuario
+            ->whereIn('c.id', $userCentrocostos) // Filtra por los centros de costo del usuario 
+            ->whereYear('sa.fecha_venta', Carbon::now()->year)
+            ->whereMonth('sa.fecha_venta', Carbon::now()->month)
             ->get();
 
         return Datatables::of($data)->addIndexColumn()
             ->addColumn('status', function ($data) {
+                $statusText = '';
                 switch ($data->status) {
                     case 0:
-                        return '<span class="badge bg-info">Open</span>';
+                        $statusText = '<span class="badge bg-info">Open</span>';
+                        break;
                     case 1:
-                        return '<span class="badge bg-success">Close</span>';
+                        $statusText = '<span class="badge bg-success">Close</span>';
+                        break;
                     case 2:
-                        return '<span class="badge bg-danger">Annulled</span>';
+                        $statusText = '<span class="badge bg-danger">Annulled</span>';
+                        break;
                     case 3:
-                        return '<span class="badge bg-warning">Returned</span>';
+                        // Mostrar estado de devolución con el contador de notas de crédito
+                        $creditNotesInfo = isset($data->credit_notes_count) && $data->credit_notes_count > 0
+                            ? ' (' . $data->credit_notes_count . '/2)'
+                            : '';
+                        $statusText = '<span class="badge bg-warning">Returned' . $creditNotesInfo . '</span>';
+                        break;
                     default:
-                        return '<span class="badge bg-secondary">Unknown</span>';
+                        $statusText = '<span class="badge bg-secondary">Unknown</span>';
+                        break;
                 }
+                return $statusText;
             })
             ->addColumn('date', function ($data) {
                 $date = Carbon::parse($data->created_at);
@@ -89,10 +124,23 @@ class saleController extends Controller
             })
             ->addColumn('action', function ($data) {
                 $btn = '<div class="text-center">';
+
+                // Si el campo tipo es '1', se muestran los botones de Despacho y Remisión
+                if ($data->tipo == '1') {
+                    $btn .= '<a href="sale/showDespacho/' . $data->id . '" class="btn btn-warning" title="Ver Despacho" target="_blank">
+                                D
+                             </a>';
+                    $btn .= '<a href="sale/showRemision/' . $data->id . '" class="btn btn-success" title="Ver Remisión" target="_blank">
+                                R
+                             </a>';
+                }
+
                 // Botón para ver la factura (siempre visible)
                 $btn .= '<a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="Ver Factura" target="_blank">
                             <i class="far fa-file-pdf"></i>
                          </a>';
+
+
                 // Según el estado de la venta se muestran otras acciones:
                 if ($data->status == 0) {
                     $btn .= '<a href="sale/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
@@ -100,20 +148,40 @@ class saleController extends Controller
                              </a>';
                 } elseif ($data->status == 1) {
                     // Venta cerrada: mostrar botón de devolución parcial y anulación total.
-                    $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial" onclick="confirmPartialReturn(' . $data->id . ')">
+                    // Verificar si ya se alcanzó el límite de notas de crédito (máximo 2)
+                    $creditNotesCount = isset($data->credit_notes_count) ? $data->credit_notes_count : 0;
+                    if ($creditNotesCount < 2) {
+                        $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
                                    <i class="fas fa-undo-alt"></i>
-                             </a>';
-                    $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
-                                <i class="fas fa-trash"></i>
-                            </a>';
+                                 </a>';
+                    }
+                    // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
+                    if ($creditNotesCount == 0 || $creditNotesCount == 1) {
+                        $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
+                                    <i class="fas fa-trash"></i>
+                                 </a>';
+                    }
                 } elseif ($data->status == 2) {
                     $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
                                 <i class="fas fa-ban"></i>
                              </button>';
                 } elseif ($data->status == 3) {
-                    $btn .= '<button class="btn btn-dark" title="Venta devuelta" disabled>
-                                <i class="fas fa-undo"></i>
-                             </button>';
+                    // Venta con devolución parcial: verificar si todavía se pueden hacer más devoluciones
+                    $creditNotesCount = isset($data->credit_notes_count) ? $data->credit_notes_count : 0;
+                    if ($creditNotesCount < 2) {
+                        $btn .= '<a href="#" class="btn btn-info" title="Devolución parcial (' . $creditNotesCount . '/2)" onclick="confirmPartialReturn(' . $data->id . ')">
+                                   <i class="fas fa-undo-alt"></i>
+                                 </a>';
+                    } else {
+                        $btn .= '<button class="btn btn-dark" title="Máximo de devoluciones alcanzado" disabled>
+                                    <i class="fas fa-undo"></i>
+                                 </button>';
+                    }
+                    if ($creditNotesCount == 1) {
+                        $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
+                                    <i class="fas fa-trash"></i>
+                                 </a>';
+                    }
                 }
                 $btn .= '</div>';
                 return $btn;
@@ -160,6 +228,7 @@ class saleController extends Controller
             // Buscar la caja en estado "open" asociada al cajero
             $caja = Caja::where('cajero_id', $cajeroId)
                 ->where('estado', 'open')
+                ->latest()
                 ->first();
 
             if (!$caja) {
@@ -190,16 +259,6 @@ class saleController extends Controller
                 $venta->valor_pagado             = $valor_pagado;
                 $venta->cambio                   = $cambio;
                 $venta->status                   = $status;
-
-                // Si la venta corresponde a las tiendas 1 o 2, asignar resolución
-                if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
-                    $count1 = DB::table('sales')->where('status', '1')->count();
-                    $count2 = DB::table('notacreditos')->where('status', '1')->count();
-                    $count3 = DB::table('notadebitos')->where('status', '1')->count();
-                    $count  = $count1 + $count2 + $count3;
-                    $resolucion = 'ERPC ' . (1 + $count);
-                    $venta->resolucion = $resolucion;
-                }
                 $venta->save();
 
                 // Llamar al método para cargar el inventario
@@ -208,8 +267,8 @@ class saleController extends Controller
                 // Regenerar la sesión si es necesario
                 session()->regenerate();
 
-                // Redirigir a la ruta sale.index con un mensaje de éxito
-                return redirect()->route('sale.index')
+                // Retornar la vista con el script que abre la factura y redirige
+                return view('sale.redirectAndInvoice', ['ventaId' => $ventaId])
                     ->with('success', 'Guardado correctamente y cargado al inventario.');
             } catch (\Throwable $th) {
                 // En caso de error al actualizar la venta
@@ -232,11 +291,12 @@ class saleController extends Controller
         $formaPagoCreditoId =  $venta->forma_pago_credito_id;
         $formaPagos = Formapago::find($formaPagoCreditoId);
         $diasCredito = $formaPagos->diascredito;
-        $cXc = new Cuentas_por_cobrar();
+        $cXc = new CuentaPorCobrar();
         $cXc->sale_id = $ventaId;
         $cXc->third_id = $clienteId;
         $cXc->deuda_inicial = $venta->valor_a_pagar_credito;
         $cXc->deuda_x_cobrar = $venta->valor_a_pagar_credito;
+        $cXc->fecha_inicial = now();
         $cXc->fecha_vencimiento = now()->addDays($diasCredito);
         $cXc->save();
     }
@@ -246,56 +306,16 @@ class saleController extends Controller
     public function create($id)
     {
         $venta = Sale::find($id);
-        $stores = Store::WhereIn('id', [1, 4, 5, 6, 8, 9, 10])
-            ->orderBy('name', 'asc')
-            ->get();
-        //        $stores = Store::all();
-
-        /*  $prod = Product::where('status', '1')
-        ->whereHas('inventarios', function ($query) {
-            $query->where('stock_ideal', '>', 0);
-        })
-        ->whereHas('lotesPorVencer') // Filtra solo productos con lotes próximos a vencer
-        ->with('lotesPorVencer') // Carga los lotes próximos a vencer para cada producto
-        ->orderBy('category_id', 'asc')
-        ->orderBy('name', 'asc')
-        ->get();
-
- */
-        /* 
-        $prod = Product::where('status', '1')
-            ->whereHas('inventarios', function ($query) {
-                $query->where('stock_ideal', '>', 0);
-            })
-            ->whereHas('lotesPorVencer') // Asegura que haya al menos un lote próximo a vencer
-            ->with(['lotesPorVencer' => function ($query) {
-                $query->select('lotes.*') // Evita problemas de alias duplicados
-                    ->orderBy('fecha_vencimiento', 'asc'); // Ordena por fecha más próxima
-            }])
-            ->orderBy('category_id', 'asc')
+        /* $stores = Store::WhereIn('id', [1, 4, 5, 6, 8, 9, 10])
             ->orderBy('name', 'asc')
             ->get(); */
 
-
-
-        /*    $prod = Product::where('status', '1')
-            ->whereHas('inventarios', function ($query) {
-                $query->where('stock_ideal', '>', 0);
-            })
-            ->whereHas('lotesPorVencer') // Asegura que haya al menos un lote próximo a vencer
-
-            ->orderBy('category_id', 'asc')
-            ->orderBy('name', 'asc')
-            ->get();
- 
-
-        //  $storeId = [10];
-*/
-        //$storeIds = [1, 4, 5, 6, 8, 9, 10];
-        $storeIds = \DB::table('store_user')
+        $storeIds = [0];
+        // $storeIds = [1, 4, 5, 6, 8, 9, 10];
+        /*  $storeIds = \DB::table('store_user')
             ->where('user_id', auth()->id())
             ->pluck('store_id')
-            ->toArray();
+            ->toArray(); */
 
         // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery = Product::query();
@@ -344,8 +364,6 @@ class saleController extends Controller
         }
 
 
-
-
         $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
         $arrayTotales = $this->sumTotales($id);
 
@@ -386,7 +404,7 @@ class saleController extends Controller
         $detalleVenta = $this->getventasdetail($id);
 
 
-        return view('sale.create', compact('datacompensado', 'results', 'stores', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+        return view('sale.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
     }
 
     public function getventasdetalle($ventaId, $centrocostoId)
@@ -415,15 +433,20 @@ class saleController extends Controller
             ->toArray();
 
 
+        $query = $request->input('q');
+
         // Consulta de productos. Se busca por barcode o por nombre o por el código del lote (mediante la relación "lotes")
         $productsQuery = Product::query();
 
         if ($query) {
             if (preg_match('/^\d{13}$/', $query)) {
+                // Si es un EAN-13, buscar por barcode
                 $productsQuery->where('barcode', $query);
             } else {
+                // Si no, buscar por nombre, código de producto ó código de lote
                 $productsQuery->where(function ($q) use ($query) {
-                    $q->where('name', 'LIKE', "%{$query}%")
+                    $q->where('name',   'LIKE', "%{$query}%")
+                        ->orWhere('code', 'LIKE', "%{$query}%")
                         ->orWhereHas('lotes', function ($q2) use ($query) {
                             $q2->where('codigo', 'LIKE', "%{$query}%");
                         });
@@ -437,12 +460,24 @@ class saleController extends Controller
                 ->where('stock_ideal', '>', 0);
         });
 
+        // Obtener los IDs de productos válidos
         $products = $productsQuery->get();
+        // Obtener los IDs de productos válidos
+        $productIds = $productsQuery->pluck('id')->toArray();
 
         // Se obtienen todos los inventarios que cumplan la condición, cargando además la relación "lote" y "store"
-        $inventarios = Inventario::with('store', 'lote')
-            ->whereIn('store_id', $storeIds)
+        $inventarios = Inventario::with(['store', 'lote'])
+            ->whereIn('store_id',    $storeIds)
             ->where('stock_ideal', '>', 0)
+            ->whereIn('product_id', $productIds)
+            ->whereHas('lote', function ($q) {
+                $q->where('fecha_vencimiento', '>=', now());
+            })
+            // Unir con la tabla de lotes para poder ordenar por su fecha
+            ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
+            ->orderBy('lotes.fecha_vencimiento', 'asc')
+            ->orderBy('stock_ideal', 'desc')
+            ->select('inventarios.*')
             ->get();
 
         $results = [];
@@ -521,6 +556,7 @@ class saleController extends Controller
         $TotalBruto = (float)SaleDetail::Where([['sale_id', $id]])->sum('total_bruto');
         $TotalIva = (float)SaleDetail::Where([['sale_id', $id]])->sum('iva');
         $TotalOtroImpuesto = (float)SaleDetail::Where([['sale_id', $id]])->sum('otro_impuesto');
+        $TotalImpAlConusmo = (float)SaleDetail::Where([['sale_id', $id]])->sum('impoconsumo');
         $TotalValorAPagar = (float)SaleDetail::Where([['sale_id', $id]])->sum('total');
 
         $array = [
@@ -530,6 +566,7 @@ class saleController extends Controller
             'TotalValorAPagar' => $TotalValorAPagar,
             'TotalIva' => $TotalIva,
             'TotalOtroImpuesto' => $TotalOtroImpuesto,
+            'TotalImpAlConusmo' => $TotalImpAlConusmo,
         ];
 
         return $array;
@@ -786,23 +823,22 @@ class saleController extends Controller
     public function store(Request $request) // Guardar venta por domicilio
     {
         try {
-
             $rules = [
                 'ventaId' => 'required',
                 'cliente' => 'required',
                 'vendedor' => 'required',
+                'direccion_envio' => 'required',
                 'centrocosto' => 'required',
                 'subcentrodecosto' => 'required',
-
             ];
             $messages = [
                 'ventaId.required' => 'El ventaId es requerido',
                 'cliente.required' => 'El cliente es requerido',
                 'vendedor.required' => 'El proveedor es requerido',
+                'direccion_envio.required' => 'La dirección de envio es requerida',
                 'centrocosto.required' => 'El centro costo es requerido',
                 'subcentrodecosto.required' => 'El subcentro de costo es requerido',
             ];
-
             $validator = Validator::make($request->all(), $rules, $messages);
             if ($validator->fails()) {
                 return response()->json([
@@ -811,30 +847,26 @@ class saleController extends Controller
                 ], 422);
             }
 
+            // Verificar si ya existe la venta con ventaId
             $getReg = Sale::firstWhere('id', $request->ventaId);
-
-
             if ($getReg == null) {
                 $currentDateTime = Carbon::now();
                 $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
                 $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date->modify('next monday'); // Move to the next Monday
-                $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
-
+                $current_date->modify('next monday'); // Mover al siguiente lunes
+                $dateNextMonday = $current_date->format('Y-m-d'); // Formato Y-m-d
                 $id_user = Auth::user()->id;
-                //    $idcc = $request->centrocosto;
 
                 $venta = new Sale();
                 $venta->user_id = $id_user;
                 $venta->centrocosto_id = $request->centrocosto;
                 $venta->third_id = $request->cliente;
+                $venta->direccion_envio = $request->direccion_envio;
                 $venta->vendedor_id = $request->vendedor;
                 $venta->domiciliario_id = $request->domiciliario;
                 $venta->subcentrocostos_id = $request->subcentrodecosto;
-
                 $venta->fecha_venta = $currentDateFormat;
-                // $venta->fecha_cierre = $dateNextMonday;
-
+                // $venta->fecha_cierre = $dateNextMonday;  // Puedes habilitar si es necesario
                 $venta->total_bruto = 0;
                 $venta->descuentos = 0;
                 $venta->subtotal = 0;
@@ -846,49 +878,50 @@ class saleController extends Controller
                 $venta->valor_a_pagar_credito = 0;
                 $venta->valor_pagado = 0;
                 $venta->cambio = 0;
-
                 $venta->items = 0;
+                $venta->tipo = "1"; // Domicilio
 
-                $venta->valor_pagado = 0;
-                $venta->cambio = 0;
-                $venta->tipo = "1";
+                // --- INICIO: Generación de consecutivo para la facturacion de venta ---
+                // Recuperar el centro de costo y su prefijo
+                $centroCosto = CentroCosto::find($request->centrocosto);
+                if (!$centroCosto) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Centro de costo no encontrado'
+                    ], 404);
+                }
+                $prefijo = $centroCosto->prefijo;
+                // Consultar la última venta creada para este centro de costo para determinar el consecutivo
+                $lastSale = Sale::where('centrocosto_id', $request->centrocosto)
+                    ->orderBy('consec', 'desc')
+                    ->first();
+                $consecutivo = $lastSale ? $lastSale->consec + 1 : 1;
+                // Generar la resolución con el formato {prefijo}-{consecutivo} (con 5 dígitos)
+                $generaConsecutivo = $prefijo . '-' . str_pad($consecutivo, 5, '0', STR_PAD_LEFT);
+
+                $venta->consecutivo = $generaConsecutivo;
+                $venta->consec = $consecutivo;     // Campo para llevar el número secuencial numérico
+                // --- FIN: Generación de consecutivo ---
+
                 $venta->save();
-
-                //ACTUALIZA CONSECUTIVO 
-                $idcc = $request->centrocosto;
-                DB::update(
-                    "
-        UPDATE sales a,    
-        (
-            SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
-            @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
-        ) as tabla
-        SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
-            a.consec = @numeroConsecutivo
-        WHERE a.consecutivo is null",
-                    [
-                        'vcentrocosto1' => $idcc,
-                        'vcentrocosto2' => $idcc
-                    ]
-                );
 
                 return response()->json([
                     'status' => 1,
                     'message' => 'Guardado correctamente',
-                    "registroId" => $venta->id
+                    'registroId' => $venta->id
                 ]);
             } else {
+                // En caso de que ya exista la venta se actualizan algunos campos
                 $getReg = Sale::firstWhere('id', $request->ventaId);
                 $getReg->third_id = $request->vendedor;
                 $getReg->centrocosto_id = $request->centrocosto;
                 $getReg->subcentrocostos_id = $request->subcentrodecosto;
                 $getReg->factura = $request->factura;
                 $getReg->save();
-
                 return response()->json([
                     'status' => 1,
                     'message' => 'Guardado correctamente',
-                    "registroId" => 0
+                    'registroId' => 0
                 ]);
             }
         } catch (\Throwable $th) {
@@ -1044,6 +1077,32 @@ class saleController extends Controller
 
     public function storeVentaMostrador(Request $request) // POS-Mostrador
     {
+        //   $centros = Centrocosto::WhereIn('id', [1])->get();
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
+
+        // Obtiene los modelos de centros de costo usando los IDs obtenidos
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
+        // Selecciona el primer centro de costo como valor por defecto (si existe)
+        $defaultCentro = $centros->first();
+
+        $userId = Auth::id();
+        $cacheKey = "sale_in_process_user_{$userId}";
+
+        // 1) Si ya hay una venta en curso para este usuario, devolvemos la misma
+        if (Cache::has($cacheKey)) {
+            return response()->json([
+                'status'     => 2,
+                'message'    => 'Ya tienes una venta en curso',
+                'registroId' => Cache::get($cacheKey . '_id')
+            ], 200);
+        }
+
+        // 2) Marcamos que hay una venta en proceso 
+        Cache::put($cacheKey, true, now()->addSeconds(20));
+
+        DB::beginTransaction();
         try {
             $currentDateTime = Carbon::now();
             $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
@@ -1054,9 +1113,9 @@ class saleController extends Controller
 
             $venta = new Sale();
             $venta->user_id = $id_user;
-            $venta->centrocosto_id = 1;
+            $venta->centrocosto_id = $defaultCentro->id;
             $venta->subcentrocostos_id = 2;
-            $venta->third_id = 1;
+            $venta->third_id = ($defaultCentro->id == 8) ? 157 : 1;
             $venta->vendedor_id = 1;
 
             $venta->fecha_venta = $currentDateFormat;
@@ -1075,47 +1134,51 @@ class saleController extends Controller
             $venta->items = 0;
             $venta->valor_pagado = 0;
             $venta->cambio = 0;
+            $venta->in_process = true;       // si se usa columna en BD
 
             $venta->save();
 
-            /*     if ($venta->centrocosto_id == 1 || $venta->centrocosto_id == 2) {
-                $count1 = DB::table('sales')->count();
-                $count2 = DB::table('notacreditos')->count();
-                $count3 = DB::table('notadebitos')->count();
-                $count = $count1 + $count2 + $count3;
-                $resolucion = 'ERPC ' . (1 + $count);
-              //  $venta->resolucion = $resolucion;
-                $venta->save();
-            }  */
+            // --- INICIO: Generación de consecutivo para la facturacion de venta ---
+            // Recuperar el centro de costo y su prefijo
+            $centroCosto = CentroCosto::find($request->centrocosto);
+            if (!$centroCosto) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Centro de costo no encontrado'
+                ], 404);
+            }
+            $prefijo = $centroCosto->prefijo;
+            // Consultar la última venta creada para este centro de costo para determinar el consecutivo
+            $lastSale = Sale::where('centrocosto_id', $request->centrocosto)
+                ->orderBy('consec', 'desc')
+                ->first();
+            $consecutivo = $lastSale ? $lastSale->consec + 1 : 1;
+            // Generar la resolución con el formato {prefijo}-{consecutivo} (con 5 dígitos)
+            $generaConsecutivo = $prefijo . '-' . str_pad($consecutivo, 5, '0', STR_PAD_LEFT);
 
-            //ACTUALIZA CONSECUTIVO 
-            $idcc = $request->centrocosto;
-            DB::update(
-                "
-     UPDATE sales a,    
-     (
-         SELECT @numeroConsecutivo:= (SELECT (COALESCE (max(consec),0) ) FROM sales where centrocosto_id = :vcentrocosto1 ),
-         @documento:= (SELECT MAX(prefijo) FROM centro_costo where id = :vcentrocosto2 )
-     ) as tabla
-     SET a.consecutivo =  CONCAT( @documento,  LPAD( (@numeroConsecutivo:=@numeroConsecutivo + 1),5,'0' ) ),
-         a.consec = @numeroConsecutivo
-     WHERE a.consecutivo is null",
-                [
-                    'vcentrocosto1' => $idcc,
-                    'vcentrocosto2' => $idcc
-                ]
-            );
+            $venta->consecutivo = $generaConsecutivo;
+            $venta->consec = $consecutivo;     // Campo para llevar el número secuencial numérico
+            // --- FIN: Generación de consecutivo ---
+
+            $venta->save();
+
+            DB::commit();
 
             return response()->json([
-                'status' => 1,
-                'message' => 'Inicio de venta por mostrador',
+                'status'     => 1,
+                'message'    => 'Inicio de venta por mostrador',
                 'registroId' => $venta->id
-            ]);
-        } catch (\Throwable $th) {
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // Limpiamos la bandera para que puedan reintentar
+            Cache::forget($cacheKey);
+            Cache::forget($cacheKey . '_id');
+
             return response()->json([
-                'status' => 0,
-                'array' => (array) $th
-            ]);
+                'status'  => 0,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -1249,7 +1312,8 @@ class saleController extends Controller
                 Log::debug('Venta tiene valor a pagar en crédito, se debe invocar cuentasPorCobrar', [
                     'valor_a_pagar_credito' => $sale->valor_a_pagar_credito
                 ]);
-                // Ejemplo: $this->cuentasPorCobrar($sale);
+
+                $this->cuentasPorCobrar($sale->id);
             }
 
             // Marcar la venta como cerrada y asignar la fecha de cierre
@@ -1278,16 +1342,119 @@ class saleController extends Controller
 
 
 
+    /**
+     * Carga masiva de ventas al inventario usando fechas estáticas.
+     */
     public function cargarInventarioMasivo()
     {
-        for ($ventaId = 484; $ventaId <= 592; $ventaId++) {
-            $this->cargarInventariocr($ventaId);
-        }
+        // ——————————————————————————————
+        // Aquí “inyectamos” de forma fija el rango deseado:
+        $data = [
+            'start_date' => '2025-05-01',
+            'end_date'   => '2025-05-02',
+            'sale_ids'   => null,  // null para usar siempre fechas
+        ];
+        // ——————————————————————————————
+
+        // Construcción del query base
+        $query = Sale::with(['saleDetails' => function ($q) {
+            $q->where('status', '1');
+        }])
+            ->where('status', '1')
+            ->whereBetween('fecha_venta', [
+                $data['start_date'],
+                $data['end_date'],
+            ]);
+
+        // Procesamiento por lotes para no saturar memoria
+        $query->orderBy('id')
+            ->chunkById(100, function ($salesBatch) {
+
+                foreach ($salesBatch as $sale) {
+                    DB::beginTransaction();
+                    try {
+                        if ($sale->saleDetails->isEmpty()) {
+                            Log::debug("Venta {$sale->id} sin detalles activos. Se omite.");
+                            DB::rollBack();
+                            continue;
+                        }
+
+                        // Agrupamos detalles por producto|tienda|lote
+                        $grouped = $sale->saleDetails->groupBy(function ($d) {
+                            return "{$d->product_id}|{$d->store_id}|{$d->lote_id}";
+                        });
+
+                        $movimientosToInsert = [];
+
+                        foreach ($grouped as $key => $details) {
+                            [$productId, $storeId, $loteId] = explode('|', $key);
+
+                            $qty   = $details->sum('quantity');
+                            $costo = $details->sum('total_bruto');
+
+                            // Si ya existe el movimiento, saltamos
+                            $exists = MovimientoInventario::where([
+                                'sale_id'           => $sale->id,
+                                'product_id'        => $productId,
+                                'store_origen_id'   => $storeId,
+                                'tipo'              => 'venta',
+                                'lote_id'           => $loteId,
+                            ])->exists();
+                            if ($exists) continue;
+
+                            // Preparo array para bulk-insert
+                            $movimientosToInsert[] = [
+                                'product_id'       => $productId,
+                                'lote_id'          => $loteId,
+                                'store_origen_id'  => $storeId,
+                                'store_destino_id' => null,
+                                'tipo'             => 'venta',
+                                'sale_id'          => $sale->id,
+                                'cantidad'         => $qty,
+                                'costo_unitario'   => $costo,
+                                'created_at'       => now(),
+                                'updated_at'       => now(),
+                            ];
+
+                            // Actualizo inventario con un solo query
+                            Inventario::where([
+                                'product_id' => $productId,
+                                'store_id'   => $storeId,
+                                'lote_id'    => $loteId,
+                            ])->increment('cantidad_venta', $qty, [
+                                'costo_unitario' => DB::raw("costo_unitario + {$costo}")
+                            ]);
+                        }
+
+                        // Inserto todos los movimientos de golpe
+                        if (!empty($movimientosToInsert)) {
+                            MovimientoInventario::insert($movimientosToInsert);
+                        }
+
+                        // Si hay crédito pendiente, lo procesamos
+                        if ($sale->valor_a_pagar_credito > 0) {
+                            $this->cuentasPorCobrar($sale->id);
+                        }
+
+                        // Marcamos la venta como cerrada
+                        $sale->update([
+                            'status'       => '1',
+                            'fecha_cierre' => now(),
+                        ]);
+
+                        DB::commit();
+                        Log::info("Venta {$sale->id} procesada correctamente.");
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        Log::error("Error procesando venta {$sale->id}: {$e->getMessage()}");
+                    }
+                }
+            });
 
         return response()->json([
-            'status' => 1,
-            'message' => 'Cargado al inventario masivamente desde el ID 672 hasta el ID 1127'
-        ]);
+            'status'  => 0,
+            'message' => "Carga masiva completada para ventas entre {$data['start_date']} y {$data['end_date']}.",
+        ], 200);
     }
 
     public function annulSale($saleId)
@@ -1295,10 +1462,30 @@ class saleController extends Controller
         // Se obtiene la venta junto con sus detalles (relación 'details')
         $sale = Sale::with('details')->findOrFail($saleId);
 
-        // Verificar que la venta esté en estado '1' 'closed' (o el estado que permita anulación)
+        /*  // Verificar que la venta esté en estado '1' 'closed' (o el estado que permita anulación)
         if ($sale->status !== '1') {
             return response()->json(['error' => 'La venta no puede ser anulada.'], 422);
+        } */
+
+        // Obtener la venta junto con sus detalles
+
+        Log::info("Venta encontrada", ['sale_id' => $sale->id]);
+
+        // Verificar que la venta esté en un estado que permita la devolución parcial
+        if ($sale->status === '1') {
+            // '1' representa ventas elegibles para devolución; se continúa el proceso.
+        } elseif ($sale->status === '3') {
+            // Para ventas en estado '3' se debe tener exactamente 1 nota de crédito asociada
+            if ($sale->credit_notes_count !== 1) {
+                Log::warning("La venta ID {$sale->id} en estado '3' no tiene una única nota de crédito. Cantidad: {$sale->credit_notes_count}");
+                return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
+            }
+            // Continuar el proceso para ventas en estado '3' que cumplen la condición
+        } else {
+            Log::warning("La venta ID {$sale->id} no se puede devolver totalmente por su estado ({$sale->status}).");
+            return redirect()->back()->with('error', 'La venta no puede ser devuelta totalmente.');
         }
+
 
         DB::beginTransaction();
         try {
@@ -1488,65 +1675,7 @@ class saleController extends Controller
         }
     }
 
-
-
-    public function partialReturnVersion1(Request $request)
-    {
-        // Si es POST, procesa la devolución parcial
-        if ($request->isMethod('post')) {
-            // Registra los datos recibidos para debug
-            Log::info('Recibiendo datos para devolución parcial', $request->all());
-
-            // Validar los datos recibidos
-            $validated = $request->validate([
-                'ventaId'    => 'required|integer|exists:sales,id',
-                'returns'    => 'required|array',
-                'returns.*'  => 'numeric|min:0',
-                'store_ids'  => 'required|array',
-                'store_ids.*' => 'integer',
-            ]);
-
-            // Buscar la venta
-            $sale = Sale::findOrFail($validated['ventaId']);
-            Log::info("Venta encontrada", ['sale_id' => $sale->id]);
-
-            // Procesar cada detalle de devolución
-            foreach ($validated['returns'] as $detailId => $returnQuantity) {
-                if ($returnQuantity > 0) {
-                    // Buscar el detalle de venta
-                    $saleDetail = SaleDetail::findOrFail($detailId);
-                    Log::info("Procesando detalle", ['detail_id' => $detailId, 'returnQuantity' => $returnQuantity]);
-
-                    // Validar que la cantidad a devolver no exceda la cantidad vendida
-                    if ($returnQuantity > $saleDetail->quantity) {
-                        $errorMsg = 'La cantidad a devolver supera la cantidad vendida para el producto ' . $saleDetail->product->name;
-                        Log::error($errorMsg);
-                        return redirect()->back()->with('error', $errorMsg);
-                    }
-
-                    // Obtener el store_id para este detalle
-                    $storeId = $validated['store_ids'][$detailId] ?? null;
-                    if (!$storeId) {
-                        $errorMsg = 'No se encontró el store_id para el detalle ' . $detailId;
-                        Log::error($errorMsg);
-                        return redirect()->back()->with('error', $errorMsg);
-                    }
-
-                    // Actualizar la cantidad vendida (restarle la cantidad devuelta)
-                    $saleDetail->quantity -= $returnQuantity;
-                    $saleDetail->save();
-                    Log::info("Detalle actualizado", ['detail_id' => $detailId, 'nueva_quantity' => $saleDetail->quantity]);
-
-                    // Aquí podrías actualizar el inventario del store correspondiente
-                    // Ejemplo: Inventory::incrementStock($saleDetail->product_id, $returnQuantity, $storeId);
-                }
-            }
-
-            Log::info("Devolución parcial procesada exitosamente para la venta {$sale->id}");
-
-            return redirect()->route('sale.index')->with('success', 'Devolución parcial procesada exitosamente.');
-        }
-    }
+ 
 
     public function partialReturn(Request $request)
     {
@@ -1560,11 +1689,22 @@ class saleController extends Controller
         // Obtener la venta junto con sus detalles
         $sale = Sale::with('details')->findOrFail($validated['ventaId']);
         Log::info("Venta encontrada", ['sale_id' => $sale->id]);
+
         // Verificar que la venta esté en un estado que permita la devolución parcial
-        if ($sale->status !== '1') { // '1' representa ventas elegibles para devolución
-            Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status})");
+        if ($sale->status === '1') {
+            // '1' representa ventas elegibles para devolución; se continúa el proceso.
+        } elseif ($sale->status === '3') {
+            // Para ventas en estado '3' se debe tener exactamente 1 nota de crédito asociada
+            if ($sale->credit_notes_count !== 1) {
+                Log::warning("La venta ID {$sale->id} en estado '3' no tiene una única nota de crédito. Cantidad: {$sale->credit_notes_count}");
+                return redirect()->back()->with('error', 'La venta no puede ser devuelta parcialmente.');
+            }
+            // Continuar el proceso para ventas en estado '3' que cumplen la condición
+        } else {
+            Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status}).");
             return redirect()->back()->with('error', 'La venta no puede ser devuelta parcialmente.');
         }
+
         // Preparar variables para calcular el total parcial a devolver y almacenar los detalles a procesar
         $partialTotal = 0;
         $returnedDetails = [];
@@ -1599,12 +1739,24 @@ class saleController extends Controller
         // Procesar la devolución parcial mediante nota de crédito
         DB::beginTransaction();
         try {
+            // Incrementar el contador de notas de crédito
+            $sale->credit_notes_count += 1;
+
+            // Determinar el estado de las notas de crédito
+            // Si es la primera nota, establecer como 'partial'
+            // Si es la segunda nota, mantener como 'partial' a menos que sea una devolución total
+            $sale->credit_note_status = 'partial';
+
             // Crear la cabecera de la nota de crédito
             $notaCredito = Notacredito::create([
                 'sale_id' => $sale->id,
                 'user_id' => auth()->id(),
                 'total'   => $partialTotal,
                 'status'  => '1',
+                // Agregar el número de secuencia de la nota de crédito para esta venta
+                'credit_note_sequence' => $sale->credit_notes_count,
+                // Establecer el tipo de devolución como parcial
+                'return_type' => 'partial_return'
             ]);
             Log::info("Nota de crédito creada con ID: {$notaCredito->id}");
             // Recorrer cada detalle a devolver
@@ -1616,12 +1768,16 @@ class saleController extends Controller
                 NotaCreditoDetalle::create([
                     'notacredito_id' => $notaCredito->id,
                     'product_id'     => $detail->product_id,
+                    'sale_detail_id' => $detail->id,
+                    'store_id'       => $detail->store_id,
+                    'lote_id'        => $detail->lote_id,
                     'quantity'       => $returnQuantity,
                     'price'          => $detail->price,
+                    'inventory_processed' => false
                 ]);
                 Log::info("Nota de crédito detalle creada para producto ID: {$detail->product_id}, cantidad: {$returnQuantity}");
                 // Registrar el movimiento en inventario para la devolución parcial
-                MovimientoInventario::create([
+                $movimiento = MovimientoInventario::create([
                     'tipo'            => 'notacredito',
                     'store_origen_id' => $detail->store_id,
                     'sale_id'         => $sale->id,
@@ -1644,18 +1800,108 @@ class saleController extends Controller
                     Log::info("Inventario actualizado para producto ID: {$detail->product_id}");
                 }
 
-                // Opcional: actualizar el detalle de la venta restando la cantidad devuelta
-                // $detail->quantity -= $returnQuantity;
-                // $detail->save();
-                // Log::info("Detalle de venta ID: {$detail->id} actualizado. Nueva cantidad: {$detail->quantity}");
+                // --- Funcionalidad 1: si tras restar queda cantidad = 0, marcamos status = '0' ---
+                $detail->quantity -= $returnQuantity;
+                if ($detail->quantity <= 0) {
+                    // Si quedó en 0 (o negativo por seguridad), forzamos a 0 y desactivamos
+                    $detail->quantity = 0;
+                    $detail->status   = '0';
+                }
+                $detail->save();
+                Log::info("Detalle de venta actualizado para producto ID: {$detail->product_id}, cantidad restante: {$detail->quantity}");
+                // --- Fin de la funcionalidad 1 ---
+
             }
-            // Actualizar el estado de la venta a '3' indicando que la devolución parcial se procesó correctamente
-            $sale->status = '3';
+
+            // —— Funcionalidad 2: recalcular y guardar cada detalle con status = '1'
+            $activeDetails = SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->get();
+
+            foreach ($activeDetails as $d) {
+                // 1) Recalcular bruto
+                $d->total_bruto       = round($d->quantity * $d->price, 2);
+
+                // 2) Recalcular descuento (por % + fijo)
+                $calcDescuento        = ($d->total_bruto * ($d->porc_desc / 100))
+                    + $d->descuento_cliente;
+                $d->descuento         = round($calcDescuento, 2);
+
+                // 3) Neto base para impuestos
+                $neto                 = $d->total_bruto - $d->descuento;
+
+                // 4) Recalcular cada impuesto
+                $d->iva               = round($neto * ($d->porc_iva           / 100), 2);
+                $d->otro_impuesto     = round($neto * ($d->porc_otro_impuesto / 100), 2);
+                $d->impoconsumo       = round($neto * ($d->porc_impoconsumo   / 100), 2);
+
+                // 5) Total final del detalle
+                $d->total             = round(
+                    $neto
+                        + $d->iva
+                        + $d->otro_impuesto
+                        + $d->impoconsumo,
+                    2
+                );
+
+                // 6) Forzar timestamp de actualización
+                $d->updated_at        = now();
+
+                // 7) Guardar cambios
+                $d->save();
+            }
+
+            // —— Ahora, recalcular y guardar los totales de la venta
+            $TotalBruto        = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('total_bruto');
+            $TotalIva          = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('iva');
+            $TotalOtroImp      = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('otro_impuesto');
+            $TotalImpConsumo   = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('impoconsumo');
+            $TotalAPagar       = (float) SaleDetail::where('sale_id', $sale->id)
+                ->where('status',    '1')
+                ->sum('total');
+
+            // Mantener descuentos globales
+            $TotalDescuentos   = (float) $sale->descuentos + $sale->descuento_cliente;
+
+            $sale->total_bruto           = $TotalBruto;
+            $sale->subtotal              = $TotalBruto - $TotalDescuentos;
+            $sale->total_iva             = $TotalIva;
+            $sale->total_otros_impuestos = $TotalOtroImp + $TotalImpConsumo;
+
+            $sale->total                 = $TotalAPagar;
+            $sale->total_valor_a_pagar = $TotalAPagar;
+
+            if ($sale->valor_a_pagar_credito > 0) {
+                $sale->valor_a_pagar_credito = $TotalAPagar;
+            }
+
+            // —— Nuevo: recalcular y asignar 'cambio'
+            $sale->cambio = round(
+                ($sale->valor_a_pagar_efectivo
+                    + $sale->valor_a_pagar_tarjeta)
+                    - $sale->total,
+                2
+            );
+
+            $sale->status                = '3';
+
+            // Forzar timestamp de la venta
+            $sale->updated_at            = now();
+
+            // Guardar venta
             $sale->save();
-            Log::info("Venta ID {$sale->id} actualizada a status '3'.");
+
             DB::commit();
-            Log::info("Devolución parcial procesada exitosamente para la venta ID: {$sale->id}");
-            return redirect()->route('sale.index')->with('success', 'Devolución parcial procesada exitosamente.');
+            return redirect()->route('sale.index')
+                ->with('success', 'Devolución parcial y recalculo de totales completados.');
         } catch (\Exception $e) {
             DB::rollback();
             Log::error("Error en devolución parcial para venta ID {$sale->id}: " . $e->getMessage());
