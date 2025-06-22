@@ -19,11 +19,11 @@ class InventarioService
      */
     public static function actualizarStock($storeId, $loteId, $productId)
     {
-        Log::info('Iniciando actualización de stock ideal', [
+        /* Log::info('Iniciando actualización de stock ideal', [
             'storeId' => $storeId,
             'loteId' => $loteId,
             'productId' => $productId,
-        ]);
+        ]); */
 
         // Buscar el inventario correspondiente
         $inventario = Inventario::where('store_id', $storeId)
@@ -32,15 +32,15 @@ class InventarioService
             ->first();
 
         if (!$inventario) {
-            Log::warning('Inventario no encontrado', [
+            /* Log::warning('Inventario no encontrado', [
                 'storeId' => $storeId,
                 'loteId' => $loteId,
                 'productId' => $productId,
-            ]);
+            ]); */
             return null;
         }
 
-        Log::info('Inventario encontrado', ['inventario' => $inventario->toArray()]);
+        // Log::info('Inventario encontrado', ['inventario' => $inventario->toArray()]);
 
         // Obtener los movimientos asociados agrupados por tipo (ingresos)
         $movimientos = MovimientoInventario::where('lote_id', $loteId)
@@ -50,7 +50,7 @@ class InventarioService
             ->groupBy('tipo')
             ->get();
 
-        Log::info('Movimientos de ingreso obtenidos', ['movimientosIngreso' => $movimientos->toArray()]);
+        // Log::info('Movimientos de ingreso obtenidos', ['movimientosIngreso' => $movimientos->toArray()]);
 
         // Sumar cantidades por cada tipo de movimiento de ingresos
         $desposteres      = $movimientos->where('tipo', 'desposteres')->sum('cantidad_total');
@@ -58,16 +58,15 @@ class InventarioService
         $enlistments      = $movimientos->where('tipo', 'enlistments')->sum('cantidad_total');
         $compensadores    = $movimientos->where('tipo', 'compensadores')->sum('cantidad_total');
         $trasladoIngreso  = $movimientos->where('tipo', 'traslado_ingreso')->sum('cantidad_total');
-        $trasladoSalida   = $movimientos->where('tipo', 'traslado_salida')->sum('cantidad_total');
 
-        Log::info('Totales de movimientos de ingreso', [
+        /*  Log::info('Totales de movimientos de ingreso', [
             'desposteres'    => $desposteres,
             'despostecerdos' => $despostecerdos,
             'enlistments'    => $enlistments,
             'compensadores'  => $compensadores,
             'trasladoIngreso'=> $trasladoIngreso,
             'trasladoSalida' => $trasladoSalida,
-        ]);
+        ]); */
 
         // Obtener los movimientos de salida agrupados por tipo
         $movimientosSalida = MovimientoInventario::where('lote_id', $loteId)
@@ -81,21 +80,25 @@ class InventarioService
 
         $totalVenta  = $movimientosSalida->where('tipo', 'venta')->sum('cantidad_total');
         $totalNotaCredito  = $movimientosSalida->where('tipo', 'notacredito')->sum('cantidad_total');
-        
+        $trasladoSalida  = $movimientosSalida->where('tipo', 'traslado_salida')->sum('cantidad_total');
+
         Log::info('Total de ventas', ['totalVenta' => $totalVenta]);
 
         // Calcular el stock ideal según la fórmula definida
         $stockIdeal = ($inventario->cantidad_inventario_inicial
-                    + $desposteres
-                    + $despostecerdos
-                    + $enlistments
-                    + $compensadores
-                    + $inventario->cantidad_prod_term
-                    + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
+            + $desposteres
+            + $despostecerdos
+            + $enlistments
+            + $compensadores
+            + $inventario->cantidad_prod_term
+            + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
 
         Log::info('Stock ideal calculado', [
             'cantidad_inventario_inicial' => $inventario->cantidad_inventario_inicial,
             'cantidad_prod_term'          => $inventario->cantidad_prod_term,
+            'trasladoSalida' => $trasladoSalida,
+            'totalNotaCredito' => $totalNotaCredito,
+            'totalVenta' => $totalVenta,
             'stockIdeal'                  => $stockIdeal,
         ]);
 

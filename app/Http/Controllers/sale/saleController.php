@@ -1334,7 +1334,7 @@ class saleController extends Controller
                 $venta->valor_a_pagar_credito = 0;
                 $venta->valor_pagado = 0;
                 $venta->cambio = 0;
-                $venta->items = 0;               
+                $venta->items = 0;
 
                 // --- INICIO: Generación de consecutivo para la facturacion de venta ---
                 // Recuperar el centro de costo y su prefijo
@@ -1755,7 +1755,7 @@ class saleController extends Controller
     {
         DB::beginTransaction();
         try {
-            Log::debug('Inicio de cargarInventariocr', ['ventaId' => $ventaId]);
+            // Log::debug('Inicio de cargarInventariocr', ['ventaId' => $ventaId]);
 
             // 1) Obtener la venta con sus detalles
             $sale = Sale::with('saleDetails.product')
@@ -1763,22 +1763,22 @@ class saleController extends Controller
                 ->where('status', '0')
                 ->firstOrFail();
 
-            Log::debug('Turno diario de la venta', [
+            /*    Log::debug('Turno diario de la venta', [
                 'sale_id'      => $sale->id,
                 'turno_diario' => $sale->turno_diario,
                 'centrocosto'  => $sale->centrocosto_id,
-            ]);
+            ]); */
 
             if (!$sale) {
-                Log::debug('Venta no encontrada o ya cerrada', ['ventaId' => $ventaId]);
+                //   Log::debug('Venta no encontrada o ya cerrada', ['ventaId' => $ventaId]);
                 return response()->json(['status' => 1, 'message' => 'Venta no encontrada o cerrada.'], 404);
             }
-            Log::debug('Venta encontrada', ['sale_id' => $sale->id]);
+            //    Log::debug('Venta encontrada', ['sale_id' => $sale->id]);
 
             // 2) Filtrar detalles activos
             $details = $sale->saleDetails->where('status', '1');
             if ($details->isEmpty()) {
-                Log::debug('No hay detalles de venta activos', ['sale_id' => $sale->id]);
+                //  Log::debug('No hay detalles de venta activos', ['sale_id' => $sale->id]);
                 return response()->json(['status' => 0, 'message' => 'No hay detalles de venta activos.'], 404);
             }
 
@@ -1789,7 +1789,7 @@ class saleController extends Controller
                 $qty    = $d->quantity;
                 $costo  = $d->total_bruto;
 
-                Log::debug('Procesando detalle', ['detail_id' => $d->id, 'product_id' => $prod->id, 'type' => $prod->type, 'store_id' => $store, 'quantity' => $qty]);
+                //  Log::debug('Procesando detalle', ['detail_id' => $d->id, 'product_id' => $prod->id, 'type' => $prod->type, 'store_id' => $store, 'quantity' => $qty]);
 
                 switch ($prod->type) {
                     case 'combo':
@@ -1818,13 +1818,13 @@ class saleController extends Controller
 
             // Cuentas por cobrar
             if ($sale->valor_a_pagar_credito > 0) {
-                Log::debug('Generando cuentas por cobrar');
+                //    Log::debug('Generando cuentas por cobrar');
                 $this->cuentasPorCobrar($sale->id);
             }
 
             // Marcar cierre
             $sale->update(['status' => '1', 'fecha_cierre' => Carbon::now()]);
-            Log::debug('Venta cerrada', ['sale_id' => $sale->id]);
+            //     Log::debug('Venta cerrada', ['sale_id' => $sale->id]);
 
             DB::commit();
             Log::debug('Transacción completada');
@@ -1887,7 +1887,7 @@ class saleController extends Controller
             ->where('tipo', 'venta')
             ->exists()
         ) {
-            Log::debug("{$tag} Movimiento ya existe", ['product_id' => $productId, 'lote_id' => $loteId, 'store_id' => $storeId]);
+            //    Log::debug("{$tag} Movimiento ya existe", ['product_id' => $productId, 'lote_id' => $loteId, 'store_id' => $storeId]);
             return;
         }
         $mov = MovimientoInventario::create([
@@ -1899,7 +1899,7 @@ class saleController extends Controller
             'cantidad'        => $qty,
             'costo_unitario'  => $costo ?? 0,
         ]);
-        Log::debug("{$tag} Movimiento creado", ['movimiento_id' => $mov->id]);
+        // Log::debug("{$tag} Movimiento creado", ['movimiento_id' => $mov->id]);
 
         $inv = Inventario::firstOrNew([
             'product_id' => $productId,
@@ -1916,7 +1916,7 @@ class saleController extends Controller
             $inv->costo_unitario += $costo;
         }
         $inv->save();
-        Log::debug("{$tag} Inventario actualizado", ['inventario_id' => $inv->id, 'qty' => $inv->cantidad_venta]);
+        // Log::debug("{$tag} Inventario actualizado", ['inventario_id' => $inv->id, 'qty' => $inv->cantidad_venta]);
     }
 
     /**
@@ -1928,18 +1928,18 @@ class saleController extends Controller
         foreach ($comps as $c) {
             $cid = $c->component_id;
             $ded = $qty * $c->quantity;
-            Log::debug("{$ctx} Descontando componente", ['component_id' => $cid, 'qty' => $ded]);
+           // Log::debug("{$ctx} Descontando componente", ['component_id' => $cid, 'qty' => $ded]);
 
             $p = Product::find($cid);
             if ($p && $p->type === 'receta') {
-                Log::debug('Sub-receta detectada', ['component_id' => $cid]);
+              //  Log::debug('Sub-receta detectada', ['component_id' => $cid]);
                 $this->descontarComponentes($saleId, $cid, $storeId, $ded, 'SUB-' . $ctx);
                 continue;
             }
 
             $l = $this->buscarLoteMasCercano($cid, $storeId);
             if (!$l) {
-                Log::error('No lote para componente', compact('cid', 'storeId'));
+              // Log::error('No lote para componente', compact('cid', 'storeId'));
                 continue;
             }
             $this->procesarMovimiento($saleId, $cid, $storeId, $l->id, $ded, null, $ctx);
