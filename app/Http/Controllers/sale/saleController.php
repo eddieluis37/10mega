@@ -484,9 +484,9 @@ class saleController extends Controller
 
     public function create($id)
     {
-        $venta = Sale::find($id);       
+        $venta = Sale::find($id);
 
-        $storeIds = [0];       
+        $storeIds = [0];
 
         // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
         $productsQuery = Product::query();
@@ -1275,6 +1275,118 @@ class saleController extends Controller
         }
     }
 
+    public function store_parrilla(Request $request) // Guardar venta parrrilla por domicilio
+    {
+        try {
+            $rules = [
+                'ventaId' => 'required',
+                'cliente' => 'required',
+                'vendedor' => 'required',
+                'direccion_envio' => 'required',
+                'centrocosto' => 'required',
+                'subcentrodecosto' => 'required',
+            ];
+            $messages = [
+                'ventaId.required' => 'El ventaId es requerido',
+                'cliente.required' => 'El cliente es requerido',
+                'vendedor.required' => 'El proveedor es requerido',
+                'direccion_envio.required' => 'La dirección de envio es requerida',
+                'centrocosto.required' => 'El centro costo es requerido',
+                'subcentrodecosto.required' => 'El subcentro de costo es requerido',
+            ];
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Verificar si ya existe la venta con ventaId
+            $getReg = Sale::firstWhere('id', $request->ventaId);
+            if ($getReg == null) {
+                $currentDateTime = Carbon::now();
+                $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
+                $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
+                $current_date->modify('next monday'); // Mover al siguiente lunes
+                $dateNextMonday = $current_date->format('Y-m-d'); // Formato Y-m-d
+                $id_user = Auth::user()->id;
+
+                $venta = new Sale();
+                $venta->user_id = $id_user;
+                $venta->tipo = '3'; // Parrilla Domicilio
+                $venta->centrocosto_id = $request->centrocosto;
+                $venta->third_id = $request->cliente;
+                $venta->direccion_envio = $request->direccion_envio;
+                $venta->vendedor_id = $request->vendedor;
+                $venta->domiciliario_id = $request->domiciliario;
+                $venta->subcentrocostos_id = $request->subcentrodecosto;
+                $venta->fecha_venta = $currentDateFormat;
+                // $venta->fecha_cierre = $dateNextMonday;  // Puedes habilitar si es necesario
+                $venta->total_bruto = 0;
+                $venta->descuentos = 0;
+                $venta->subtotal = 0;
+                $venta->total = 0;
+                $venta->total_otros_descuentos = 0;
+                $venta->valor_a_pagar_efectivo = 0;
+                $venta->valor_a_pagar_tarjeta = 0;
+                $venta->valor_a_pagar_otros = 0;
+                $venta->valor_a_pagar_credito = 0;
+                $venta->valor_pagado = 0;
+                $venta->cambio = 0;
+                $venta->items = 0;               
+
+                // --- INICIO: Generación de consecutivo para la facturacion de venta ---
+                // Recuperar el centro de costo y su prefijo
+                $centroCosto = CentroCosto::find($request->centrocosto);
+                if (!$centroCosto) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Centro de costo no encontrado'
+                    ], 404);
+                }
+                $prefijo = $centroCosto->prefijo;
+                // Consultar la última venta creada para este centro de costo para determinar el consecutivo
+                $lastSale = Sale::where('centrocosto_id', $request->centrocosto)
+                    ->orderBy('consec', 'desc')
+                    ->first();
+                $consecutivo = $lastSale ? $lastSale->consec + 1 : 1;
+                // Generar la resolución con el formato {prefijo}-{consecutivo} (con 5 dígitos)
+                $generaConsecutivo = $prefijo . '-' . str_pad($consecutivo, 5, '0', STR_PAD_LEFT);
+
+                $venta->consecutivo = $generaConsecutivo;
+                $venta->consec = $consecutivo;     // Campo para llevar el número secuencial numérico
+                // --- FIN: Generación de consecutivo ---
+
+                $venta->save();
+
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Guardado correctamente',
+                    'registroId' => $venta->id
+                ]);
+            } else {
+                // En caso de que ya exista la venta se actualizan algunos campos
+                $getReg = Sale::firstWhere('id', $request->ventaId);
+                $getReg->third_id = $request->vendedor;
+                $getReg->centrocosto_id = $request->centrocosto;
+                $getReg->subcentrocostos_id = $request->subcentrodecosto;
+                $getReg->factura = $request->factura;
+                $getReg->save();
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Guardado correctamente',
+                    'registroId' => 0
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'array' => (array) $th
+            ]);
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -1717,11 +1829,33 @@ class saleController extends Controller
             DB::commit();
             Log::debug('Transacción completada');
 
-            return redirect()->route('sale.index')->with('success', 'Cargado exitosamente');
+            // Si la venta es tipo 2 o 3, redirige a sale_parrilla.index
+            if (in_array($sale->tipo, ['2', '3'])) {
+                return redirect()
+                    ->route('sale.index_parrilla')
+                    ->with('success', 'Venta Parrilla Cargada Exitosamente');
+            }
+
+            // En cualquier otro caso (0 o 1), redirige a sale.index
+            return redirect()
+                ->route('sale.index')
+                ->with('success', 'Cargado exitosamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error cargarInventariocr', ['error' => $e->getMessage(), 'ventaId' => $ventaId]);
-            return redirect()->route('sale.index')->with('error', 'Error: ' . $e->getMessage());
+            Log::error('Error cargarInventariocr', [
+                'error'   => $e->getMessage(),
+                'ventaId' => $ventaId
+            ]);
+
+            if (in_array($sale->tipo, ['2', '3'])) {
+                return redirect()
+                    ->route('sale.index_parrilla')
+                    ->with('error', 'Error: ' . $e->getMessage());
+            }
+
+            return redirect()
+                ->route('sale.index')
+                ->with('error', 'Error: ' . $e->getMessage());
         }
     }
 

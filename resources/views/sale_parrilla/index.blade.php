@@ -13,7 +13,7 @@
 						<a href="{{ route('cargar.inventario.masivo') }}" class="btn btn-primary">Cargar Inventario Masivo</a>
 					</li> -->
 					<li>
-						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-sale" title="Nueva venta por domicilio">Domicilio</a>
+						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-sale" title="Nueva venta parrilla por domicilio">Domicilio</a>
 					</li>
 					<li></li>
 					@php
@@ -65,13 +65,13 @@
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
 						<div class="modal-header bg-secondary">
-							<h4 class="modal-title" style="color: white; font-weight: bold;">CREAR VENTA DOMICILIO </h4>
+							<h4 class="modal-title" style="color: white; font-weight: bold;">CREAR VENTA PARRILLA DOMICILIO </h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body">
-							@include('sale.modal_create')
+							@include('sale_parrilla.modal_create')
 						</div>
 						<div class="modal-footer">
 							<button type="button" id="btnModalClose" class="btn btn-default" data-dismiss="modal">Cancelar</button>

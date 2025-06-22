@@ -6,7 +6,7 @@ import {
 btnAddVentaDomicilio.addEventListener("click", async (e) => {
     e.preventDefault();
     const dataform = new FormData(formCompensadoRes);
-    sendData("/ventasave", dataform, token).then((resp) => {
+    sendData("/ventasave_parrilla", dataform, token).then((resp) => {
         console.log(resp);
         if (resp.status == 1) {
             formCompensadoRes.reset();
@@ -14,7 +14,7 @@ btnAddVentaDomicilio.addEventListener("click", async (e) => {
             successToastMessage(resp.message);
             if (resp.registroId != 0) {
                 //for new register
-                window.location.href = `sale/create/${resp.registroId}`;
+                window.location.href = `sale_parrilla/create/${resp.registroId}`;
             } else {
                 refresh_table();
             }
