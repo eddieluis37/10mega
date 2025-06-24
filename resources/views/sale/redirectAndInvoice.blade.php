@@ -7,13 +7,22 @@
 <body>
     <p>{{ session('success') }}</p>
     <p>Si no se abre la factura automáticamente, por favor haga clic en el siguiente enlace:</p>
-    <a id="facturaLink" href="/sale/showFactura/{{ $ventaId }}" target="_blank">Abrir Factura</a>
+    <a id="facturaLink" href="{{ url('sale/showFactura/'.$ventaId) }}" target="_blank">Abrir Factura</a>
+
     <script>
         window.onload = function() {
-            // Simular clic en el enlace
+            // Abrir la factura en una nueva pestaña
             document.getElementById('facturaLink').click();
-            // Luego redirigir a sale.index
-            window.location.href = "{{ route('sale.index') }}";
+
+            // Calcular la URL de redirección según el tipo de venta
+            let redirectUrl = "{{ $tipoVenta == 2 || $tipoVenta == 3
+                ? route('sale.index_parrilla')
+                : route('sale.index') }}";
+
+            // Redirigir después de un pequeño retardo (para asegurar que abra la factura)
+            setTimeout(function(){
+                window.location.href = redirectUrl;
+            }, 500);
         }
     </script>
 </body>

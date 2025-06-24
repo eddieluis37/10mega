@@ -423,41 +423,41 @@ class saleController extends Controller
             $saleCaja->caja_id = $caja->id;
             $saleCaja->save();
 
-            try {
-                // Actualizar la venta
-                $venta = Sale::find($ventaId);
-                $venta->user_id                  = $request->user()->id;
-                $venta->forma_pago_tarjeta_id    = $forma_pago_tarjeta_id;
-                $venta->forma_pago_otros_id      = $forma_pago_otros_id;
-                $venta->forma_pago_credito_id    = $forma_pago_credito_id;
-                $venta->codigo_pago_tarjeta      = $codigo_pago_tarjeta;
-                $venta->codigo_pago_otros        = $codigo_pago_otros;
-                $venta->codigo_pago_credito      = $codigo_pago_credito;
-                $venta->valor_a_pagar_tarjeta    = $valor_a_pagar_tarjeta;
-                $venta->valor_a_pagar_efectivo   = $valor_a_pagar_efectivo;
-                $venta->valor_a_pagar_otros      = $valor_a_pagar_otros;
-                $venta->valor_a_pagar_credito    = $valor_a_pagar_credito;
-                $venta->valor_pagado             = $valor_pagado;
-                $venta->cambio                   = $cambio;
-                $venta->status                   = $status;
-                $venta->save();
+            $currentDateTime = Carbon::now();
+            $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
 
-                // Llamar al método para cargar el inventario
-                $this->cargarInventariocr($ventaId);
+            // Actualizar la venta
+            $venta = Sale::findOrFail($ventaId);
+            $venta->user_id                  = $request->user()->id;
+            $venta->forma_pago_tarjeta_id    = $forma_pago_tarjeta_id;
+            $venta->forma_pago_otros_id      = $forma_pago_otros_id;
+            $venta->forma_pago_credito_id    = $forma_pago_credito_id;
+            $venta->codigo_pago_tarjeta      = $codigo_pago_tarjeta;
+            $venta->codigo_pago_otros        = $codigo_pago_otros;
+            $venta->codigo_pago_credito      = $codigo_pago_credito;
+            $venta->valor_a_pagar_tarjeta    = $valor_a_pagar_tarjeta;
+            $venta->valor_a_pagar_efectivo   = $valor_a_pagar_efectivo;
+            $venta->valor_a_pagar_otros      = $valor_a_pagar_otros;
+            $venta->valor_a_pagar_credito    = $valor_a_pagar_credito;
+            $venta->valor_pagado             = $valor_pagado;
+            $venta->cambio                   = $cambio;
+            $venta->status                   = $status;
+            $venta->fecha_cierre = $currentDateFormat;
+            $venta->save();
 
-                // Regenerar la sesión si es necesario
-                session()->regenerate();
+            // Llamar al método para cargar el inventario
+            $this->cargarInventariocr($ventaId);
 
-                // Retornar la vista con el script que abre la factura y redirige
-                return view('sale.redirectAndInvoice', ['ventaId' => $ventaId])
-                    ->with('success', 'Guardado correctamente y cargado al inventario.');
-            } catch (\Throwable $th) {
-                // En caso de error al actualizar la venta
-                return redirect()->route('sale.index')
-                    ->with('error', 'Error al actualizar la venta: ' . $th->getMessage());
-            }
+            // Regenerar la sesión si es necesario
+            session()->regenerate();
+
+            // Obtener el campo 'tipo' para la vista
+            $tipoVenta = $venta->tipo;
+
+            // Pasamos tipoVenta para controlar la redirección
+            return view('sale.redirectAndInvoice', compact('ventaId', 'tipoVenta'))
+                ->with('success', 'Guardado correctamente y cargado al inventario.');
         } catch (\Throwable $th) {
-            // En caso de error general en el proceso de pago
             return redirect()->route('sale.index')
                 ->with('error', 'Error al procesar el pago: ' . $th->getMessage());
         }
@@ -1322,7 +1322,7 @@ class saleController extends Controller
                 $venta->domiciliario_id = $request->domiciliario;
                 $venta->subcentrocostos_id = $request->subcentrodecosto;
                 $venta->fecha_venta = $currentDateFormat;
-                $venta->fecha_cierre = $currentDateFormat;
+
                 $venta->total_bruto = 0;
                 $venta->descuentos = 0;
                 $venta->subtotal = 0;
@@ -1569,7 +1569,7 @@ class saleController extends Controller
             $venta->vendedor_id = 1;
 
             $venta->fecha_venta = $currentDateFormat;
-            $venta->fecha_cierre = $currentDateFormat;
+        //    $venta->fecha_cierre = $currentDateFormat;
             $venta->total_bruto = 0;
             $venta->descuentos = 0;
             $venta->subtotal = 0;
@@ -1675,9 +1675,8 @@ class saleController extends Controller
             $venta->subcentrocostos_id = 2;
             $venta->third_id = ($defaultCentro->id == 8) ? 157 : 1;
             $venta->vendedor_id = 1;
-
             $venta->fecha_venta = $currentDateFormat;
-            $venta->fecha_cierre = $currentDateFormat;
+           // $venta->fecha_cierre = $currentDateFormat;
             $venta->total_bruto = 0;
             $venta->descuentos = 0;
             $venta->subtotal = 0;
