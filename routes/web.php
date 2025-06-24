@@ -77,6 +77,7 @@ use App\Http\Controllers\BrandCrudController;
 use App\Http\Controllers\caja\cajasalidaefectivoController;
 use App\Http\Controllers\caja\pdfCierreCajaController;
 use App\Http\Controllers\caja\pdfSalidaefectivoController;
+use App\Http\Controllers\caja\resumenDiarioController;
 use App\Http\Controllers\ComboController;
 use App\Http\Controllers\producto\productoController;
 use App\Http\Controllers\compensado\pdfCompensadoController;
@@ -666,7 +667,7 @@ Route::group(['middleware' => [('auth')]], function () {
 
     // Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
     Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja'])->name('caja.pdfCierre');
-    Route::get('caja/resumenDiario/{id}', [pdfCierreCajaController::class])->name('caja.resumenDiario');
+    Route::get('caja/resumenDiario/{id}', [resumenDiarioController::class, 'resumenDiario'])->name('caja.resumenDiario');
 
 
 

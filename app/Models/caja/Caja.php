@@ -6,6 +6,7 @@ use App\Models\CajaReciboDineroDetail;
 use App\Models\centros\Centrocosto;
 use App\Models\Recibodecaja;
 use App\Models\Sale;
+use App\Models\SaleCaja;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -83,6 +84,15 @@ class Caja extends Model
     public function getNamecajeroAttribute()
     {
         return $this->cajero ? $this->cajero->name : '';
+    }
+
+    /**
+     * Relación a la tabla pivote sale_caja (cada registro indica
+     * que una venta pertenece a esta caja).
+     */
+    public function saleCajas()
+    {
+        return $this->hasMany(SaleCaja::class, 'caja_id', 'id');
     }
 
     /**
