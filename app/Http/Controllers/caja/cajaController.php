@@ -384,78 +384,56 @@ class cajaController extends Controller
             ->join('users as u', 'c.cajero_id', '=', 'u.id')
             ->join('centro_costo as s', 'c.centrocosto_id', '=', 's.id')
             ->select('c.*', 's.name as namecentrocosto', 'u.name as namecajero')
-            /*  ->where('c.status', 1) */
             ->get();
-        //$data = Compensadores::orderBy('id','desc');
-        return Datatables::of($data)->addIndexColumn()
-            ->addColumn('fecha1', function ($data) {
-                $fecha1 = Carbon::parse($data->fecha_hora_inicio);
-                $formattedDate1 = $fecha1->format('M-d. H:i');
-                return $formattedDate1;
+
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('fecha1', function ($row) {
+                return Carbon::parse($row->fecha_hora_inicio)->format('M-d. H:i');
             })
-            ->addColumn('fecha2', function ($data) {
-                $fecha2 = Carbon::parse($data->fecha_hora_cierre);
-                $formattedDate = $fecha2->format('M-d. H:i');
-                return $formattedDate;
+            ->addColumn('fecha2', function ($row) {
+                return Carbon::parse($row->fecha_hora_cierre)->format('M-d. H:i');
             })
-            ->addColumn('inventory', function ($data) {
-                if ($data->estado == 'close') {
-                    $statusInventory = '<span class="badge bg-warning">Cerrado</span>';
+            ->addColumn('inventory', function ($row) {
+                return $row->estado === 'close'
+                    ? '<span class="badge bg-warning">Cerrado</span>'
+                    : '<span class="badge bg-success">Abierto</span>';
+            })
+            ->addColumn('action', function ($row) {
+                // Inicializamos el contenedor
+                $btn = '<div class="text-center">';
+
+                // Botones comunes
+                $btnPdf       = '<a href="' . route('caja.pdfCierre', $row->id) . '" class="btn btn-dark" title="PDF" target="_blank"><i class="far fa-file-pdf"></i></a>';
+                $btnRecibo    = '<a href="' . route('caja.showRecibo', $row->id) . '" class="btn btn-dark" title="Recibo" target="_blank"><i class="fas fa-eye"></i></a>';
+                $btnReporte   = '<button class="btn btn-warning" title="Reporte" onclick="openReport(' . $row->id . ');">RC</button>';
+                $btnResumen   = '<a href="' . route('caja.resumenDiario', $row->id) . '" class="btn btn-danger" title="Resumen" target="_blank"><i class="far fa-file-pdf"></i></a>';
+                $btnApertura  = '<a href="' . route('caja.create', $row->id) . '" class="btn btn-dark" title="Cuadre Caja"><i class="fas fa-money-check-alt"></i></a>';
+
+                if ($row->status == 1) {
+                    // Caja ya cerrada
+                    $btn .= $btnPdf
+                        . $btnRecibo
+                        . $btnReporte
+                        . $btnResumen;
+                } elseif ($row->status === 0) {
+                    // Caja abierta, pendiente de cierre
+                    $btn .= $btnApertura
+                        . $btnPdf
+                        . $btnReporte
+                        . $btnResumen;
                 } else {
-                    $statusInventory = '<span class="badge bg-success">Abierto</span>';
+                    // Otro estado (por ejemplo, status == 2)
+                    $btn .= $btnRecibo
+                        . $btnReporte
+                        . $btnResumen;
                 }
-                return $statusInventory;
-            })
 
-            ->addColumn('action', function ($data) {
-                $currentDateTime = Carbon::now();
+                // Cerramos el contenedor
+                $btn .= '</div>';
 
-                if ($data->status == 1) {
-                    $btn = '
-                         <div class="text-center">   
-                         <a href="caja/pdfCierreCaja/' . $data->id . '" class="btn btn-dark" title="PdfCuadreCajaPendiente" target="_blank">
-                         <i class="far fa-file-pdf"></i>
-                         </a>
-                         <a href="caja/showReciboCaja/' . $data->id . '" class="btn btn-dark" title="RecibodeCajaCerrado" target="_blank">
-                         <i class="fas fa-eye"></i>
-                         </a>		                 
-                        <button class="btn btn-warning" title="ReporteCierre" onclick="openReport(' . $data->id . ');">
-						     RC
-					    </button>                         
-                         </div>
-                         ';
-                } elseif ($data->status == 0) {
-                    $btn = '
-                         <div class="text-center">
-                         <a href="caja/create/' . $data->id . '" class="btn btn-dark" title="CuadreCaja">
-                            <i class="fas fa-money-check-alt"></i>
-                         </a>
-                        
-                         <a href="caja/pdfCierreCaja/' . $data->id . '" class="btn btn-dark" title="PdfCuadreCajaOpen" target="_blank">
-                         <i class="far fa-file-pdf"></i>
-                         </a>                                        
-
-                        <button class="btn btn-warning" title="ReporteCierre" onclick="openReport(' . $data->id . ');">
-						     RC
-					    </button>
-                         </div>
-                         ';
-                    //ESTADO Cerrada
-                } else {
-                    $btn = '
-                         <div class="text-center">
-                         <a href="caja/showReciboCaja/' . $data->id . '" class="btn btn-dark" title="CuadreCajaCerrado" target="_blank">
-                         <i class="far fa-file-pdf"></i>
-                         </a>
-                        <button class="btn btn-warning" title="ReporteCierre" onclick="openReport(' . $data->id . ');">
-						     RC
-					    </button>                       
-                         </div>
-                         ';
-                }
                 return $btn;
             })
-
             ->rawColumns(['fecha1', 'fecha2', 'inventory', 'action'])
             ->make(true);
     }

@@ -660,12 +660,13 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('showcaja', [cajaController::class, 'show'])->name('caja.showcaja');
     Route::get('caja/create/{id}', [cajaController::class, 'create'])->name('caja.create');
     Route::post('caja/create/{id}', [cajaController::class, 'storeCierreCaja'])->name('caja.cierre');
-    Route::get('caja/showReciboCaja/{id}', [cajaController::class, 'showReciboCaja'])->name('caja.showReciboCaja');
+    Route::get('caja/showReciboCaja/{id}', [cajaController::class, 'showReciboCaja'])->name('caja.showRecibo');
 
     Route::get('caja/reportecierre/{id}', [cajaController::class, 'reportecierre'])->name('caja.reportecierre');
 
-    Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
-
+    // Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja']);
+    Route::get('caja/pdfCierreCaja/{id}', [pdfCierreCajaController::class, 'pdfCierreCaja'])->name('caja.pdfCierre');
+    Route::get('caja/resumenDiario/{id}', [pdfCierreCajaController::class])->name('caja.resumenDiario');
 
 
 

@@ -1322,7 +1322,7 @@ class saleController extends Controller
                 $venta->domiciliario_id = $request->domiciliario;
                 $venta->subcentrocostos_id = $request->subcentrodecosto;
                 $venta->fecha_venta = $currentDateFormat;
-                // $venta->fecha_cierre = $dateNextMonday;  // Puedes habilitar si es necesario
+                $venta->fecha_cierre = $currentDateFormat;
                 $venta->total_bruto = 0;
                 $venta->descuentos = 0;
                 $venta->subtotal = 0;
@@ -1928,18 +1928,18 @@ class saleController extends Controller
         foreach ($comps as $c) {
             $cid = $c->component_id;
             $ded = $qty * $c->quantity;
-           // Log::debug("{$ctx} Descontando componente", ['component_id' => $cid, 'qty' => $ded]);
+            // Log::debug("{$ctx} Descontando componente", ['component_id' => $cid, 'qty' => $ded]);
 
             $p = Product::find($cid);
             if ($p && $p->type === 'receta') {
-              //  Log::debug('Sub-receta detectada', ['component_id' => $cid]);
+                //  Log::debug('Sub-receta detectada', ['component_id' => $cid]);
                 $this->descontarComponentes($saleId, $cid, $storeId, $ded, 'SUB-' . $ctx);
                 continue;
             }
 
             $l = $this->buscarLoteMasCercano($cid, $storeId);
             if (!$l) {
-              // Log::error('No lote para componente', compact('cid', 'storeId'));
+                // Log::error('No lote para componente', compact('cid', 'storeId'));
                 continue;
             }
             $this->procesarMovimiento($saleId, $cid, $storeId, $l->id, $ded, null, $ctx);
