@@ -140,7 +140,7 @@ class inventarioController extends Controller
                     'venta'                 => $totalVenta,
                     'notacredito'           => $totalNotaCredito,
                     'notadebito'            => 0,
-                    'venta_real'            => 0,                            
+                    'venta_real'            => $totalVenta - $totalNotaCredito,                            
                     'StockIdeal'            => $inventario->stock_ideal,
                     'stock'                 => $stockFisico,
                     'fisico'                => $inventario->cantidad_diferencia,
