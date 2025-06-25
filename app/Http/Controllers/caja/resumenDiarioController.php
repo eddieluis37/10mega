@@ -31,8 +31,14 @@ class resumenDiarioController extends Controller
         // 2) Extraer las ventas y agrupar por forma de pago
         $ventas     = $caja->sales;
         $sumEfectivo = $ventas->sum('valor_a_pagar_efectivo');
-        $sumQR       = $ventas->where('forma_pago', 'TARJETA')->sum('total');
-        $sumCredito  = $ventas->where('forma_pago', 'CREDITO')->sum('total');
+        $valorCambio         = $ventas->sum('cambio');
+
+           // efectivo neto antes de retiros
+        $valorEfectivo  = $sumEfectivo - $valorCambio;
+
+
+        $sumQR    =   $ventas->sum('valor_a_pagar_tarjeta');
+        $sumCredito  = $ventas->sum('valor_a_pagar_credito');
 
         // 3) Detalle de clientes a crédito
         $creditos = $ventas
@@ -48,8 +54,8 @@ class resumenDiarioController extends Controller
         $totalGastos = $salidas->sum('valor');
 
         // 5) Cálculos finales
-        $totalVenta   = $sumEfectivo + $sumQR + $sumCredito;
-        $totalEfectivoCaja  = $caja->base + $sumEfectivo;
+        $totalVenta   = $valorEfectivo + $sumQR + $sumCredito;
+        $totalEfectivoCaja  = $caja->base + $valorEfectivo;
         $efectivoAEntregar  = $totalEfectivoCaja - $totalGastos;
         $totalPagosConQR    = $sumQR;
 
@@ -60,7 +66,7 @@ class resumenDiarioController extends Controller
         // 7) Renderizar PDF
         $pdf = PDF::loadView('caja.resumenDiario', compact(
             'caja',
-            'sumEfectivo',
+            'valorEfectivo',
             'sumQR',
             'sumCredito',
             'totalVenta',

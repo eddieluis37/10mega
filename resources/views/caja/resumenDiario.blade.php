@@ -66,7 +66,7 @@
         </tr>
         <tr>
             <th>Efectivo</th>
-            <td class="right">${{ number_format($sumEfectivo,0,',','.') }}</td>
+            <td class="right">${{ number_format($valorEfectivo,0,',','.') }}</td>
         </tr>
         <tr>
             <th>QR</th>

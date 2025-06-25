@@ -420,8 +420,7 @@ class cajaController extends Controller
                     // Caja abierta, pendiente de cierre
                     $btn .= $btnApertura
                         . $btnPdf
-                        . $btnReporte
-                        . $btnResumen;
+                        . $btnReporte;
                 } else {
                     // Otro estado (por ejemplo, status == 2)
                     $btn .= $btnRecibo
