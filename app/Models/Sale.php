@@ -6,6 +6,7 @@ use App\Models\caja\Caja;
 use App\Models\centros\Centrocosto;
 use App\Services\TurnoDiarioService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sale extends Model
 {
@@ -66,9 +67,18 @@ class Sale extends Model
         return $this->belongsTo(Centrocosto::class);
     }
 
-    public function third()
+  /*   public function third()
     {
         return $this->belongsTo(Third::class);
+    }
+ */
+
+ /**
+     * El “tercero” (cliente) asociado a esta venta.
+     */
+    public function third(): BelongsTo
+    {
+        return $this->belongsTo(Third::class, 'third_id');
     }
 
 

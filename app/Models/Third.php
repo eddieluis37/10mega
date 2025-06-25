@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Third extends Model
 {
+	protected $table = 'thirds';
+	
 	use HasFactory;
 
 	protected $fillable = ['name', 'type_identification_id', 'identification', 'digito_verificacion', 'office_id', 'agreement_id', 'type_regimen_iva_id', 'direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9', 'direccion10', 'direccion11', 'direccion12', 'direccion13', 'direccion14', 'direccion15', 'province_id', 'celular', 'nombre_contacto', 'status', 'correo', 'porc_descuento', 'cliente', 'proveedor', 'vendedor', 'domiciliario', 'alistador', 'listaprecio_nichoid', 'listaprecio_genericid'];

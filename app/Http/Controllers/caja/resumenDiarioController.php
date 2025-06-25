@@ -19,52 +19,56 @@ class resumenDiarioController extends Controller
 {
     public function resumenDiario($id)
     {
-        // 1) Cargar la caja con sus ventas pivot y salidas
+        // 1) Cargo la caja con las relaciones necesarias:
         $caja = Caja::with([
-            'user',           // quien abrió la caja
-            'cajero',         // quien la cierra
-            'centroCosto',    // centro de costo
-            'sales',          // ventas asociadas (pivot sale_caja)
-            'salidasEfectivo' // gastos / retiros
+            'user',
+            'cajero',
+            'centroCosto',
+            'salidasEfectivo'
         ])->findOrFail($id);
 
-        // 2) Extraer las ventas y agrupar por forma de pago
-        $ventas     = $caja->sales;
+        // 2) Cargo **todas** las ventas de este turno, eager-load de third:
+        $ventas = $caja->sales()
+            ->with('third')                   // trae el cliente
+            ->get();
+
+        // 3) Totales generales:
         $sumEfectivo = $ventas->sum('valor_a_pagar_efectivo');
-        $valorCambio         = $ventas->sum('cambio');
+        $valorCambio = $ventas->sum('cambio');
+        $valorEfectivo = $sumEfectivo - $valorCambio;
+        $sumQR      = $ventas->sum('valor_a_pagar_tarjeta');
+        $sumCredito = $ventas->sum('valor_a_pagar_credito');
 
-           // efectivo neto antes de retiros
-        $valorEfectivo  = $sumEfectivo - $valorCambio;
+        // 4) Ventas a crédito: filtro por monto > 0
+        $ventasCredito = $ventas
+            ->filter(fn($v) => $v->valor_a_pagar_credito > 0)
+            ->values();  // reindexa 0,1,2…
 
+        // 5) Monto total de créditos
+        $totalCreditos = $ventasCredito->sum('valor_a_pagar_credito');
 
-        $sumQR    =   $ventas->sum('valor_a_pagar_tarjeta');
-        $sumCredito  = $ventas->sum('valor_a_pagar_credito');
+        // 6) Preparo el array para la vista
+        $creditos = $ventasCredito->map(fn($v) => [
+            'cliente' => $v->third?->name ?? '—',
+            'monto'   => $v->valor_a_pagar_credito,
+        ]);
 
-        // 3) Detalle de clientes a crédito
-        $creditos = $ventas
-            ->where('forma_pago', 'CREDITO')
-            ->map(fn($v) => [
-                'cliente' => $v->cliente->name,
-                'monto'   => $v->total
-            ]);
-        $totalCreditos = $sumCredito;
-
-        // 4) Salidas de dinero (gastos/retiros)
+        // 7) Salidas
         $salidas     = $caja->salidasEfectivo;
         $totalGastos = $salidas->sum('valor');
 
-        // 5) Cálculos finales
-        $totalVenta   = $valorEfectivo + $sumQR + $sumCredito;
+        // 8) Cálculos finales
+        $totalVenta         = $valorEfectivo + $sumQR + $sumCredito;
         $totalEfectivoCaja  = $caja->base + $valorEfectivo;
         $efectivoAEntregar  = $totalEfectivoCaja - $totalGastos;
         $totalPagosConQR    = $sumQR;
 
-        // 6) Formato de fecha en español
+        // 9) Fecha en español
         Carbon::setLocale('es');
         $fechaCierre = $caja->fecha_hora_cierre->isoFormat('dddd, D [de] MMMM [de] YYYY');
 
-        // 7) Renderizar PDF
-        $pdf = PDF::loadView('caja.resumenDiario', compact(
+        // 10) Renderizo PDF
+        return PDF::loadView('caja.resumenDiario', compact(
             'caja',
             'valorEfectivo',
             'sumQR',
@@ -78,8 +82,6 @@ class resumenDiarioController extends Controller
             'efectivoAEntregar',
             'totalPagosConQR',
             'fechaCierre'
-        ));
-
-        return $pdf->stream("resumen_caja_{$caja->id}.pdf");
+        ))->stream("resumen_caja_{$caja->id}.pdf");
     }
 }

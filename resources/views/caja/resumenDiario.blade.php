@@ -82,24 +82,33 @@
             <td class="small">= EFECTIVO + QR + CRÉDITO</td>
         </tr>
 
-        {{-- 2. Clientes a crédito --}}
-        <tr class="spacer">
-            <td colspan="3"></td>
+        {{-- Clientes a Crédito --}}
+        <tr>
+            <td colspan="3" style="height:8px;"></td>
         </tr>
         <tr>
             <th colspan="2">Clientes a Crédito</th>
         </tr>
-        @foreach($creditos as $c)
+
+        @forelse($creditos as $c)
         <tr>
             <td>{{ $c['cliente'] }}</td>
-            <td class="right">${{ number_format($c['monto'],0,',','.') }}</td>
+            <td class="right">${{ number_format($c['monto'], 0, ',', '.') }}</td>
         </tr>
-        @endforeach
+        @empty
+        <tr>
+            <td colspan="2" style="text-align:center; color:#666;">
+                No hay ventas a crédito en este turno
+            </td>
+        </tr>
+        @endforelse
+
         <tr class="border-top">
-            <th>Total Créditos</th>
-            <td class="right bold">${{ number_format($totalCreditos,0,',','.') }}</td>
+            <th>TOTAL CRÉDITOS</th>
+            <td class="right bold">${{ number_format($totalCreditos, 0, ',', '.') }}</td>
             <td class="small">= SUMA Créditos</td>
         </tr>
+
 
         {{-- 3. Resumen de caja --}}
         <tr class="spacer">
