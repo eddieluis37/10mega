@@ -119,10 +119,42 @@
             <td class="right">${{ number_format($caja->base,0,',','.') }}</td>
         </tr>
         <tr>
+            <th>Efectivo Real</th>
+            <td class="right">${{ number_format($valorEfectivo,0,',','.') }}</td>
+        </tr>
+        <tr>
             <th>Total Efectivo en Caja</th>
             <td class="right">${{ number_format($totalEfectivoCaja,0,',','.') }}</td>
             <td class="small">= BASE + EFECTIVO</td>
         </tr>
+
+        {{-- Recibos de caja --}}
+        <tr>
+            <td colspan="3" style="height:8px;"></td>
+        </tr>
+        <tr>
+            <th colspan="2">Resumen recibos de caja</th>
+        </tr>
+
+        @forelse($creditos as $c)
+        <tr>
+          
+        </tr>
+        @empty
+        <tr>
+            <td colspan="2" style="text-align:center; color:#666;">
+                No hay ventas a crédito en este turno
+            </td>
+        </tr>
+        @endforelse
+
+        <tr class="border-top">
+            <th>TOTAL CRÉDITOS</th>
+            <td class="right bold">${{ number_format($totalCreditos, 0, ',', '.') }}</td>
+            <td class="small">= SUMA Créditos</td>
+        </tr>
+
+
 
         {{-- 4. Salidas de dinero --}}
         <tr class="spacer">
