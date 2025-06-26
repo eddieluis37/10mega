@@ -4,6 +4,7 @@ namespace App\Http\Controllers\caja;
 
 use App\Http\Controllers\Controller;
 use App\Models\caja\Caja;
+use App\Models\Recibodecaja;
 use App\Models\compensado\Compensadores;
 use App\Models\Sale;
 use App\Models\SaleDetail;
@@ -53,6 +54,41 @@ class resumenDiarioController extends Controller
             'monto'   => $v->valor_a_pagar_credito,
         ]);
 
+        // 1) Cargo la caja
+        $caja = Caja::findOrFail($id);
+
+        // … tus cálculos de ventas, créditos, etc. …
+
+        // 5) Recibos de caja para esta caja, filtrados por user_id y fecha_elaboracion = hoy
+        $hoy = Carbon::today()->toDateString();
+
+        $recibos = Recibodecaja::with([
+            'user',
+            'third',
+            'details.paymentMethod',
+            'details.cuentaPorCobrar.sale.third'
+        ])
+            ->where('user_id', $caja->user_id)         // 1) solo del mismo user que abrió la caja
+            ->whereDate('fecha_elaboracion', $hoy)     // 2) solo los recibos de hoy
+            ->get()
+            ->map(function ($r) {
+                $r->vr_total_pago   = $r->details->sum('vr_pago');
+                $r->nvo_total_saldo = $r->details->sum('nvo_saldo');
+                return $r;
+            });
+
+        $totalRecibos = $recibos->sum('vr_total_pago');
+
+        // 3) **Agrupación de pagos POR FORMA** (across all recibos)
+        $pagosPorForma = $recibos
+            ->flatMap(fn($r) => $r->details)
+            ->groupBy(fn($det) => $det->paymentMethod?->nombre ?? 'Otro')
+            ->map(fn($group, $forma) => [
+                'forma' => $forma,
+                'total' => $group->sum('vr_pago')
+            ])
+            ->values();
+
         // 7) Salidas
         $salidas     = $caja->salidasEfectivo;
         $totalGastos = $salidas->sum('valor');
@@ -76,6 +112,9 @@ class resumenDiarioController extends Controller
             'totalVenta',
             'creditos',
             'totalCreditos',
+            'recibos',
+            'totalRecibos',
+            'pagosPorForma',
             'salidas',
             'totalGastos',
             'totalEfectivoCaja',

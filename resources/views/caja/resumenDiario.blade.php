@@ -128,32 +128,60 @@
             <td class="small">= BASE + EFECTIVO</td>
         </tr>
 
-        {{-- Recibos de caja --}}
+        {{-- Bloque: Recibos de Caja --}}
         <tr>
             <td colspan="3" style="height:8px;"></td>
         </tr>
         <tr>
-            <th colspan="2">Resumen recibos de caja</th>
+            <th colspan="2">Resumen Recibos de Caja</th>
         </tr>
 
-        @forelse($creditos as $c)
+        @forelse($recibos as $r)
         <tr>
-          
+            <td>{{ $r->third?->name ?? $r->user->name }}</td>
+            <td class="right">
+                $ {{ number_format($r->vr_total_pago, 0, ',', '.') }}
+            </td>
         </tr>
         @empty
         <tr>
             <td colspan="2" style="text-align:center; color:#666;">
-                No hay ventas a crédito en este turno
+                No hay recibos de caja en este turno
             </td>
         </tr>
         @endforelse
 
-        <tr class="border-top">
-            <th>TOTAL CRÉDITOS</th>
-            <td class="right bold">${{ number_format($totalCreditos, 0, ',', '.') }}</td>
-            <td class="small">= SUMA Créditos</td>
+        {{-- --- Pagos recibidos POR FORMA DE PAGO --- --}}
+        <tr>
+            <td colspan="3" style="height:8px;"></td>
+        </tr>
+        <tr>
+            <th colspan="2">Pagos recibidos por forma</th>
         </tr>
 
+        @forelse($pagosPorForma as $p)
+        <tr>
+            <td>{{ $p['forma'] }}</td>
+            <td class="right">
+                $ {{ number_format($p['total'], 0, ',', '.') }}
+            </td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="2" style="text-align:center; color:#666;">
+                No hay pagos registrados
+            </td>
+        </tr>
+        @endforelse
+
+        {{-- Luego tu fila de TOTAL RECIBOS --}}
+        <tr class="border-top">
+            <th>TOTAL RECAUDOS RECIBIDOS</th>
+            <td class="right bold">
+                $ {{ number_format($totalRecibos, 0, ',', '.') }}
+            </td>
+            <td class="small">= SUMA Pagos Recibidos</td>
+        </tr>
 
 
         {{-- 4. Salidas de dinero --}}
