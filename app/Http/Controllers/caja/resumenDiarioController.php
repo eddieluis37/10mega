@@ -69,7 +69,7 @@ class resumenDiarioController extends Controller
             'details.cuentaPorCobrar.sale.third'
         ])
             ->where('user_id', $caja->user_id)         // 1) solo del mismo user que abrió la caja
-            ->whereDate('fecha_elaboracion', $hoy)     // 2) solo los recibos de hoy
+            ->whereDate('fecha_elaboracion', $caja->fecha_hora_inicio)     // 2) solo los recibos de hoy
             ->get()
             ->map(function ($r) {
                 $r->vr_total_pago   = $r->details->sum('vr_pago');
