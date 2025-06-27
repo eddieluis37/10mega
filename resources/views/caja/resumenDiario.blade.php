@@ -71,9 +71,10 @@
         <table cellpadding="0" cellspacing="0" width="100%">
             <tr>
                 <td class="text-center">
-                    <span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">RESUMEN CIERRE DE CAJA</span>
-
+                    <span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">RESUMEN CIERRE DE CAJA</span>                  
                     <img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
+                    <span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">{{$caja->centroCosto->name}}</span>
+                    <span style="font-size: 13px; font-weight: bold; display: block; margin: 0;">Caja: {{$caja->cajero->name}}</span>
                 </td>
             </tr>
             <tr>
