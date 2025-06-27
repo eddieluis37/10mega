@@ -91,7 +91,17 @@ class resumenDiarioController extends Controller
 
         // 7) Salidas
         $salidas     = $caja->salidasEfectivo;
-        $totalGastos = $salidas->sum('valor');
+        $totalGastos = $salidas->sum('vr_efectivo');
+
+        // 1) Aplanar todos los detalles de todos los recibos
+        $allDetails = $recibos->flatMap(fn($r) => $r->details);
+
+        // 2) Filtrar solo los que sean EFECTIVO
+        $detallesEfectivo = $allDetails
+            ->filter(fn($det) => $det->paymentMethod?->nombre === 'EFECTIVO');
+
+        // 3) Sumar vr_pago de esos detalles
+        $totalRecaudoPagoEfectivo = $detallesEfectivo->sum('vr_pago');
 
         // 8) Cálculos finales
         $totalVenta         = $valorEfectivo + $sumQR + $sumCredito;
@@ -114,6 +124,7 @@ class resumenDiarioController extends Controller
             'totalCreditos',
             'recibos',
             'totalRecibos',
+            'totalRecaudoPagoEfectivo',
             'pagosPorForma',
             'salidas',
             'totalGastos',
