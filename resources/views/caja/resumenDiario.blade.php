@@ -3,7 +3,21 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="application/pdf">
+
     <title>Resumen Cierre Diario</title>
+
+    <!-- cargar a través de la url del sistema -->
+    <!--
+		<link rel="stylesheet" href="{{ asset('css/custom_pdf.css') }}">
+		<link rel="stylesheet" href="{{ asset('css/custom_page.css') }}">
+	-->
+    <!-- ruta física relativa OS -->
+    <link rel="stylesheet" href="{{ public_path('css/pos_custom_pdf.css') }}">
+    <link rel="stylesheet" href="{{ public_path('css/pos_custom_page.css') }}">
+
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,6 +67,35 @@
 
 <body>
 
+    <section class="" style="top: 0px;">
+        <table cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+                <td class="text-center">
+                    <span style="font-size: 17px; font-weight: bold; display: block; margin: 0;">RESUMEN CIERRE DE CAJA</span>
+
+                    <img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
+                </td>
+            </tr>
+            <tr>
+
+            </tr>
+            <tr>
+                <td>
+                    <span style="font-size: 13px; font-weight: bold; display: block; margin-top: 10;">Turno: {{$caja->id}}</span>
+                </td>
+            </tr>
+            <tr>
+                <td width="100%" class="text-left text-company" style="vertical-align: top; padding-top: 7px">
+                    <span style="font-size: 11px; font-weight: bold; display: block; margin: 2;">Fecha y hora:<strong> {{\Carbon\Carbon::now()->format('Y-m-d H:i')}}</strong></span>
+                    <span style="font-size: 11px; font-weight: bold; display: block; margin: 2;"> Actualización: <strong>{{ \Carbon\Carbon::parse($caja->updated_at)->format('Y-m-d H:i') }}</strong></span>
+
+                    </span>
+
+                </td>
+            </tr>
+        </table>
+    </section>
+
     <h2 style="text-align:center; margin-bottom:4px;">
         RESUMEN CIERRE DIARIO<br>
         {{ strtoupper($fechaCierre) }}
@@ -79,7 +122,7 @@
         <tr class="border-top">
             <th>Total Venta</th>
             <td class="right bold">${{ number_format($totalVenta,0,',','.') }}</td>
-           <!--  <td class="small">= EFECTIVO + QR + CRÉDITO</td> -->
+            <!--  <td class="small">= EFECTIVO + QR + CRÉDITO</td> -->
         </tr>
 
         {{-- Clientes a Crédito --}}
@@ -106,7 +149,7 @@
         <tr class="border-top">
             <th>TOTAL CRÉDITOS</th>
             <td class="right bold">${{ number_format($totalCreditos, 0, ',', '.') }}</td>
-         <!--    <td class="small">= SUMA Créditos</td> -->
+            <!--    <td class="small">= SUMA Créditos</td> -->
         </tr>
 
 
@@ -125,7 +168,7 @@
         <tr>
             <th>Total Efectivo en Caja</th>
             <td class="right">${{ number_format($totalEfectivoCaja,0,',','.') }}</td>
-           <!--  <td class="small">= BASE + EFECTIVO</td> -->
+            <!--  <td class="small">= BASE + EFECTIVO</td> -->
         </tr>
 
         {{-- Bloque: Recibos de Caja --}}
@@ -180,7 +223,7 @@
             <td class="right bold">
                 $ {{ number_format($totalRecibos, 0, ',', '.') }}
             </td>
-           <!--  <td class="small">= SUMA Pagos Recibidos</td> -->
+            <!--  <td class="small">= SUMA Pagos Recibidos</td> -->
         </tr>
 
 
@@ -217,7 +260,7 @@
                 $ {{ number_format($totalRecaudoPagoEfectivo, 0, ',', '.') }}
             </td>
         </tr>
-         <tr>
+        <tr>
             <th>Total Salida Dinero</th>
             <td class="right bold">
                 $ {{ number_format($totalGastos, 0, ',', '.') }}
@@ -231,15 +274,15 @@
         <tr>
             <th>EFECTIVO A ENTREGAR</th>
             <td class="right bold">${{ number_format($efectivoAEntregar,0,',','.') }}</td>
-           <!--  <td class="small">= TOTAL EN CAJA – GASTOS</td> -->
+            <!--  <td class="small">= TOTAL EN CAJA – GASTOS</td> -->
         </tr>
         <tr>
             <th>TOTAL PAGOS CON CODIGO QR</th>
-            <td class="right">${{ number_format($totalPagosConQR,0,',','.') }}</td>           
+            <td class="right">${{ number_format($totalPagosConQR,0,',','.') }}</td>
         </tr>
         <tr>
             <th>TOTAL CREDITOS DEL DIA</th>
-            <td class="right">${{ number_format($sumCredito,0,',','.') }}</td>          
+            <td class="right">${{ number_format($sumCredito,0,',','.') }}</td>
         </tr>
 
     </table>
