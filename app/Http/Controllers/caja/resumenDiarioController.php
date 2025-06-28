@@ -106,7 +106,7 @@ class resumenDiarioController extends Controller
         // 8) Cálculos finales
         $totalVenta         = $valorEfectivo + $sumQR + $sumCredito;
         $totalEfectivoCaja  = $caja->base + $valorEfectivo;
-        $efectivoAEntregar  = $totalEfectivoCaja - $totalGastos;
+        $efectivoAEntregar  = ($valorEfectivo  + $totalRecaudoPagoEfectivo) - $totalGastos;
         $totalPagosConQR    = $sumQR;
 
         // 9) Fecha en español

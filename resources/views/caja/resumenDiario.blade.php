@@ -97,10 +97,10 @@
         </table>
     </section>
 
-    <h2 style="text-align:center; margin-bottom:4px;">
-        RESUMEN CIERRE DIARIO<br>
+    <h3 style="text-align:center; margin-bottom:4px;">
+      
         {{ strtoupper($fechaCierre) }}
-    </h2>
+    </h3>
 
     <table>
 
