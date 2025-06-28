@@ -227,7 +227,6 @@
             <!--  <td class="small">= SUMA Pagos Recibidos</td> -->
         </tr>
 
-
         {{-- 4. Salidas de dinero --}}
         <tr class="spacer">
             <td colspan="3"></td>
@@ -279,7 +278,7 @@
         </tr>
         <tr>
             <th>TOTAL PAGOS CON CODIGO QR</th>
-            <td class="right">${{ number_format($totalPagosConQR,0,',','.') }}</td>
+            <td class="right">${{ number_format($totalRecaudoPagoElectronicos,0,',','.') }}</td>
         </tr>
         <tr>
             <th>TOTAL CREDITOS DEL DIA</th>

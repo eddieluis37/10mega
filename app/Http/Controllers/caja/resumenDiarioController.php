@@ -96,18 +96,31 @@ class resumenDiarioController extends Controller
         // 1) Aplanar todos los detalles de todos los recibos
         $allDetails = $recibos->flatMap(fn($r) => $r->details);
 
-        // 2) Filtrar solo los que sean EFECTIVO
+        // 2a) Filtrar solo los detalles cuyo método de pago sea EFECTIVO
         $detallesEfectivo = $allDetails
-            ->filter(fn($det) => $det->paymentMethod?->nombre === 'EFECTIVO');
+            ->filter(
+                fn($det) =>
+                strcasecmp($det->paymentMethod?->nombre, 'EFECTIVO') === 0
+            );
 
-        // 3) Sumar vr_pago de esos detalles
+        // 3a) Sumar vr_pago de esos detalles EFECTIVO
         $totalRecaudoPagoEfectivo = $detallesEfectivo->sum('vr_pago');
 
+        // 2b) Filtrar solo los detalles cuyo método de pago sea TARJETA (o cualquier otro electrónico)
+        $detallesElectronicos = $allDetails
+            ->filter(
+                fn($det) =>
+                strcasecmp($det->paymentMethod?->tipoformapago, 'TARJETA') === 0
+            );
+
+        // 3b) Sumar vr_pago de esos detalles ELECTRÓNICOS
+        $recaudoPagoElectronicos = $detallesElectronicos->sum('vr_pago');
+       
         // 8) Cálculos finales
         $totalVenta         = $valorEfectivo + $sumQR + $sumCredito;
         $totalEfectivoCaja  = $caja->base + $valorEfectivo;
         $efectivoAEntregar  = ($valorEfectivo  + $totalRecaudoPagoEfectivo) - $totalGastos;
-        $totalPagosConQR    = $sumQR;
+        $totalRecaudoPagoElectronicos = $sumQR + $recaudoPagoElectronicos;
 
         // 9) Fecha en español
         Carbon::setLocale('es');
@@ -130,7 +143,7 @@ class resumenDiarioController extends Controller
             'totalGastos',
             'totalEfectivoCaja',
             'efectivoAEntregar',
-            'totalPagosConQR',
+            'totalRecaudoPagoElectronicos',
             'fechaCierre'
         ))->stream("resumen_caja_{$caja->id}.pdf");
     }
