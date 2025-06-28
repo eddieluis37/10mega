@@ -110,19 +110,19 @@
         </tr>
         <tr>
             <th>Efectivo</th>
-            <td class="right">${{ number_format($valorEfectivo,0,',','.') }}</td>
+            <td class="right">{{ number_format($valorEfectivo,0,',','.') }}</td>
         </tr>
         <tr>
             <th>QR</th>
-            <td class="right">${{ number_format($sumQR,0,',','.') }}</td>
+            <td class="right">{{ number_format($sumQR,0,',','.') }}</td>
         </tr>
         <tr>
             <th>Crédito</th>
-            <td class="right">${{ number_format($sumCredito,0,',','.') }}</td>
+            <td class="right">{{ number_format($sumCredito,0,',','.') }}</td>
         </tr>
         <tr class="border-top">
             <th>Total Venta</th>
-            <td class="right bold">${{ number_format($totalVenta,0,',','.') }}</td>
+            <td class="right bold">{{ number_format($totalVenta,0,',','.') }}</td>
             <!--  <td class="small">= EFECTIVO + QR + CRÉDITO</td> -->
         </tr>
 
@@ -137,7 +137,7 @@
         @forelse($creditos as $c)
         <tr>
             <td>{{ $c['cliente'] }}</td>
-            <td class="right">${{ number_format($c['monto'], 0, ',', '.') }}</td>
+            <td class="right">{{ number_format($c['monto'], 0, ',', '.') }}</td>
         </tr>
         @empty
         <tr>
@@ -149,7 +149,7 @@
 
         <tr class="border-top">
             <th>TOTAL CRÉDITOS</th>
-            <td class="right bold">${{ number_format($totalCreditos, 0, ',', '.') }}</td>
+            <td class="right bold">{{ number_format($totalCreditos, 0, ',', '.') }}</td>
             <!--    <td class="small">= SUMA Créditos</td> -->
         </tr>
 
@@ -160,15 +160,15 @@
         </tr>
         <tr>
             <th>Base Inicial</th>
-            <td class="right">${{ number_format($caja->base,0,',','.') }}</td>
+            <td class="right">{{ number_format($caja->base,0,',','.') }}</td>
         </tr>
         <tr>
             <th>Efectivo Real</th>
-            <td class="right">${{ number_format($valorEfectivo,0,',','.') }}</td>
+            <td class="right">{{ number_format($valorEfectivo,0,',','.') }}</td>
         </tr>
         <tr>
             <th>Total Efectivo en Caja</th>
-            <td class="right">${{ number_format($totalEfectivoCaja,0,',','.') }}</td>
+            <td class="right">{{ number_format($totalEfectivoCaja,0,',','.') }}</td>
             <!--  <td class="small">= BASE + EFECTIVO</td> -->
         </tr>
 
@@ -184,7 +184,7 @@
         <tr>
             <td>{{ $r->third?->name ?? $r->user->name }}</td>
             <td class="right">
-                $ {{ number_format($r->vr_total_pago, 0, ',', '.') }}
+                 {{ number_format($r->vr_total_pago, 0, ',', '.') }}
             </td>
         </tr>
         @empty
@@ -207,7 +207,7 @@
         <tr>
             <td>{{ $p['forma'] }}</td>
             <td class="right">
-                $ {{ number_format($p['total'], 0, ',', '.') }}
+                 {{ number_format($p['total'], 0, ',', '.') }}
             </td>
         </tr>
         @empty
@@ -222,7 +222,7 @@
         <tr class="border-top">
             <th>TOTAL RECAUDOS RECIBIDOS</th>
             <td class="right bold">
-                $ {{ number_format($totalRecibos, 0, ',', '.') }}
+                 {{ number_format($totalRecibos, 0, ',', '.') }}
             </td>
             <!--  <td class="small">= SUMA Pagos Recibidos</td> -->
         </tr>
@@ -237,12 +237,12 @@
         @foreach($salidas as $g)
         <tr>
             <td>{{ $g->concepto }}</td>
-            <td class="right">${{ number_format($g->vr_efectivo,0,',','.') }}</td>
+            <td class="right">{{ number_format($g->vr_efectivo,0,',','.') }}</td>
         </tr>
         @endforeach
         <tr class="border-top">
             <th>TOTAL GASTOS</th>
-            <td class="right bold">${{ number_format($totalGastos,0,',','.') }}</td>
+            <td class="right bold">{{ number_format($totalGastos,0,',','.') }}</td>
             <!-- <td class="small">= SUMA Gastos</td> -->
         </tr>
 
@@ -252,18 +252,18 @@
 
         <tr>
             <th>Total Efectivo</th>
-            <td class="right">${{ number_format($valorEfectivo,0,',','.') }}</td>
+            <td class="right">{{ number_format($valorEfectivo,0,',','.') }}</td>
         </tr>
         <tr>
             <th>Total Recaudo Efectivo</th>
             <td class="right bold">
-                $ {{ number_format($totalRecaudoPagoEfectivo, 0, ',', '.') }}
+                 {{ number_format($totalRecaudoPagoEfectivo, 0, ',', '.') }}
             </td>
         </tr>
         <tr>
             <th>Total Salida Dinero</th>
             <td class="right bold">
-                $ {{ number_format($totalGastos, 0, ',', '.') }}
+                 {{ number_format($totalGastos, 0, ',', '.') }}
             </td>
         </tr>
 
@@ -273,16 +273,16 @@
         </tr>
         <tr>
             <th>EFECTIVO A ENTREGAR</th>
-            <td class="right bold">${{ number_format($efectivoAEntregar,0,',','.') }}</td>
+            <td class="right bold">{{ number_format($efectivoAEntregar,0,',','.') }}</td>
             <!--  <td class="small">= TOTAL EN CAJA – GASTOS</td> -->
         </tr>
         <tr>
             <th>TOTAL PAGOS CON CODIGO QR</th>
-            <td class="right">${{ number_format($totalRecaudoPagoElectronicos,0,',','.') }}</td>
+            <td class="right">{{ number_format($totalRecaudoPagoElectronicos,0,',','.') }}</td>
         </tr>
         <tr>
             <th>TOTAL CREDITOS DEL DIA</th>
-            <td class="right">${{ number_format($sumCredito,0,',','.') }}</td>
+            <td class="right">{{ number_format($sumCredito,0,',','.') }}</td>
         </tr>
 
     </table>
