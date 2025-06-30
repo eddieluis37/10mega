@@ -110,7 +110,7 @@ class resumenDiarioController extends Controller
         $detallesElectronicos = $allDetails
             ->filter(
                 fn($det) =>
-                strcasecmp($det->paymentMethod?->tipoformapago, 'TARJETA') === 0
+                strcasecmp($det->paymentMethod?->nombre, 'CODIGO QR') === 0
             );
 
         // 3b) Sumar vr_pago de esos detalles ELECTRÓNICOS
