@@ -186,6 +186,16 @@ class saleautoservicioController extends Controller
                     <i class="fas fa-receipt"></i>
                  </a>';
                 }
+                
+                // Si el campo tipo es '5', se muestran los botones de Despacho y Remisión
+                if ($data->tipo == '5') {
+                    $btn .= '<a href="sale/showDespacho/' . $data->id . '" class="btn btn-warning" title="Ver Despacho" target="_blank">
+                                D
+                             </a>';
+                    $btn .= '<a href="sale/showRemision/' . $data->id . '" class="btn btn-success" title="Ver Remisión" target="_blank">
+                                R
+                             </a>';
+                }
 
                 // Botón para ver la factura (siempre visible)
                 $btn .= '<a href="sale/showFactura/' . $data->id . '" class="btn btn-dark" title="Ver Factura" target="_blank">
