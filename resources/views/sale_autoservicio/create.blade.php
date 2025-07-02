@@ -11,11 +11,11 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b> Ventas parrilla</b>
+					<b> Ventas Autoservicio</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<li>
-						<a href="javascript:void(0)" onclick="window.location.href = '../../sales_parrilla'" class="tabmenu bg-dark" data-toggle="modal" data-target="" title="Regresa al listado ventas parrilla">Volver</a>
+						<a href="javascript:void(0)" onclick="window.location.href = '../../sales_autoservicio'" class="tabmenu bg-dark" data-toggle="modal" data-target="" title="Regresa al listado ventas autoservicio">Volver</a>
 					</li>
 				</ul>
 			</div>
@@ -38,7 +38,7 @@
 										<label>Bodega</label>
 										<div>
 											<select class="form-control form-control-sm" name="tipobodega" id="tipobodega" required="">
-											 	<option value="PARRILLA">PARRILLA</option>											
+											 	<option value="AUTOSERVICIO">AUTOSERVICIO</option>											
 											</select>
 											<span class="text-danger error-message"></span>
 										</div>
@@ -334,5 +334,5 @@
 
 @endsection
 @section('script')
-<script src="{{asset('rogercode/js/sale/rogercode-create.js')}}" type="module"></script>
+<script src="{{asset('rogercode/js/sale_autoservicio/rogercode-create.js')}}" type="module"></script>
 @endsection

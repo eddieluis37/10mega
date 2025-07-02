@@ -6,14 +6,14 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b>Ventas Parrilla</b>
+					<b>Ventas Autoservicio</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<!-- <li>
 						<a href="{{ route('cargar.inventario.masivo') }}" class="btn btn-primary">Cargar Inventario Masivo</a>
 					</li> -->
 					<li>
-						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-sale" title="Nueva venta parrilla por domicilio">Domicilio</a>
+						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-sale" title="Nueva venta autoservicio por domicilio">Domicilio</a>
 					</li>
 					<li></li>
 					@php
@@ -26,8 +26,8 @@
 					<li>
 						<a href="javascript:void(0)"
 							class="tabmenu bg-dark ml-2"
-							id="storeParrillaMostradorBtn"
-							title="Nueva venta parrilla por mostrador">
+							id="storeAutoservicioMostradorBtn"
+							title="Nueva venta autoservicio por mostrador">
 							POS
 						</a>
 					</li>
@@ -65,13 +65,13 @@
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
 						<div class="modal-header bg-secondary">
-							<h4 class="modal-title" style="color: white; font-weight: bold;">CREAR VENTA PARRILLA DOMICILIO </h4>
+							<h4 class="modal-title" style="color: white; font-weight: bold;">CREAR VENTA AUTOSERVICIO DOMICILIO </h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body">
-							@include('sale_parrilla.modal_create')
+							@include('sale_autoservicio.modal_create')
 						</div>
 						<div class="modal-footer">
 							<button type="button" id="btnModalClose" class="btn btn-default" data-dismiss="modal">Cancelar</button>
@@ -88,6 +88,6 @@
 </div>
 @endsection
 @section('script')
-<script src="{{asset('rogercode/js/sale_parrilla/rogercode-ventas-index.js')}}"></script>
-<script src="{{asset('rogercode/js/sale_parrilla/rogercode-create-update.js')}}" type="module"></script>
+<script src="{{asset('rogercode/js/sale_autoservicio/rogercode-ventas-index.js')}}"></script>
+<script src="{{asset('rogercode/js/sale_autoservicio/rogercode-create-update.js')}}" type="module"></script>
 @endsection

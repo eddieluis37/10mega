@@ -5,6 +5,21 @@
     <title>Redireccionando...</title>
 </head>
 <body>
+    @php
+        switch ($tipoVenta) {
+            case 2:
+            case 3:
+                $redirectUrl = route('sale.index_parrilla');
+                break;
+            case 4:
+            case 5:
+                $redirectUrl = route('sale.index_autoservicio');
+                break;
+            default:
+                $redirectUrl = route('sale.index');
+        }
+    @endphp
+
     <p>{{ session('success') }}</p>
     <p>Si no se abre la factura automáticamente, por favor haga clic en el siguiente enlace:</p>
     <a id="facturaLink" href="{{ url('sale/showFactura/'.$ventaId) }}" target="_blank">Abrir Factura</a>
@@ -14,14 +29,9 @@
             // Abrir la factura en una nueva pestaña
             document.getElementById('facturaLink').click();
 
-            // Calcular la URL de redirección según el tipo de venta
-            let redirectUrl = "{{ $tipoVenta == 2 || $tipoVenta == 3
-                ? route('sale.index_parrilla')
-                : route('sale.index') }}";
-
-            // Redirigir después de un pequeño retardo (para asegurar que abra la factura)
+            // Redirigir tras un pequeño retardo (para asegurar que abra la factura)
             setTimeout(function(){
-                window.location.href = redirectUrl;
+                window.location.href = "{{ $redirectUrl }}";
             }, 500);
         }
     </script>

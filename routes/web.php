@@ -128,6 +128,7 @@ use App\Http\Controllers\ReporteCierreCajaController;
 use App\Http\Controllers\reportes\reporteajusteinventariosController;
 use App\Http\Controllers\RestaurantOrderController;
 use App\Http\Controllers\sale\exportComandaController;
+use App\Http\Controllers\sale\saleautoservicioController;
 use App\Http\Controllers\transfer\exportTransferController;
 
 
@@ -432,23 +433,23 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::post('ventasave', [saleController::class, 'store'])->name('sale.save');
     Route::get('showlistVentas', [saleController::class, 'show'])->name('sale.showlistVentas');
     Route::post('store-venta-mostrador', [saleController::class, 'storeVentaMostrador'])->name('sale.storeVentaMostrador');
-        
+
     Route::post('salesavedetail', [saleController::class, 'savedetail'])->name('sale.savedetail');
     Route::post('saleById', [saleController::class, 'editCompensado'])->name('sale.editCompensado');
     Route::post('ventadown', [saleController::class, 'destroy'])->name('sale.down');
     Route::post('/destroyVenta', [saleController::class, 'destroyVenta'])->name('sale.destroyVenta');
 
     Route::get('sale/create/{id}', [saleController::class, 'create'])->name('sale.create');
-    
+
     Route::get('/sa-obtener-precios-producto', [saleController::class, 'SaObtenerPreciosProducto'])->name('sale.sa-obtener-precios-producto');
 
     Route::get('sale/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
     Route::post('sale/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
-  
+
     Route::get('sale/showFactura/{id}', [exportFacturaController::class, 'showFactura'])->name('sale.showFactura');
     Route::get('sale/showDespacho/{id}', [exportDespachoController::class, 'showDespacho'])->name('sale.showDespacho');
     Route::get('sale/showRemision/{id}', [exportRemisionController::class, 'showRemision'])->name('sale.showRemision');
-    
+
     Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
 
     Route::get('/products/search', [saleController::class, 'search'])->name('products.search');
@@ -464,7 +465,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
 
 
     /* VENTAS PARRILLA Tipo 2 = POS MOSTRADOR, Tpo 3 = DOMICILIO */
-    Route::get('sales_parrilla', [saleController::class, 'index_parrilla'])->name('sale.index_parrilla');    
+    Route::get('sales_parrilla', [saleController::class, 'index_parrilla'])->name('sale.index_parrilla');
     Route::get('showParrillaVentas', [saleController::class, 'showParrilla'])->name('sale.showParrilla');
     Route::post('ventasave_parrilla', [saleController::class, 'store_parrilla'])->name('sale.save_parrilla');
     Route::post('store-parrilla-mostrador', [saleController::class, 'storeParrillaMostrador'])->name('sale.storeParrillaMostrador');
@@ -472,6 +473,16 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
     Route::post('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
     Route::get('sale/showComanda/{id}', [exportComandaController::class, 'showComanda'])->name('sale.showComanda');
+
+    /* VENTAS AUTOSERVICIO Tipo 4 = POS MOSTRADOR, Tipo 5 = DOMICILIO */
+    Route::get('sales_autoservicio', [saleautoservicioController::class, 'index_autoservicio'])->name('sale.index_autoservicio');
+    Route::get('showAutoservicioVentas', [saleautoservicioController::class, 'showAutoservicio'])->name('sale.showAutoservicio');
+    Route::post('ventasave_autoservicio', [saleautoservicioController::class, 'store_autoservicio'])->name('sale.store_autoservicio');
+    Route::get('sale_autoservicio/create/{id}', [saleautoservicioController::class, 'create_autoservicio'])->name('sale.create_autoservicio');
+    Route::get('/products/search/autoservicio', [saleautoservicioController::class, 'search'])->name('products.search_autoservicio');
+    Route::get('sale_autoservicio/create/registrar_pago/{id}', [saleautoservicioController::class, 'create_reg_pago'])->name('sale.registrar_pago');
+    Route::post('sale_autoservicio/create/registrar_pago/{id}', [saleautoservicioController::class, 'storeRegistroPago'])->name('pago.save');
+    Route::post('store-autoservicio-mostrador', [saleautoservicioController::class, 'storeAutoservicioMostrador'])->name('sale.storeAutoservicioMostrador');
 });
 
 

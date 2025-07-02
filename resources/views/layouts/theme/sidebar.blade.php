@@ -370,37 +370,7 @@
                     </ul>
                 </li>
                 @endcan
-                @can('ver_venta_domicilio')
-                <li class="sub-submenu">
-                    <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenudomicilio" aria-expanded="false">
-                        <div><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                </svg></span> DOMICILIO </div> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </a>
-                    <ul id="submenudomicilio" class="collapse" data-parent="#compact_submenuSidebar">
-                        <li>
-                            <a href="{{ url('sales') }}"> VENTAS </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('sales') }}"> CIERRE DE CAJA </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('sales') }}"> MANEJO DE EFECTIVO </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('sales') }}"> HISTORICO DE VENTAS </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('sales') }}"> REMISIONES </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('notacredito') }}"> NOTAS CREDITOS </a>
-                        </li>
-                    </ul>
-                </li>
-                @endcan
+                
                 @can('ver_venta_parrilla')
                 <li class="sub-submenu">
                     <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenuparrilla" aria-expanded="false">
