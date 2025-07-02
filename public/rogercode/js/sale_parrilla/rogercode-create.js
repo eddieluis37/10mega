@@ -38,7 +38,7 @@ $(document).ready(function () {
         allowClear: true,
         minimumInputLength: 1,
         ajax: {
-            url: "/products/search",
+            url: "/products/search/parrilla",
             dataType: "json",
             delay: 250,
             data: function (params) {
@@ -125,7 +125,7 @@ $(document).ready(function () {
         theme: "bootstrap-5",
         allowClear: true,
         ajax: {
-            url: "/products/search",
+            url: "/products/search/parrilla",
             dataType: "json",
             delay: 250,
             data: function (params) {

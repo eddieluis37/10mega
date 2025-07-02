@@ -334,5 +334,5 @@
 
 @endsection
 @section('script')
-<script src="{{asset('rogercode/js/sale/rogercode-create.js')}}" type="module"></script>
+<script src="{{asset('rogercode/js/sale_parrilla/rogercode-create.js')}}" type="module"></script>
 @endsection

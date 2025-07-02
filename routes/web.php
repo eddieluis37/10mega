@@ -129,6 +129,7 @@ use App\Http\Controllers\reportes\reporteajusteinventariosController;
 use App\Http\Controllers\RestaurantOrderController;
 use App\Http\Controllers\sale\exportComandaController;
 use App\Http\Controllers\sale\saleautoservicioController;
+use App\Http\Controllers\sale\saleparrillaController;
 use App\Http\Controllers\transfer\exportTransferController;
 
 
@@ -470,6 +471,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::post('ventasave_parrilla', [saleController::class, 'store_parrilla'])->name('sale.save_parrilla');
     Route::post('store-parrilla-mostrador', [saleController::class, 'storeParrillaMostrador'])->name('sale.storeParrillaMostrador');
     Route::get('sale_parrilla/create/{id}', [saleController::class, 'create_parrilla'])->name('sale.create_parrilla');
+    Route::get('/products/search/parrilla', [saleparrillaController::class, 'search'])->name('products.search_parrilla');
     Route::get('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
     Route::post('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
     Route::get('sale/showComanda/{id}', [exportComandaController::class, 'showComanda'])->name('sale.showComanda');
