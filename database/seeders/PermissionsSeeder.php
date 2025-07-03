@@ -68,7 +68,6 @@ class PermissionsSeeder extends Seeder
             'editar_compra_productos',
 
             'acceder_cargue_productos_term',
-
             'ver_traslado',
             'acceder_traslado',
             'crear_traslado',
