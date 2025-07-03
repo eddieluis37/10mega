@@ -129,6 +129,7 @@ use App\Http\Controllers\reportes\reporteajusteinventariosController;
 use App\Http\Controllers\RestaurantOrderController;
 use App\Http\Controllers\sale\exportComandaController;
 use App\Http\Controllers\sale\saleautoservicioController;
+use App\Http\Controllers\sale\salebarController;
 use App\Http\Controllers\sale\saleparrillaController;
 use App\Http\Controllers\transfer\exportTransferController;
 
@@ -485,11 +486,17 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('sale_autoservicio/create/registrar_pago/{id}', [saleautoservicioController::class, 'create_reg_pago'])->name('sale.registrar_pago');
     Route::post('sale_autoservicio/create/registrar_pago/{id}', [saleautoservicioController::class, 'storeRegistroPago'])->name('pago.save');
     Route::post('store-autoservicio-mostrador', [saleautoservicioController::class, 'storeAutoservicioMostrador'])->name('sale.storeAutoservicioMostrador');
+
+     /* VENTAS BAR Tipo 6 = POS MOSTRADOR, Tipo 7 = DOMICILIO */
+    Route::get('sales_bar', [salebarController::class, 'index_bar'])->name('sale.index_bar');
+    Route::get('showBarVentas', [salebarController::class, 'showBar'])->name('sale.showBar');
+    Route::post('ventasave_bar', [salebarController::class, 'store_bar'])->name('sale.store_bar');
+    Route::get('sale_bar/create/{id}', [salebarController::class, 'create_bar'])->name('sale.create_bar');
+    Route::get('/products/search/bar', [salebarController::class, 'search'])->name('products.search_bar');
+    Route::get('sale_bar/create/registrar_pago/{id}', [salebarController::class, 'create_reg_pago'])->name('sale.registrar_pago');
+    Route::post('sale_bar/create/registrar_pago/{id}', [salebarController::class, 'storeRegistroPago'])->name('pago.save');
+    Route::post('store-bar-mostrador', [salebarController::class, 'storeBarMostrador'])->name('sale.storeBarMostrador');
 });
-
-
-
-
 
 Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     /*****************************INVENTORY****************************************** */

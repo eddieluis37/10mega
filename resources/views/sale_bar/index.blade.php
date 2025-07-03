@@ -6,14 +6,14 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b>Ventas | Listado </b>
+					<b>Ventas Bar</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<!-- <li>
 						<a href="{{ route('cargar.inventario.masivo') }}" class="btn btn-primary">Cargar Inventario Masivo</a>
 					</li> -->
 					<li>
-						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-compensado" title="Nueva venta por domicilio">Domicilio</a>
+						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-sale" title="Nueva venta bar por domicilio">Domicilio</a>
 					</li>
 					<li></li>
 					@php
@@ -24,7 +24,12 @@
 					->where('estado', 'open')
 					->exists())
 					<li>
-						<a href="javascript:void(0)" class="tabmenu bg-dark ml-2" id="storeVentaMostradorBtn" title="Nueva venta por mostrador">POS</a>
+						<a href="javascript:void(0)"
+							class="tabmenu bg-dark ml-2"
+							id="storeBarMostradorBtn"
+							title="Nueva venta bar por mostrador">
+							POS
+						</a>
 					</li>
 					@endif
 				</ul>
@@ -37,7 +42,7 @@
 							<tr>
 								<th class="table-th text-white">#</th>
 								<th class="table-th text-white">CLIENT</th>
-								<th class="table-th text-white ">BODEGA</th>
+								<th class="table-th text-white ">CENTROCOSTO</th>
 								<th class="table-th text-white">ST</th>
 								<th class="table-th text-white">VALOR.F</th>
 								<th class="table-th text-white">DIA.HORA</th>
@@ -54,18 +59,19 @@
 		</div>
 	</div>
 	<!-- modal -->
-	<div class="modal fade" id="modal-create-compensado" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+	<div class="modal fade" id="modal-create-sale" aria-hidden="true" data-keyboard="false" data-backdrop="static">
 		<div class="modal-dialog modal-xl" role="document">
-			<div class="modal-content bg-default">
+			<div class="modal-content bg-dark text-white">
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
-						<div class="modal-header">
-							<h4 class="modal-title">Crear venta domicilio</h4>
+						<div class="modal-header bg-secondary">
+							<h4 class="modal-title" style="color: white; font-weight: bold;">CREAR VENTA BAR DOMICILIO </h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span></button>
+								<span aria-hidden="true">&times;</span>
+							</button>
 						</div>
 						<div class="modal-body">
-							@include('sale.modal_create')
+							@include('sale_bar.modal_create')
 						</div>
 						<div class="modal-footer">
 							<button type="button" id="btnModalClose" class="btn btn-default" data-dismiss="modal">Cancelar</button>
@@ -82,6 +88,6 @@
 </div>
 @endsection
 @section('script')
-<script src="{{asset('rogercode/js/sale/rogercode-ventas-index.js')}}"></script>
-<script src="{{asset('rogercode/js/sale/rogercode-create-update.js')}}" type="module"></script>
+<script src="{{asset('rogercode/js/sale_bar/rogercode-ventas-index.js')}}"></script>
+<script src="{{asset('rogercode/js/sale_bar/rogercode-create-update.js')}}" type="module"></script>
 @endsection

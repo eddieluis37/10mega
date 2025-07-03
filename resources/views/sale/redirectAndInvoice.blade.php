@@ -15,6 +15,10 @@
             case 5:
                 $redirectUrl = route('sale.index_autoservicio');
                 break;
+            case 6:    
+            case 7:
+                $redirectUrl = route('sale.index_bar');
+                break;    
             default:
                 $redirectUrl = route('sale.index');
         }

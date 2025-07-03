@@ -38,7 +38,7 @@ $(document).ready(function () {
         allowClear: true,
         minimumInputLength: 1,
         ajax: {
-            url: "/products/search",
+            url: "/products/search/bar",
             dataType: "json",
             delay: 250,
             data: function (params) {
@@ -125,7 +125,7 @@ $(document).ready(function () {
         theme: "bootstrap-5",
         allowClear: true,
         ajax: {
-            url: "/products/search",
+            url: "/products/search/bar",
             dataType: "json",
             delay: 250,
             data: function (params) {
@@ -219,34 +219,46 @@ tbodyTable.addEventListener("click", (e) => {
 
 btnAdd.addEventListener("click", (e) => {
     e.preventDefault();
+
+    // 1. Crea FormData a partir del form
     const dataform = new FormData(formDetail);
-    sendData("/salesavedetail", dataform, token).then((result) => {
-        console.log(result);
+
+    // 2. Extrae el tipobodega del <select> y lo añade explícitamente
+    const tipobodega = document.getElementById("tipobodega").value;
+    console.log("tipobodega a enviar:", tipobodega);
+    dataform.set("tipobodega", tipobodega);
+    // (o bien dataform.append("tipobodega", tipobodega) si no existiera aún)
+
+    // 3. Envía al método savedetail
+    sendData("/salesavedetail", dataform, token)
+      .then((result) => {
+        console.log("Respuesta savedetail:", result);
+
         if (result.status === 1) {
-            // Reiniciar el valor de regdetailId para que en la próxima acción se cree un nuevo detalle
+            // reset campos
             $("#regdetailId").val("0");
             $("#producto").val("").trigger("change");
             formDetail.reset();
             showData(result);
-
-            // Recarga la pagina para evitar que se renombren productos en la edición
-            //  window.location.reload();
         }
+
         if (result.status === 0) {
             let errors = result.errors;
-            console.log(errors);
+            console.log("Errores validación:", errors);
             $.each(errors, function (field, messages) {
-                console.log(field, messages);
                 let $input = $('[name="' + field + '"]');
                 let $errorContainer = $input
                     .closest(".form-group")
                     .find(".error-message");
-                $errorContainer.html(messages[0]);
-                $errorContainer.show();
+                $errorContainer.html(messages[0]).show();
             });
         }
-    });
+      })
+      .catch((err) => {
+        console.error("Error en la petición savedetail:", err);
+      });
 });
+
 
 const showData = (data) => {
     let dataAll = data.array;

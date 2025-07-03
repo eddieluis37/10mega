@@ -350,7 +350,7 @@
                     </a>
                     <ul id="submenubar" class="collapse" data-parent="#compact_submenuSidebar">
                         <li>
-                            <a href="{{ url('sales') }}"> VENTAS </a>
+                            <a href="{{ url('sales_bar') }}"> VENTAS </a>
                         </li>
                         <li>
                             <a href="{{ url('sales') }}"> CIERRE DE CAJA </a>

@@ -11,11 +11,11 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b> Ventas </b>
+					<b> Ventas Bar</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<li>
-						<a href="javascript:void(0)" onclick="window.location.href = '../../sales'" class="tabmenu bg-dark" data-toggle="modal" data-target="" title="Regresa al listado">Volver</a>
+						<a href="javascript:void(0)" onclick="window.location.href = '../../sales_bar'" class="tabmenu bg-dark" data-toggle="modal" data-target="" title="Regresa al listado ventas bar">Volver</a>
 					</li>
 				</ul>
 			</div>
@@ -26,16 +26,22 @@
 							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="date1" class="form-label">Fecha de venta</label>
-										<input type="date" class="form-control" name="fecha" id="fecha" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+										<label for="" class="form-label">Centro costo</label>
+										<p>{{$datacompensado[0]->namecentrocosto}}</p>
 									</div>
 								</div>
 							</div>
+
 							<div class="col-md-4">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Bodega</label>
-										<p>{{$datacompensado[0]->namestore}}</p>
+										<label>Bodega</label>
+										<div>
+											<select class="form-control form-control-sm" name="tipobodega" id="tipobodega" required="">
+											 	<option value="BAR">BAR</option>											
+											</select>
+											<span class="text-danger error-message"></span>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -50,7 +56,12 @@
 							</div>
 
 							<div class="col-md-4">
-
+								<div class="task-header">
+									<div class="form-group">
+										<label for="date1" class="form-label">Fecha de venta</label>
+										<input type="date" class="form-control" name="fecha" id="fecha" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+									</div>
+								</div>
 							</div>
 
 							<div class="col-md-4">
@@ -84,22 +95,41 @@
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
 							<input type="hidden" id="codigoBarras" name="codigoBarras" value="999999999">
 							<div class="row g-3">
-								<div class="col-md-4">
+
+
+								<script>
+									$(document).ready(function() {
+
+									});
+								</script>
+								<div class="col-md-10">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="" class="form-label">Buscar producto</label>
-											<input type="hidden" id="store" name="store" value="{{$datacompensado[0]->store_id}}" data-id="{{$datacompensado[0]->store_id}}">
-											<input type="hidden" id="cliente" name="cliente" value="{{$datacompensado[0]->third_id}}" data-id="{{$datacompensado[0]->third_id}}">
-											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{$datacompensado[0]->porc_descuento_cliente}}" data-id="{{$datacompensado[0]->porc_descuento_cliente}}">
+											<label for="producto" class="form-label">Buscar producto</label>
+											<input type="hidden" id="centrocosto" name="centrocosto" value="{{ $datacompensado[0]->centrocosto_id }}">
+											<input type="hidden" id="cliente" name="cliente" value="{{ $datacompensado[0]->third_id }}">
+											<input type="hidden" id="porc_descuento_cliente" name="porc_descuento_cliente" value="{{ $datacompensado[0]->porc_descuento_cliente }}">
+
+											<!-- Campos ocultos para enviar datos adicionales -->
+											<input type="hidden" id="lote_id" name="lote_id" value="">
+											<input type="hidden" id="inventario_id" name="inventario_id" value="">
+											<input type="hidden" id="stock_ideal" name="stock_ideal" value="">
+											<input type="hidden" id="store_id" name="store" value="">
+											<input type="hidden" id="store_name" name="store_name" value="">
+
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required>
 												<option value="">Seleccione el producto</option>
-												@foreach ($prod as $producto)
-												@foreach ($producto->lotesPorVencer as $lote)
-												<option value="{{ $producto->id }}"
-													data-info="{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}">
-													{{ $producto->name }} - {{ $lote->codigo }} - {{ \Carbon\Carbon::parse($lote->fecha_vencimiento)->format('d/m/Y') }}
+												@foreach ($results as $result)
+												<option value="{{ $result['inventario_id'] }}"
+													data-product-id="{{ $result['product_id'] }}"
+													data-lote-id="{{ $result['lote_id'] }}"
+													data-inventario-id="{{ $result['inventario_id'] }}"
+													data-stock-ideal="{{ $result['stock_ideal'] }}"
+													data-store-id="{{ $result['store_id'] }}"
+													data-store-name="{{ $result['store_name'] }}"
+													data-info="{{ $result['text'] }}">
+													{{ $result['text'] }}
 												</option>
-												@endforeach
 												@endforeach
 											</select>
 
@@ -108,13 +138,28 @@
 									</div>
 								</div>
 								<div class="col-md-2">
+									<div class="form-group">
+										<label for="" class="form-label">KG|QT</label>
+										<div class="input-group flex-nowrap"">
+										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10.00">
+											<span class="input-group-text" id="addon-wrapping">QT</span>
+										</div>
+										<span class="text-danger error-message"></span>
+									</div>
+								</div>
+								<div class="col-md-2">
 									<label for="" class="form-label">Precio venta</label>
 									<div class="input-group flex-nowrap">
 										<span class="input-group-text" id="addon-wrapping">$</span>
+										@can('ver_CambiarPrecioVenta')
+										<!-- El usuario tiene permiso para editar -->
+										<input type="text" id="price" name="price" class="form-control input" placeholder="">
+										@else
+										<!-- El usuario no tiene permiso, campo de solo lectura -->
 										<input type="text" id="price" name="price" class="form-control input" readonly placeholder="">
+										@endcan
 									</div>
 								</div>
-
 								<div class="col-md-2">
 									<label for="" class="form-label">I.V.A</label>
 									<div class="input-group flex-nowrap">
@@ -137,65 +182,26 @@
 									<label for="" class="form-label">I.A.C</label>
 									<div class="input-group flex-nowrap">
 
-										<input type="text" id="impoconsumo" name="impoconsumo" class="form-control input" readonly placeholder="">
+										<input type="text" id="porc_impoconsumo" name="porc_impoconsumo" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
 
+								<div class="col-md-2">
+									<label for="" class="form-label">Descuento</label>
+									<div class="input-group flex-nowrap">
 
-								<div class="form-group row" style="margin-top:3px; margin-left:3px">
+										<input type="text" id="porc_desc" name="porc_desc" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
 
-									<div class="col-md-3">
-										<label for="" class="form-label">Descuento</label>
-										<div class="input-group flex-nowrap">
-
-											<input type="text" id="porc_descuento" name="porc_descuento" class="form-control input" readonly placeholder="">
-											<span class="input-group-text" id="addon-wrapping">%</span>
+								<div class="col-md-2">
+									<div class="" style="margin-top:30px;">
+										<div class="d-grid gap-2">
+											<button id="btnAdd" class="btn btn-primary btn-block">Añadir Producto</button>
 										</div>
 									</div>
-
-									<div class="col-md-3">
-										<label for="" class="form-label">Peso KG</label>
-										<div class="input-group flex-nowrap"">
-										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10,00">
-											<span class="input-group-text" id="addon-wrapping">KG</span>
-										</div>
-										<span class="text-danger error-message"></span>
-									</div>
-									@if($datacompensado[0]->status == '0')
-									<div class="col-md-2">
-										<div class="" style="margin-top:30px;">
-											<div class="d-grid gap-2">
-												<button id="btnAdd" class="btn btn-primary">Añadir</button>
-											</div>
-										</div>
-									</div>
-									<!-- <div class="col-md-1">
-										<div class="" style="margin-top:30px;">
-											<div class="d-grid gap-2">
-												<button onclick="window.location.reload();" class="btn btn-danger" data-bs-toggle="tooltip" title="Solo en caso que edites un producto, y requieras ingresar uno nuevo">Limpiar</button>
-											</div>
-										</div>
-									</div> -->
-
-									@can('Admin_Menu')
-									<div class="col-md-2">
-										<div class="" style="margin-top:0px; margin-left:3px">
-											<label for="password">Contraseña:</label>
-											<input type="password" id="password" name="password" class="form-control input">
-
-										</div>
-									</div>
-
-									<div class="col-md-2">
-										<div class="" style="margin-top:30px;">
-											<div class="d-grid gap-2">
-												<button id="btnRemove" class="btn btn-warning">Modificar Precio</button>
-											</div>
-										</div>
-									</div>
-									@endcan
-									@endif
 								</div>
 						</form>
 					</div>
@@ -222,6 +228,8 @@
 								<th class="table-th text-white">IVA</th>
 								<th class="table-th text-white">%I.S</th>
 								<th class="table-th text-white">I.S</th>
+								<th class="table-th text-white">%I.C</th>
+								<th class="table-th text-white">I.C</th>
 								<th class="table-th text-white">Total</th>
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
@@ -231,16 +239,18 @@
 							<tr>
 								<!--td>{{$proddetail->id}}</td-->
 								<td>{{$proddetail->nameprod}}</td>
-								<td>{{ number_format($proddetail->quantity, 2, ',', '.')}}KG</td>
+								<td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
 								<td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_desc}}%</td>
+								<td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_iva}}%</td>
+								<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_otro_impuesto}}%</td>
+								<td>{{ number_format($proddetail->porc_otro_impuesto, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
+								<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
+								<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
 								<td class="text-center">
 									@if($datacompensado[0]->status == '0')
@@ -271,16 +281,18 @@
 								<td></td>
 								<td></td>
 								<td></td>
+								<td></td>
+								<td></td>
 								<th>${{number_format($arrayTotales['TotalValorAPagar'], 0, ',', '.')}} </th>
 							</tr>
 						</tfoot>
 					</table>
 					@if($datacompensado[0]->status == '0')
-					<div>
+					<div class="col-md-12">
 						<form method="GET" action="registrar_pago/{{$id}}">
 							@csrf
-							<div class="text-center mt-1">
-								<button id="cargarInventarioBtn" type="submit" class="btn btn-success">Pagar</button>
+							<div class="col-md-12 text-right mt-1">
+								<button id="cargarInventarioBtn" type="submit" class="btn btn-success btn-block">Pagar</button>
 								<!-- <a href="registrar_pago/{{$id}}" target="_blank" class="btn btn-success">Pagar</a> -->
 							</div>
 						</form>
@@ -314,9 +326,13 @@
 				e.target.value = "0";
 			}
 		});
+
+		$('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
+		$('#cambiarContraseDiv').hide(); // 
 	});
 </script>
+
 @endsection
 @section('script')
-<script src="{{asset('rogercode/js/sale/rogercode-create.js')}}" type="module"></script>
+<script src="{{asset('rogercode/js/sale_bar/rogercode-create.js')}}" type="module"></script>
 @endsection
