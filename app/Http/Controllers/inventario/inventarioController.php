@@ -12,8 +12,7 @@ use App\Models\Inventario;
 use App\Models\MovimientoInventario;
 use Illuminate\Support\Facades\Log;
 use App\Models\Lote;
-
-
+use Illuminate\Support\Facades\Auth;
 
 class inventarioController extends Controller
 
@@ -30,8 +29,20 @@ class inventarioController extends Controller
 
         /*  $category = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
  */
-        $centros = Centrocosto::Where('status', 1)->get();
-        $stores = Store::orderBy('id', 'asc')->get();
+      $centros = Centrocosto::Where('status', 1)->get();
+
+        $user = auth()->user(); // Obtener el usuario autenticado        
+        // Obtener solo las bodegas asociadas al usuario en store_user
+        $stores = Store::whereIn('id', function ($query) use ($user) {
+            $query->select('store_id')
+                ->from('store_user')
+                ->where('user_id', $user->id);
+        })
+            ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
+            ->orderBy('name', 'asc')
+            ->get();
+
+      //  $stores = Store::orderBy('id', 'asc')->get();
         $lotes = Lote::orderBy('id', 'asc')->get();
 
 
@@ -140,7 +151,7 @@ class inventarioController extends Controller
                     'venta'                 => $totalVenta,
                     'notacredito'           => $totalNotaCredito,
                     'notadebito'            => 0,
-                    'venta_real'            => $totalVenta - $totalNotaCredito,                            
+                    'venta_real'            => $totalVenta - $totalNotaCredito,
                     'StockIdeal'            => $inventario->stock_ideal,
                     'stock'                 => $stockFisico,
                     'fisico'                => $inventario->cantidad_diferencia,
