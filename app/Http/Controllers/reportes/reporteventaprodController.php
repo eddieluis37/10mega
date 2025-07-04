@@ -9,6 +9,7 @@ use App\Models\centros\Centrocosto;
 use App\Models\SaleDetail;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class reporteventaprodController extends Controller
 {
@@ -23,7 +24,12 @@ class reporteventaprodController extends Controller
         $endDate = Carbon::parse(Carbon::now())->format('Y-m-d');
 
         $category = Category::orderBy('name', 'asc')->get();
-        $centros = Centrocosto::Where('status', 1)->get();
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
+
+        // Obtiene los modelos de centros de costo usando los IDs obtenidos
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
 
         return view('reportes.consolidado', compact('category', 'centros', 'startDate', 'endDate'));
     }
@@ -37,7 +43,7 @@ class reporteventaprodController extends Controller
         $endDate      = Carbon::parse($request->input('endDate'))->format('Y-m-d H:i:s');
 
         // 2) Armamos la consulta con joins y agrupamientos
-        $data = DB::table('sale_details as sd')       
+        $data = DB::table('sale_details as sd')
             ->select([
                 'p.name as producto',
                 'l.codigo as lote',
