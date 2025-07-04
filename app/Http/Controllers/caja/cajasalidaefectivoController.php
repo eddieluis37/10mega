@@ -57,6 +57,13 @@ class cajasalidaefectivoController extends Controller
 
     public function show(Request $request)
     {
+        // 1) IDs de los centros de costo del usuario autenticado
+        $centroIds = Auth::user()
+            ->stores
+            ->pluck('centrocosto_id')
+            ->unique();
+
+        // 2) Consulta filtrada
         $data = DB::table('caja_salida_efectivo as csd')
             ->join('cajas as c', 'c.id', '=', 'csd.caja_id')
             ->leftJoin('thirds as t', 't.id', '=', 'csd.third_id')
@@ -69,53 +76,49 @@ class cajasalidaefectivoController extends Controller
                 'u.name as name_cajero',
                 'centro.name as name_centro_costo',
                 'csd.vr_efectivo',
-                't.name as recibe',    // el que recibe
+                't.name as recibe',
                 'csd.status',
             ])
-            //  ->where('c.status', 1)               // turno vigente
+            // 3) FILTRO: que el centro de costo de la caja esté en los autorizados para el usuario
+            ->whereIn('c.centrocosto_id', $centroIds)
+            // Filtro: solo las cajas creadas por el usuario autenticado
+            ->where('c.user_id', Auth::id())
             ->orderBy('csd.fecha_hora_salida', 'desc')
             ->get();
 
         return DataTables::of($data)
             ->addIndexColumn()
-
-            // formateo de fecha/hora
             ->editColumn('fecha_hora_salida', function ($row) {
                 return $row->fecha_hora_salida
                     ? Carbon::parse($row->fecha_hora_salida)->format('Y-m-d H:i:s')
                     : '';
             })
-
-            // formateo de valor
             ->editColumn('vr_efectivo', function ($row) {
                 return '$' . number_format($row->vr_efectivo, 0, ',', '.');
             })
-
-            // columna de acciones
             ->addColumn('action', function ($row) {
                 if ($row->status) {
                     return '
-                    <div class="text-center">
-                      <button class="btn btn-sm btn-primary" onclick="editSalida(' . $row->id . ')">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-sm btn-danger" onclick="deleteSalida(' . $row->id . ')">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                       <a href="caja-salida-efectivo/pdfFormatopos/' . $row->id . '" class="btn btn-dark" title="FormatoPOS" target="_blank">
-                         <i class="far fa-file-pdf"></i>
-                         </a>
-                    </div>';
+                <div class="text-center">
+                  <button class="btn btn-sm btn-primary" onclick="editSalida(' . $row->id . ')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteSalida(' . $row->id . ')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                   <a href="caja-salida-efectivo/pdfFormatopos/' . $row->id . '" class="btn btn-dark" title="FormatoPOS" target="_blank">
+                     <i class="far fa-file-pdf"></i>
+                   </a>
+                </div>';
                 }
 
                 return '
-                <div class="text-center">
-                  <button class="btn btn-sm btn-secondary" disabled>
-                    <i class="fas fa-lock"></i>
-                  </button>
-                </div>';
+            <div class="text-center">
+              <button class="btn btn-sm btn-secondary" disabled>
+                <i class="fas fa-lock"></i>
+              </button>
+            </div>';
             })
-
             ->rawColumns(['action'])
             ->make(true);
     }
