@@ -132,7 +132,9 @@ use App\Http\Controllers\sale\saleautoservicioController;
 use App\Http\Controllers\sale\salebarController;
 use App\Http\Controllers\sale\saleparrillaController;
 use App\Http\Controllers\transfer\exportTransferController;
+use App\Http\Controllers\UserController;
 
+Route::get('export-users', [UserController::class, 'export'])->name('users.export');
 
 Route::get('caja-salida-efectivo', [cajasalidaefectivoController::class, 'index'])->name('cajasalidaefectivo.index');
 Route::get('show-cse', [cajasalidaefectivoController::class, 'show'])->name('cajasalidaefectivo.show');
