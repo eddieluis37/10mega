@@ -44,23 +44,42 @@ class recibodecajaController extends Controller
 
     public function index()
     {
-        $ventas = Sale::get();
-        $centros = Centrocosto::Where('status', 1)->get();
+        // 1) IDs de centros de costo del usuario
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
 
+        // 2) Centros de costo
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
+        // 3) Otros datos
+        $ventas = Sale::all();
+        $formapagos = Formapago::whereIn('tipoformapago', ['EFECTIVO', 'TARJETA', 'OTROS'])->get();
+        $domiciliarios = Third::where('domiciliario', 1)->get();
+
+        // 4) Clientes con deuda > 0, filtrados por centrocosto de la venta
         $clientes = DB::table('thirds')
             ->join('cuentas_por_cobrars', 'cuentas_por_cobrars.third_id', '=', 'thirds.id')
-            ->select('thirds.id', 'thirds.name', DB::raw('SUM(cuentas_por_cobrars.deuda_x_cobrar) as total_deuda'))
+            ->join('sales', 'sales.id', '=', 'cuentas_por_cobrars.sale_id')
+            ->select(
+                'thirds.id',
+                'thirds.name',
+                DB::raw('SUM(cuentas_por_cobrars.deuda_x_cobrar) as total_deuda')
+            )
             ->where('cuentas_por_cobrars.deuda_x_cobrar', '>', 0)
+            ->whereIn('sales.centrocosto_id', $centroIds)
             ->groupBy('thirds.id', 'thirds.name')
             ->having('total_deuda', '>', 0)
             ->get();
 
-        $formapagos = Formapago::whereIn('tipoformapago', ['EFECTIVO', 'TARJETA', 'OTROS'])->get();
-        $domiciliarios = Third::Where('domiciliario', 1)->get();
-        /*      $subcentrodecostos = Subcentrocosto::get(); */
-
-        return view('recibodecaja.index', compact('ventas', 'centros', 'clientes', 'formapagos', 'domiciliarios'));
+        return view('recibodecaja.index', compact(
+            'ventas',
+            'centros',
+            'clientes',
+            'formapagos',
+            'domiciliarios'
+        ));
     }
+
+
 
     // Método para obtener los registros de cuentas_por_cobrars del cliente seleccionado
     public function getClientPayments(Request $request)
