@@ -468,9 +468,9 @@
                         <li>
                             <a href="{{ url('reportes/ventas_por_productos_clientes') }}"> Por prod & cliente </a>
                         </li>
-                        <li>
+                       <!--  <li>
                             <a href="{{ url('excel-consolidado-ventas') }}"> Consolidado ventas </a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="{{ url('descargar-reporte') }}"> Stock fisico real </a>
                         </li>
