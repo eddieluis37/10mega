@@ -142,6 +142,7 @@ class salebarController extends Controller
             ->whereIn('sa.tipo', ['6', '7'])
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
             ->whereMonth('sa.fecha_venta', Carbon::now()->month)
+            ->whereDay('sa.fecha_venta', Carbon::now()->day)
             ->get();
 
 

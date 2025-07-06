@@ -142,6 +142,7 @@ class saleautoservicioController extends Controller
             ->whereIn('sa.tipo', ['4', '5'])
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
             ->whereMonth('sa.fecha_venta', Carbon::now()->month)
+            ->whereDay('sa.fecha_venta', Carbon::now()->day)
             ->get();
 
 
