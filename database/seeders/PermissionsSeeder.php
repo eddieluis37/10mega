@@ -45,10 +45,11 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($liderAuditoria);
         }
 
-         // Asignar rol "" a un usuario con el nombre ""
-        $user = User::where('name', 'ADMINISTRADOR LECHONERIA')->first();
-        if ($user) {
-            $user->assignRole($liderAuditoria);
+        // Asignar LiderAuditoria a ADMINISTRADOR LECHONERIA
+        $user2 = User::where('name', 'ADMINISTRADOR LECHONERIA')->first();
+        if ($user2) {
+            // limpia roles previos y deja sólo LiderAuditoria
+            $user2->syncRoles([$liderAuditoria]);
         }
 
         /*  // Crear o actualizar roles
@@ -564,7 +565,7 @@ class PermissionsSeeder extends Seeder
         );
 
         $usuarios = User::where('name', 'like', '%BAR%')
-            ->orWhere('name', 'like', '%ADMIN%')
+           // ->orWhere('name', 'like', '%ADMIN%')
             //  ->orWhereIn('id', $idsUsuarios)
             ->get();
 
