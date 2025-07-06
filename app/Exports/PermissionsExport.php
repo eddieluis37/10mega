@@ -5,6 +5,7 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Models\User;
 
 class PermissionsExport implements WithMultipleSheets
 {
@@ -20,9 +21,10 @@ class PermissionsExport implements WithMultipleSheets
 
     public function sheets(): array
     {
-        $sheets = [];
-        $sheets[] = new ModulesSheet($this->modules);
-        $sheets[] = new RolesSheet(Role::with('permissions')->get());
-        return $sheets;
+       return [
+            new ModulesSheet($this->modules),
+            new RolesSheet(Role::with('permissions')->get()),
+            new UsuariosSheet(User::with('roles')->get()),
+        ];
     }
 }

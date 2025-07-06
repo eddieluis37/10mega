@@ -30,5 +30,6 @@ Copiar
 Editar
 
 php artisan export:permissions
-
-El archivo se guardará en storage/app/permissions_export_YYYYMMDD_HHMM.xlsx.
+// Uso:
+// php artisan export:permissions
+// Luego descarga el archivo desde storage/app/permissions_export_YYYYMMDD_HHMM.xlsx

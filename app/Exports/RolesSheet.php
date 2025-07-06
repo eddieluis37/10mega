@@ -17,8 +17,9 @@ class RolesSheet implements FromCollection, WithTitle
 
     public function collection()
     {
-        $rows = [];
-        $rows[] = ['Rol', 'Permisos asignados'];
+        $rows = [
+            ['Rol', 'Permisos asignados'],
+        ];
         foreach ($this->roles as $role) {
             $rows[] = [
                 $role->name,

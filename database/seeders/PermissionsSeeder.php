@@ -45,6 +45,12 @@ class PermissionsSeeder extends Seeder
             $user->assignRole($liderAuditoria);
         }
 
+         // Asignar rol "" a un usuario con el nombre ""
+        $user = User::where('name', 'ADMINISTRADOR LECHONERIA')->first();
+        if ($user) {
+            $user->assignRole($liderAuditoria);
+        }
+
         /*  // Crear o actualizar roles
         $adminCentroCosto = Role::updateOrCreate(['name' => 'AdminCentroCosto']);
         $adminCentroCosto->syncPermissions($allPermissions); // Asigna todos los permisos */
