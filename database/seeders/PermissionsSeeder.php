@@ -138,6 +138,7 @@ class PermissionsSeeder extends Seeder
             'ver_administracion',
             'ver_terceros',
             'accceder_terceros',
+            'acceder_venta_autoservicio',
             'crear_terceros',
             'Pos_Create',
             'ver_compras',
@@ -355,7 +356,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('01CajaCerdoCentral.2025*')
             ]
         );
-         User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'subamega2@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'CAJERO 2 SUBA',
@@ -379,7 +380,9 @@ class PermissionsSeeder extends Seeder
         $cajero->syncPermissions([
             'ver_administracion',
             'ver_terceros',
-            'accceder_terceros',
+            'acceder_terceros',
+            'acceder_venta_autoservicio',
+            'acceder_venta_parrilla',
             'crear_terceros',
             'Pos_Create',
             'ver_compras',
@@ -802,7 +805,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('Com3rC1@l1.*')
             ]
         );
-         User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'analistacomercialmega@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'ANALISTA COMERCIAL 1',
@@ -875,6 +878,7 @@ class PermissionsSeeder extends Seeder
 
         // 3. Definir el listado de permisos a sincronizar
         $permisos = [
+            'acceder_venta_autoservicio',
             'ver_CambiarPrecioVenta',
 
             'ver_productos',
@@ -956,7 +960,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('AuxLi@rCart3r@2025*')
             ]
         );
-         User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'auxiliar_contable1@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'AUX CONTABLE1',
@@ -966,7 +970,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('AuxLi@rC0nt@1Mega2025*')
             ]
         );
-         User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'auxiliar_contable2@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'AUX CONTABLE2',

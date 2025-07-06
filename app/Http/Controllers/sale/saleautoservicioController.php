@@ -567,7 +567,7 @@ class saleautoservicioController extends Controller
         // 1) Obtener los IDs de las bodegas asociadas al usuario autenticado
         $storeIds = DB::table('store_user')
             ->where('user_id', auth()->id())
-            ->whereIn('store_id', ['11', '14', '17', '18'])
+            ->whereIn('store_id', ['11', '14', '17', '18', '22', '23', '24', '26'])
             ->pluck('store_id')
             ->toArray();
 
