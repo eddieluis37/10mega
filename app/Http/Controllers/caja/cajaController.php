@@ -380,10 +380,21 @@ class cajaController extends Controller
      */
     public function show()
     {
+
+        // 1) IDs de los centros de costo del usuario autenticado
+        $centroIds = Auth::user()
+            ->stores
+            ->pluck('centrocosto_id')
+            ->unique();
+
         $data = DB::table('cajas as c')
             ->join('users as u', 'c.cajero_id', '=', 'u.id')
             ->join('centro_costo as s', 'c.centrocosto_id', '=', 's.id')
             ->select('c.*', 's.name as namecentrocosto', 'u.name as namecajero')
+            ->whereIn('c.centrocosto_id', $centroIds)
+            // Filtro: solo las cajas creadas por el usuario autenticado
+            ->where('c.user_id', Auth::id())
+            ->orderBy('c.id', 'desc')
             ->get();
 
         return Datatables::of($data)
