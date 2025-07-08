@@ -216,12 +216,12 @@ class saleController extends Controller
                                    <i class="fas fa-undo-alt"></i>
                                  </a>';
                     }
-                    // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
+                   /*  // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
                     if ($creditNotesCount == 0 || $creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
                                  </a>';
-                    }
+                    } */
                 } elseif ($data->status == 2) {
                     $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
                                 <i class="fas fa-ban"></i>
@@ -238,11 +238,11 @@ class saleController extends Controller
                                     <i class="fas fa-undo"></i>
                                  </button>';
                     }
-                    if ($creditNotesCount == 1) {
+                   /*  if ($creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
                                  </a>';
-                    }
+                    } */
                 }
                 $btn .= '</div>';
                 return $btn;
@@ -350,12 +350,12 @@ class saleController extends Controller
                                    <i class="fas fa-undo-alt"></i>
                                  </a>';
                     }
-                    // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
+                    /* // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
                     if ($creditNotesCount == 0 || $creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
                                  </a>';
-                    }
+                    } */
                 } elseif ($data->status == 2) {
                     $btn .= '<button class="btn btn-dark" title="Venta cancelada" disabled>
                                 <i class="fas fa-ban"></i>
@@ -372,11 +372,11 @@ class saleController extends Controller
                                     <i class="fas fa-undo"></i>
                                  </button>';
                     }
-                    if ($creditNotesCount == 1) {
+                   /*  if ($creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
                                  </a>';
-                    }
+                    } */
                 }
                 $btn .= '</div>';
                 return $btn;
@@ -2071,6 +2071,8 @@ class saleController extends Controller
         ], 200);
     }
 
+
+    
     public function annulSale($saleId)
     {
         // Se obtiene la venta junto con sus detalles (relación 'details')

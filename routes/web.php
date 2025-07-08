@@ -463,7 +463,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     // y permite digitar la cantidad a devolver para cada producto.
     Route::get('/sale/partial-return-form/{id}', [saleController::class, 'partialreturnform'])->name('sales.partialReturnForm');
     // Ruta para procesar la devolución parcial (se envían los datos mediante AJAX)
-    Route::post('/sale/{saleId}/annul', [saleController::class, 'annulSale']);
+    // Route::post('/sale/{saleId}/annul', [saleController::class, 'annulSale']); // esta funcionalidad de anulacion no realiza devolucion de dinero
 
     Route::get('/getDireccionesByClienteSale/{cliente_id}', [saleController::class, 'getDireccionesByClienteSale'])->name('sale.getDireccionesByClienteSale');
 });
