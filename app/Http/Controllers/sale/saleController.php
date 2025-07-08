@@ -1580,7 +1580,7 @@ class saleController extends Controller
             $venta->vendedor_id = 1;
 
             $venta->fecha_venta = $currentDateFormat;
-        //    $venta->fecha_cierre = $currentDateFormat;
+            //    $venta->fecha_cierre = $currentDateFormat;
             $venta->total_bruto = 0;
             $venta->descuentos = 0;
             $venta->subtotal = 0;
@@ -1687,7 +1687,7 @@ class saleController extends Controller
             $venta->third_id = ($defaultCentro->id == 8) ? 157 : 1;
             $venta->vendedor_id = 1;
             $venta->fecha_venta = $currentDateFormat;
-           // $venta->fecha_cierre = $currentDateFormat;
+            // $venta->fecha_cierre = $currentDateFormat;
             $venta->total_bruto = 0;
             $venta->descuentos = 0;
             $venta->subtotal = 0;
@@ -2462,7 +2462,7 @@ class saleController extends Controller
                 $d->save();
             }
 
-            // —— Ahora, recalcular y guardar los totales de la venta
+            // 8) Ahora, recalcular y guardar los totales de la venta
             $TotalBruto        = (float) SaleDetail::where('sale_id', $sale->id)
                 ->where('status',    '1')
                 ->sum('total_bruto');
@@ -2479,7 +2479,7 @@ class saleController extends Controller
                 ->where('status',    '1')
                 ->sum('total');
 
-            // Mantener descuentos globales
+            // 9) Mantener descuentos globales
             $TotalDescuentos   = (float) $sale->descuentos + $sale->descuento_cliente;
 
             $sale->total_bruto           = $TotalBruto;
@@ -2494,13 +2494,22 @@ class saleController extends Controller
                 $sale->valor_a_pagar_credito = $TotalAPagar;
             }
 
-            // —— Nuevo: recalcular y asignar 'cambio'
-            $sale->cambio = round(
-                ($sale->valor_a_pagar_efectivo
-                    + $sale->valor_a_pagar_tarjeta)
+            // — recalculo de totales de Sale ya hecho aquí —
+
+            // 10) Calcular el valor de devolución usando los pagos en efectivo y tarjeta de la venta
+            $calculatedValor = round(
+                ($sale->valor_a_pagar_efectivo + $sale->valor_a_pagar_tarjeta)
                     - $sale->total,
                 2
             );
+
+            // Asignar en la NotaCredito tanto el ID de la forma de pago (global)
+            // como el valor que acabamos de calcular
+            $notaCredito->forma_pago_id    = $request->input('forma_pago');   // tu campo oculto o select global
+            $notaCredito->valor_devolucion = $calculatedValor;
+
+            // Persistimos los cambios en la cabecera de la nota
+            $notaCredito->save();
 
             $sale->status                = '3';
 

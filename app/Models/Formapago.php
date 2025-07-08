@@ -8,13 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Formapago extends Model
 {
 
-    use HasFactory;
-    
-    protected $fillable = ['codigo',
-    'nombre', 
-    'tipoformapago', 
-    'cuenta'
-    ];
+    protected $table = 'formapagos';
+    protected $fillable = ['codigo', 'nombre', 'tipoformapago', 'diascredito', 'cuenta'];
 
-	protected $table = 'formapagos';
+    public function scopeEfectivoTarjeta($query)
+    {
+        return $query->whereIn('tipoformapago', ['EFECTIVO', 'TARJETA']);
+    }
 }

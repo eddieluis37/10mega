@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Notacredito extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'notacreditos';
 
     protected $fillable = [
@@ -16,7 +16,10 @@ class Notacredito extends Model
         'user_id',     // Usuario que genera la nota
         'total',       // Total de la nota (puede ser calculado a partir de los detalles)
         'status',      // Estado de la nota (por ejemplo, 'active', 'anulada', etc.)
-        // Otros campos que requieras...
+        'credit_note_sequence',
+        'return_type',
+        'forma_pago_id',
+        'valor_devolucion',
     ];
 
     public function detalles()
@@ -24,4 +27,13 @@ class Notacredito extends Model
         return $this->hasMany(NotaCreditoDetalle::class, 'notacredito_id');
     }
 
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
+
+    public function formaPago()
+    {
+        return $this->belongsTo(FormaPago::class, 'forma_pago_id');
+    }
 }
