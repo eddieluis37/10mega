@@ -1,33 +1,23 @@
- para Laravel que te permitirá generar un archivo .xlsx con:
+<?php
 
 Una hoja Módulos y Permisos, listando cada módulo y sus permisos (ver, crear, editar, etc.).
 
 Una hoja Roles y Permisos, mostrando cada rol y la lista de permisos asignados.
 
-Solo sigue estos pasos:
 
 Instala el paquete:
 
-bash
-Copiar
-Editar
 composer require maatwebsite/excel
 Crea los exports y el comando:
 
-bash
-Copiar
-Editar
+
 php artisan make:export PermissionsExport
 php artisan make:export ModulesSheet
 php artisan make:export RolesSheet
 php artisan make:command ExportPermissionsToExcel
-Copia y pega el código que encontrarás en el archivo de canvas Export Permissions Excel (ID: 6866a1504b7c8191886fb3d86eb0fa96) dentro de las clases generadas en tu proyecto.
 
 Ejecuta el comando para crear el Excel:
 
-bash
-Copiar
-Editar
 
 php artisan export:permissions
 // Uso:
