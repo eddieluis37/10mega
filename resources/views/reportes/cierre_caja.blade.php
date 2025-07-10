@@ -144,14 +144,20 @@
           <th>TOTAL FACTURA</th>
           <th>EFECTIVO</th>
 
-          {{-- Solo encabezados de TARJETA con ventas --}}
+          {{-- Encabezados de TARJETA --}}
           @foreach($activeTarjetas as $tarjeta)
           <th>{{ $tarjeta->nombre }}</th>
           @endforeach
 
+          {{-- Crédito --}}
           @if($showCredito)
           <th>CREDITO</th>
           @endif
+
+          {{-- Encabezados dinámicos de DEV + siglas --}}
+          @foreach($creditForms as $fp)
+          <th>DEV {{ strtoupper($fp->nombre) }}</th>
+          @endforeach
         </tr>
       </thead>
 
@@ -160,37 +166,37 @@
         <tr>
           <td>{{ $sale->tercero->name ?? 'Sin Nombre' }}</td>
           <td>{{ $sale->consecutivo }}</td>
-          <td>$ {{ number_format($sale->total_valor_a_pagar, 0, ',', '.') }}</td>
+          <td>${{ number_format($sale->total_valor_a_pagar,0,',','.') }}</td>
+          <td>${{ number_format($sale->valor_a_pagar_efectivo - $sale->cambio,0,',','.') }}</td>
 
-          {{-- Efectivo neto --}}
-          <td>
-            $ {{ number_format(
-            $sale->valor_a_pagar_efectivo - $sale->cambio,
-            0, ',', '.'
-          ) }}
-          </td>
-
-          {{-- Columnas de tarjeta existentes --}}
+          {{-- Valores de TARJETA --}}
           @foreach($activeTarjetas as $tarjeta)
           <td>
             @if(optional($sale->formaPagoTarjeta)->id === $tarjeta->id)
-            ${{ number_format($sale->valor_a_pagar_tarjeta, 0, ',', '.') }}
+            ${{ number_format($sale->valor_a_pagar_tarjeta,0,',','.') }}
+            @else $0 @endif
+          </td>
+          @endforeach
+
+          {{-- Valor de CRÉDITO --}}
+          @if($showCredito)
+          <td>
+            @if($sale->formaPagoCredito)
+            ${{ number_format($sale->valor_a_pagar_credito,0,',','.') }}
+            @else $0 @endif
+          </td>
+          @endif
+
+          {{-- Valor de DEV (nota de crédito) --}}
+          @foreach($creditForms as $fp)
+          <td>
+            @if($sale->notacredito && $sale->notacredito->formaPago->id === $fp->id)
+            ${{ number_format($sale->notacredito->total,0,',','.') }}
             @else
             $0
             @endif
           </td>
           @endforeach
-
-          {{-- Columna CRÉDITO solo si aplica --}}
-          @if($showCredito)
-          <td>
-            @if($sale->formaPagoCredito)
-            ${{ number_format($sale->valor_a_pagar_credito, 0, ',', '.') }}
-            @else
-            $0
-            @endif
-          </td>
-          @endif
         </tr>
         @endforeach
       </tbody>
@@ -198,22 +204,27 @@
       <tfoot>
         <tr>
           <td colspan="2">TOTALES</td>
-          <td>${{ number_format($totalFactura, 0, ',', '.') }}</td>
-          <td>${{ number_format($totalEfectivo, 0, ',', '.') }}</td>
+          <td>${{ number_format($totalFactura,0,',','.') }}</td>
+          <td>${{ number_format($totalEfectivo,0,',','.') }}</td>
 
-          {{-- Totales por tarjeta --}}
+          {{-- Totales TARJETA --}}
           @foreach($activeTarjetas as $tarjeta)
-          <td>
-            ${{ number_format($totalesTarjeta[$tarjeta->id] ?? 0, 0, ',', '.') }}
-          </td>
+          <td>${{ number_format($totalesTarjeta[$tarjeta->id] ?? 0,0,',','.') }}</td>
           @endforeach
 
-          {{-- Total crédito --}}
+          {{-- Total CRÉDITO --}}
           @if($showCredito)
-          <td>${{ number_format($totalCredito, 0, ',', '.') }}</td>
+          <td>${{ number_format($totalCredito,0,',','.') }}</td>
           @endif
+
+          {{-- Totales DEV por forma de pago --}}
+          @foreach($creditForms as $fp)
+          <td>${{ number_format($totalesDevolucion[$fp->id] ?? 0,0,',','.') }}</td>
+          @endforeach
         </tr>
       </tfoot>
+
+      
     </table>
   </div>
 </body>

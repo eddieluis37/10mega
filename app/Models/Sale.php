@@ -51,7 +51,7 @@ class Sale extends Model
 
         static::creating(function (Sale $sale) {
             // Solo para ventas Parrilla (2 y 3) y si tengo centro de costo
-            if (in_array($sale->tipo, ['2','3']) && $sale->centrocosto_id) {
+            if (in_array($sale->tipo, ['2', '3']) && $sale->centrocosto_id) {
                 $sale->turno_diario = TurnoDiarioService::generarParaCentro($sale->centrocosto_id);
             }
         });
@@ -67,13 +67,13 @@ class Sale extends Model
         return $this->belongsTo(Centrocosto::class);
     }
 
-  /*   public function third()
+    /*   public function third()
     {
         return $this->belongsTo(Third::class);
     }
  */
 
- /**
+    /**
      * El “tercero” (cliente) asociado a esta venta.
      */
     public function third(): BelongsTo
@@ -166,5 +166,28 @@ class Sale extends Model
     public function cajero()
     {
         return $this->belongsTo(User::class, 'cajero_id');
+    }
+
+    /**
+     * Nota de crédito asociada a esta venta (asumo 1:1).
+     */
+    public function notacredito()
+    {
+        return $this->hasOne(\App\Models\Notacredito::class, 'sale_id');
+    }
+
+    /**
+     * Forma de pago de la nota de crédito, a través de la relación anterior.
+     */
+    public function notaFormaPago()
+    {
+        return $this->hasOneThrough(
+            \App\Models\Formapago::class,
+            \App\Models\Notacredito::class,
+            'sale_id',         // FK en notacreditos
+            'id',              // PK en formapagos
+            'id',              // PK en sales
+            'forma_pago_id'    // FK en notacreditos hacia formapagos
+        );
     }
 }
