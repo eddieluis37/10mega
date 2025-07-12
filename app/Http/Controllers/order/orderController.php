@@ -62,7 +62,16 @@ class orderController extends Controller
             ->get();
 
         $ventas = Order::get();
-        $centros = Centrocosto::Where('status', 1)->get();
+        // $centros = Centrocosto::Where('status', 1)->get();
+        // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
+        $centroIds = Auth::user()->stores->pluck('centrocosto_id')->unique();
+
+        // Obtiene los modelos de centros de costo usando los IDs obtenidos
+        $centros = Centrocosto::whereIn('id', $centroIds)->get();
+
+        // Selecciona el primer centro de costo como valor por defecto (si existe)
+        $defaultCentro = $centros->first();
+
         $clientes = Third::Where('cliente', 1)->get();
         $vendedores = Third::Where('vendedor', 1)->get();
         $alistadores = Third::Where('alistador', 1)->get();
@@ -70,7 +79,9 @@ class orderController extends Controller
         $formapagos = Formapago::get();
 
 
-        return view('order.index', compact('ventas', 'direccion', 'centros', 'clientes', 'vendedores', 'alistadores', 'subcentrodecostos', 'formapagos'));
+
+
+        return view('order.index', compact('ventas', 'direccion', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'alistadores', 'subcentrodecostos', 'formapagos'));
     }
 
     public function show()

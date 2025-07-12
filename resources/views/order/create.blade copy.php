@@ -69,7 +69,7 @@
 							<input type="hidden" id="ventaId" name="ventaId" value="{{$id}}">
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
 							<div class="row g-3">
-								<div class="col-md-10">
+								<div class="col-md-3">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar producto</label>
@@ -80,46 +80,48 @@
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
 												<option value="">Seleccione el producto</option>
 												@foreach ($prod as $p)
-												<option value="{{$p->id}}">Cod: {{$p->code}} - {{$p->name}}</option>
+												<option value="{{$p->id}}">{{$p->name}}</option>
 												@endforeach
 											</select>
 										</div>
 									</div>
 								</div>
-								
-								<div class="col-md-2">
-									<div class="form-group">
-										<label for="" class="form-label">KG|QT</label>
-										<div class="input-group flex-nowrap"">
-										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 10.00">
-											<span class="input-group-text" id="addon-wrapping">QT</span>
-										</div>
-										<span class="text-danger error-message"></span>
-									</div>
-								</div>
-								<div class="col-md-2">
+								<div class="col-md-3">
 									<label for="" class="form-label">Precio venta</label>
 									<div class="input-group flex-nowrap">
 										<span class="input-group-text" id="addon-wrapping">$</span>
-										@can('ver_Cambiar')
-										<!-- El usuario tiene permiso para editar -->
-										<input type="text" id="price" name="price" class="form-control input" placeholder="">
-										@else
-										<!-- El usuario no tiene permiso, campo de solo lectura -->
 										<input type="text" id="price" name="price" class="form-control input" readonly placeholder="">
-										@endcan
 									</div>
 								</div>
+
+								@can('Admin_Menu')
 								<div class="col-md-2">
-									<label for="" class="form-label">I.V.A</label>
+									<div class="" style="margin-top:0px; margin-left:3px">
+										<label for="password">Contraseña:</label>
+										<input type="password" id="password" name="password" class="form-control input">
+
+									</div>
+								</div>
+
+								<div class="col-md-2">
+									<div class="" style="margin-top:30px;">
+										<div class="d-grid gap-2">
+											<button id="btnRemove" class="btn btn-warning">Modificar-Precio</button>
+										</div>
+									</div>
+								</div>
+								@endcan
+
+								<div class="col-md-3">
+									<label for="" class="form-label">IVA</label>
 									<div class="input-group flex-nowrap">
 
 										<input type="text" id="porc_iva" name="porc_iva" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
-								<div class="col-md-2">
-									<label for="" class="form-label">I.U.P</label>
+								<div class="col-md-3">
+									<label for="" class="form-label">I.S</label>
 									<div class="input-group flex-nowrap">
 
 										<input type="text" id="porc_otro_impuesto" name="porc_otro_impuesto" class="form-control input" readonly placeholder="">
@@ -127,32 +129,25 @@
 									</div>
 								</div>
 
-
-								<div class="col-md-2">
-									<label for="" class="form-label">I.A.C</label>
-									<div class="input-group flex-nowrap">
-
-										<input type="text" id="porc_impoconsumo" name="porc_impoconsumo" class="form-control input" readonly placeholder="">
-										<span class="input-group-text" id="addon-wrapping">%</span>
-									</div>
-								</div>
-
-								<div class="col-md-2">
+								<div class="col-md-3">
 									<label for="" class="form-label">Descuento</label>
 									<div class="input-group flex-nowrap">
 
-										<input type="text" id="porc_desc" name="porc_desc" class="form-control input" readonly placeholder="">
+										<input type="text" id="porc_descuento" name="porc_descuento" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
 
-								<div class="col-md-2 d-flex justify-content-center align-items-center">
-									<div style="margin-top:25px;">
-										<div class="d-grid gap-2">
-											<button onclick="window.location.reload();" class="btn btn-danger btn-block" data-bs-toggle="tooltip" title="Solo en caso que edites un producto, y requieras ingresar uno nuevo">Limpiar Campos</button>
-										</div>
+								<!-- <div class="form-group row" style="margin-top:3px; margin-left:3px"> -->
+
+								<div class="col-md-3">
+									<label for="" class="form-label">Peso KG</label>
+									<div class="input-group flex-nowrap"">
+										<input type=" text" id="quantity" name="quantity" class="form-control input" placeholder="EJ: 25,00">
+										<span class="input-group-text" id="addon-wrapping">KG</span>
 									</div>
 								</div>
+
 
 								<div class="col-md-6">
 									<div class="form-group">
@@ -164,11 +159,17 @@
 								<div class="col-md-2 d-flex justify-content-center align-items-center">
 									<div style="margin-top:0px;">
 										<div class="d-grid gap-2">
-											<button id="btnAdd" class="btn btn-primary btn-block">Añadir Producto</button>
+											<button id="btnAdd" class="btn btn-primary">Añadir</button>
 										</div>
 									</div>
 								</div>
-								
+								<div class="col-md-2 d-flex justify-content-center align-items-center">
+									<div style="margin-top:0px;">
+										<div class="d-grid gap-2">
+											<button onclick="window.location.reload();" class="btn btn-danger" data-bs-toggle="tooltip" title="Solo en caso que edites un producto, y requieras ingresar uno nuevo">Limpiar</button>
+										</div>
+									</div>
+								</div>
 						</form>
 					</div>
 				</div>
@@ -199,7 +200,7 @@
 								<th class="table-th text-white">%I.S</th>
 								<th class="table-th text-white">I.S</th>
 								<th class="table-th text-white">Total</th>
-								<th class="table-th text-white">OBSER</th>
+								<th class="table-th text-white">OBSERVACION</th>
 
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
@@ -279,30 +280,6 @@
 	</div>
 </div>
 </div>
-<script>
-	document.addEventListener("DOMContentLoaded", function() {
-		const costoInput = document.getElementById("price");
-
-		// Función para formatear el número con puntos
-		function formatCurrency(value) {
-			return value
-				.replace(/\D/g, "") // Elimina caracteres que no sean dígitos
-				.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos como separadores de miles
-		}
-
-		costoInput.addEventListener("input", function(e) {
-			const value = e.target.value;
-			e.target.value = formatCurrency(value);
-		});
-
-		costoInput.addEventListener("blur", function(e) {
-			// Opcional: Agrega un "0" si el campo está vacío al salir
-			if (!e.target.value) {
-				e.target.value = "0";
-			}
-		});	
-	});
-</script>
 @endsection
 @section('script')
 <script src="{{asset('rogercode/js/order/rogercode-create.js')}}" type="module"></script>

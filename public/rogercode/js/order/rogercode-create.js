@@ -57,7 +57,9 @@ function actualizarValoresProducto(productId) {
         },
         success: function (response) {
             // Actualiza los valores en los campos de entrada 
-            $("#price").val(response.precio);
+            const formattedPrice = formatCantidadSinCero(response.precio);
+
+            $("#price").val(formattedPrice);
             $("#porc_iva").val(response.iva);
             $("#porc_otro_impuesto").val(response.otro_impuesto);
             $("#porc_descuento").val(response.porc_descuento);
@@ -213,54 +215,7 @@ const showData = (data) => {
             denyButtonText: `Cancelar`,
         });
     }
-
-    /*   // Evento click del botón "facturarBtn"
-    tableFoot.addEventListener("click", (e) => {
-        e.preventDefault();
-        let element = e.target;
-        console.log(element);
-        if (element.id === "cargarInventarioBtn") {
-            showConfirmationAlert(element)
-                .then((result) => {
-                    if (result && result.value) {
-                        loadingStart(element);
-                        const dataform = new FormData();
-                        dataform.append("ventaId", Number(venta_id.value));
-                        return sendData("/registrar_pago", dataform, token);
-                    }
-                })
-                .then((result) => {
-                    console.log(result);
-                    if (result && result.status == 1) {
-                        loadingEnd(
-                            element,
-                            "success",
-                            "Cargando al inventorio"
-                        );
-                        element.disabled = true;
-                        return swal(
-                            "EXITO",
-                            "Inventario Cargado Exitosamente",
-                            "success"
-                        );
-                    }
-                    if (result && result.status == 0) {
-                        loadingEnd(
-                            element,
-                            "success",
-                            "Cargando al inventorio"
-                        );
-                        errorMessage(result.message);
-                    }
-                })
-                .then(() => {
-                    window.location.href = 'registrar_pago/{{$id}}';
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        }
-    }); */
+    
 };
 
 price.addEventListener("change", function () {
@@ -273,29 +228,4 @@ quantity.addEventListener("change", function () {
     const enteredValue = formatkg(quantity.value);
     console.log("Entered value: " + enteredValue);
     quantity.value = enteredValue;
-});
-
-// Get the current date
-const date = new Date();
-
-// Create a dynamic password by combining letters and the current date
-const passwordHoy =
-    "admin" + date.getFullYear() + (date.getMonth() + 1) + date.getDate();
-
-btnRemove.addEventListener("click", (e) => {
-    e.preventDefault();
-    const priceInput = document.querySelector("#price");
-    const passwordInput = document.querySelector("#password");
-    const password = passwordInput.value;
-
-    // Check if the password is correct
-    if (password === passwordHoy) {
-        // Disable the readonly attribute of the price input field
-        priceInput.removeAttribute("readonly");
-    } else {
-        // Set the readonly attribute of the price input field
-        priceInput.setAttribute("readonly", true);
-        // Display an error message
-        alert("Contraseña incorrecta");
-    }
 });
