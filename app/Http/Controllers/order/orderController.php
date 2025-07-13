@@ -354,7 +354,7 @@ class orderController extends Controller
     {
         $detalles = DB::table('order_details as de')
             ->join('products as pro', 'de.product_id', '=', 'pro.id')
-            ->select('de.*', 'pro.name as nameprod', 'pro.code', 'de.porc_iva', 'de.iva', 'de.porc_otro_impuesto',)
+            ->select('de.*', 'pro.name as nameprod', 'pro.code', 'de.porc_iva', 'de.iva', 'de.porc_otro_impuesto', 'de.porc_impoconsumo')
             ->where([
                 ['de.order_id', $ventaId],
                 /*   ['de.status', 1] */
@@ -408,6 +408,11 @@ class orderController extends Controller
             $porcIva = $request->get('porc_iva');
             $porcOtroImpuesto = $request->get('porc_otro_impuesto');
 
+            $netoSinImp   = $precioUnitarioBruto - $totalDescuento;
+
+            $porcImpoconsumo = $request->get('porc_impoconsumo', 0);
+            $impoconsumo     = $netoSinImp * ($porcImpoconsumo / 100);
+
             $Impuestos = $porcIva + $request->porc_otro_impuesto;
             $TotalImpuestos = $precioUnitarioBrutoConDesc * ($Impuestos / 100);
             $Total = $TotalImpuestos + $precioUnitarioBrutoConDesc;
@@ -439,8 +444,10 @@ class orderController extends Controller
                 $detail->descuento_cliente = $descuentoCliente;
                 $detail->porc_iva = $porcIva;
                 $detail->iva = $iva;
-                $detail->porc_otro_impuesto = $porcOtroImpuesto;
+                $detail->porc_otro_impuesto = $porcOtroImpuesto;                
                 $detail->otro_impuesto = $otroImpuesto;
+                $detail->porc_impoconsumo = $porcImpoconsumo;
+                $detail->impoconsumo = $impoconsumo;
                 $detail->total_bruto = $precioUnitarioBrutoConDesc;
                 $detail->total_costo = $totalCosto;
                 $detail->utilidad = $utilidad;
@@ -463,6 +470,8 @@ class orderController extends Controller
                 $updateReg->porc_iva = $porcIva;
                 $updateReg->porc_otro_impuesto = $porcOtroImpuesto;
                 $updateReg->otro_impuesto = $otroImpuesto;
+                $updateReg->porc_impoconsumo = $porcImpoconsumo;
+                $updateReg->impoconsumo = $impoconsumo;
                 $updateReg->total_bruto = $precioUnitarioBrutoConDesc;
                 $updateReg->total_costo = $totalCosto;
                 $updateReg->total_costo = $totalCosto;
@@ -634,7 +643,7 @@ class orderController extends Controller
             ->join('thirds as t', 'listapreciodetalles.listaprecio_id', '=', 't.id')
             ->where('prod.id', $request->productId)
             ->where('t.id', $cliente->listaprecio_genericid)
-            ->select('listapreciodetalles.precio', 'prod.iva', 'otro_impuesto', 'listapreciodetalles.porc_descuento', 'cost') // Select only the
+            ->select('listapreciodetalles.precio', 'prod.iva', 'otro_impuesto', 'listapreciodetalles.porc_descuento', 'prod.impoconsumo', 'cost') // Select only the
             ->first();
         if ($producto) {
             return response()->json([
@@ -642,6 +651,7 @@ class orderController extends Controller
                 'iva' => $producto->iva,
                 'otro_impuesto' => $producto->otro_impuesto,
                 'porc_descuento' => $producto->porc_descuento,
+                'porc_impoconsumo' => $producto->impoconsumo,
                 'costo_prod' => $producto->cost
             ]);
         } else {

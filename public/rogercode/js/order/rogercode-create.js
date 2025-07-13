@@ -56,12 +56,13 @@ function actualizarValoresProducto(productId) {
             cliente: $("#cliente").val(), // Obtén el valor del campo centrocosto
         },
         success: function (response) {
-            // Actualiza los valores en los campos de entrada 
+            // Actualiza los valores en los campos de entrada
             const formattedPrice = formatCantidadSinCero(response.precio);
 
             $("#price").val(formattedPrice);
             $("#porc_iva").val(response.iva);
             $("#porc_otro_impuesto").val(response.otro_impuesto);
+            $("#porc_impoconsumo").val(response.impoconsumo);
             $("#porc_descuento").val(response.porc_descuento);
             $("#costo_prod").val(response.costo_prod);
         },
@@ -114,6 +115,8 @@ tbodyTable.addEventListener("click", (e) => {
             regDetail.value = editReg.id;
             price.value = formatCantidadSinCero(editReg.price);
             quantity.value = formatCantidad(editReg.quantity);
+            porc_otro_impuesto.value = editReg.porc_otro_impuesto;
+            porc_impoconsumo.value = editReg.porc_impoconsumo;
             observaciones.value = editReg.observaciones;
 
             $(".select2Prod").val(editReg.product_id).trigger("change");
@@ -157,10 +160,11 @@ const showData = (data) => {
                 <td>${formatCantidad(element.porc_utilidad)}%</td>				
                 <td>${formatCantidad(element.porc_iva)}%</td> 
                 <td>$${formatCantidadSinCero(element.iva)}</td> 
-                <td>${element.porc_otro_impuesto}%</td>     
-                <td>${formatCantidadSinCero(
-                    element.otro_impuesto
-                )}</td>             
+                <td>${formatCantidadSinCero(element.otro_impuesto)}</td> 
+                <td>${formatCantidadSinCero(element.porc_impoconsumo)}</td> 	
+                   <td>$${formatCantidadSinCero(
+                       element.impoconsumo
+                   )}</td>	            
                 <td>$${formatCantidadSinCero(element.total)}</td>  
                 <td>${element.observaciones}</td>		
                 <td class="text-center">
@@ -215,7 +219,6 @@ const showData = (data) => {
             denyButtonText: `Cancelar`,
         });
     }
-    
 };
 
 price.addEventListener("change", function () {

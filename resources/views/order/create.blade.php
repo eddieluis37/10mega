@@ -131,7 +131,6 @@
 								<div class="col-md-2">
 									<label for="" class="form-label">I.A.C</label>
 									<div class="input-group flex-nowrap">
-
 										<input type="text" id="porc_impoconsumo" name="porc_impoconsumo" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
@@ -183,21 +182,23 @@
 					<table id="tableDespostere" class="table table-sm table-striped table-bordered">
 						<thead class="text-white" style="background: #3B3F5C">
 							<tr>
-								<th class="table-th text-white"> Producto </th>
+								<th class="table-th text-white">Producto</th>
 								<th class="table-th text-white">Cant</th>
-								<th class="table-th text-white">COSTO</th>
+								<th class="table-th text-white">COST</th>
 								<th class="table-th text-white">Valor.U</th>
 								<th class="table-th text-white">%Des</th>
 								<th class="table-th text-white">Des</th>
 								<th class="table-th text-white">{{$datacompensado[0]->porc_descuento}}%DCl</th>
 								<th class="table-th text-white">Total.B</th>
-								<th class="table-th text-white">T.COSTO</th>
+								<th class="table-th text-white">T.COST</th>
 								<th class="table-th text-white">UT</th>
 								<th class="table-th text-white">%UT</th>
 								<th class="table-th text-white">%IVA</th>
 								<th class="table-th text-white">IVA</th>
 								<th class="table-th text-white">%I.S</th>
 								<th class="table-th text-white">I.S</th>
+								<th class="table-th text-white">%I.C</th>
+								<th class="table-th text-white">I.C</th>
 								<th class="table-th text-white">Total</th>
 								<th class="table-th text-white">OBSER</th>
 
@@ -220,10 +221,12 @@
 								<td>${{ number_format($proddetail->total_costo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->utilidad, 0, ',', '.')}}</td>
 								<td>{{$proddetail->porc_utilidad}}%</td>
-								<td>{{$proddetail->porc_iva}}%</td>
+								<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
-								<td>{{$proddetail->porc_otro_impuesto}}%</td>
+								<td>{{ number_format($proddetail->porc_otro_impuesto, 0, ',', '.')}}</td>															
 								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
+								<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
+								<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
 								<td><span style="font-size: small;">{{ strtolower($proddetail->observaciones) }}</span></td>
 
