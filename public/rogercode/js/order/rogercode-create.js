@@ -63,7 +63,7 @@ function actualizarValoresProducto(productId) {
             $("#porc_iva").val(response.iva);
             $("#porc_otro_impuesto").val(response.otro_impuesto);
             $("#porc_impoconsumo").val(response.impoconsumo);
-            $("#porc_descuento").val(response.porc_descuento);
+            $("#porc_desc").val(response.porc_descuento);
             $("#costo_prod").val(response.costo_prod);
         },
         error: function (xhr, status, error) {
@@ -159,7 +159,8 @@ const showData = (data) => {
                 <td>$${formatCantidadSinCero(element.utilidad)}</td> 
                 <td>${formatCantidad(element.porc_utilidad)}%</td>				
                 <td>${formatCantidad(element.porc_iva)}%</td> 
-                <td>$${formatCantidadSinCero(element.iva)}</td> 
+                <td>$${formatCantidadSinCero(element.iva)}</td>
+                <td>${formatCantidad(element.porc_otro_impuesto)}%</td> 
                 <td>${formatCantidadSinCero(element.otro_impuesto)}</td> 
                 <td>${formatCantidadSinCero(element.porc_impoconsumo)}</td> 	
                    <td>$${formatCantidadSinCero(

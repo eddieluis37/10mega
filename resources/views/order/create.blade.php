@@ -130,10 +130,10 @@
 
 								<div class="col-md-2">
 									<label for="" class="form-label">I.A.C</label>
-									<div class="input-group flex-nowrap">
+								
 										<input type="text" id="porc_impoconsumo" name="porc_impoconsumo" class="form-control input" readonly placeholder="">
-										<span class="input-group-text" id="addon-wrapping">%</span>
-									</div>
+										
+									
 								</div>
 
 								<div class="col-md-2">

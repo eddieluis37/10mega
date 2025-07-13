@@ -444,7 +444,7 @@ class orderController extends Controller
                 $detail->descuento_cliente = $descuentoCliente;
                 $detail->porc_iva = $porcIva;
                 $detail->iva = $iva;
-                $detail->porc_otro_impuesto = $porcOtroImpuesto;                
+                $detail->porc_otro_impuesto = $porcOtroImpuesto;
                 $detail->otro_impuesto = $otroImpuesto;
                 $detail->porc_impoconsumo = $porcImpoconsumo;
                 $detail->impoconsumo = $impoconsumo;
@@ -650,8 +650,8 @@ class orderController extends Controller
                 'precio' => $producto->precio,
                 'iva' => $producto->iva,
                 'otro_impuesto' => $producto->otro_impuesto,
+                'impoconsumo' => $producto->impoconsumo,
                 'porc_descuento' => $producto->porc_descuento,
-                'porc_impoconsumo' => $producto->impoconsumo,
                 'costo_prod' => $producto->cost
             ]);
         } else {
