@@ -73,7 +73,8 @@
                         <div class="col-md-4">
                             <label for="" class="form-label">Medios Electronicos</label>
                             <select class="form-control form-control-sm input" name="forma_pago_tarjeta_id" id="forma_pago_tarjeta_id" required>
-                                <option value="1">Seleccione medio de pago</option>
+                                <option value="">Seleccione medio de pago</option>
+                                <option value="1">No Aplica</option>
                                 @foreach($forma_pago_tarjeta as $formaPagoTarjeta)
                                 <option value="{{$formaPagoTarjeta->id}}" {{ $formaPagoTarjeta->id == 0 ? 'selected' : '' }}>{{$formaPagoTarjeta->nombre}}</option>
                                 @endforeach
@@ -163,8 +164,7 @@
                     </div>
                 </div>
             </div>
-        </div>    
-       
+        </div>   
     </div>
 
     <div class="col-sm-5">
@@ -316,6 +316,8 @@
 
     });
 </script>
+
+
 @endsection
 @section('script')
 <script src="{{asset('rogercode/js/sale/code-app-index.js')}}"></script>
