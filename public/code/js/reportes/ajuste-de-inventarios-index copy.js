@@ -39,7 +39,7 @@ function initializeDataTable({
             },
         },
         columns: [
-            { data: "diahora_ajuste", name: "diahora_ajuste" },
+            { data: "diahora_ajuste", name: "diahora_ajuste" },    
             {
                 data: "category_name",
                 name: "category_name",
@@ -47,7 +47,7 @@ function initializeDataTable({
                     return "<div style='text-align: right;'>" + data + "</div>";
                 },
             },
-            { data: "product_id", name: "product_id" },
+            { data: "product_id", name: "product_id" }, 
             {
                 data: "product_name",
                 name: "product_name",
@@ -87,13 +87,13 @@ function initializeDataTable({
             {
                 data: "lote_code",
                 name: "lote_code",
-                render: function (data, type, row) {
+                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: center;'>" + data + "</div>"
                     );
                 },
             },
-            { data: "fecha_vencimientolote", name: "fecha_vencimientolote" },
+             { data: "fecha_vencimientolote", name: "fecha_vencimientolote" }, 
             {
                 data: "stock_fisico_despues",
                 name: "stock_fisico_despues",
@@ -104,7 +104,7 @@ function initializeDataTable({
                         "</div>"
                     );
                 },
-            },
+            },            
             {
                 data: "cantidad_diferencia",
                 name: "cantidad_diferencia",
@@ -138,7 +138,7 @@ function initializeDataTable({
                     );
                 },
             },
-            {
+             {
                 data: "user_name",
                 name: "user_name",
                 render: function (data) {
@@ -153,7 +153,7 @@ function initializeDataTable({
                         return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
                     }
                 },
-            },
+            },          
         ],
         order: [[1, "ASC"]],
         language: {
@@ -178,8 +178,9 @@ function initializeDataTable({
         dom: "Bfrtip",
         buttons: ["copy", "csv", "excel", "pdf"],
         footerCallback: function (row, data, start, end, display) {
-            var api = this.api();
+            var api = this.api();       
 
+           
             var totalCant = api
                 .column("stock_fisico_despues:name", { search: "applied" })
                 .data()
@@ -210,7 +211,9 @@ function initializeDataTable({
                 }, 0)
                 .toFixed(2);
             var totalCostoPromdFormatted =
-                "$" + formatCantidadSinCero(totalCostoPromd);
+                "$" + formatCantidadSinCero(totalCostoPromd);      
+
+         
 
             $(api.column("stock_fisico_despues:name").footer())
                 .html(totalCantFormatted)
@@ -225,24 +228,91 @@ function initializeDataTable({
                 .css("text-align", "right");
         },
     });
+
+    // Agregar botón de exportar a Excel
+    console.log("Iniciando configuración de botones DataTable");
+    new $.fn.dataTable.Buttons(dataTable, {
+        buttons: [
+            {
+                extend: "excel",
+                text: '<i class="far fa-file-excel"></i>',
+                className: "btn btn-dark btn-block",
+                action: function (e, dt, button, config) {
+                    var dateFrom = $("#dateFrom").val();
+                    var dateTo = $("#dateTo").val();
+                    var url =
+                        "/report_compras_x_prod/excel/" +
+                        dateFrom +
+                        "/" +
+                        dateTo;
+                    if (!url) {
+                        alert("Error al obtener la URL de exportación a Excel");
+                    } else {
+                        window.open(url, "_blank");
+                    }
+                },
+            },
+        ],
+    });
+
+    /* // Agregar campos de búsqueda para la primera y cuarta columna de la tabla
+    $("#tableInventory thead th").each(function (index) {
+        if (index === 1 || index === 2) {
+            var title = $(this).text();
+            $(this).html(
+                '<input type="text" placeholder="Buscar ' + title + '" />'
+            );
+        }
+    });
+
+    // Aplicar el filtro de búsqueda solo para la primera y cuarta columna
+    dataTable.columns().every(function (index) {
+        if (index === 1 || index === 2) {
+            var that = this;
+            $("input", this.header()).on("keyup change", function () {
+                if (that.search() !== this.value) {
+                    that.search(this.value).draw();
+                }
+            });
+        }
+    }); */
+   
 }
+
+/* $(document).ready(function () {
+    initializeDataTable("-1");
+
+    $("#dateFrom, #dateTo").on("change", function () {
+        var dateFrom = $("#dateFrom").val();
+        var dateTo = $("#dateTo").val();
+
+        dataTable.destroy();
+        initializeDataTable(dateFrom, dateTo);
+        cargarTotales(dateFrom, dateTo);
+    });
+});
+ */
 
 $(document).ready(function () {
     // 1) Inicializamos con valores vacíos
     initializeDataTable();
 
     // 2) Cada vez que cambie cualquier filtro, destruimos y recreamos la tabla
-    $("#centrocosto, #categoria, #dateFrom, #dateTo").on("change", function () {
-        const filtros = {
-            centroId: $("#centrocosto").val(),
-            categoriaId: $("#categoria").val(),
-            dateFrom: $("#dateFrom").val(),
-            dateTo: $("#dateTo").val(),
-        };
-        dataTable.destroy();
-        initializeDataTable(filtros);
-    });
+    $("#centrocosto, #categoria, #dateFrom, #dateTo").on(
+        "change",
+        function () {
+            const filtros = {
+                centroId: $("#centrocosto").val(),
+                categoriaId: $("#categoria").val(),
+                dateFrom: $("#dateFrom").val(),
+                dateTo: $("#dateTo").val(),
+            };
+            dataTable.destroy();
+            initializeDataTable(filtros);
+        }
+    );
 });
+
 
 document
     .getElementById("cargarInventarioBtn")

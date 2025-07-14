@@ -59,7 +59,7 @@
             <input type="datetime-local" class="form-control" value="{{ $dateFrom ?? date('Y-m-d') }}T00:00" name="dateFrom" id="dateFrom" required data-bs-toggle="tooltip" title="Selecciona la fecha y hora inicial desde el calendario">
           </div>
         </div>
-        <div class="col-sm-12 col-md-3">
+       <div class="col-sm-12 col-md-3">
           <h6>Fecha y hora final</h6>
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $dateTo ?? date('Y-m-d') }}T23:59" name="dateTo" id="dateTo" required data-bs-toggle="tooltip" title="Selecciona la fecha y hora final desde el calendario">
@@ -75,14 +75,14 @@
                 <th class="table-th text-white" title="Identificador del Producto" style="text-align: center;">ID.P</th>
                 <th class="table-th text-white" title="Nombre del Producto" style="text-align: center;">PRODUCTO</th>
                 <th class="table-th text-white" title="Stock Ideal antes de Ajuste" style="text-align: center;">SI</th>
-                <th class="table-th text-white" title="Bodega" style="text-align: center;">BODEGA</th>
+                 <th class="table-th text-white" title="Bodega" style="text-align: center;">BODEGA</th>
                 <th class="table-th text-white" title="Codigo lote" style="text-align: center;">LOTE</th>
                 <th class="table-th text-white" title="Fecha de vencimiento del lote" style="text-align: center;">FEC_VENC</th>
                 <th class="table-th text-white" title="Stock Fisica" style="text-align: center;">SF</th>
                 <th class="table-th text-white" title="Cantidad diferencia" style="text-align: center;">DIF</th>
-                <th class="table-th text-white" title="Costo inicial total" style="text-align: center;">COSTO</th>
-                <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">SUBTOTAL</th>
-                <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">USUARIO</th>
+                <th class="table-th text-white" title="Costo inicial total" style="text-align: center;">COSTO</th>                
+                <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">SUBTOTAL</th>  
+                <th class="table-th text-white" title="Costo total ajuste" style="text-align: center;">USUARIO</th>             
               </tr>
             </thead>
             <tbody>
@@ -90,6 +90,13 @@
             <tfoot>
               <tr>
                 <th>Totales</th>
+                <td>
+                  <div class="col-sm-6 col-md-2 mt-3">
+                    <a class="btn btn-dark btn-block {{(2) < 1 ? 'disabled' : '' }}" href="{{ url('report_compras_x_prod/excel' . '/' . $dateFrom. '/' . $dateTo) }}" target="_blank">
+                      <i class="far fa-file-excel"></i>
+                    </a>
+                  </div>
+                </td>
                 <td></td>
                 <td>0.00</td>
                 <td>0.00</td>
@@ -103,6 +110,8 @@
             </tfoot>
           </table>
         </div>
+
+
       </div>
     </div>
   </div>
@@ -110,3 +119,13 @@
   @section('script')
   <script src="{{asset('code/js/reportes/ajuste-de-inventarios-index.js')}} " type="module"></script>
   @endsection
+
+  <script>
+    // Función para exportar a Excel
+    function exportarExcel() {
+      const dateFrom = $("#dateFrom").val();
+      const dateTo = $("#dateTo").val();
+      const url = `../report_compras_x_prod/excel/${dateFrom}/${dateTo}`;
+      window.open(url, "_blank");
+    }
+  </script>
