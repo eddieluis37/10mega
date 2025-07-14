@@ -70,7 +70,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>" +
-                        formatCantidad(data) +
+                        parseFloat(data) +
                         "</div>"
                     );
                 },
@@ -100,7 +100,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>" +
-                        formatCantidad(data) +
+                        parseFloat(data) +
                         "</div>"
                     );
                 },
@@ -111,7 +111,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>" +
-                        formatCantidad(data) +
+                        parseFloat(data) +
                         "</div>"
                     );
                 },
@@ -122,7 +122,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidad(data) +
+                        formatCantidadSinCero(data) +
                         "</div>"
                     );
                 },
@@ -210,7 +210,7 @@ function initializeDataTable({
                 }, 0)
                 .toFixed(2);
             var totalCostoPromdFormatted =
-                "$" + formatCantidadSinCero(totalCostoPromd);
+                "" + formatCantidadSinCero(totalCostoPromd);
 
             $(api.column("stock_fisico_despues:name").footer())
                 .html(totalCantFormatted)
