@@ -24,12 +24,11 @@
 			<tr>
 				<td colspan="2" class="text-center">
 
-					<span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">CARNICOS SV SAS</span>
+					<span style="font-size: 9px; font-weight: bold; display: block; margin: 0;">MEGACHORIZOS SAS</span>
 					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Nit 901.531.807-3</span>
-					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">AUTOPISTA SUR 66 78 LC B 22 FRIGORIFICO GUADALUPE</span>
-					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Bogotá - Tel. (601) 9502998</span>
-					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">contabilidad@puracarnes.com</span>
-					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">www.puracarnes.com</span>
+					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">CALLE 35 SUR 70B 79</span>
+					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">Bogotá - Tel. (601) 9502998</span>					
+					<span style="font-size: 8px; font-weight: lighter; display: block; margin: 0;">contamegachorizos@gmail.com</span>
 				</td>
 				<!-- <td>
 					<img src="{{ asset('assets/img/Logo_CSV2.png') }}" alt="" class="invoice-logo" width="10%" style="vertical-align: top; padding-top: -1px; position: relative">
