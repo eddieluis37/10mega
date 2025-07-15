@@ -121,7 +121,7 @@
 									<select class="form-control form-control-sm input" name="hora_inicial_entrega" id="hora_inicial_entrega" required>
 										<option value="">Seleccione hora de entrega</option>
 										@php
-										$startTime = strtotime('08:00');
+										$startTime = strtotime('06:00');
 										$endTime = strtotime('17:00');
 										$interval = 60 * 60; // 1 hour interval
 										for ($i = $startTime; $i <= $endTime; $i +=$interval) { echo '<option value="' . date('H:i', $i) . '">' . date('h:i A', $i) . '</option>' ; } @endphp </select>
@@ -136,8 +136,8 @@
 									<select class="form-control form-control-sm input" name="hora_final_entrega" id="hora_final_entrega" required>
 										<option value="">Seleccione hora de entrega</option>
 										@php
-										$startTime = strtotime('08:00');
-										$endTime = strtotime('17:00');
+										$startTime = strtotime('07:00');
+										$endTime = strtotime('18:00');
 										$interval = 60 * 60; // 1 hour interval
 										for ($i = $startTime; $i <= $endTime; $i +=$interval) { echo '<option value="' . date('H:i', $i) . '">' . date('h:i A', $i) . '</option>' ; } @endphp </select>
 											<span class="text-danger error-message"></span>
