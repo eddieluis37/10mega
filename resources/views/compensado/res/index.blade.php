@@ -37,7 +37,7 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b>Compras | Productos </b>
+					<b>Ordenes | Compras </b>
 				</h4>
 				<div class="d-flex justify-content-between">
 					<ul class="tabs tab-pills d-flex">
@@ -79,7 +79,7 @@
 				<fieldset id="contentDisable">
 					<form action="" id="form-compensado-res">
 						<div class="modal-header">
-							<h4 class="modal-title">Crear compra de productos</h4>
+							<h4 class="modal-title">Crear orden de compra</h4>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span></button>
 						</div>

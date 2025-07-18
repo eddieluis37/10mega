@@ -58,6 +58,50 @@ class compensadoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+     public function create_order($id)
+    {       
+        $datacompensado = DB::table('compensadores as comp')        
+            ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
+            ->join('stores as s', 'comp.store_id', '=', 's.id')          
+            ->join('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
+            ->select('comp.*', 'tird.name as namethird', 's.name as namestore', 'centro.name as namecentrocosto')
+            ->where('comp.id', $id)
+            ->get();
+
+        $lotes = Lote::orderBy('id', 'desc')->get();
+
+        $prod = Product::Where([
+            ['status', 1]
+        ])
+            ->orderBy('category_id', 'asc')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        /**************************************** */
+        $status = '';
+        $fechaCompensadoCierre = Carbon::parse($datacompensado[0]->fecha_cierre);
+        $date = Carbon::now();
+        $currentDate = Carbon::parse($date->format('Y-m-d'));
+        if ($currentDate->gt($fechaCompensadoCierre)) {
+            //'Date 1 is greater than Date 2';
+            $status = 'false';
+        } elseif ($currentDate->lt($fechaCompensadoCierre)) {
+            //'Date 1 is less than Date 2';
+            $status = 'true';
+        } else {
+            //'Date 1 and Date 2 are equal';
+            $status = 'false';
+        }
+        /**************************************** */
+
+        $detail = $this->getcompensadoresdetail($id);
+
+        $arrayTotales = $this->sumTotales($id);
+        //dd($arrayTotales);
+        return view('compensado.create_order', compact('datacompensado', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
+    }
+
     public function create($id)
     {
         //$category = Category::WhereIn('id',[1,2,3])->get();
@@ -150,6 +194,74 @@ class compensadoController extends Controller
         });
         
         return response()->json($formattedProducts);
+    }
+
+      public function savedetail_order(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'compensadoId' => 'required',
+                'lote' => 'required',
+                'producto' => 'required',
+                'pcompra' => 'required',
+                'pesokg' => [
+                    'required',
+                    'numeric',
+                    'regex:/^\d+(\.\d{1,2})?$/',
+                    'min:0.1',
+                ],
+            ], [
+                'compensadoId.required' => 'El compensado es requerido',
+                'lote.required' => 'El lote es requerido',
+                'producto.required' => 'El producto es requerido',
+                'pcompra.required' => 'El precio de compra es requerido',
+                'pesokg.required' => 'El peso es requerido',
+                'pesokg.numeric'  => 'La cantidad debe ser un número.',
+                'pesokg.min'      => 'La cantidad debe ser mayor a 0.1.',
+                'pesokg.regex'     => 'La cantidad debe tener hasta dos decimales.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $formatCantidad = new metodosrogercodeController();
+            $formatPcompra = $formatCantidad->MoneyToNumber($request->pcompra);
+
+            $pesokg = $request->pesokg;
+            $subtotal = $formatPcompra * $pesokg;
+
+            $data = [
+                'compensadores_id' => $request->compensadoId,
+                'lote_id' => $request->lote,
+                'products_id' => $request->producto,
+                'pcompra' => $formatPcompra,
+                'peso' => $pesokg,
+                'iva' => 0,
+                'subtotal' => $subtotal,
+            ];
+
+            // Actualiza si existe, crea si no
+            Compensadores_detail::updateOrCreate(
+                ['id' => $request->regdetailId], // Busca por ID si existe
+                $data // Asigna datos
+            );
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Agregado correctamente",
+                'array' => $this->getcompensadoresdetail($request->compensadoId),
+                'arrayTotales' => $this->sumTotales($request->compensadoId),
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 0,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
 
@@ -379,7 +491,10 @@ class compensadoController extends Controller
                 } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
                     $btn = '
                         <div class="text-center">
-					    <a href="compensado/create/' . $data->id . '" class="btn btn-dark" title="Detalles" >
+                         <a href="compensado/create_order/' . $data->id . '" class="btn btn-dark" title="Orden" >
+						    <i class="fas fa-directions"></i>
+					    </a>
+					    <a href="compensado/create/' . $data->id . '" class="btn btn-dark" title="Factura" >
 						    <i class="fas fa-directions"></i>
 					    </a>
 					    <button class="btn btn-dark" title="Compensado" onclick="editCompensado(' . $data->id . ');">
