@@ -61,32 +61,19 @@
 						<form id="form-detail">
 							<input type="hidden" id="compensadoId" name="compensadoId" value="{{$id}}">
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
-							<div class="row g-3">
-								<div class="col-md-3">
+							<div class="row g-3">								
+								<div class="col-md-6">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="" class="form-label">Buscar lote</label>
-											<select class="form-control form-control-sm select2Lote" name="lote" id="lote" required="">
-												<option value="">Seleccione el lote</option>
-												@foreach ($lotes as $l)
-												<option value="{{$l->id}}">{{$l->codigo}}</option>
-												@endforeach
-											</select>
-											<span class="text-danger error-message"></span>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-3">
-									<div class="task-header">
-										<div class="form-group">
-											<label for="" class="form-label">Buscar producto</label>
+											<label for="" class="form-label">Buscar producto</label>																				
+											
+											<input type="hidden" id="costo_prod" name="costo_prod" class="form-control input" readonly placeholder="">
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
 												<option value="">Seleccione el producto</option>
 												@foreach ($prod as $p)
-												<option value="{{$p->id}}">{{$p->name}}</option>
+												<option value="{{$p->id}}">Cod: {{$p->code}} - {{$p->name}}</option>
 												@endforeach
 											</select>
-											<span class="text-danger error-message"></span>
 										</div>
 									</div>
 								</div>
@@ -95,7 +82,7 @@
 										<label for="" class="form-label">Precio cotizado</label>
 										<div class="input-group flex-nowrap">
 											<span class="input-group-text" id="addon-wrapping">$</span>
-											<input type="text" id="pcompra" name="pcompra" class="form-control input" placeholder="EJ: 20.500">
+											<input type="text" id="precio_cotiza" name="precio_cotiza" class="form-control input" placeholder="EJ: 20.500">
 										</div>
 										<span class="text-danger error-message"></span>
 									</div>
@@ -104,7 +91,7 @@
 									<div class="form-group">
 										<label for="" class="form-label">KG|UND</label>
 										<div class="input-group flex-nowrap">
-											<input type="text" id="pesokg" name="pesokg" class="form-control input" placeholder="EJ: 10.00">
+											<input type="text" id="peso_cotiza" name="peso_cotiza" class="form-control input" placeholder="EJ: 10.00">
 											<span class="input-group-text" id="addon-wrapping">QT</span>
 										</div>
 										<span class="text-danger error-message"></span>
@@ -175,10 +162,10 @@
 										<td></td>
 										<th>{{number_format($arrayTotales['pesoTotalGlobal'], 2, '.', '.')}}</td>
 										<th>${{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
-										<td></td>
+										<td></td>									
 										<td class="text-center">
-											<button type="hidden" id="cargarInventarioBtn"></button>
-										</td>
+											<input type="hidden" id="cargarInventarioBtn" name="cargarInventarioBtn">										
+										</td>										
 									</tr>
 								</tfoot>
 							</table>
@@ -241,5 +228,5 @@
 </script>
 @endsection
 @section('script')
-<script src="{{asset('rogercode/js/compensado/rogercode-create.js')}}" type="module"></script>
+<script src="{{asset('rogercode/js/compensado/rogercode-create-order.js')}}" type="module"></script>
 @endsection

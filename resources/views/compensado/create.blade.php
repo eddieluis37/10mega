@@ -177,7 +177,7 @@
 										<th>${{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
 										<td></td>
 										<td class="text-center">
-											<button type="hidden" id="cargarInventarioBtn"></button>
+											<button id="cargarInventarioBtn" class="btn btn-primary">Cargar al Inventario</button>
 										</td>
 									</tr>
 								</tfoot>

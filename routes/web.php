@@ -345,9 +345,19 @@ Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::post('getproductos', [compensadoController::class, 'getproducts'])->name('compensado.getproductos');
     Route::get('/compensado/search-products', [compensadoController::class, 'searchProducts'])->name('compensado.search-products');
     Route::post('compensadosave', [compensadoController::class, 'store'])->name('compensado.save');
+    
+    Route::post('compensadosavedetailorder', [compensadoController::class, 'savedetail_order'])->name('compensado.savedetail_order');
+    
     Route::post('compensadosavedetail', [compensadoController::class, 'savedetail'])->name('compensado.savedetail');
+
+
     Route::post('compensadodown', [compensadoController::class, 'destroy'])->name('compensado.down');
     Route::post('compensadogetById', [compensadoController::class, 'edit'])->name('compensado.ById');
+
+    Route::post('compensadogetByIdOrder', [compensadoController::class, 'editOrder'])->name('compensado.ByIdOrder');
+     Route::post('compensadoByIdOrder', [compensadoController::class, 'editCompensadoorder'])->name('compensado.editCompensadoorder');
+
+
     Route::post('compensadoById', [compensadoController::class, 'editCompensado'])->name('compensado.editCompensado');
     Route::post('/downmaincompensado', [compensadoController::class, 'destroyCompensado'])->name('compensado.downCompensado');
     Route::post('compensadoInvres', [compensadoController::class, 'cargarInventariocr'])->name('compensado.cargarInventariocr');

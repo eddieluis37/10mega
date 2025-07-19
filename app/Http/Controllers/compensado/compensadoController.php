@@ -95,7 +95,7 @@ class compensadoController extends Controller
         }
         /**************************************** */
 
-        $detail = $this->getcompensadoresdetail($id);
+        $detail = $this->getcompensadoresdetailorder($id);
 
         $arrayTotales = $this->sumTotales($id);
         //dd($arrayTotales);
@@ -150,6 +150,21 @@ class compensadoController extends Controller
         return view('compensado.create', compact('datacompensado', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
     }
 
+    public function getcompensadoresdetailorder($compensadoId)
+    {
+
+        $detail = DB::table('compensadores_details as de')
+            ->join('lotes as l', 'de.lote_id', '=', 'l.id')
+            ->join('products as pro', 'de.products_id', '=', 'pro.id')
+            ->select('de.*', 'l.codigo as codigo', 'pro.name as nameprod', 'pro.code')
+            ->where([
+                ['de.compensadores_id', $compensadoId],
+                ['de.status', 1]
+            ])->get();
+
+        return $detail;
+    }
+
     public function getcompensadoresdetail($compensadoId)
     {
 
@@ -200,25 +215,23 @@ class compensadoController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'compensadoId' => 'required',
-                'lote' => 'required',
+                'compensadoId' => 'required',               
                 'producto' => 'required',
-                'pcompra' => 'required',
-                'pesokg' => [
+                'precio_cotiza' => 'required',
+                'peso_cotiza' => [
                     'required',
                     'numeric',
                     'regex:/^\d+(\.\d{1,2})?$/',
                     'min:0.1',
                 ],
             ], [
-                'compensadoId.required' => 'El compensado es requerido',
-                'lote.required' => 'El lote es requerido',
+                'compensadoId.required' => 'El compensado es requerido',               
                 'producto.required' => 'El producto es requerido',
-                'pcompra.required' => 'El precio de compra es requerido',
-                'pesokg.required' => 'El peso es requerido',
-                'pesokg.numeric'  => 'La cantidad debe ser un número.',
-                'pesokg.min'      => 'La cantidad debe ser mayor a 0.1.',
-                'pesokg.regex'     => 'La cantidad debe tener hasta dos decimales.',
+                'precio_cotiza.required' => 'El precio de compra es requerido',
+                'peso_cotiza.required' => 'El peso es requerido',
+                'peso_cotiza.numeric'  => 'La cantidad debe ser un número.',
+                'peso_cotiza.min'      => 'La cantidad debe ser mayor a 0.1.',
+                'peso_cotiza.regex'     => 'La cantidad debe tener hasta dos decimales.',
             ]);
 
             if ($validator->fails()) {
@@ -229,17 +242,17 @@ class compensadoController extends Controller
             }
 
             $formatCantidad = new metodosrogercodeController();
-            $formatPcompra = $formatCantidad->MoneyToNumber($request->pcompra);
+            $formatPcompra = $formatCantidad->MoneyToNumber($request->precio_cotiza);
 
-            $pesokg = $request->pesokg;
-            $subtotal = $formatPcompra * $pesokg;
+            $peso_cotiza = $request->peso_cotiza;
+            $subtotal = $formatPcompra * $peso_cotiza;
 
             $data = [
                 'compensadores_id' => $request->compensadoId,
-                'lote_id' => $request->lote,
+                'lote_id' => 1,
                 'products_id' => $request->producto,
-                'pcompra' => $formatPcompra,
-                'peso' => $pesokg,
+                'precio_cotiza' => $formatPcompra,
+                'peso_cotiza' => $peso_cotiza,
                 'iva' => 0,
                 'subtotal' => $subtotal,
             ];
@@ -253,8 +266,8 @@ class compensadoController extends Controller
             return response()->json([
                 'status' => 1,
                 'message' => "Agregado correctamente",
-                'array' => $this->getcompensadoresdetail($request->compensadoId),
-                'arrayTotales' => $this->sumTotales($request->compensadoId),
+                'array' => $this->getcompensadoresdetailorder($request->compensadoId),
+                'arrayTotales' => $this->sumTotalesOrder($request->compensadoId),
             ]);
         } catch (\Throwable $th) {
             return response()->json([
@@ -331,6 +344,30 @@ class compensadoController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+     public function sumTotalesOrder($id)
+    {
+
+        // Calcular los totales
+        $pesoTotalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('peso_cotiza');
+        $totalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('subtotal_cotiza');
+        //$costoKiloTotal = number_format($costoTotalGlobal / $pesoTotalGlobal, 2, ',', '.');
+
+        // Actualizar el campo valor_total_factura en el modelo Compensadores
+        $compensador = Compensadores::find($id);
+        if ($compensador) {
+            $compensador->valor_total_factura = $totalGlobal; // Asignar el total calculado
+            $compensador->save(); // Guardar los cambios en la base de datos
+        }
+
+        // Preparar el array de resultados
+        $array = [
+            'pesoTotalGlobal' => $pesoTotalGlobal,
+            'totalGlobal' => $totalGlobal,
+        ];
+
+        return $array;
     }
 
     public function sumTotales($id)
@@ -491,11 +528,11 @@ class compensadoController extends Controller
                 } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
                     $btn = '
                         <div class="text-center">
-                         <a href="compensado/create_order/' . $data->id . '" class="btn btn-dark" title="Orden" >
-						    <i class="fas fa-directions"></i>
-					    </a>
+                         <a href="compensado/create_order/' . $data->id . '" class="btn btn-success" title="Orden de compra">
+                                O
+                             </a>
 					    <a href="compensado/create/' . $data->id . '" class="btn btn-dark" title="Factura" >
-						    <i class="fas fa-directions"></i>
+						   F
 					    </a>
 					    <button class="btn btn-dark" title="Compensado" onclick="editCompensado(' . $data->id . ');">
 						    <i class="fas fa-edit"></i>
@@ -533,10 +570,30 @@ class compensadoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+    public function editOrder(Request $request)
+    {
+
+        $reg = Compensadores_detail::where('id', $request->id)->first();
+        return response()->json([
+            'status' => 1,
+            'reg' => $reg
+        ]);
+    }
+
     public function edit(Request $request)
     {
 
         $reg = Compensadores_detail::where('id', $request->id)->first();
+        return response()->json([
+            'status' => 1,
+            'reg' => $reg
+        ]);
+    }
+
+    public function editCompensadoorder(Request $request)
+    {
+        $reg = Compensadores::where('id', $request->id)->first();
         return response()->json([
             'status' => 1,
             'reg' => $reg
