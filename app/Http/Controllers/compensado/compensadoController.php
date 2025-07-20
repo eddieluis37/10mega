@@ -252,9 +252,12 @@ class compensadoController extends Controller
                 'lote_id' => 1,
                 'products_id' => $request->producto,
                 'precio_cotiza' => $formatPcompra,
-                'peso_cotiza' => $peso_cotiza,
-                'iva' => 0,
+                'peso_cotiza' => $peso_cotiza,                
                 'subtotal_cotiza' => $subtotal,
+                'iva' => 0,
+                'pcompra' => $formatPcompra,
+                'peso' => $peso_cotiza,                
+                'subtotal' => $subtotal,
             ];
 
             // Actualiza si existe, crea si no
