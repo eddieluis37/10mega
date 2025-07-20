@@ -35,7 +35,17 @@ $(document).ready(function () {
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "namethird", name: "namethird" },
+                {
+                    data: "namethird",
+                    name: "namethird",
+                    render: function (data) {
+                        if (data.length > 15) {
+                            return `<span title="${data}">${data.substring(0, 7)}.</span>`;
+                        } else {
+                            return data;
+                        }
+                    },
+                },
                 { data: "namestore", name: "namestore" },
                 { data: "factura", name: "factura" },
                 {
