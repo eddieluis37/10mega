@@ -185,7 +185,7 @@ const showData = (data) => {
                 <td>${element.nameprod}</td>
                 <td>$${formatCantidadSinCero(element.precio_cotiza)}</td>
                 <td>${element.peso_cotiza}</td>
-                <td>$${formatCantidadSinCero(element.subtotal)}</td>
+                <td>$${formatCantidadSinCero(element.subtotal_cotiza)}</td>
                 <td>${element.iva}</td>
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${

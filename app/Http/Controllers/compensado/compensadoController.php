@@ -97,7 +97,7 @@ class compensadoController extends Controller
 
         $detail = $this->getcompensadoresdetailorder($id);
 
-        $arrayTotales = $this->sumTotales($id);
+        $arrayTotales = $this->sumTotalesOrder($id);
         //dd($arrayTotales);
         return view('compensado.create_order', compact('datacompensado', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
     }
@@ -254,7 +254,7 @@ class compensadoController extends Controller
                 'precio_cotiza' => $formatPcompra,
                 'peso_cotiza' => $peso_cotiza,
                 'iva' => 0,
-                'subtotal' => $subtotal,
+                'subtotal_cotiza' => $subtotal,
             ];
 
             // Actualiza si existe, crea si no

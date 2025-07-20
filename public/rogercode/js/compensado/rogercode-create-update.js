@@ -10,7 +10,7 @@ btnAddCompensadoRes.addEventListener("click", async (e) => {
             btnClose.click();
             successToastMessage(resp.message); 
             if (resp.registroId != 0) {//for new register
-                window.location.href = `compensado/create/${resp.registroId}`;
+                window.location.href = `compensado/create_order/${resp.registroId}`;
             }else{
                 refresh_table();
             }
