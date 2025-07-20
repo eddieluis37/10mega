@@ -62,11 +62,10 @@
 							<input type="hidden" id="compensadoId" name="compensadoId" value="{{$id}}">
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
 							<div class="row g-3">								
-								<div class="col-md-6">
+								<div class="col-md-10">
 									<div class="task-header">
 										<div class="form-group">
-											<label for="" class="form-label">Buscar producto</label>																				
-											
+											<label for="" class="form-label">Buscar producto</label>		
 											<input type="hidden" id="costo_prod" name="costo_prod" class="form-control input" readonly placeholder="">
 											<select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
 												<option value="">Seleccione el producto</option>
@@ -77,7 +76,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-2">
 									<div class="form-group">
 										<label for="" class="form-label">Precio cotizado</label>
 										<div class="input-group flex-nowrap">
@@ -87,7 +86,7 @@
 										<span class="text-danger error-message"></span>
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-2">
 									<div class="form-group">
 										<label for="" class="form-label">KG|UND</label>
 										<div class="input-group flex-nowrap">
@@ -97,17 +96,41 @@
 										<span class="text-danger error-message"></span>
 									</div>
 								</div>
-								<div class="container">
-									<div class="row justify-content-end">
-										<div class="col-md-3 text-center">
-											<div class="" style="margin-top:10px;">
-												<div class="d-grid gap-2">
-													<button id="btnAdd" class="btn btn-primary btn-block">Añadir</button>
-												</div>
-											</div>
-										</div>
+								
+								<div class="col-md-2">
+									<label for="" class="form-label">I.V.A</label>
+									<div class="input-group flex-nowrap">
+
+										<input type="text" id="porc_iva" name="porc_iva" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
+								<div class="col-md-2">
+									<label for="" class="form-label">I.U.P</label>
+									<div class="input-group flex-nowrap">
+
+										<input type="text" id="porc_otro_impuesto" name="porc_otro_impuesto" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<label for="" class="form-label">I.A.C</label>								
+										<input type="text" id="porc_impoconsumo" name="porc_impoconsumo" class="form-control input" readonly placeholder="">									
+								</div>
+								<div class="col-md-2">
+									<label for="" class="form-label">Descuento</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="porc_desc" name="porc_desc" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+								<div class="col-md-2 d-flex justify-content-center align-items-center">
+									<div style="margin-top:13px;">
+										<div class="d-grid gap-2">
+											<button id="btnAdd" class="btn btn-primary btn-block">Añadir Producto</button>
+										</div>
+									</div>
+								</div>								
 							</div>
 						</form>
 					</div>
