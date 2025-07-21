@@ -107,8 +107,7 @@ class Sale extends Model
     }
 
     /**
-     * Scope para filtrar las ventas del turno vigente.
-     * Este scope se debe ajustar a la lógica de tu negocio, por ejemplo,
+     * Scope para filtrar las ventas del turno vigente.     
      * comparando el fecha_venta con el inicio y fin del turno.
      */
     public function scopeTurnoVigente($query)

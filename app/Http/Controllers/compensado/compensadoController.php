@@ -59,11 +59,11 @@ class compensadoController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function create_order($id)
-    {       
-        $datacompensado = DB::table('compensadores as comp')        
+    public function create_order($id)
+    {
+        $datacompensado = DB::table('compensadores as comp')
             ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
-            ->join('stores as s', 'comp.store_id', '=', 's.id')          
+            ->join('stores as s', 'comp.store_id', '=', 's.id')
             ->join('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
             ->select('comp.*', 'tird.name as namethird', 's.name as namestore', 'centro.name as namecentrocosto')
             ->where('comp.id', $id)
@@ -188,34 +188,34 @@ class compensadoController extends Controller
         ])->get();
         return response()->json(['products' => $prod]);
     }
-    
+
     public function searchProducts(Request $request)
     {
         $query = $request->get('q');
-        
+
         $products = Product::where('status', 1)
-            ->where(function($q) use ($query) {
+            ->where(function ($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('code', 'LIKE', "%{$query}%");
+                    ->orWhere('code', 'LIKE', "%{$query}%");
             })
             ->orderBy('name', 'asc')
             ->get();
-            
-        $formattedProducts = $products->map(function($product) {
+
+        $formattedProducts = $products->map(function ($product) {
             return [
                 'id' => $product->id,
                 'text' => $product->code . ' - ' . $product->name
             ];
         });
-        
+
         return response()->json($formattedProducts);
     }
 
-      public function savedetail_order(Request $request)
+    public function savedetail_order(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'compensadoId' => 'required',               
+                'compensadoId' => 'required',
                 'producto' => 'required',
                 'precio_cotiza' => 'required',
                 'peso_cotiza' => [
@@ -225,7 +225,7 @@ class compensadoController extends Controller
                     'min:0.1',
                 ],
             ], [
-                'compensadoId.required' => 'El compensado es requerido',               
+                'compensadoId.required' => 'El compensado es requerido',
                 'producto.required' => 'El producto es requerido',
                 'precio_cotiza.required' => 'El precio de compra es requerido',
                 'peso_cotiza.required' => 'El peso es requerido',
@@ -242,21 +242,58 @@ class compensadoController extends Controller
             }
 
             $formatCantidad = new metodosrogercodeController();
-            $formatPcompra = $formatCantidad->MoneyToNumber($request->precio_cotiza);
-
+            $price = $formatCantidad->MoneyToNumber($request->precio_cotiza);
             $peso_cotiza = $request->peso_cotiza;
-            $subtotal = $formatPcompra * $peso_cotiza;
+
+            $precioBruto  = $price * $peso_cotiza;
+
+            $porcIvaCot  = $request->get('porc_iva_cotiza', 0);
+            $porcOtroImpCotiza    = $request->get('porc_otro_imp_cotiza', 0);
+            $porcImpoconCotiza    = $request->get('porc_impoconsumo_cotiza', 0);
+            $porcDescCotiza    = $request->get('porc_descuento_cotiza', 0);
+
+            $descProd     = $precioBruto * ($porcDescCotiza / 100);
+            $netoSinImp   = $precioBruto - $descProd;
+
+            $iva             = $netoSinImp * ($porcIvaCot / 100);
+            $otroImpto       = $netoSinImp * ($porcOtroImpCotiza / 100);
+            $impoconsumo     = $netoSinImp * ($porcImpoconCotiza / 100);
+            $totalImpuestos  = $iva + $otroImpto + $impoconsumo;
+
+            $subtotal = $price * $peso_cotiza;
+
 
             $data = [
                 'compensadores_id' => $request->compensadoId,
                 'lote_id' => 1,
                 'products_id' => $request->producto,
-                'precio_cotiza' => $formatPcompra,
-                'peso_cotiza' => $peso_cotiza,                
-                'subtotal_cotiza' => $subtotal,
-                'iva' => 0,
-                'pcompra' => $formatPcompra,
-                'peso' => $peso_cotiza,                
+                'precio_cotiza' => $price,
+                'peso_cotiza' => $peso_cotiza,
+                'porc_iva_cotiza' => $porcIvaCot,
+                'porc_otro_imp_cotiza' => $porcOtroImpCotiza,
+                'porc_impoconsumo_cotiza' => $porcImpoconCotiza,
+                'porc_descuento_cotiza' => $porcDescCotiza,
+                'descuento_cotiza' => $descProd,
+                'total_bruto_cotiza' => $precioBruto,
+                'iva_cotiza'                => $iva,
+                'otro_impuesto_cotiza'      => $otroImpto,
+                'impoconsumo_cotiza'        => $impoconsumo,
+                'total_cotiza'              => $netoSinImp + $totalImpuestos,
+                'subtotal_cotiza'           => $subtotal,
+
+                'pcompra'                   => $price,
+                'peso'                      => $peso_cotiza,
+                'porc_iva'                  => $porcIvaCot,
+                'porc_otro_imp'             => $porcOtroImpCotiza,
+                'porc_impoconsumo'          => $porcImpoconCotiza,
+                'porc_descuento'            => $porcDescCotiza,
+                'descuento'                 => $descProd,
+                'total_bruto'               => $precioBruto,
+                'iva'                       => $iva,
+                'otro_impuesto'             => $otroImpto,
+                'impoconsumo'               => $impoconsumo,
+                'total'                     => $netoSinImp + $totalImpuestos,
+                'subtotal_cotiza'           => $subtotal,                
                 'subtotal' => $subtotal,
             ];
 
@@ -349,7 +386,7 @@ class compensadoController extends Controller
         }
     }
 
-     public function sumTotalesOrder($id)
+    public function sumTotalesOrder($id)
     {
 
         // Calcular los totales
@@ -681,7 +718,7 @@ class compensadoController extends Controller
         $compensadorId = $request->input('compensadoId');
         $compensador = Compensador::findOrFail($compensadorId);
 
-    //    Log::info('Detalle Compensado:', ['detalle' => $compensador->detalles]);
+        //    Log::info('Detalle Compensado:', ['detalle' => $compensador->detalles]);
 
         // Actualizar el registro de compensadores
         $compensador->fecha_cierre = $formattedDate;
@@ -711,7 +748,7 @@ class compensadoController extends Controller
 
                 // Verificar si el lote existe
                 $lote = Lote::with('productos')->find($loteId);
-           //     Log::info('Lotes productos:', ['lote_productos' => optional($lote)->productos]);
+                //     Log::info('Lotes productos:', ['lote_productos' => optional($lote)->productos]);
 
                 if (!$lote) {
                     return response()->json([

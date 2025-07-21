@@ -116,6 +116,10 @@ tbodyTable.addEventListener("click", (e) => {
             regDetail.value = editReg.id;
             precio_cotiza.value = formatCantidadSinCero(editReg.precio_cotiza);
             peso_cotiza.value = (editReg.peso_cotiza);
+            porc_iva_cotiza.value = (editReg.porc_iva_cotiza);
+            porc_otro_imp_cotiza.value = (editReg.porc_otro_imp_cotiza);
+            porc_impoconsumo_cotiza.value = (editReg.porc_impoconsumo_cotiza);
+            porc_descuento_cotiza.value = (editReg.porc_descuento_cotiza);
             $(".select2Prod").val(editReg.products_id).trigger("change");
             $(".select2Lote").val(editReg.lote_id).trigger("change");
         });
@@ -180,8 +184,7 @@ const showData = (data) => {
     showRegTbody.innerHTML = "";
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
-            <tr>             
-                <td>${element.codigo}</td>                    
+            <tr>                               
                 <td>${element.nameprod}</td>
                 <td>$${formatCantidadSinCero(element.precio_cotiza)}</td>
                 <td>${element.peso_cotiza}</td>
