@@ -23,7 +23,7 @@ class Store extends Model
 
     /**
      * Cada tienda pertenece a un centro de costo.
-     * Se asume que en la tabla "stores" existe el campo "centro_costo_id".
+     * Se asume que en la tabla "stores" existe el campo "centrocosto_id".
      */
     public function centroCosto()
     {

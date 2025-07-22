@@ -144,23 +144,39 @@
 						<div class="table-responsive mt-3">
 							<table id="tableDespostere" class="table table-sm table-striped table-bordered">
 								<thead class="text-white" style="background: #3B3F5C">
-									<tr>										
-										<th class="table-th text-white">Productos</th>
-										<th class="table-th text-white">Precio|Cotiza</th>
-										<th class="table-th text-white">KG|UND</th>
-										<th class="table-th text-white">SubTotal</th>
-										<th class="table-th text-white">IVA $</th>
+									<tr>
+										<th class="table-th text-white">Producto</th>
+										<th class="table-th text-white">Cant</th>
+										<th class="table-th text-white">$Valor.U</th>
+										<th class="table-th text-white">%Des</th>
+										<th class="table-th text-white">$Des</th>
+										<th class="table-th text-white">$Total.B</th>
+										<th class="table-th text-white">%IVA</th>
+										<th class="table-th text-white">$IVA</th>
+										<th class="table-th text-white">%I.S</th>
+										<th class="table-th text-white">$I.S</th>
+										<th class="table-th text-white">%I.C</th>
+										<th class="table-th text-white">$I.C</th>
+										<th class="table-th text-white">$Total</th>
 										<th class="table-th text-white text-center">Acciones</th>
 									</tr>
 								</thead>
 								<tbody id="tbodyDetail">
 									@foreach($detail as $proddetail)
-									<tr>									
+									<tr>
 										<td>{{$proddetail->nameprod}}</td>
-										<td>${{ number_format($proddetail->precio_cotiza, 0, ',', '.')}}</td>
 										<td>{{($proddetail->peso_cotiza)}}</td>
-										<td>${{ number_format($proddetail->subtotal_cotiza, 0, ',', '.')}}</td>
-										<td>{{$proddetail->iva}}</td>
+										<td>{{ number_format($proddetail->precio_cotiza, 0, ',', '.')}}</td>										
+										<td>{{ number_format($proddetail->porc_descuento_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->descuento_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->total_bruto_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->porc_iva_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->iva_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->porc_otro_imp_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->otro_imp_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->porc_impoconsumo_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->impoconsumo_cotiza, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->total_cotiza, 0, ',', '.')}}</td>
 										<td class="text-center">
 											@if($status == 'true')
 											<button class="btn btn-dark fas fa-edit" name="btnEdit" data-id="{{$proddetail->id}}" title="Editar">
@@ -180,11 +196,18 @@
 								<tfoot id="tabletfoot">
 									<tr>
 										<th>Totales</th>
-										<td></td>
-										<td></td>
 										<th>{{number_format($arrayTotales['pesoTotalGlobal'], 2, '.', '.')}}</td>
-										<th>${{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
-										<td></td>
+										<th>{{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcDesc'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalDescCot'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalBrutoCot'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcIvaCot'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalIvaCot'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcOtroImpCot'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalOtroImpCot'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcImpoCot'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalImpoCot'], 0, ',', '.')}} </th>								
+										<th>{{number_format($arrayTotales['totalCotiza'], 0, ',', '.')}} </th>
 										<td class="text-center">
 											<input type="hidden" id="cargarInventarioBtn" name="cargarInventarioBtn">
 										</td>

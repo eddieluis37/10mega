@@ -43,15 +43,15 @@ $(".select2Prod").select2({
         delay: 250,
         data: function (params) {
             return {
-                q: params.term // Término de búsqueda
+                q: params.term, // Término de búsqueda
             };
         },
         processResults: function (data) {
             return {
-                results: data
+                results: data,
             };
         },
-        cache: true
+        cache: true,
     },
     templateResult: function (item) {
         if (item.loading) return item.text;
@@ -60,7 +60,7 @@ $(".select2Prod").select2({
     templateSelection: function (item) {
         if (!item.id) return item.text;
         return item.text;
-    }
+    },
 });
 
 function showConfirmationAlert(element) {
@@ -115,11 +115,11 @@ tbodyTable.addEventListener("click", (e) => {
             console.log(editReg);
             regDetail.value = editReg.id;
             precio_cotiza.value = formatCantidadSinCero(editReg.precio_cotiza);
-            peso_cotiza.value = (editReg.peso_cotiza);
-            porc_iva_cotiza.value = (editReg.porc_iva_cotiza);
-            porc_otro_imp_cotiza.value = (editReg.porc_otro_imp_cotiza);
-            porc_impoconsumo_cotiza.value = (editReg.porc_impoconsumo_cotiza);
-            porc_descuento_cotiza.value = (editReg.porc_descuento_cotiza);
+            peso_cotiza.value = editReg.peso_cotiza;
+            porc_iva_cotiza.value = editReg.porc_iva_cotiza;
+            porc_otro_imp_cotiza.value = editReg.porc_otro_imp_cotiza;
+            porc_impoconsumo_cotiza.value = editReg.porc_impoconsumo_cotiza;
+            porc_descuento_cotiza.value = editReg.porc_descuento_cotiza;
             $(".select2Prod").val(editReg.products_id).trigger("change");
             $(".select2Lote").val(editReg.lote_id).trigger("change");
         });
@@ -186,10 +186,24 @@ const showData = (data) => {
         showRegTbody.innerHTML += `
             <tr>                               
                 <td>${element.nameprod}</td>
-                <td>$${formatCantidadSinCero(element.precio_cotiza)}</td>
-                <td>${element.peso_cotiza}</td>
-                <td>$${formatCantidadSinCero(element.subtotal_cotiza)}</td>
-                <td>${element.iva}</td>
+                <td>${element.peso_cotiza}</td>                
+                <td>${formatCantidadSinCero(element.precio_cotiza)}</td>
+                <td>${formatCantidadSinCero(element.porc_descuento_cotiza)}</td>
+                <td>${formatCantidadSinCero(element.descuento_cotiza)}</td>
+                <td>${formatCantidadSinCero(element.total_bruto_cotiza)}</td>
+                <td>${formatCantidadSinCero(element.porc_iva_cotiza)}</td>
+                <td>${formatCantidadSinCero(element.iva_cotiza)}</td>
+                <td>${formatCantidadSinCero(element.porc_otro_imp_cotiza)}</td>
+                <td>${formatCantidadSinCero(element.otro_imp_cotiza)}</td>
+                <td>${formatCantidadSinCero(
+                    element.porc_impoconsumo_cotiza
+                )}</td>
+                <td>${formatCantidadSinCero(
+                    element.impoconsumo_cotiza
+                )}</td>              
+                <td>${formatCantidadSinCero(
+                    element.total_cotiza
+                )}</td>                
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${
                         element.id
@@ -206,13 +220,20 @@ const showData = (data) => {
     tableFoot.innerHTML = "";
     tableFoot.innerHTML += `
         <tr>
-            <th>Totales</th>
-            <td></td>
-            <td></td>           
-            <th>${(arrayTotales.pesoTotalGlobal)}</td>
-            <th>$${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
-            <td></td>
-            
+            <th>Totales</th>                     
+            <th>${arrayTotales.pesoTotalGlobal}</td>
+            <th>${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcDesc)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalDescCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalBrutoCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcIvaCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalIvaCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcOtroImpCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalOtroImpCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcImpoCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalImpoCot)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalCotiza)}</th>        
+            <td></td>            
         </tr>
     `;
 

@@ -58,7 +58,7 @@
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
-						<label for="date1" class="form-label">Fecha compra</label>
+						<label for="date1" class="form-label">Fecha orden de compra</label>
 						<input type="date" class="form-control" name="fecha_compensado" id="fecha_compensado" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
 						<span class="text-danger error-message"></span>
 					</div>
@@ -71,6 +71,12 @@
 						<input type="date" class="form-control" name="fecha_ingreso" id="fecha_ingreso" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
 						<span class="text-danger error-message"></span>
 					</div>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="form-group">
+					<label for="observations">Observación general</label>
+					<textarea class="form-control" id="observacion" name="observacion" rows="3"></textarea>
 				</div>
 			</div>
 		</div>

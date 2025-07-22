@@ -276,7 +276,7 @@ class compensadoController extends Controller
                 'descuento_cotiza' => $descProd,
                 'total_bruto_cotiza' => $precioBruto,
                 'iva_cotiza'                => $iva,
-                'otro_impuesto_cotiza'      => $otroImpto,
+                'otro_imp_cotiza'           => $otroImpto,
                 'impoconsumo_cotiza'        => $impoconsumo,
                 'total_cotiza'              => $netoSinImp + $totalImpuestos,
                 'subtotal_cotiza'           => $subtotal,
@@ -293,7 +293,7 @@ class compensadoController extends Controller
                 'otro_impuesto'             => $otroImpto,
                 'impoconsumo'               => $impoconsumo,
                 'total'                     => $netoSinImp + $totalImpuestos,
-                'subtotal_cotiza'           => $subtotal,                
+                'subtotal_cotiza'           => $subtotal,
                 'subtotal' => $subtotal,
             ];
 
@@ -392,6 +392,16 @@ class compensadoController extends Controller
         // Calcular los totales
         $pesoTotalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('peso_cotiza');
         $totalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('subtotal_cotiza');
+        $totalPorcDesc = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_descuento_cotiza');
+        $totalDescCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('descuento_cotiza');
+        $totalBrutoCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('total_bruto_cotiza');
+        $totalPorcIvaCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_iva_cotiza');
+        $totalIvaCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('iva_cotiza');
+        $totalPorcOtroImpCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_otro_imp_cotiza');
+        $totalOtroImpCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('otro_imp_cotiza');
+        $totalPorcImpoCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_impoconsumo_cotiza');
+        $totalImpoCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('impoconsumo_cotiza');
+        $totalCotiza = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('total_cotiza');
         //$costoKiloTotal = number_format($costoTotalGlobal / $pesoTotalGlobal, 2, ',', '.');
 
         // Actualizar el campo valor_total_factura en el modelo Compensadores
@@ -405,6 +415,16 @@ class compensadoController extends Controller
         $array = [
             'pesoTotalGlobal' => $pesoTotalGlobal,
             'totalGlobal' => $totalGlobal,
+            'totalPorcDesc' => $totalPorcDesc,
+            'totalDescCot' => $totalDescCot,
+            'totalBrutoCot' => $totalBrutoCot,
+            'totalPorcIvaCot' => $totalPorcIvaCot,
+            'totalIvaCot' => $totalIvaCot,
+            'totalPorcOtroImpCot' => $totalPorcOtroImpCot,
+            'totalOtroImpCot' => $totalOtroImpCot,
+            'totalPorcImpoCot' => $totalPorcImpoCot,
+            'totalImpoCot' => $totalImpoCot,
+            'totalCotiza' => $totalCotiza,
         ];
 
         return $array;
@@ -486,6 +506,7 @@ class compensadoController extends Controller
                 $comp->fecha_ingreso = $request->fecha_ingreso;
                 $comp->fecha_cierre = $dateNextMonday;
                 $comp->factura = $request->factura;
+                $comp->observacion = $request->observacion;
                 $comp->save();
                 return response()->json([
                     'status' => 1,
@@ -499,6 +520,7 @@ class compensadoController extends Controller
                 $getReg->fecha_compensado = $request->fecha_compensado;
                 $getReg->fecha_ingreso = $request->fecha_ingreso;
                 $getReg->factura = $request->factura;
+                $getReg->observacion = $request->observacion;
                 $getReg->save();
 
                 return response()->json([

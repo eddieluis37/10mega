@@ -12,6 +12,7 @@ const selectCategory = document.querySelector("#categoria");
 const selectProvider = document.querySelector("#provider");
 const selectStore = document.querySelector("#store");
 const inputFactura = document.querySelector("#factura");
+const inputObservacion = document.querySelector("#observacion");
 const compensado_id = document.querySelector("#compensadoId");
 const contentform = document.querySelector("#contentDisable");
 
@@ -171,6 +172,7 @@ const showData = (resp) => {
     $("#lote").val(register.lote_id).trigger("change");
     selectStore.value = register.store_id;
     inputFactura.value = register.factura;
+    inputObservacion.value = register.observacion;
     const modal = new bootstrap.Modal(
         document.getElementById("modal-create-compensado")
     );
