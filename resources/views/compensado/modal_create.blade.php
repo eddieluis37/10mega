@@ -63,7 +63,7 @@
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
-						<label for="" class="form-label">Factura</label>
+						<label for="" class="form-label">Cotización</label>
 						<input type="text" class="form-control" id="factura" name="factura" required="true">
 						<span class="text-danger error-message"></span>
 					</div>
