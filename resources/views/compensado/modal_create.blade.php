@@ -29,6 +29,20 @@
 							@endforeach
 						</select>
 						<span class="text-danger error-message"></span>
+					</div> 	
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="task-header">
+					<div class="form-group">
+						<label for="" class="form-label">FormaPago</label>
+						<select class="form-control form-control-sm select2Formapago " name="formapago" id="formapago" required>
+							<option value="">Seleccione la formapago</option>
+							@foreach($formapagos as $option)
+							<option value="{{ $option['id'] }}" data="{{$option}}">{{ $option['nombre'] }}</option>
+							@endforeach
+						</select>
+						<span class="text-danger error-message"></span>
 					</div>
 				</div>
 			</div>
@@ -67,7 +81,7 @@
 			<div class="col-md-4">
 				<div class="task-header">
 					<div class="form-group">
-						<label for="date1" class="form-label">Fecha ingreso</label>
+						<label for="date1" class="form-label">Fecha de entrega</label>
 						<input type="date" class="form-control" name="fecha_ingreso" id="fecha_ingreso" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
 						<span class="text-danger error-message"></span>
 					</div>

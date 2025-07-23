@@ -151,7 +151,7 @@
             display: table-cell;
             width: 48%;
             vertical-align: top;
-            text-align: left;
+            text-align: right;
         }
 
         .date-info h3 {

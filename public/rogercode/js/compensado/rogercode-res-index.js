@@ -11,6 +11,7 @@ const btnClose = document.querySelector("#btnModalClose");
 const selectCategory = document.querySelector("#categoria");
 const selectProvider = document.querySelector("#provider");
 const selectStore = document.querySelector("#store");
+const selectFormapago = document.querySelector("#formapago");
 const inputFactura = document.querySelector("#factura");
 const inputObservacion = document.querySelector("#observacion");
 const compensado_id = document.querySelector("#compensadoId");
@@ -96,6 +97,12 @@ $(document).ready(function () {
     });
     $(".select2Store").select2({
         placeholder: "Busca una bodega",
+        width: "100%",
+        theme: "bootstrap-5",
+        allowClear: true,
+    });
+     $(".select2Formapago").select2({
+        placeholder: "Busca una formapago",
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,

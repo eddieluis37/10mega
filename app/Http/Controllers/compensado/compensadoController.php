@@ -21,6 +21,7 @@ use App\Models\Compensadores;
 use App\Models\Compensadores_detail;
 use App\Models\Centro_costo_product;
 use App\Models\Compensador;
+use App\Models\Formapago;
 use App\Models\Store;
 use App\Models\MovimientoInventario;
 use App\Models\Inventario;
@@ -40,6 +41,11 @@ class compensadoController extends Controller
         $providers = Third::where('status', 1)->get();
         $centros = Centrocosto::where('status', 1)->get();
 
+        $formapagos = Formapago::whereNotIn('id', [2,3,4,5,6,7,8,9,10,17])
+            ->orderBy('id', 'asc')
+            ->get();
+
+
         // Obtener solo las bodegas asociadas al usuario en store_user
         $bodegas = Store::whereIn('id', function ($query) use ($user) {
             $query->select('store_id')
@@ -50,7 +56,7 @@ class compensadoController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        return view('compensado.res.index', compact('providers', 'bodegas', 'centros'));
+        return view('compensado.res.index', compact('providers', 'bodegas', 'centros', 'formapagos'));
     }
 
     /**
