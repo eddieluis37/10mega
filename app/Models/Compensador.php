@@ -17,6 +17,7 @@ class Compensador extends Model
         'users_id',
         'store_id',
         'thirds_id',
+        'formapago_id',
         'fecha_compensado',
         'fecha_ingreso',
         'fecha_cierre',
@@ -53,6 +54,11 @@ class Compensador extends Model
         return $this->belongsTo(Third::class, 'thirds_id');
     }
 
+    public function formapago()
+    {
+        return $this->belongsTo(Formapago::class, 'formapago_id');
+    }
+
     /**
      * Relación con User (usuario).
      * Un compensador fue creado/gestionado por un usuario.
@@ -84,7 +90,7 @@ class Compensador extends Model
             ->isoFormat('dddd, D [de] MMMM [de] YYYY');
     }
 
-     /**
+    /**
      * Relación directa a CentroCosto a través de Store.
      */
     public function centroCosto()
@@ -98,5 +104,4 @@ class Compensador extends Model
             'centrocosto_id'    // FK local en stores
         );
     }
-
 }

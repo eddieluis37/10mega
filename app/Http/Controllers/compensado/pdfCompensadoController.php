@@ -26,10 +26,10 @@ class pdfCompensadoController extends Controller
         // 9) Fecha en español
         Carbon::setLocale('es');
 
-        $comp = Compensador::with(['third','user','store','centroCosto'])
+        $comp = Compensador::with(['third', 'user', 'store', 'formapago', 'centroCosto'])
             ->findOrFail($id);
 
-         // dd($comp);  
+        // dd($comp);  
 
         // Usando el accesor:
         $fechaCierre = $comp->fecha_compensado_formatted;
@@ -42,22 +42,30 @@ class pdfCompensadoController extends Controller
             ->get();
 
         $total_weight = 0;
+        $total_descuento = 0;
         $total_iva = 0;
+        $total_otro_impuesto = 0;
+        $total_impoconsumo = 0;
         $total_precio = 0;
         $total_subtotal = 0;
+        $total_cotiza = 0;
 
         foreach ($compDetails as $item) {
             $total_weight += $item->peso_cotiza;
+            $total_descuento += $item->descuento_cotiza;
             $total_iva += $item->iva_cotiza;
+            $total_otro_impuesto += $item->otro_imp_cotiza;
+            $total_impoconsumo += $item->impoconsumo_cotiza;
             $total_precio += $item->precio_cotiza;
             $total_subtotal += $item->subtotal_cotiza;
+            $total_cotiza += $item->total_cotiza;
         }
 
         // dd($total_weight);
 
 
 
-        $pdfCompensado = PDF::loadView('compensado.pdf', compact('compDetails', 'comp', 'fechaCierre', 'total_weight', 'total_iva', 'total_precio', 'total_subtotal'));
+        $pdfCompensado = PDF::loadView('compensado.pdf', compact('compDetails', 'comp', 'fechaCierre', 'total_weight', 'total_descuento', 'total_iva', 'total_otro_impuesto', 'total_impoconsumo', 'total_precio', 'total_subtotal', 'total_cotiza'));
         return $pdfCompensado->stream('compensado.pdf');
         //return $pdfCompensado->download('sale.pdf');
     }

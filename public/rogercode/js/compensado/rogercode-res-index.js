@@ -176,8 +176,10 @@ const showData = (resp) => {
     /*  selectCategory.value = register.categoria_id; */
     $("#provider").val(register.thirds_id).trigger("change");
     $("#store").val(register.store_id).trigger("change");
+    $("#formapago").val(register.formapago_id).trigger("change");
     $("#lote").val(register.lote_id).trigger("change");
     selectStore.value = register.store_id;
+    selectFormapago.value = register.formapago_id;
     inputFactura.value = register.factura;
     inputObservacion.value = register.observacion;
     const modal = new bootstrap.Modal(

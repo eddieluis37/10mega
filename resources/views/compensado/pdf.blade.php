@@ -454,7 +454,7 @@
                 </div>
                 <div class="delivery-row clearfix">
                     <span class="label">Forma de Pago:</span>
-                    <span class="value">{{ $delivery['paymentMethod'] ?? 'CONTADO-TRANSFERENCIA' }}</span>
+                    <span class="value">{{ $comp->formapago?->nombre ?? '–' }}</span>
                 </div>
                 <div class="delivery-row clearfix">
                     <span class="label">Área de Solicitud:</span>
@@ -479,10 +479,13 @@
                         <th class="col-no">N°</th>
                         <th class="col-description">DESCRIPCION PRODUCTO</th>
                         <th class="col-ref">CODE</th>
-                        <th class="col-cant">CANT.</th>
-                        <th class="col-valor">VALOR U.</th>
-                        <th class="col-iva">IVA</th>
-                        <th class="col-total">VALOR TOTAL</th>
+                        <th class="col-cant">CANT</th>
+                        <th class="col-valor">$.UNID</th>
+                        <th class="col-valor">$.DESC</th>
+                        <th class="col-iva">$.IVA</th>
+                        <th class="col-iva">$.I.S</th>
+                        <th class="col-iva">$.I.C</th>
+                        <th class="col-total">$.TOTAL</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -494,7 +497,10 @@
                             <td>{{$item->code}}</td>
                             <td>{{$item->peso}}</td>
                             <td>{{number_format($item->pcompra ,0, ',', '.' )}}</td>
+                            <td>{{number_format($item->descuento_cotiza ,0, ',', '.' )}}</td>
                             <td>{{number_format($item->iva_cotiza ,0, ',', '.' )}}</td>
+                            <td>{{number_format($item->otro_imp_cotiza ,0, ',', '.' )}}</td>
+                            <td>{{number_format($item->impoconsumo_cotiza ,0, ',', '.' )}}</td>
                             <td>{{number_format($item->subtotal ,0, ',', '.' )}}</td>
                         </tr>
                         @endforeach
@@ -517,20 +523,33 @@
         <div class="bottom-section">
             <div class="observations">
                 <h4>OBSERVACIONES:</h4>
+                <span class="value">{{ $comp->observacion ?? '–' }}</span>
             </div>
             
             <div class="totals-section">
                 <div class="totals-row">
                     <span class="label">SUBTOTAL</span>
-                    <span class="value">{{ number_format($total_precio ,0, ',', '.' )}}</span>
+                    <span class="value">{{ number_format($total_subtotal ,0, ',', '.' )}}</span>
+                </div>
+                 <div class="totals-row">
+                    <span class="label">DESCUENTO</span>
+                    <span class="value">{{ number_format($total_descuento ,0, ',', '.' )}}</span>
                 </div>
                 <div class="totals-row">
                     <span class="label">I.V.A.</span>
                     <span class="value">{{ number_format($total_iva ,0, ',', '.' )}}</span>
                 </div>
+                <div class="totals-row">
+                    <span class="label">I.S</span>
+                    <span class="value">{{ number_format($total_otro_impuesto ,0, ',', '.' )}}</span>
+                </div>
+                <div class="totals-row">
+                    <span class="label">I.C</span>
+                    <span class="value">{{ number_format($total_impoconsumo ,0, ',', '.' )}}</span>
+                </div>
                 <div class="totals-row total-final">
                     <span class="label">T O T A L E S</span>
-                    <span class="value">{{ number_format($total_subtotal ,0, ',', '.' )}}</span>
+                    <span class="value">{{ number_format($total_cotiza ,0, ',', '.' )}}</span>
                 </div>
             </div>
         </div>

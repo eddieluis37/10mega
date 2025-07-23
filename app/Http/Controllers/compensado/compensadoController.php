@@ -473,6 +473,7 @@ class compensadoController extends Controller
                 'compensadoId' => 'required',
                 'provider' => 'required',
                 'store' => 'required',
+                'formapago' => 'required',
                 'factura' => 'required',
             ];
             $messages = [
@@ -480,6 +481,7 @@ class compensadoController extends Controller
                 'provider.required' => 'El proveedor es requerido',
                 'factura.required' => 'La factura es requerida',
                 'store.required' => 'La bodega es requerido',
+                'formapago.required' => 'Forma pago es requerida',
                 'factura.required' => 'La factura es requerida',
             ];
 
@@ -507,6 +509,7 @@ class compensadoController extends Controller
                 /*     $comp->categoria_id = $request->categoria; */
                 $comp->thirds_id = $request->provider;
                 $comp->store_id = $request->store;
+                $comp->formapago_id = $request->formapago;
                 /*    $comp->fecha_compensado = $currentDateFormat; */
                 $comp->fecha_compensado = $request->fecha_compensado;
                 $comp->fecha_ingreso = $request->fecha_ingreso;
@@ -522,6 +525,7 @@ class compensadoController extends Controller
             } else {
                 $getReg = Compensadores::firstWhere('id', $request->compensadoId);
                 $getReg->thirds_id = $request->provider;
+                $getReg->formapago_id = $request->formapago;
                 $getReg->store_id = $request->store;
                 $getReg->fecha_compensado = $request->fecha_compensado;
                 $getReg->fecha_ingreso = $request->fecha_ingreso;
