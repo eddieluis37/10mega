@@ -116,6 +116,10 @@ tbodyTable.addEventListener("click", (e) => {
             regDetail.value = editReg.id;
             pcompra.value = formatCantidadSinCero(editReg.pcompra);
             pesokg.value = (editReg.peso);
+            porc_iva.value = editReg.porc_iva;
+            porc_otro_imp.value = editReg.porc_otro_imp;
+            porc_impoconsumo.value = editReg.porc_impoconsumo;
+            porc_descuento.value = editReg.porc_descuento;
             $(".select2Prod").val(editReg.products_id).trigger("change");
             $(".select2Lote").val(editReg.lote_id).trigger("change");
         });
@@ -180,13 +184,26 @@ const showData = (data) => {
     showRegTbody.innerHTML = "";
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
-            <tr>             
-                <td>${element.codigo}</td>                    
+            <tr> 
                 <td>${element.nameprod}</td>
-                <td>$${formatCantidadSinCero(element.pcompra)}</td>
                 <td>${element.peso}</td>
-                <td>$${formatCantidadSinCero(element.subtotal)}</td>
-                <td>${element.iva}</td>
+                <td>${formatCantidadSinCero(element.precio)}</td>
+                <td>${formatCantidadSinCero(element.porc_descuento)}</td>
+                <td>${formatCantidadSinCero(element.descuento)}</td>
+                <td>${formatCantidadSinCero(element.total_bruto)}</td>
+                <td>${formatCantidadSinCero(element.porc_iva)}</td>
+                <td>${formatCantidadSinCero(element.iva)}</td>
+                <td>${formatCantidadSinCero(element.porc_otro_imp)}</td>
+                <td>${formatCantidadSinCero(element.otro_imp)}</td>
+                <td>${formatCantidadSinCero(
+                    element.porc_impoconsumo
+                )}</td>
+                <td>${formatCantidadSinCero(
+                    element.impoconsumo
+                )}</td>              
+                <td>${formatCantidadSinCero(
+                    element.total
+                )}</td>                     
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${
                         element.id
@@ -203,11 +220,19 @@ const showData = (data) => {
     tableFoot.innerHTML = "";
     tableFoot.innerHTML += `
         <tr>
-            <th>Totales</th>
-            <td></td>
-            <td></td>           
-            <th>${(arrayTotales.pesoTotalGlobal)}</td>
-            <th>$${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
+            <th>Totales</th>                     
+            <th>${arrayTotales.pesoTotalGlobal}</td>
+            <th>${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcDesc)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalDesc)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalBruto)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcIva)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalIva)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcOtroImp)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalOtroImp)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPorcImpo)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalImpo)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.total)}</th>        
             <td></td>
             <td class="text-center">
             <button id="cargarInventarioBtn" class="btn btn-success btn-sm">Cargar al inventario</button>

@@ -296,11 +296,10 @@ class compensadoController extends Controller
                 'descuento'                 => $descProd,
                 'total_bruto'               => $precioBruto,
                 'iva'                       => $iva,
-                'otro_impuesto'             => $otroImpto,
+                'otro_imp'                  => $otroImpto,
                 'impoconsumo'               => $impoconsumo,
                 'total'                     => $netoSinImp + $totalImpuestos,
-                'subtotal_cotiza'           => $subtotal,
-                'subtotal' => $subtotal,
+                'subtotal'                  => $subtotal,
             ];
 
             // Actualiza si existe, crea si no
@@ -357,19 +356,43 @@ class compensadoController extends Controller
             }
 
             $formatCantidad = new metodosrogercodeController();
-            $formatPcompra = $formatCantidad->MoneyToNumber($request->pcompra);
+            $price = $formatCantidad->MoneyToNumber($request->pcompra);
 
             $pesokg = $request->pesokg;
-            $subtotal = $formatPcompra * $pesokg;
+            $precioBruto = $price * $pesokg;
+
+            $porcIvaCot  = $request->get('porc_iva_cotiza', 0);
+            $porcOtroImpCotiza    = $request->get('porc_otro_imp_cotiza', 0);
+            $porcImpoconCotiza    = $request->get('porc_impoconsumo_cotiza', 0);
+            $porcDescCotiza    = $request->get('porc_descuento_cotiza', 0);
+
+            $descProd     = $precioBruto * ($porcDescCotiza / 100);
+            $netoSinImp   = $precioBruto - $descProd;
+
+            $iva             = $netoSinImp * ($porcIvaCot / 100);
+            $otroImpto       = $netoSinImp * ($porcOtroImpCotiza / 100);
+            $impoconsumo     = $netoSinImp * ($porcImpoconCotiza / 100);
+            $totalImpuestos  = $iva + $otroImpto + $impoconsumo;
+
+            $subtotal = $price * $pesokg;
 
             $data = [
                 'compensadores_id' => $request->compensadoId,
-                'lote_id' => $request->lote,
-                'products_id' => $request->producto,
-                'pcompra' => $formatPcompra,
-                'peso' => $pesokg,
-                'iva' => 0,
-                'subtotal' => $subtotal,
+                'lote_id'                   => $request->lote,
+                'products_id'               => $request->producto,
+                'pcompra'                   => $price,
+                'peso'                      => $pesokg,
+                'porc_iva'                  => $porcIvaCot,
+                'porc_otro_imp'             => $porcOtroImpCotiza,
+                'porc_impoconsumo'          => $porcImpoconCotiza,
+                'porc_descuento'            => $porcDescCotiza,
+                'descuento'                 => $descProd,
+                'total_bruto'               => $precioBruto,
+                'iva'                       => $iva,
+                'otro_imp'                  => $otroImpto,
+                'impoconsumo'               => $impoconsumo,
+                'total'                     => $netoSinImp + $totalImpuestos,
+                'subtotal'                  => $subtotal,
             ];
 
             // Actualiza si existe, crea si no
@@ -442,7 +465,16 @@ class compensadoController extends Controller
         // Calcular los totales
         $pesoTotalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('peso');
         $totalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('subtotal');
-        //$costoKiloTotal = number_format($costoTotalGlobal / $pesoTotalGlobal, 2, ',', '.');
+        $totalPorcDesc = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_descuento');
+        $totalDesc = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('descuento');
+        $totalBruto = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('total_bruto');
+        $totalPorcIva = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_iva');
+        $totalIva = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('iva');
+        $totalPorcOtroImp = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_otro_imp');
+        $totalOtroImp = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('otro_imp');
+        $totalPorcImpo = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_impoconsumo');
+        $totalImpo = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('impoconsumo');
+        $total = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('total');
 
         // Actualizar el campo valor_total_factura en el modelo Compensadores
         $compensador = Compensadores::find($id);
@@ -452,9 +484,19 @@ class compensadoController extends Controller
         }
 
         // Preparar el array de resultados
-        $array = [
+         $array = [
             'pesoTotalGlobal' => $pesoTotalGlobal,
             'totalGlobal' => $totalGlobal,
+            'totalPorcDesc' => $totalPorcDesc,
+            'totalDesc' => $totalDesc,
+            'totalBruto' => $totalBruto,
+            'totalPorcIva' => $totalPorcIva,
+            'totalIva' => $totalIva,
+            'totalPorcOtroImp' => $totalPorcOtroImp,
+            'totalOtroImp' => $totalOtroImp,
+            'totalPorcImpo' => $totalPorcImpo,
+            'totalImpo' => $totalImpo,
+            'total' => $total,
         ];
 
         return $array;

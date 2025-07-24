@@ -164,11 +164,19 @@
 								<thead class="text-white" style="background: #3B3F5C">
 									<tr>
 										<th class="table-th text-white">Lote</th>
-										<th class="table-th text-white">Productos</th>
-										<th class="table-th text-white">PrecioCompra</th>
-										<th class="table-th text-white">KG|UND</th>
-										<th class="table-th text-white">SubTotal</th>
-										<th class="table-th text-white">IVA $</th>
+										<th class="table-th text-white">Producto</th>
+										<th class="table-th text-white">Cant</th>
+										<th class="table-th text-white">$Valor.U</th>
+										<th class="table-th text-white">%Des</th>
+										<th class="table-th text-white">$Des</th>
+										<th class="table-th text-white">$Total.B</th>
+										<th class="table-th text-white">%IVA</th>
+										<th class="table-th text-white">$IVA</th>
+										<th class="table-th text-white">%I.S</th>
+										<th class="table-th text-white">$I.S</th>
+										<th class="table-th text-white">%I.C</th>
+										<th class="table-th text-white">$I.C</th>
+										<th class="table-th text-white">$Total</th>
 										<th class="table-th text-white text-center">Acciones</th>
 									</tr>
 								</thead>
@@ -177,10 +185,18 @@
 									<tr>
 										<td>{{$proddetail->codigo}}</td>
 										<td>{{$proddetail->nameprod}}</td>
-										<td>${{ number_format($proddetail->pcompra, 0, ',', '.')}}</td>
 										<td>{{($proddetail->peso)}}</td>
-										<td>${{ number_format($proddetail->subtotal, 0, ',', '.')}}</td>
-										<td>{{$proddetail->iva}}</td>
+										<td>{{ number_format($proddetail->pcompra, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->porc_descuento, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->iva, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->porc_otro_imp, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->otro_imp, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
+										<td>{{ number_format($proddetail->total, 0, ',', '.')}}</td>						
 										<td class="text-center">
 											@if($status == 'true')
 											<button class="btn btn-dark fas fa-edit" name="btnEdit" data-id="{{$proddetail->id}}" title="Editar">
@@ -200,11 +216,19 @@
 								<tfoot id="tabletfoot">
 									<tr>
 										<th>Totales</th>
-										<td></td>
-										<td></td>
+										<th></th>										
 										<th>{{number_format($arrayTotales['pesoTotalGlobal'], 2, '.', '.')}}</td>
-										<th>${{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
-										<td></td>
+										<th>{{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcDesc'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalDesc'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalBruto'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcIva'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalIva'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcOtroImp'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalOtroImp'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPorcImpo'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalImpo'], 0, ',', '.')}} </th>								
+										<th>{{number_format($arrayTotales['total'], 0, ',', '.')}} </th>
 										<td class="text-center">
 											<button id="cargarInventarioBtn" class="btn btn-primary">Cargar al Inventario</button>
 										</td>

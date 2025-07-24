@@ -39,7 +39,9 @@ class Compensadores_detail extends Model
         'otro_imp',
         'porc_impoconsumo',
         'impoconsumo',  
+        'total_bruto',
         'subtotal',
+        'total',
         'status',
     ];  
 
