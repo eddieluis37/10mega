@@ -230,7 +230,7 @@
 </div>
 <script>
 	document.addEventListener("DOMContentLoaded", function() {
-		const costoInput = document.getElementById("pcompra");
+		const costoInput = document.getElementById("precio_cotiza");
 
 		// Función para formatear el número con puntos
 		function formatCurrency(value) {

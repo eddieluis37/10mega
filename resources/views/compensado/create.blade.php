@@ -62,7 +62,7 @@
 							<input type="hidden" id="compensadoId" name="compensadoId" value="{{$id}}">
 							<input type="hidden" id="regdetailId" name="regdetailId" value="0">
 							<div class="row g-3">
-								<div class="col-md-3">
+								<div class="col-md-4">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar lote</label>
@@ -76,7 +76,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-6">
 									<div class="task-header">
 										<div class="form-group">
 											<label for="" class="form-label">Buscar producto</label>
@@ -90,7 +90,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-2">
 									<div class="form-group">
 										<label for="" class="form-label">Precio de compra</label>
 										<div class="input-group flex-nowrap">
@@ -100,7 +100,7 @@
 										<span class="text-danger error-message"></span>
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-2">
 									<div class="form-group">
 										<label for="" class="form-label">KG|UND</label>
 										<div class="input-group flex-nowrap">
@@ -109,18 +109,47 @@
 										</div>
 										<span class="text-danger error-message"></span>
 									</div>
+								</div>								
+
+								<div class="col-md-2">
+									<label for="" class="form-label">I.V.A</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="porc_iva_cotiza" name="porc_iva_cotiza" class="form-control input" placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
 								</div>
-								<div class="container">
-									<div class="row justify-content-end">
-										<div class="col-md-3 text-center">
-											<div class="" style="margin-top:10px;">
-												<div class="d-grid gap-2">
-													<button id="btnAdd" class="btn btn-primary btn-block">Añadir</button>
-												</div>
-											</div>
+								<div class="col-md-2">
+									<label for="" class="form-label">I.U.P</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="porc_otro_imp_cotiza" name="porc_otro_imp_cotiza" class="form-control input" placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<label for="" class="form-label">I.A.C</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="porc_impoconsumo_cotiza" name="porc_impoconsumo_cotiza" class="form-control input" placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<label for="" class="form-label">Descuento</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="porc_descuento_cotiza" name="porc_descuento_cotiza" class="form-control input" placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+
+								<div class="col-md-2 d-flex justify-content-center align-items-center">
+									<div style="margin-top:13px;">
+										<div class="d-grid gap-2">
+											<button id="btnAdd" class="btn btn-primary btn-block">Añadir_Producto</button>
 										</div>
 									</div>
 								</div>
+
+
+
 							</div>
 						</form>
 					</div>
