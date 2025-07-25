@@ -166,7 +166,7 @@
 									<tr>
 										<td>{{$proddetail->nameprod}}</td>
 										<td>{{($proddetail->peso_cotiza)}}</td>
-										<td>{{ number_format($proddetail->precio_cotiza, 0, ',', '.')}}</td>										
+										<td>{{ number_format($proddetail->precio_cotiza, 0, ',', '.')}}</td>
 										<td>{{ number_format($proddetail->porc_descuento_cotiza, 0, ',', '.')}}</td>
 										<td>{{ number_format($proddetail->descuento_cotiza, 0, ',', '.')}}</td>
 										<td>{{ number_format($proddetail->total_bruto_cotiza, 0, ',', '.')}}</td>
@@ -206,14 +206,15 @@
 										<th>{{number_format($arrayTotales['totalPorcOtroImpCot'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalOtroImpCot'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalPorcImpoCot'], 0, ',', '.')}} </th>
-										<th>{{number_format($arrayTotales['totalImpoCot'], 0, ',', '.')}} </th>								
+										<th>{{number_format($arrayTotales['totalImpoCot'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalCotiza'], 0, ',', '.')}} </th>
-										<td class="text-center">
-											<input type="hidden" id="cargarInventarioBtn" name="cargarInventarioBtn">
-										</td>
 									</tr>
 								</tfoot>
 							</table>
+							<td class="text-center">
+								<a href="{{ url('/compensado/ordencomprapdfCompensado/'.$id) }}" class="btn btn-success btn-block" title="Generar orden de compra" target="_blank">Generar</a>
+								<input type="hidden" id="cargarInventarioBtn" name="cargarInventarioBtn">
+							</td>
 						</div>
 					</div>
 				</div>
@@ -228,6 +229,9 @@
 		</div>
 	</div>
 </div>
+
+<!-- <a href="javascript:void(0)" onclick="window.location.href = '../../compensado/ordencomprapdfCompensado/{{$id}}' " class="btn btn-primary btn-block" data-toggle="modal" data-target="" title="Generar orden de compra" target="_blank">Generar</a> -->
+
 <script>
 	document.addEventListener("DOMContentLoaded", function() {
 		const costoInput = document.getElementById("precio_cotiza");

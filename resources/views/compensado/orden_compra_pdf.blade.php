@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factura de Compra - Megachorizos</title>
+    <title>Orden de Compra - Megachorizos</title>
     <style>       
 
         body {
@@ -405,7 +405,7 @@
 
             <div class="order-info">
                 <div class="order-header">
-                    <h2>FACTURA COMPRA</h2>
+                    <h2>ORDEN DE COMPRA</h2>
                     <div class="order-number">
                         <span>Nro.</span>
                         <span class="number">{{ $comp->id ?? '–' }}</span>

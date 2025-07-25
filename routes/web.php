@@ -79,6 +79,7 @@ use App\Http\Controllers\caja\pdfCierreCajaController;
 use App\Http\Controllers\caja\pdfSalidaefectivoController;
 use App\Http\Controllers\caja\resumenDiarioController;
 use App\Http\Controllers\ComboController;
+use App\Http\Controllers\compensado\ordencomprapdfCompensadoController;
 use App\Http\Controllers\producto\productoController;
 use App\Http\Controllers\compensado\pdfCompensadoController;
 use App\Http\Controllers\faster\fasterController;
@@ -361,6 +362,8 @@ Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::post('compensadoById', [compensadoController::class, 'editCompensado'])->name('compensado.editCompensado');
     Route::post('/downmaincompensado', [compensadoController::class, 'destroyCompensado'])->name('compensado.downCompensado');
     Route::post('compensadoInvres', [compensadoController::class, 'cargarInventariocr'])->name('compensado.cargarInventariocr');
+
+    Route::get('compensado/ordencomprapdfCompensado/{id}', [ordencomprapdfCompensadoController::class, 'ordencomprapdfCompensado']);
     Route::get('compensado/pdfCompensado/{id}', [pdfCompensadoController::class, 'pdfCompensado']);
 });
 

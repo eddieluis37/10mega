@@ -361,17 +361,17 @@ class compensadoController extends Controller
             $pesokg = $request->pesokg;
             $precioBruto = $price * $pesokg;
 
-            $porcIvaCot  = $request->get('porc_iva_cotiza', 0);
-            $porcOtroImpCotiza    = $request->get('porc_otro_imp_cotiza', 0);
-            $porcImpoconCotiza    = $request->get('porc_impoconsumo_cotiza', 0);
-            $porcDescCotiza    = $request->get('porc_descuento_cotiza', 0);
+            $porcIva  = $request->get('porc_iva', 0);
+            $porcOtroImp    = $request->get('porc_otro_imp', 0);
+            $porcImpocon    = $request->get('porc_impoconsumo', 0);
+            $porcDesc    = $request->get('porc_descuento', 0);
 
-            $descProd     = $precioBruto * ($porcDescCotiza / 100);
+            $descProd     = $precioBruto * ($porcDesc / 100);
             $netoSinImp   = $precioBruto - $descProd;
 
-            $iva             = $netoSinImp * ($porcIvaCot / 100);
-            $otroImpto       = $netoSinImp * ($porcOtroImpCotiza / 100);
-            $impoconsumo     = $netoSinImp * ($porcImpoconCotiza / 100);
+            $iva             = $netoSinImp * ($porcIva / 100);
+            $otroImpto       = $netoSinImp * ($porcOtroImp / 100);
+            $impoconsumo     = $netoSinImp * ($porcImpocon / 100);
             $totalImpuestos  = $iva + $otroImpto + $impoconsumo;
 
             $subtotal = $price * $pesokg;
@@ -382,10 +382,10 @@ class compensadoController extends Controller
                 'products_id'               => $request->producto,
                 'pcompra'                   => $price,
                 'peso'                      => $pesokg,
-                'porc_iva'                  => $porcIvaCot,
-                'porc_otro_imp'             => $porcOtroImpCotiza,
-                'porc_impoconsumo'          => $porcImpoconCotiza,
-                'porc_descuento'            => $porcDescCotiza,
+                'porc_iva'                  => $porcIva,
+                'porc_otro_imp'             => $porcOtroImp,
+                'porc_impoconsumo'          => $porcImpocon,
+                'porc_descuento'            => $porcDesc,
                 'descuento'                 => $descProd,
                 'total_bruto'               => $precioBruto,
                 'iva'                       => $iva,
@@ -627,7 +627,10 @@ class compensadoController extends Controller
                         <div class="text-center">
                         <a href="" class="btn btn-dark" title="DesposteCerradoPorFecha" target="_blank">
                             <i class="fas fa-check-circle"></i>
-                        </a>					   
+                        </a>
+                          <a href="compensado/ordencomprapdfCompensado/' . $data->id . '" class="btn btn-primary" title="OrdenDeCompra" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>					   
 					    <button class="btn btn-dark" title="Editar Compensado" onclick="showDataForm(' . $data->id . ')" disabled>
                             <i class="fas fa-edit"></i>
 					    </button>
@@ -642,15 +645,20 @@ class compensadoController extends Controller
                 } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
                     $btn = '
                         <div class="text-center">
+                         <button class="btn btn-dark" title="Cabezote Orden de compra" onclick="editCompensado(' . $data->id . ');">
+						    <i class="fas fa-edit"></i>
+					    </button>
                          <a href="compensado/create_order/' . $data->id . '" class="btn btn-success" title="Orden de compra">
                                 O
                              </a>
+                               </a>
+                        <a href="compensado/ordencomprapdfCompensado/' . $data->id . '" class="btn btn-primary" title="OrdenDeCompra" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>	
 					    <a href="compensado/create/' . $data->id . '" class="btn btn-dark" title="Factura" >
 						   F
 					    </a>
-					    <button class="btn btn-dark" title="Compensado" onclick="editCompensado(' . $data->id . ');">
-						    <i class="fas fa-edit"></i>
-					    </button>
+					   
                         <a href="compensado/pdfCompensado/' . $data->id . '" class="btn btn-dark" title="VerCompraPendiente" target="_blank">
                         <i class="far fa-file-pdf"></i>
 					    </a>
@@ -663,6 +671,10 @@ class compensadoController extends Controller
                         <a href="" class="btn btn-dark" title="CompraCerrado" target="_blank">
                             <i class="fas fa-check-circle"></i>
                         </a>
+                          </a>
+                          <a href="compensado/ordencomprapdfCompensado/' . $data->id . '" class="btn btn-primary" title="OrdenDeCompra" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>	
 					    <button class="btn btn-dark" title="Compensado" disabled>
 						    <i class="fas fa-eye"></i>
 					    </button>
