@@ -185,9 +185,10 @@ const showData = (data) => {
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
             <tr> 
+                <td>${element.codigo}</td>    
                 <td>${element.nameprod}</td>
                 <td>${element.peso}</td>
-                <td>${formatCantidadSinCero(element.precio)}</td>
+                <td>${formatCantidadSinCero(element.pcompra)}</td>
                 <td>${formatCantidadSinCero(element.porc_descuento)}</td>
                 <td>${formatCantidadSinCero(element.descuento)}</td>
                 <td>${formatCantidadSinCero(element.total_bruto)}</td>
@@ -220,7 +221,8 @@ const showData = (data) => {
     tableFoot.innerHTML = "";
     tableFoot.innerHTML += `
         <tr>
-            <th>Totales</th>                     
+            <th>Totales</th> 
+            <th></th>      
             <th>${arrayTotales.pesoTotalGlobal}</td>
             <th>${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
             <th>${formatCantidadSinCero(arrayTotales.totalPorcDesc)}</th>
@@ -232,8 +234,7 @@ const showData = (data) => {
             <th>${formatCantidadSinCero(arrayTotales.totalOtroImp)}</th>
             <th>${formatCantidadSinCero(arrayTotales.totalPorcImpo)}</th>
             <th>${formatCantidadSinCero(arrayTotales.totalImpo)}</th>
-            <th>${formatCantidadSinCero(arrayTotales.total)}</th>        
-            <td></td>
+            <th>${formatCantidadSinCero(arrayTotales.total)}</th>                 
             <td class="text-center">
             <button id="cargarInventarioBtn" class="btn btn-success btn-sm">Cargar al inventario</button>
             </td>

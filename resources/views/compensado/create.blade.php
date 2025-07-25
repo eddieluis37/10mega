@@ -54,7 +54,6 @@
 					</div>
 				</div>
 			</div>
-
 			<div class="widget-content mt-3">
 				<div class="card">
 					<div class="card-body">
@@ -109,37 +108,35 @@
 										</div>
 										<span class="text-danger error-message"></span>
 									</div>
-								</div>								
-
+								</div>
 								<div class="col-md-2">
 									<label for="" class="form-label">I.V.A</label>
 									<div class="input-group flex-nowrap">
-										<input type="text" id="porc_iva_cotiza" name="porc_iva_cotiza" class="form-control input" placeholder="">
+										<input type="text" id="porc_iva" name="porc_iva" class="form-control input" placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
 								<div class="col-md-2">
 									<label for="" class="form-label">I.U.P</label>
 									<div class="input-group flex-nowrap">
-										<input type="text" id="porc_otro_imp_cotiza" name="porc_otro_imp_cotiza" class="form-control input" placeholder="">
+										<input type="text" id="porc_otro_imp" name="porc_otro_imp" class="form-control input" placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
 								<div class="col-md-2">
 									<label for="" class="form-label">I.A.C</label>
 									<div class="input-group flex-nowrap">
-										<input type="text" id="porc_impoconsumo_cotiza" name="porc_impoconsumo_cotiza" class="form-control input" placeholder="">
+										<input type="text" id="porc_impoconsumo" name="porc_impoconsumo" class="form-control input" placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
 								<div class="col-md-2">
 									<label for="" class="form-label">Descuento</label>
 									<div class="input-group flex-nowrap">
-										<input type="text" id="porc_descuento_cotiza" name="porc_descuento_cotiza" class="form-control input" placeholder="">
+										<input type="text" id="porc_descuento" name="porc_descuento" class="form-control input" placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
-
 								<div class="col-md-2 d-flex justify-content-center align-items-center">
 									<div style="margin-top:13px;">
 										<div class="d-grid gap-2">
@@ -147,9 +144,6 @@
 										</div>
 									</div>
 								</div>
-
-
-
 							</div>
 						</form>
 					</div>
@@ -196,7 +190,7 @@
 										<td>{{ number_format($proddetail->otro_imp, 0, ',', '.')}}</td>
 										<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
 										<td>{{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
-										<td>{{ number_format($proddetail->total, 0, ',', '.')}}</td>						
+										<td>{{ number_format($proddetail->total, 0, ',', '.')}}</td>
 										<td class="text-center">
 											@if($status == 'true')
 											<button class="btn btn-dark fas fa-edit" name="btnEdit" data-id="{{$proddetail->id}}" title="Editar">
@@ -216,7 +210,7 @@
 								<tfoot id="tabletfoot">
 									<tr>
 										<th>Totales</th>
-										<th></th>										
+										<th></th>
 										<th>{{number_format($arrayTotales['pesoTotalGlobal'], 2, '.', '.')}}</td>
 										<th>{{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalPorcDesc'], 0, ',', '.')}} </th>
@@ -227,7 +221,7 @@
 										<th>{{number_format($arrayTotales['totalPorcOtroImp'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalOtroImp'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalPorcImpo'], 0, ',', '.')}} </th>
-										<th>{{number_format($arrayTotales['totalImpo'], 0, ',', '.')}} </th>								
+										<th>{{number_format($arrayTotales['totalImpo'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['total'], 0, ',', '.')}} </th>
 										<td class="text-center">
 											<button id="cargarInventarioBtn" class="btn btn-primary">Cargar al Inventario</button>
