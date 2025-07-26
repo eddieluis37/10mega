@@ -48,24 +48,22 @@ class pdfCompensadoController extends Controller
         $total_impoconsumo = 0;
         $total_precio = 0;
         $total_subtotal = 0;
-        $total_cotiza = 0;
+        $total = 0;
 
         foreach ($compDetails as $item) {
-            $total_weight += $item->peso_cotiza;
-            $total_descuento += $item->descuento_cotiza;
-            $total_iva += $item->iva_cotiza;
-            $total_otro_impuesto += $item->otro_imp_cotiza;
-            $total_impoconsumo += $item->impoconsumo_cotiza;
+            $total_weight += $item->peso;
+            $total_descuento += $item->descuento;
+            $total_iva += $item->iva;
+            $total_otro_impuesto += $item->otro_imp;
+            $total_impoconsumo += $item->impoconsumo;
             $total_precio += $item->precio_cotiza;
-            $total_subtotal += $item->subtotal_cotiza;
-            $total_cotiza += $item->total_cotiza;
+            $total_subtotal += $item->subtotal;
+            $total += $item->total;
         }
 
         // dd($total_weight);
 
-
-
-        $pdfCompensado = PDF::loadView('compensado.pdf', compact('compDetails', 'comp', 'fechaCierre', 'total_weight', 'total_descuento', 'total_iva', 'total_otro_impuesto', 'total_impoconsumo', 'total_precio', 'total_subtotal', 'total_cotiza'));
+        $pdfCompensado = PDF::loadView('compensado.pdf', compact('compDetails', 'comp', 'fechaCierre', 'total_weight', 'total_descuento', 'total_iva', 'total_otro_impuesto', 'total_impoconsumo', 'total_precio', 'total_subtotal', 'total'));
         return $pdfCompensado->stream('compensado.pdf');
         //return $pdfCompensado->download('sale.pdf');
     }

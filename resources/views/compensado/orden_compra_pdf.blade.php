@@ -517,13 +517,13 @@
                         <td>{{ $index + 1 }}</td>
                         <td style="text-align: left;">{{$item->nameprod}}</td>
                         <td>{{$item->code}}</td>
-                        <td>{{$item->peso}}</td>
-                        <td>{{number_format($item->pcompra ,0, ',', '.' )}}</td>
+                        <td>{{$item->peso_cotiza}}</td>
+                        <td>{{number_format($item->precio_cotiza ,0, ',', '.' )}}</td>
                         <td>{{number_format($item->descuento_cotiza ,0, ',', '.' )}}</td>
                         <td>{{number_format($item->iva_cotiza ,0, ',', '.' )}}</td>
                         <td>{{number_format($item->otro_imp_cotiza ,0, ',', '.' )}}</td>
                         <td>{{number_format($item->impoconsumo_cotiza ,0, ',', '.' )}}</td>
-                        <td>{{number_format($item->subtotal ,0, ',', '.' )}}</td>
+                        <td>{{number_format($item->subtotal_cotiza ,0, ',', '.' )}}</td>
                     </tr>
                     @endforeach
                     @else

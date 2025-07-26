@@ -519,10 +519,10 @@
                         <td>{{$item->code}}</td>
                         <td>{{$item->peso}}</td>
                         <td>{{number_format($item->pcompra ,0, ',', '.' )}}</td>
-                        <td>{{number_format($item->descuento_cotiza ,0, ',', '.' )}}</td>
-                        <td>{{number_format($item->iva_cotiza ,0, ',', '.' )}}</td>
-                        <td>{{number_format($item->otro_imp_cotiza ,0, ',', '.' )}}</td>
-                        <td>{{number_format($item->impoconsumo_cotiza ,0, ',', '.' )}}</td>
+                        <td>{{number_format($item->descuento ,0, ',', '.' )}}</td>
+                        <td>{{number_format($item->iva ,0, ',', '.' )}}</td>
+                        <td>{{number_format($item->otro_imp ,0, ',', '.' )}}</td>
+                        <td>{{number_format($item->impoconsumo ,0, ',', '.' )}}</td>
                         <td>{{number_format($item->subtotal ,0, ',', '.' )}}</td>
                     </tr>
                     @endforeach
@@ -571,7 +571,7 @@
                 </div>
                 <div class="totals-row total-final">
                     <span class="label">T O T A L E S</span>
-                    <span class="value">{{ number_format($total_cotiza ,0, ',', '.' )}}</span>
+                    <span class="value">{{ number_format($total ,0, ',', '.' )}}</span>
                 </div>
             </div>
         </div>
