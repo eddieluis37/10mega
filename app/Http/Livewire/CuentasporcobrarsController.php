@@ -65,10 +65,11 @@ class CuentasporcobrarsController extends Component
             ->whereBetween('cuentas_por_cobrars.created_at', [$from, $to])           
             ->get();
         } else {
-            $this->data = Cuentaporcobrar::join('thirds as t','t.id','cuentas_por_cobrars.third_id')           
-            ->leftjoin('recibodecajas as rc', 'rc.sale_id', '=', 'cuentas_por_cobrars.sale_id')
+            $this->data = Cuentaporcobrar::join('thirds as t','t.id','cuentas_por_cobrars.third_id')   
+            ->join('recibodecajas as rc', 'rc.third_id', '=', 't.id')        
+            ->leftjoin('caja_recibo_dinero_details as crdd', 'crdd.recibodecaja_id', '=', 'rc.id')          
             ->join('sales as sa', 'sa.id', '=', 'cuentas_por_cobrars.sale_id')
-            ->select('cuentas_por_cobrars.*','t.name as name', 'sa.consecutivo', 'rc.vr_pago')
+            ->select('cuentas_por_cobrars.*','t.name as name', 'sa.consecutivo', 'crdd.vr_pago')
             ->whereBetween('cuentas_por_cobrars.created_at', [$from, $to])
             ->where('cuentas_por_cobrars.third_id', $this->userId)
             ->get();
