@@ -87,6 +87,7 @@ use App\Http\Controllers\transfer\transferController;
 use App\Http\Controllers\workshop\workshopController;
 
 use App\Http\Controllers\costo\costoController;
+use App\Http\Controllers\cuentasporcobrar\cuentasporcobrarController;
 use App\Http\Controllers\DishController;
 use App\Http\Controllers\DragDropController;
 use App\Http\Controllers\excelAnalisisKGController;
@@ -240,6 +241,8 @@ Route::middleware(['auth', 'can:acceder_inventario_stockfisico'])->group(functio
 
     Route::get('showReportVentasPorProd', [reporteventaprodController::class, 'show'])->name('showReportVentasPorProd.showlist');
 });
+
+Route::get('cuentas_por_cobrar', [cuentasporcobrarController::class, 'index'])->name('cuentas_por_cobrar');
 
 /*****************************ORDENES DE PEDIDOS******************************************/
 Route::middleware(['auth', 'can:acceder_orders'])->group(function () {
@@ -695,6 +698,9 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('showReportComprasPorProvee', [reportecompraproveedorController::class, 'show'])->name('showReportComprasPorProvee.showlist');
 
     Route::get('showReportAjusteDeInv', [reporteajusteinventariosController::class, 'show'])->name('showReportAjusteDeInv.showajustedeinv');
+
+
+     Route::get('showCuentasPorCobrar', [cuentasporcobrarController::class, 'show'])->name('showCuentasPorCobrar');
 
 
 
