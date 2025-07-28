@@ -42,7 +42,17 @@ class transferController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        $stores = Store::where('status', 1)->get();
+       // $stores = Store::where('status', 1)->get();
+
+
+         $stores = Store::whereIn('id', function ($query) use ($user) {
+            $query->select('store_id')
+                ->from('store_user')
+                ->where('user_id', $user->id);
+        })
+            ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
+            ->orderBy('name', 'asc')
+            ->get();
 
         /*  $stores = DB::table('inventarios as i')
             ->rightJoin('stores as s', 'i.store_id', '=', 's.id')
