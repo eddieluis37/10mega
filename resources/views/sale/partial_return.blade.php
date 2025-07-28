@@ -35,7 +35,7 @@
       <label for="forma_pago">Forma de pago de la devolución</label>
       <select name="forma_pago" id="forma_pago" class="form-control" required>
         <option value="">Seleccione...</option>
-        @foreach(App\Models\FormaPago::efectivoTarjeta()->get() as $fp)
+        @foreach(App\Models\Formapago::efectivoTarjeta()->get() as $fp)
           <option value="{{ $fp->id }}">{{ $fp->nombre }}</option>
         @endforeach
       </select>
