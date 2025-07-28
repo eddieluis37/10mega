@@ -30,6 +30,7 @@ class cuentasporcobrarController extends Controller
 
         $clientes = Third::Where('cliente', 1)->get();
         $vendedores = Third::Where('vendedor', 1)->get();
+        $domiciliarios = Third::Where('domiciliario', 1)->get();
 
         // $clientes = Third::Where('status', 1)->get();
 
@@ -37,7 +38,7 @@ class cuentasporcobrarController extends Controller
 
         $centros = Store::Where('status', 1)->get();
 
-        return view('cuentas_por_cobrar.index', compact('category', 'clientes', 'vendedores',   'centros', 'dateFrom', 'dateTo'));
+        return view('cuentas_por_cobrar.index', compact('category', 'clientes', 'vendedores', 'domiciliarios',  'centros', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -49,8 +50,9 @@ class cuentasporcobrarController extends Controller
 
     public function show(Request $request)
     {
-        $centroCostoId = $request->input('centrocosto');
-        $categoryId   = $request->input('categoria');
+        $clienteId    = $request->input('cliente');
+        $vendedorId   = $request->input('vendedor');
+        $domiciliarioId   = $request->input('domiciliario');
         $dateFrom     = $request->input('dateFrom');
         $dateTo       = $request->input('dateTo');
 
@@ -72,15 +74,20 @@ class cuentasporcobrarController extends Controller
             ->leftJoin('caja_recibo_dinero_details as crdd', 'crdd.recibodecaja_id', '=', 'rc.id')
             // Filtros dinámicos
             ->when(
-                $centroCostoId,
+                $clienteId,
                 fn($q) =>
-                $q->where('cuentas_por_cobrars.third_id', $centroCostoId)
+                $q->where('cuentas_por_cobrars.third_id', $clienteId)
             )
-            /* ->when(
-                $categoryId,
+            ->when(
+                $vendedorId,
                 fn($q) =>
-                $q->where('sa.vendedor_id', $categoryId)
-            ) */
+                $q->where('sa.vendedor_id', $vendedorId)
+            )
+            ->when(
+                $domiciliarioId,
+                fn($q) =>
+                $q->where('sa.domiciliario_id', $domiciliarioId)
+            )
             ->whereBetween('cuentas_por_cobrars.created_at', [$dateFrom, $dateTo])
             // Selección de columnas con los alias que tu DataTable espera
             ->select([
@@ -88,14 +95,25 @@ class cuentasporcobrarController extends Controller
                 'v.name  as vendedor_name',
                 'd.name  as domiciliario_name',
                 'sa.consecutivo                   as sales_consecutivo',
-                'sa.created_at                    as fecha_venta',
-                'cuentas_por_cobrars.deuda_inicial as cuentas_por_cobrars_deuda_inicial',
-                'cuentas_por_cobrars.deuda_x_cobrar as cuentas_por_cobrars_deuda_x_cobrar',
+                'cuentas_por_cobrars.fecha_vencimiento                    as fecha_vencimiento',
+
+                // cálculo de días de mora:
+                DB::raw(
+                    // Evitamos días negativos con GREATEST
+                    'GREATEST(DATEDIFF(CURDATE(), cuentas_por_cobrars.fecha_vencimiento), 0) as dias_mora'
+                ),
+                // Formateo de moneda colombiana (sin decimales, miles/puntos):
+                DB::raw("REPLACE(FORMAT(cuentas_por_cobrars.deuda_inicial, 0), ',', ',') as cuentas_por_cobrars_deuda_inicial"),
+                DB::raw("REPLACE(FORMAT(cuentas_por_cobrars.deuda_x_cobrar, 0), ',', ',') as cuentas_por_cobrars_deuda_x_cobrar"),
             ]);
 
         // Retornamos al servidor de DataTables
         return datatables()
             ->of($query)
+            ->editColumn('fecha_vencimiento', function ($row) {
+                return Carbon::parse($row->fecha_vencimiento)
+                    ->format('d/m/Y');
+            })
             ->addIndexColumn()
             ->make(true);
     }

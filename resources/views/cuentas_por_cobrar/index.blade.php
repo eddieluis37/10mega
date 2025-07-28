@@ -29,8 +29,8 @@
       <div class="row g-3 mt-3">
         <div class="col-sm-12 col-md-3">
           <div class="form-group">
-            <label for="centrocosto" class="form-label">Cliente</label>
-            <select class="form-control form-control-sm select2" name="centrocosto" id="centrocosto" required>
+            <label for="cliente" class="form-label">Cliente</label>
+            <select class="form-control form-control-sm select2" name="cliente" id="cliente" required>
               <option value="">Seleccione cliente</option>
               @foreach($clientes as $option)
               <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
@@ -42,10 +42,23 @@
 
         <div class="col-sm-12 col-md-3">
           <div class="form-group">
-            <label for="categoria" class="form-label">Vendedor</label>
-            <select class="form-control form-control-sm select2" name="categoria" id="categoria" required>
+            <label for="vendedor" class="form-label">Vendedor</label>
+            <select class="form-control form-control-sm select2" name="vendedor" id="vendedor" required>
               <option value="">Seleccione vendedor</option>
               @foreach($vendedores as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="domiciliario" class="form-label">Domiciliario</label>
+            <select class="form-control form-control-sm select2" name="domiciliario" id="domiciliario" required>
+              <option value="">Seleccione domiciliario</option>
+              @foreach($domiciliarios as $option)
               <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
               @endforeach
             </select>
@@ -75,15 +88,14 @@
                 <th class="table-th text-white" title="" style="text-align: center;">DOMICILIARIO</th>
                 <th class="table-th text-white" title="" style="text-align: center;">FACTURA</th>
                 <th class="table-th text-white" title="" style="text-align: center;">FECHA_V</th>
+                <th class="table-th text-white" title="Dias de mora" style="text-align: center;">DMORA</th>
                 <th class="table-th text-white" title="" style="text-align: center;">DEUDA-INICIAL</th>
                 <th class="table-th text-white" title=" " style="text-align: center;">DEUDA.X.COBRAR</th>
-                
-                <th class="table-th text-white" title="" style="text-align: center;">ACCIONES</th>
               </tr>
             </thead>
             <tbody>
             </tbody>
-            <tfoot>
+           <!--  <tfoot>
               <tr>
                 <th>Totales</th>
                 <td></td>
@@ -92,18 +104,15 @@
                 <td>0.00</td>
                 <td>0.00</td>
                 <td>0.00</td>
-                <td>0.00</td>
-                <td>0.00</td>
-                <td>0.00</td>
+                <td>0.00</td>               
               </tr>
-            </tfoot>
+            </tfoot> -->
           </table>
         </div>
       </div>
     </div>
   </div>
   @endsection
-  @section('script')  
+  @section('script')
   <script src="{{asset('code/js/cuentas_por_cobrar/index.js')}} " type="module"></script>
   @endsection
-

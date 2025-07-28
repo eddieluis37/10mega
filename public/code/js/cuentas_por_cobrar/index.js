@@ -17,8 +17,9 @@ const token = document
 var dataTable;
 
 function initializeDataTable({
-    centroId = "",
-    categoriaId = "",
+    clienteId = "",
+    vendedorId = "",
+    domiciliarioId = "",
     dateFrom = "",
     dateTo = "",
 } = {}) {
@@ -32,8 +33,9 @@ function initializeDataTable({
             url: "/showCuentasPorCobrar",
             type: "GET",
             data: {
-                centrocosto: centroId,
-                categoria: categoriaId,
+                cliente: clienteId,
+                vendedor: vendedorId,
+                domiciliario: domiciliarioId,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
             },
@@ -43,32 +45,39 @@ function initializeDataTable({
                 data: "cliente_name",
                 name: "cliente_name",
                 render: function (data, type, row) {
-                    return "<div style='text-align: right;'>" + data + "</div>";
+                    return "<div style='text-align: center;'>" + data + "</div>";
                 },
             },
             {
                 data: "vendedor_name",
                 name: "vendedor_name",
                 render: function (data, type, row) {
-                    return "<div style='text-align: right;'>" + data + "</div>";
+                    return "<div style='text-align: center;'>" + data + "</div>";
                 },
             },
             {
                 data: "domiciliario_name",
                 name: "domiciliario_name",
                 render: function (data, type, row) {
-                    return "<div style='text-align: right;'>" + data + "</div>";
+                    return "<div style='text-align: center;'>" + data + "</div>";
                 },
             },
             { data: "sales_consecutivo", name: "sales_consecutivo" },
-            { data: "fecha_venta", name: "fecha_venta" },
+            { data: "fecha_vencimiento", name: "fecha_vencimiento" },
+            {
+                data: "dias_mora",
+                name: "dias_mora",
+                render: function (data, type, row) {
+                    return "<div style='text-align: center;'>" + data + "</div>";
+                },
+            },
             {
                 data: "cuentas_por_cobrars_deuda_inicial",
                 name: "cuentas_por_cobrars_deuda_inicial",
                 render: function (data, type, row) {
                     return (
-                        "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        "<div style='text-align: right;'>" +
+                        (data) +
                         "</div>"
                     );
                 },
@@ -78,8 +87,8 @@ function initializeDataTable({
                 name: "cuentas_por_cobrars_deuda_x_cobrar",
                 render: function (data, type, row) {
                     return (
-                        "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        "<div style='text-align: right;'>" +
+                        (data) +
                         "</div>"
                     );
                 },
@@ -125,16 +134,20 @@ $(document).ready(function () {
     initializeDataTable();
 
     // 2) Cada vez que cambie cualquier filtro, destruimos y recreamos la tabla
-    $("#centrocosto, #categoria, #dateFrom, #dateTo").on("change", function () {
-        const filtros = {
-            centroId: $("#centrocosto").val(),
-            categoriaId: $("#categoria").val(),
-            dateFrom: $("#dateFrom").val(),
-            dateTo: $("#dateTo").val(),
-        };
-        dataTable.destroy();
-        initializeDataTable(filtros);
-    });
+    $("#cliente, #vendedor, #domiciliario, #dateFrom, #dateTo").on(
+        "change",
+        function () {
+            const filtros = {
+                clienteId: $("#cliente").val(),
+                vendedorId: $("#vendedor").val(),
+                domiciliarioId: $("#domiciliario").val(),
+                dateFrom: $("#dateFrom").val(),
+                dateTo: $("#dateTo").val(),
+            };
+            dataTable.destroy();
+            initializeDataTable(filtros);
+        }
+    );
 });
 
 document
