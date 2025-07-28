@@ -228,6 +228,13 @@ function initializeDataTable({
 }
 
 $(document).ready(function () {
+       // Inicializa Select2
+    $(".select2").select2({
+        theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
+        width: "100%",
+        allowClear: true,
+    });
+
     // 1) Inicializamos con valores vacíos
     initializeDataTable();
 
