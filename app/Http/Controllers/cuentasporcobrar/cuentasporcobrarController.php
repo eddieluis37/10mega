@@ -6,7 +6,9 @@ use App\Models\Cuentas_por_cobrar;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Cuentaporcobrar;
 use App\Models\Store;
+use App\Models\Third;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -26,19 +28,80 @@ class cuentasporcobrarController extends Controller
         /*  $dateFrom = '2024-05-01';
          */
 
+        $clientes = Third::Where('cliente', 1)->get();
+        $vendedores = Third::Where('vendedor', 1)->get();
+
+        // $clientes = Third::Where('status', 1)->get();
+
         $category = Category::orderBy('name', 'asc')->get();
+
         $centros = Store::Where('status', 1)->get();
 
-        return view('cuentas_por_cobrar.index', compact('category', 'centros', 'dateFrom', 'dateTo'));
+        return view('cuentas_por_cobrar.index', compact('category', 'clientes', 'vendedores',   'centros', 'dateFrom', 'dateTo'));
     }
 
-     /**
+    /**
      * Display the specified resource.
      *
      * @param  \App\Models\Cuentas_por_cobrar  $cuentas_por_cobrar
      * @return \Illuminate\Http\Response
      */
-      public function show(Request $request)
+
+    public function show(Request $request)
+    {
+        $centroCostoId = $request->input('centrocosto');
+        $categoryId   = $request->input('categoria');
+        $dateFrom     = $request->input('dateFrom');
+        $dateTo       = $request->input('dateTo');
+
+        // Guardar filtro de fechas en sesión (si lo necesitas luego)
+        session(['dateFrom' => $dateFrom, 'dateTo' => $dateTo]);
+
+        // Construcción de la query
+        $query = Cuentaporcobrar::query()
+            // Relacionamos con la venta
+            ->join('sales as sa', 'sa.id', '=', 'cuentas_por_cobrars.sale_id')
+            // Centro de costo (tercero asociado a la cuenta por cobrar)
+            ->join('thirds as cc', 'cc.id', '=', 'cuentas_por_cobrars.third_id')
+            // Cliente, vendedor y domiciliario sacados desde la venta (ajusta los campos FK según tu esquema)
+            ->leftJoin('thirds as cl', 'cl.id', '=', 'sa.third_id')
+            ->leftJoin('thirds as v',  'v.id',  '=', 'sa.vendedor_id')
+            ->leftJoin('thirds as d',  'd.id',  '=', 'sa.domiciliario_id')
+            // Opcional: si necesitas traer info de pagos parciales
+            ->leftJoin('recibodecajas as rc',         'rc.third_id',              '=', 'cc.id')
+            ->leftJoin('caja_recibo_dinero_details as crdd', 'crdd.recibodecaja_id', '=', 'rc.id')
+            // Filtros dinámicos
+            ->when(
+                $centroCostoId,
+                fn($q) =>
+                $q->where('cuentas_por_cobrars.third_id', $centroCostoId)
+            )
+            /* ->when(
+                $categoryId,
+                fn($q) =>
+                $q->where('sa.vendedor_id', $categoryId)
+            ) */
+            ->whereBetween('cuentas_por_cobrars.created_at', [$dateFrom, $dateTo])
+            // Selección de columnas con los alias que tu DataTable espera
+            ->select([
+                'cl.name as cliente_name',
+                'v.name  as vendedor_name',
+                'd.name  as domiciliario_name',
+                'sa.consecutivo                   as sales_consecutivo',
+                'sa.created_at                    as fecha_venta',
+                'cuentas_por_cobrars.deuda_inicial as cuentas_por_cobrars_deuda_inicial',
+                'cuentas_por_cobrars.deuda_x_cobrar as cuentas_por_cobrars_deuda_x_cobrar',
+            ]);
+
+        // Retornamos al servidor de DataTables
+        return datatables()
+            ->of($query)
+            ->addIndexColumn()
+            ->make(true);
+    }
+
+
+    public function showOriginal(Request $request)
     {
         $centroCostoId = $request->input('centrocosto');
         $categoryId   = $request->input('categoria');

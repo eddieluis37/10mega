@@ -39,86 +39,32 @@ function initializeDataTable({
             },
         },
         columns: [
-            { data: "diahora_ajuste", name: "diahora_ajuste" },
             {
-                data: "category_name",
-                name: "category_name",
+                data: "cliente_name",
+                name: "cliente_name",
                 render: function (data, type, row) {
                     return "<div style='text-align: right;'>" + data + "</div>";
                 },
             },
-            { data: "product_id", name: "product_id" },
             {
-                data: "product_name",
-                name: "product_name",
-                render: function (data) {
-                    let subStringData = data.substring(0, 25).toLowerCase();
-                    let capitalizedSubString =
-                        subStringData.charAt(0).toUpperCase() +
-                        subStringData.slice(1);
-                    if (data.length > 25) {
-                        return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
-                    } else {
-                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
-                        return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
-                    }
-                },
-            },
-            {
-                data: "stock_ideal_antes",
-                name: "stock_ideal_antes",
+                data: "vendedor_name",
+                name: "vendedor_name",
                 render: function (data, type, row) {
-                    return (
-                        "<div style='text-align: right;'>" +
-                        parseFloat(data) +
-                        "</div>"
-                    );
+                    return "<div style='text-align: right;'>" + data + "</div>";
                 },
             },
             {
-                data: "store_name",
-                name: "store_name",
+                data: "domiciliario_name",
+                name: "domiciliario_name",
                 render: function (data, type, row) {
-                    return (
-                        "<div style='text-align: center;'>" + data + "</div>"
-                    );
+                    return "<div style='text-align: right;'>" + data + "</div>";
                 },
             },
+            { data: "sales_consecutivo", name: "sales_consecutivo" },
+            { data: "fecha_venta", name: "fecha_venta" },
             {
-                data: "lote_code",
-                name: "lote_code",
-                render: function (data, type, row) {
-                    return (
-                        "<div style='text-align: center;'>" + data + "</div>"
-                    );
-                },
-            },
-            { data: "fecha_vencimientolote", name: "fecha_vencimientolote" },
-            {
-                data: "stock_fisico_despues",
-                name: "stock_fisico_despues",
-                render: function (data, type, row) {
-                    return (
-                        "<div style='text-align: right;'>" +
-                        parseFloat(data) +
-                        "</div>"
-                    );
-                },
-            },
-            {
-                data: "cantidad_diferencia",
-                name: "cantidad_diferencia",
-                render: function (data, type, row) {
-                    return (
-                        "<div style='text-align: right;'>" +
-                        parseFloat(data) +
-                        "</div>"
-                    );
-                },
-            },
-            {
-                data: "costo_inicial_total",
-                name: "costo_inicial_total",
+                data: "cuentas_por_cobrars_deuda_inicial",
+                name: "cuentas_por_cobrars_deuda_inicial",
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
@@ -128,30 +74,14 @@ function initializeDataTable({
                 },
             },
             {
-                data: "costo_total_ajuste",
-                name: "costo_total_ajuste",
+                data: "cuentas_por_cobrars_deuda_x_cobrar",
+                name: "cuentas_por_cobrars_deuda_x_cobrar",
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
                         formatCantidadSinCero(data) +
                         "</div>"
                     );
-                },
-            },
-            {
-                data: "user_name",
-                name: "user_name",
-                render: function (data) {
-                    let subStringData = data.substring(0, 25).toLowerCase();
-                    let capitalizedSubString =
-                        subStringData.charAt(0).toUpperCase() +
-                        subStringData.slice(1);
-                    if (data.length > 25) {
-                        return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
-                    } else {
-                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
-                        return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
-                    }
                 },
             },
         ],
@@ -179,55 +109,18 @@ function initializeDataTable({
         buttons: ["copy", "csv", "excel", "pdf"],
         footerCallback: function (row, data, start, end, display) {
             var api = this.api();
-
-            var totalCant = api
-                .column("stock_fisico_despues:name", { search: "applied" })
-                .data()
-                .reduce(function (a, b) {
-                    var value = parseFloat(b);
-                    return isNaN(value) ? a : a + value;
-                }, 0)
-                .toFixed(2);
-            var totalCantFormatted = formatCantidad(totalCant);
-
-            var totalTotalCosto = api
-                .column("costo_inicial_total:name", { search: "applied" })
-                .data()
-                .reduce(function (a, b) {
-                    var value = parseFloat(b);
-                    return isNaN(value) ? a : a + value;
-                }, 0)
-                .toFixed(2);
-            var totalTotalCostoFormatted =
-                "$" + formatCantidadSinCero(totalTotalCosto);
-
-            var totalCostoPromd = api
-                .column("cantidad_diferencia:name", { search: "applied" })
-                .data()
-                .reduce(function (a, b) {
-                    var value = parseFloat(b);
-                    return isNaN(value) ? a : a + value;
-                }, 0)
-                .toFixed(2);
-            var totalCostoPromdFormatted =
-                "" + formatCantidadSinCero(totalCostoPromd);
-
-            $(api.column("stock_fisico_despues:name").footer())
-                .html(totalCantFormatted)
-                .css("text-align", "right");
-
-            $(api.column("costo_inicial_total:name").footer())
-                .html(totalTotalCostoFormatted)
-                .css("text-align", "right");
-
-            $(api.column("cantidad_diferencia:name").footer())
-                .html(totalCostoPromdFormatted)
-                .css("text-align", "right");
         },
     });
 }
 
 $(document).ready(function () {
+    // Inicializa Select2
+    $(".select2").select2({
+        theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
+        width: "100%",
+        allowClear: true,
+    });
+
     // 1) Inicializamos con valores vacíos
     initializeDataTable();
 
