@@ -42,25 +42,15 @@ class transferController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-       // $stores = Store::where('status', 1)->get();
+        // $stores = Store::where('status', 1)->get();
 
-
-         $stores = Store::whereIn('id', function ($query) use ($user) {
-            $query->select('store_id')
-                ->from('store_user')
-                ->where('user_id', $user->id);
-        })
-            ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
-            ->orderBy('name', 'asc')
-            ->get();
-
-        /*  $stores = DB::table('inventarios as i')
+        $stores = DB::table('inventarios as i')
             ->rightJoin('stores as s', 'i.store_id', '=', 's.id')
             ->select('s.id', 's.name')
             ->where('s.status', 1)
-          //  ->where('i.stock_ideal', '>', 0) // Filtrar por stock_ideal mayor a 0
+            //  ->where('i.stock_ideal', '>', 0) // Filtrar por stock_ideal mayor a 0
             ->distinct() // Asegurarse de que no haya bodegas duplicadas
-            ->get(); */
+            ->get();
 
         return view("transfer.index", compact('bodegaOrigen', 'stores'));
     }
@@ -122,79 +112,74 @@ class transferController extends Controller
         }
     }
 
-    public function show() // http://2puracarnes.test:8080/transfer  Datatable Traslado | listado
+    // http://2puracarnes.test:8080/transfer  Datatable Traslado | listado
+
+    public function show()
     {
+        $user = auth()->user();
+
+        // 1) IDs de tiendas que el usuario tiene asignadas
+        $associatedStoreIds = Store::whereIn('id', function ($query) use ($user) {
+            $query->select('store_id')
+                ->from('store_user')
+                ->where('user_id', $user->id);
+        })
+            ->whereNotIn('id', [40]) // si quieres seguir excluyendo la 40
+            ->pluck('id');           // <-- pluck en lugar de ->get()
+
+        // 2) Consulta de transfers filtrada
         $data = DB::table('transfers as tra')
-            ->join('stores as storeOrigen', 'tra.bodega_origen_id', '=', 'storeOrigen.id')
-            ->join('stores as storeDestino', 'tra.bodega_destino_id', '=', 'storeDestino.id')
-            ->select('tra.*', 'storeOrigen.name as namecentrocostoOrigen', 'storeDestino.name as namecentrocostoDestino')
+            ->join('stores as storeOrigen',    'tra.bodega_origen_id',     '=', 'storeOrigen.id')
+            ->join('stores as storeDestino',   'tra.bodega_destino_id',    '=', 'storeDestino.id')
+            ->select(
+                'tra.*',
+                'storeOrigen.name as namecentrocostoOrigen',
+                'storeDestino.name as namecentrocostoDestino'
+            )
             ->where('tra.status', 1)
+            // 3) Solo transfers donde ambas bodegas estén entre las asociadas
+            ->whereIn('tra.bodega_origen_id',  $associatedStoreIds)
+            ->whereIn('tra.bodega_destino_id', $associatedStoreIds)
+            ->orderBy('tra.fecha_tranfer', 'desc')
             ->get();
-        //$data = Compensadores::orderBy('id','desc');
-        return Datatables::of($data)->addIndexColumn()
-            ->addColumn('date', function ($data) {
-                $date = Carbon::parse($data->fecha_tranfer);
-                $onlyDate = $date->toDateString();
-                return $onlyDate;
+
+        return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('date', function ($transfer) {
+                return Carbon::parse($transfer->fecha_tranfer)->toDateString();
             })
-            ->addColumn('inventory', function ($data) {
-                if ($data->inventario == 'pending') {
-                    $statusInventory = '<span class="badge bg-warning">Pendiente</span>';
-                } else {
-                    $statusInventory = '<span class="badge bg-success">Agregado</span>';
-                }
-                return $statusInventory;
+            ->addColumn('inventory', function ($transfer) {
+                return $transfer->inventario === 'pending'
+                    ? '<span class="badge bg-warning">Pendiente</span>'
+                    : '<span class="badge bg-success">Agregado</span>';
             })
-            ->addColumn('action', function ($data) {
-                $currentDateTime = Carbon::now();
-                if (Carbon::parse($currentDateTime->format('Y-m-d'))->gt(Carbon::parse($data->fecha_cierre))) {
-                    $btn = '
-                    <div class="text-center">
-					<a href="transfer/create/' . $data->id . '" class="btn btn-dark" title="tranfar" >
-						<i class="fas fa-directions"></i>
-					</a>
-					<a href="transfer/showTransfer/' . $data->id . '" class="btn btn-danger" title="Pdf traslado" target="_blank">
-                         <i class="far fa-file-pdf"></i>
-                    </a>
-					<button class="btn btn-dark" title="" disabled>
-						<i class="fas fa-trash"></i>
-					</button>
-                    </div>
-                    ';
-                } elseif (Carbon::parse($currentDateTime->format('Y-m-d'))->lt(Carbon::parse($data->fecha_cierre))) {
-                    $status = '';
-                    if ($data->inventario == 'added') {
-                        $status = 'disabled';
-                    }
-                    $btn = '
-                    <div class="text-center">
-					<a href="transfer/create/' . $data->id . '" class="btn btn-dark" title="tranfar" >
-						<i class="fas fa-directions"></i>
-					</a>
-					<a href="transfer/showTransfer/' . $data->id . '" class="btn btn-danger" title="Pdf traslado" target="_blank">
-                        <i class="far fa-file-pdf"></i>
-                    </a>
-					<button class="btn btn-dark" title="Borrar Beneficio" onclick="downTransfer(' . $data->id . ');" ' . $status . '>
-						<i class="fas fa-trash"></i>
-					</button>
-                    </div>
-                    ';
-                } else {
-                    $btn = '
-                    <div class="text-center">
-					<a href="transfer/create/' . $data->id . '" class="btn btn-dark" title="tranfar" >
-						<i class="fas fa-directions"></i>
-					</a>
-					<a href="transfer/showTransfer/' . $data->id . '" class="btn btn-danger" title="Pdf traslado" target="_blank">
-                         <i class="far fa-file-pdf"></i>
-                    </a>
-					<button class="btn btn-dark" title="" disabled>
-						<i class="fas fa-trash"></i>
-					</button>
-                    </div>
-                    ';
+            ->addColumn('action', function ($transfer) {
+                $hoy = Carbon::today();
+                $btns = [];
+
+                // Botón PDF siempre
+                $btns[] = '<a href="transfer/showTransfer/' . $transfer->id . '" class="btn btn-danger" title="Pdf traslado" target="_blank">
+                           <i class="far fa-file-pdf"></i>
+                       </a>';
+
+                // Si pasó la fecha_cierre, inhabilito crear y borrar
+                if ($hoy->gt(Carbon::parse($transfer->fecha_cierre))) {
+                    $btns[] = '<button class="btn btn-dark" disabled><i class="fas fa-directions"></i></button>';
+                    $btns[] = '<button class="btn btn-dark" disabled><i class="fas fa-trash"></i></button>';
                 }
-                return $btn;
+                // Si aún no pasa la fecha_cierre
+                else {
+                    // Botón transferir
+                    $btns[] = '<a href="transfer/create/' . $transfer->id . '" class="btn btn-dark" title="Transferir">
+                               <i class="fas fa-directions"></i>
+                           </a>';
+                    // Botón borrar (solo si inventario != added)
+                    $disabled = $transfer->inventario === 'added' ? 'disabled' : '';
+                    $btns[] = '<button onclick="downTransfer(' . $transfer->id . ')" class="btn btn-dark" '
+                        . $disabled . '><i class="fas fa-trash"></i></button>';
+                }
+
+                return '<div class="text-center">' . implode(' ', $btns) . '</div>';
             })
             ->rawColumns(['date', 'inventory', 'action'])
             ->make(true);
