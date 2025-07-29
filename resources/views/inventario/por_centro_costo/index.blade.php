@@ -47,6 +47,15 @@
           </select>
           <span class="text-danger error-message"></span>
         </div>
+        {{-- Lote --}}
+        <div class="col-md-3">
+          <label for="inputlote" class="form-label">Lote</label>
+          <select id="inputlote" class="form-select select2">
+            <option value="">Todos los lotes</option>
+            {{-- Se llena vía AJAX --}}
+          </select>
+        </div>
+
         <div class="col-sm-12 col-md-3">
           <label for="inputcategoria" class="form-label">Categoria</label>
           <select id="inputcategoria" class="form-select select2">
@@ -59,7 +68,7 @@
           <span class="text-danger error-message"></span>
         </div>
       </div>
-      
+
       <div class="card border-0">
         <div class="m-3">
 

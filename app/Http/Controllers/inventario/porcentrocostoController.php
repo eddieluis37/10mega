@@ -43,23 +43,23 @@ class porcentrocostoController extends Controller
     {
         $centroId    = $request->input('centroId',   -1);
         $storeId     = $request->input('storeId',    -1);
+        $loteId      = $request->input('loteId',     -1);
         $categoriaId = $request->input('categoriaId', -1);
 
         DB::beginTransaction();
-        try {
+       try {
             $inventarios = Inventario::with(['lote', 'product.category', 'store'])
                 ->when($storeId != -1, function ($q) use ($storeId) {
                     return $q->where('store_id', $storeId);
                 })
                 ->when($centroId != -1, function ($q) use ($centroId) {
-                    return $q->whereHas('store', function ($q2) use ($centroId) {
-                        $q2->where('centrocosto_id', $centroId);
-                    });
+                    return $q->whereHas('store', fn($q2) => $q2->where('centrocosto_id', $centroId));
+                })
+                ->when($loteId != -1, function ($q) use ($loteId) {
+                    return $q->where('lote_id', $loteId);
                 })
                 ->when($categoriaId != -1, function ($q) use ($categoriaId) {
-                    return $q->whereHas('product', function ($q2) use ($categoriaId) {
-                        $q2->where('category_id', $categoriaId);
-                    });
+                    return $q->whereHas('product', fn($q2) => $q2->where('category_id', $categoriaId));
                 })
                 ->get();
 
@@ -173,6 +173,16 @@ class porcentrocostoController extends Controller
             $stores = Store::all(['id', 'name']);
         }
         return response()->json($stores);
+    }
+    
+    public function getLotes(Request $request)
+    {
+        $storeId = $request->input('storeId');
+        $lotes = $storeId
+            ? Lote::whereHas('inventarios', fn($q) => $q->where('store_id', $storeId))
+                  ->get(['id','codigo'])
+            : Lote::all(['id','codigo']);
+        return response()->json($lotes);
     }
 
     public function totales(Request $request)

@@ -16,8 +16,14 @@ const token = document
 
 let dataTable;
 let categoriaId = "-1";
+let loteId = "-1";
 
-function initializeDataTable(centroId = "-1", storeId = "-1", categoria = "-1") {
+function initializeDataTable(
+    centroId = "-1",
+    storeId = "-1",
+    lote = "-1",
+    categoria = "-1"
+) {
     dataTable = $("#tableInventory").DataTable({
         paging: true,
         pageLength: 500,
@@ -31,6 +37,7 @@ function initializeDataTable(centroId = "-1", storeId = "-1", categoria = "-1") 
             data: {
                 centroId: centroId,
                 storeId: storeId,
+                loteId: lote,
                 categoriaId: categoria,
             },
         },
@@ -271,60 +278,80 @@ function initializeDataTable(centroId = "-1", storeId = "-1", categoria = "-1") 
 }
 
 $(document).ready(function () {
-    // Inicializa Select2 en todos los selects
     $(".select2").select2({
         theme: "bootstrap-5",
         width: "100%",
         allowClear: true,
     });
 
-    // Carga inicial (sin filtros)
-    initializeDataTable("-1", "-1", categoriaId);
+    // Carga inicial
+    initializeDataTable();
 
-    // Cuando cambia Centrocosto
+    // Al cambiar Centrocosto → recargar Bodegas
     $("#inputcentro").on("change", function () {
         const centro = $(this).val();
         const $store = $("#inputstore");
         $store
             .empty()
-            .append('<option value="">Selecciona Bodega</option>')
+            .append('<option value="">Todas las bodegas</option>')
+            .trigger("change");
+        // Vaciar Lote
+        $("#inputlote")
+            .empty()
+            .append('<option value="">Todos los lotes</option>')
             .trigger("change");
 
-        // Pide al servidor las bodegas de ese centro (o todas)
         $.ajax({
             url: centro ? "/getStores" : "/getAllStores",
-            method: "GET",
             data: centro ? { centroId: centro } : {},
             success(data) {
-                data.forEach((s) => {
-                    $store.append(new Option(s.name, s.id));
-                });
+                data.forEach((s) => $store.append(new Option(s.name, s.id)));
                 $store.trigger("change");
-            },
-            error(err) {
-                console.error("Error al cargar bodegas:", err);
             },
         });
     });
 
-    // Cuando cambia Bodega
+    // Al cambiar Bodega → recargar Lotes
     $("#inputstore").on("change", function () {
-        const centro = $("#inputcentro").val() || "-1";
-        const store = $(this).val() || "-1";
-        dataTable.destroy();
-        initializeDataTable(centro, store, categoriaId);
-        cargarTotales(centro, store, categoriaId);
+        const store = $(this).val();
+        loteId = "-1"; // reset
+        const $lote = $("#inputlote");
+        $lote
+            .empty()
+            .append('<option value="">Todos los lotes</option>')
+            .trigger("change");
+
+        if (store) {
+            $.get("/getLotes", { storeId: store }, function (data) {
+                data.forEach((l) => $lote.append(new Option(l.codigo, l.id)));
+                $lote.trigger("change");
+            });
+        }
+
+        // refrescar tabla con nuevo filtro de bodega
+        reloadTable();
     });
 
-    // Cuando cambia Categoría
+    // Al cambiar Lote → refresca tabla
+    $("#inputlote").on("change", function () {
+        loteId = $(this).val() || "-1";
+        reloadTable();
+    });
+
+    // Al cambiar Categoría → refresca tabla
     $("#inputcategoria").on("change", function () {
         categoriaId = $(this).val() || "-1";
+        reloadTable();
+    });
+
+    function reloadTable() {
         const centro = $("#inputcentro").val() || "-1";
         const store = $("#inputstore").val() || "-1";
         dataTable.destroy();
-        initializeDataTable(centro, store, categoriaId);
-        cargarTotales(centro, store, categoriaId);
-    });
+        initializeDataTable(centro, store, loteId, categoriaId);
+        // si tienes función de totales, inclúyela también:
+        cargarTotales(centro, store, loteId, categoriaId);
+    }
 });
 
 function cargarTotales(centroId = "-1", storeId = "-1") {
