@@ -16,28 +16,19 @@ class Store extends Model
 
     protected $fillable = ['name'];
 
-    public function products()
-    {
-        return $this->belongsToMany(Product::class, 'product_store');
-    }
-
     /**
      * Cada tienda pertenece a un centro de costo.
-     * Se asume que en la tabla "stores" existe el campo "centrocosto_id".
+     * En la tabla "stores" existe el campo "centrocosto_id".
      */
     public function centroCosto()
     {
         return $this->belongsTo(Centrocosto::class, 'centrocosto_id');
     }
 
-    /* public function users(): BelongsToMany
+    public function products()
     {
-        return $this->belongsToMany(User::class);
-    } */
-
-    /**
-     * Relación inversa con User.
-     */
+        return $this->belongsToMany(Product::class, 'product_store');
+    }      
 
     public function users()
     {

@@ -23,10 +23,20 @@
     <div class="widget widget-chart-one">
       <div class="card text-center" style="background: #3B3F5C">
         <div class="m-2">
-          <h4 style="color:white;"><strong>Inventario X Centro Costo</strong></h3>
+          <h4 style="color:white;"><strong>Cierre de Inventario</strong></h3>
         </div>
       </div>
       <div class="row g-3 mt-3">
+        <div class="col-sm-12 col-md-3">
+          <label for="inputcentro" class="form-label">Centrocosto</label>
+          <select id="inputcentro" class="form-select select2">
+            <option value="">Todos los centro costos</option>
+            @foreach($centros as $option)
+            <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
+            @endforeach
+          </select>
+          <span class="text-danger error-message"></span>
+        </div>
         <div class="col-sm-12 col-md-3">
           <label for="inputstore" class="form-label">Bodega</label>
           <select id="inputstore" class="form-select select2">
@@ -38,28 +48,18 @@
           <span class="text-danger error-message"></span>
         </div>
         <div class="col-sm-12 col-md-3">
-          <label for="inputlote" class="form-label">Lote</label>
-          <select id="inputlote" class="form-select select2">
-            <option value="-1">Seleccione lote</option>
-            <option value="">Todos los lotes</option>
-            @foreach($lotes as $option)
-            <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['codigo'] }}</option>
+          <label for="inputcategoria" class="form-label">Categoria</label>
+          <select id="inputcategoria" class="form-select select2">
+            <option value="-1">Seleccione categoria</option>
+            <option value="">Todas las categorias</option>
+            @foreach($categorias as $option)
+            <option value="{{ $option->id }}" data="{{ $option }}">{{ $option->name }}</option>
             @endforeach
           </select>
           <span class="text-danger error-message"></span>
         </div>
-
-
-
-
-        @can('Cerrar_Inventario')
-        <!-- <div class="col-md-3 text-right ml-auto">
-          <div style="margin-top:28px;" clas="">
-            <button class="btn btn-success btn-lg" type="button" id="cargarInventarioBtn">Cerrar Inventario</button>
-          </div>
-        </div> -->
       </div>
-      @endcan
+      
       <div class="card border-0">
         <div class="m-3">
 

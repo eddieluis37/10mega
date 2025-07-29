@@ -27,53 +27,39 @@ class porcentrocostoController extends Controller
         $startDate = '2023-05-01';
         $endDate = '2023-05-08';
 
-        /*  $category = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
- */
-      $centros = Centrocosto::Where('status', 1)->get();
-
-        $user = auth()->user(); // Obtener el usuario autenticado        
-        // Obtener solo las bodegas asociadas al usuario en store_user
-        $stores = Store::whereIn('id', function ($query) use ($user) {
-            $query->select('store_id')
-                ->from('store_user')
-                ->where('user_id', $user->id);
-        })
-            ->whereNotIn('id', [40]) // Excluir bodegas específicas si aplica
-            ->orderBy('name', 'asc')
-            ->get();
-
-      //  $stores = Store::orderBy('id', 'asc')->get();
-        $lotes = Lote::orderBy('id', 'asc')->get();
-
+        $centros = Centrocosto::Where('status', 1)->get();
+        $stores = Store::orderBy('id', 'asc')->get();
+        $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
 
         // llama al metodo para calcular el stock
         //   $this->totales(request());
         $response = $this->totales(request()); // Call the totales method
         $totalStock = $response->getData()->totalStock; // Retrieve the totalStock value from the response
 
-        return view('inventario.por_centro_costo.index', compact('centros', 'stores', 'lotes', 'startDate', 'endDate', 'totalStock'));
+        return view('inventario.por_centro_costo.index', compact('centros', 'stores', 'categorias', 'startDate', 'endDate', 'totalStock'));
     }
 
     public function showPorCentroCosto(Request $request)
     {
-
-        $storeId = $request->input('storeId', -1); // Valor por defecto -1 si no está definido
-        $loteId = $request->input('loteId', -1);  // Valor por defecto -1 si no está definido
-
-        // Log::info('storeId:', ['storeId' => $storeId]); // larvel.log
-        // Log::info('loteId:', ['loteId' => $loteId]); // larvel.log
+        $centroId    = $request->input('centroId',   -1);
+        $storeId     = $request->input('storeId',    -1);
+        $categoriaId = $request->input('categoriaId', -1);
 
         DB::beginTransaction();
-
-
         try {
-            // Obtener todos los inventarios activos con filtros de store y lote
-            $inventarios = Inventario::with(['lote', 'product', 'store', 'store.centroCosto'])
-                ->when($storeId, function ($query, $storeId) {
-                    return $query->where('store_id', $storeId);
+            $inventarios = Inventario::with(['lote', 'product.category', 'store'])
+                ->when($storeId != -1, function ($q) use ($storeId) {
+                    return $q->where('store_id', $storeId);
                 })
-                ->when($loteId, function ($query, $loteId) {
-                    return $query->where('lote_id', $loteId);
+                ->when($centroId != -1, function ($q) use ($centroId) {
+                    return $q->whereHas('store', function ($q2) use ($centroId) {
+                        $q2->where('centrocosto_id', $centroId);
+                    });
+                })
+                ->when($categoriaId != -1, function ($q) use ($categoriaId) {
+                    return $q->whereHas('product', function ($q2) use ($categoriaId) {
+                        $q2->where('category_id', $categoriaId);
+                    });
                 })
                 ->get();
 
@@ -124,11 +110,6 @@ class porcentrocostoController extends Controller
                 //    Asumimos que stock_fisico ya está cargado en la BD o bien viene en la petición.
                 $stockFisico = $inventario->stock_fisico;
 
-                // 3) Calculamos la diferencia
-                // $diferencia = $stockIdeal - $stockFisico;
-
-                //    $stockIdeal -= $diferencia;
-
                 // Actualizar el inventario con el stock ideal calculado
                 $inventario->update([
                     'stock_ideal' => $stockIdeal,
@@ -157,9 +138,7 @@ class porcentrocostoController extends Controller
                     'fisico'                => $inventario->cantidad_diferencia,
                 ];
             }
-
             //  Log::info('Inventarios:', ['inventarios' => $resultados]); // larvel.log
-
 
             DB::commit();
             // Devolver $resultados en formato Datatables
@@ -177,33 +156,23 @@ class porcentrocostoController extends Controller
         }
     }
 
-    public function getAllLotes()
+    public function getAllStores()
     {
-        // Obtener todos los lotes
-        $lotes = Lote::all(['id', 'codigo']);
-
-        // Retornar los lotes como una respuesta JSON
-        return response()->json($lotes);
+        // Todos los stores (para cuando no hay centro seleccionado)
+        $stores = Store::all(['id', 'name']);
+        return response()->json($stores);
     }
 
-    public function getLotes(Request $request)
+    public function getStores(Request $request)
     {
-        // Validar la solicitud entrante
-        $request->validate([
-            'storeId' => 'required|exists:inventarios,store_id', // Verifica que el store_id exista en la tabla inventarios
-        ]);
-
-        // Recuperar el storeId de la solicitud
-        $storeId = $request->input('storeId');
-
-        // Obtener los lote_ids asociados a la tienda a través de la tabla inventarios
-        $loteIds = Inventario::where('store_id', $storeId)->pluck('lote_id');
-
-        // Obtener los lotes asociados a los lote_ids
-        $lotes = Lote::whereIn('id', $loteIds)->get(['id', 'codigo']); // Ajusta los nombres de los campos según tu base de datos
-
-        // Retornar los lotes como una respuesta JSON
-        return response()->json($lotes);
+        $centroId = $request->input('centroId');
+        if ($centroId) {
+            $stores = Store::where('centrocosto_id', $centroId)
+                ->get(['id', 'name']);
+        } else {
+            $stores = Store::all(['id', 'name']);
+        }
+        return response()->json($stores);
     }
 
     public function totales(Request $request)

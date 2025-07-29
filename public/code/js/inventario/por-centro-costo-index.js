@@ -14,9 +14,10 @@ const token = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-var dataTable;
+let dataTable;
+let categoriaId = "-1";
 
-function initializeDataTable(storeId = "-1", loteId = "-1") {
+function initializeDataTable(centroId = "-1", storeId = "-1", categoria = "-1") {
     dataTable = $("#tableInventory").DataTable({
         paging: true,
         pageLength: 500,
@@ -28,11 +29,12 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
             url: "/showPorCentroCosto",
             type: "GET",
             data: {
+                centroId: centroId,
                 storeId: storeId,
-                loteId: loteId,
+                categoriaId: categoria,
             },
         },
-        columns: [            
+        columns: [
             {
                 data: "StoreNombre",
                 name: "StoreNombre",
@@ -50,7 +52,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 },
             },
             { data: "codigoLote", name: "codigoLote" },
-            { data: "fechaVencimientoLote", name: "fechaVencimientoLote" },            
+            { data: "fechaVencimientoLote", name: "fechaVencimientoLote" },
             {
                 data: "CategoriaNombre",
                 name: "CategoriaNombre",
@@ -83,8 +85,8 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                     }
                 },
             },
-            { data: "CantidadInicial", name: "CantidadInicial" },           
-            { data: "compraLote", name: "compraLote" },           
+            { data: "CantidadInicial", name: "CantidadInicial" },
+            { data: "compraLote", name: "compraLote" },
             { data: "alistamiento", name: "alistamiento" },
             { data: "compensados", name: "compensados" },
             { data: "ProductoTerminado", name: "ProductoTerminado" },
@@ -92,7 +94,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
             { data: "trasladosal", name: "trasladosal" },
             { data: "venta", name: "venta" },
             { data: "notacredito", name: "notacredito" },
-            { data: "notadebito", name: "notadebito" },            
+            { data: "notadebito", name: "notadebito" },
             { data: "venta_real", name: "venta_real" },
             { data: "StockIdeal", name: "StockIdeal" },
             { data: "stock", name: "stock" },
@@ -134,8 +136,6 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                     }
                 },
             },
-
-           
         ],
         order: [[1, "ASC"]],
         language: {
@@ -216,7 +216,6 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 }, 0)
                 .toFixed(2);
 
-
             // Totalizar la columna "stock"
             var totalStock = api
                 .column("stock:name", { search: "applied" })
@@ -224,7 +223,7 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                 .reduce(function (a, b) {
                     return parseFloat(a) + parseFloat(b);
                 }, 0)
-                .toFixed(2);    
+                .toFixed(2);
 
             // Totalizar la columna "venta"
             var totalVenta = api
@@ -234,8 +233,6 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
                     return parseFloat(a) + parseFloat(b);
                 }, 0)
                 .toFixed(2);
-
-            
 
             // Totalizar la columna "fisico"
             var totalFisico = api
@@ -274,80 +271,69 @@ function initializeDataTable(storeId = "-1", loteId = "-1") {
 }
 
 $(document).ready(function () {
-    // Inicializa Select2
+    // Inicializa Select2 en todos los selects
     $(".select2").select2({
-        theme: "bootstrap-5", // Establece el tema de Bootstrap 5 para select2
+        theme: "bootstrap-5",
         width: "100%",
         allowClear: true,
     });
 
-    // Inicializa DataTable
-    initializeDataTable("-1");
+    // Carga inicial (sin filtros)
+    initializeDataTable("-1", "-1", categoriaId);
 
-    $("#inputstore").on("change", function () {
-        var storeId = $(this).val();
-        // Limpiar el select de lotes
-        $("#inputlote")
+    // Cuando cambia Centrocosto
+    $("#inputcentro").on("change", function () {
+        const centro = $(this).val();
+        const $store = $("#inputstore");
+        $store
             .empty()
-            .append('<option value="">Selecciona Lote</option>')
+            .append('<option value="">Selecciona Bodega</option>')
             .trigger("change");
 
-        if (storeId) {
-            // Realiza una llamada AJAX para obtener los lotes asociados a la tienda seleccionada
-            $.ajax({
-                url: "/getLotes",
-                method: "GET",
-                data: { storeId: storeId },
-                success: function (data) {
-                    // Suponiendo que 'data' es un array de objetos con 'id' y 'codigo'
-                    $.each(data, function (index, lote) {
-                        $("#inputlote").append(
-                            new Option(lote.codigo, lote.id)
-                        );
-                    });
-                    $("#inputlote").trigger("change"); // Actualiza Select2
-                },
-                error: function (error) {
-                    console.error("Error fetching lots:", error);
-                },
-            });
-        } else {
-            // Si no hay tienda seleccionada, obtener todos los lotes
-            $.ajax({
-                url: "/getAllLotes",
-                method: "GET",
-                success: function (data) {
-                    // Suponiendo que 'data' es un array de objetos con 'id' y 'codigo'
-                    $.each(data, function (index, lote) {
-                        $("#inputlote").append(
-                            new Option(lote.codigo, lote.id)
-                        );
-                    });
-                    $("#inputlote").trigger("change"); // Actualiza Select2
-                },
-                error: function (error) {
-                    console.error("Error fetching all lots:", error);
-                },
-            });
-        }
+        // Pide al servidor las bodegas de ese centro (o todas)
+        $.ajax({
+            url: centro ? "/getStores" : "/getAllStores",
+            method: "GET",
+            data: centro ? { centroId: centro } : {},
+            success(data) {
+                data.forEach((s) => {
+                    $store.append(new Option(s.name, s.id));
+                });
+                $store.trigger("change");
+            },
+            error(err) {
+                console.error("Error al cargar bodegas:", err);
+            },
+        });
     });
 
-    $("#inputlote").on("change", function () {
-        var storeId = $("#inputstore").val();
-        var loteId = $(this).val();
+    // Cuando cambia Bodega
+    $("#inputstore").on("change", function () {
+        const centro = $("#inputcentro").val() || "-1";
+        const store = $(this).val() || "-1";
         dataTable.destroy();
-        initializeDataTable(storeId, loteId);
-        cargarTotales(storeId, loteId);
+        initializeDataTable(centro, store, categoriaId);
+        cargarTotales(centro, store, categoriaId);
+    });
+
+    // Cuando cambia Categoría
+    $("#inputcategoria").on("change", function () {
+        categoriaId = $(this).val() || "-1";
+        const centro = $("#inputcentro").val() || "-1";
+        const store = $("#inputstore").val() || "-1";
+        dataTable.destroy();
+        initializeDataTable(centro, store, categoriaId);
+        cargarTotales(centro, store, categoriaId);
     });
 });
 
-function cargarTotales(storeId = "-1", loteId = "-1") {
+function cargarTotales(centroId = "-1", storeId = "-1") {
     $.ajax({
         type: "GET",
         url: "/totales",
         data: {
+            centroId: centroId,
             storeId: storeId,
-            loteId: loteId,
         },
         dataType: "JSON",
         success: function (data) {
@@ -374,63 +360,5 @@ function cargarTotales(storeId = "-1", loteId = "-1") {
             $("#difKilos").html(data.difKilos);
             $("#difPorcentajeMerma").html(data.difPorcentajeMerma);
         },
-    });
-}
-
-document
-    .getElementById("cargarInventarioBtn")
-    .addEventListener("click", (e) => {
-        e.preventDefault();
-        let element = e.target;
-        showConfirmationAlert(element)
-            .then((result) => {
-                if (result && result.value) {
-                    loadingStart(element);
-                    const dataform = new FormData();
-
-                    const var_storeId = document.querySelector("#inputstore");
-                    const var_loteId = document.querySelector("#inputlote");
-
-                    dataform.append("storeId", Number(var_storeId.value));
-                    dataform.append("loteId", Number(var_loteId.value));
-
-                    return sendData("/cargarInventariohist", dataform, token);
-                }
-            })
-            .then((result) => {
-                console.log(result);
-                if (result && result.status == 1) {
-                    loadingEnd(element, "success", "Cargando al inventorio");
-                    element.disabled = true;
-                    return swal(
-                        "EXITO",
-                        "Inventario Cargado Exitosamente",
-                        "success"
-                    );
-                }
-                if (result && result.status == 0) {
-                    loadingEnd(element, "success", "Cargando al inventorio");
-                    errorMessage(result.message);
-                }
-            })
-            .then(() => {
-                window.location.href = "/inventory/consolidado";
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    });
-
-function showConfirmationAlert(element) {
-    return swal.fire({
-        title: "CONFIRMAR",
-        text: "Estas seguro que desea cargar el inventario ?",
-        icon: "warning",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Acpetar",
-        denyButtonText: `Cancelar`,
     });
 }

@@ -541,7 +541,11 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
 
 
     Route::get('inventario/por_centro_costo', [porcentrocostoController::class, 'index'])->name('inventario.por_centro_costo');
-    Route::get('showInventarioPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
+    Route::get('showPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
+
+    Route::get('getStores', [porcentrocostoController::class, 'getStores'])->name('inventario.getStores');
+    Route::get('getAllStores', [porcentrocostoController::class, 'getAllStores'])->name('inventario.getAllStores');
+
 
     /*****************************INVENTORY-HISTORICO-KG****************************************** */
     Route::get('inventory/showhistorico', [inventoryController::class, 'showhistorico'])->name('inventory.showhistorico');

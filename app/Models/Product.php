@@ -17,19 +17,16 @@ class Product extends Model
 	protected $table = 'products';
 
 
+	// Relación con categorías
+	public function category()
+	{
+		return $this->belongsTo(Category::class, 'category_id');
+	}
+	
 	public function inventarios()
 	{
 		return $this->hasMany(Inventario::class, 'product_id');
 	}
-
-	/* public function lotesPorVencer() // Nueva relación con lotes a través de lote_products
-    {
-        return $this->belongsToMany(Lote::class, 'lote_products')
-            ->whereDate('fecha_vencimiento', '>=', now()) // Solo lotes no vencidos
-            ->orderBy('fecha_vencimiento', 'asc') // Ordenar por fecha más próxima
-			->limit(1); // Solo trae el lote más próximo
-    } */
-
 
 	public function lotesPorVencer()
 	{
@@ -72,13 +69,7 @@ class Product extends Model
 		return $this->belongsToMany(Lote::class, 'product_lote')
 			->withPivot('quantity') // Campo adicional en esta tabla pivote
 			->withTimestamps();
-	}
-
-	// Relación con categorías
-	public function category()
-	{
-		return $this->belongsTo(Category::class, 'category_id');
-	}
+	}	
 
 	public function ventas()
 	{
