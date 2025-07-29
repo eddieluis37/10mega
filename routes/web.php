@@ -104,6 +104,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportReciboCajaController;
 
 use App\Http\Controllers\ImportStockFisicoController;
+use App\Http\Controllers\inventario\porcentrocostoController;
 use App\Http\Controllers\inventory\inventoryUtilidadHistoricoController;
 use App\Http\Controllers\LossController;
 use App\Http\Controllers\notacredito\notacreditoController;
@@ -537,6 +538,10 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::get('showInventarioCierre', [inventarioController::class, 'showInvcierre'])->name('inventario.showInventarioCierre');
     Route::get('getLotes', [inventarioController::class, 'getLotes'])->name('inventario.getLotes');
     Route::get('getAllLotes', [inventarioController::class, 'getAllLotes'])->name('inventario.getAllLotes');
+
+
+    Route::get('inventario/por_centro_costo', [porcentrocostoController::class, 'index'])->name('inventario.por_centro_costo');
+    Route::get('showInventarioPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
 
     /*****************************INVENTORY-HISTORICO-KG****************************************** */
     Route::get('inventory/showhistorico', [inventoryController::class, 'showhistorico'])->name('inventory.showhistorico');
