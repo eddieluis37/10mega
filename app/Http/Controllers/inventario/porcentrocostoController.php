@@ -47,7 +47,7 @@ class porcentrocostoController extends Controller
         $categoriaId = $request->input('categoriaId', -1);
 
         DB::beginTransaction();
-       try {
+        try {
             $inventarios = Inventario::with(['lote', 'product.category', 'store'])
                 ->when($storeId != -1, function ($q) use ($storeId) {
                     return $q->where('store_id', $storeId);
@@ -105,6 +105,11 @@ class porcentrocostoController extends Controller
                     + $compensadores
                     + $inventario->cantidad_prod_term
                     + $trasladoIngreso) - $trasladoSalida - ($totalVenta - $totalNotaCredito);
+
+                // 1) filtra filas con stockIdeal == 0, las saltamos:
+                if ($stockIdeal == 0) {
+                    continue;
+                }
 
                 // 2) Tomamos el stock físico actual del inventario
                 //    Asumimos que stock_fisico ya está cargado en la BD o bien viene en la petición.
@@ -174,14 +179,14 @@ class porcentrocostoController extends Controller
         }
         return response()->json($stores);
     }
-    
+
     public function getLotes(Request $request)
     {
         $storeId = $request->input('storeId');
         $lotes = $storeId
             ? Lote::whereHas('inventarios', fn($q) => $q->where('store_id', $storeId))
-                  ->get(['id','codigo'])
-            : Lote::all(['id','codigo']);
+            ->get(['id', 'codigo'])
+            : Lote::all(['id', 'codigo']);
         return response()->json($lotes);
     }
 

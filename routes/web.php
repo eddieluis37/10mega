@@ -543,6 +543,10 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::get('inventario/por_centro_costo', [porcentrocostoController::class, 'index'])->name('inventario.por_centro_costo');
     Route::get('showPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
 
+    Route::get('inventario/si_por_centro_costo', [porcentrocostoController::class, 'index'])->name('inventario.si_por_centro_costo');
+  //  Route::get('showPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
+    
+
     Route::get('getStores', [porcentrocostoController::class, 'getStores'])->name('inventario.getStores');
     Route::get('getAllStores', [porcentrocostoController::class, 'getAllStores'])->name('inventario.getAllStores');
 

@@ -102,7 +102,17 @@ function initializeDataTable(
             { data: "venta", name: "venta" },
             { data: "notacredito", name: "notacredito" },
             { data: "notadebito", name: "notadebito" },
-            { data: "venta_real", name: "venta_real" },
+            {
+                data: "venta_real",
+                name: "venta_real",
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: left;'>" +
+                        (data.toFixed(2)) +
+                        "</div>"
+                    );
+                },
+            },            
             { data: "StockIdeal", name: "StockIdeal" },
             { data: "stock", name: "stock" },
             { data: "fisico", name: "fisico" },
