@@ -105,6 +105,7 @@ use App\Http\Controllers\ReportReciboCajaController;
 
 use App\Http\Controllers\ImportStockFisicoController;
 use App\Http\Controllers\inventario\porcentrocostoController;
+use App\Http\Controllers\inventario\siporcentrocostoController;
 use App\Http\Controllers\inventory\inventoryUtilidadHistoricoController;
 use App\Http\Controllers\LossController;
 use App\Http\Controllers\notacredito\notacreditoController;
@@ -543,8 +544,8 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::get('inventario/por_centro_costo', [porcentrocostoController::class, 'index'])->name('inventario.por_centro_costo');
     Route::get('showPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
 
-    Route::get('inventario/si_por_centro_costo', [porcentrocostoController::class, 'index'])->name('inventario.si_por_centro_costo');
-  //  Route::get('showPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
+    Route::get('inventario/si_por_centro_costo', [siporcentrocostoController::class, 'SiIndex'])->name('inventario.SiIndex');
+    Route::get('SishowPorCentroCosto', [siporcentrocostoController::class, 'SishowPorCentroCosto'])->name('inventario.SishowPorCentroCosto');
     
 
     Route::get('getStores', [porcentrocostoController::class, 'getStores'])->name('inventario.getStores');
