@@ -31,8 +31,8 @@
           <label for="inputcentro" class="form-label">Centrocosto</label>
           <select id="inputcentro" class="form-select select2">
             <option value="">Todos los centro costos</option>
-            @foreach($centros as $option)
-            <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
+            @foreach($centros as $c)
+            <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
             @endforeach
           </select>
           <span class="text-danger error-message"></span>
@@ -184,8 +184,8 @@
               <th class="table-th text-white" title="Lote">Lote</th>
               <th class="table-th text-white" title="Fecha de vencimiento lote">FVENC</th>
               <th class="table-th text-white" title="Categoria">CAT</th>
-              <th class="table-th text-white" title="Productos">PRODUCTO</th>             
-              <th class="table-th text-white" title="Stock Ideal">SI</th>            
+              <th class="table-th text-white" title="Productos">PRODUCTO</th>
+              <th class="table-th text-white" title="Stock Ideal">SI</th>
             </tr>
           </thead>
           <tbody>
@@ -197,7 +197,7 @@
               <td></td>
               <td></td>
               <td></td>
-              <td>0.00</td>              
+              <td>0.00</td>
             </tr>
           </tfoot>
         </table>

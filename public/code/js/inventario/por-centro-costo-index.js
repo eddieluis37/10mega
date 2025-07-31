@@ -19,7 +19,7 @@ let categoriaId = "-1";
 let loteId = "-1";
 
 function initializeDataTable(
-    centroId = "-1",
+    centroId = "1",
     storeId = "-1",
     lote = "-1",
     categoria = "-1"

@@ -31,8 +31,9 @@
           <label for="inputcentro" class="form-label">Centrocosto</label>
           <select id="inputcentro" class="form-select select2">
             <option value="">Todos los centro costos</option>
-            @foreach($centros as $option)
-            <option value="{{ $option['id'] }}" data="{{ $option }}">{{ $option['name'] }}</option>
+            <option value="">Todos los centro costos</option>
+            @foreach($centros as $c)
+            <option value="{{$c->id}}" {{ $c->id == 1 ? 'selected' : '' }}>{{$c->name}}</option>
             @endforeach
           </select>
           <span class="text-danger error-message"></span>
