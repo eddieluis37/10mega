@@ -99,7 +99,7 @@
                             @endif
                             <div class="media-body" style="font-size:0.75rem;">
                                 <h5 class="mb-0">@guest Usuario @else {{ Auth::user()->name }} @endguest</h5>
-                                <p class="mb-0">Erp-Mega</p>
+                                <p class="mb-0">@guest Perfil @else {{ Auth::user()->profile }} @endguest</p>
                             </div>
                         </div>
                     </div>

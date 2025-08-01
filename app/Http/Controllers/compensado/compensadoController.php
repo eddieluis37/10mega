@@ -41,7 +41,7 @@ class compensadoController extends Controller
         $providers = Third::where('status', 1)->get();
         $centros = Centrocosto::where('status', 1)->get();
 
-        $formapagos = Formapago::whereNotIn('id', [2,3,4,5,6,7,8,9,10,17])
+        $formapagos = Formapago::whereNotIn('id', [2, 3, 4, 5, 6, 7, 8, 9, 10, 17])
             ->orderBy('id', 'asc')
             ->get();
 
@@ -484,7 +484,7 @@ class compensadoController extends Controller
         }
 
         // Preparar el array de resultados
-         $array = [
+        $array = [
             'pesoTotalGlobal' => $pesoTotalGlobal,
             'totalGlobal' => $totalGlobal,
             'totalPorcDesc' => $totalPorcDesc,
@@ -878,6 +878,16 @@ class compensadoController extends Controller
                     'product_id' => $productId,
                     'store_destino_id' => $compensador->store_id,
                 ]);
+
+                // 2) Ahora actualizamos el campo `cost` de la tabla products               
+                $productId    = $detalle->products_id;
+                $purchaseCost = $detalle->pcompra;
+                
+                $producto = Product::find($productId);
+                if ($producto) {
+                    $producto->cost = $purchaseCost;
+                    $producto->save();
+                }
             }
 
             // Confirmar la transacción
