@@ -98,7 +98,7 @@ class AsignarPreciosProdController extends Controller
         $status              = request('status');
 
         // Cargamos el detalle con su producto:
-        $detalle = \App\Models\ListaprecioDetalle::with('product')
+        $detalle = \App\Models\Listapreciodetalle::with('product')
             ->where('listaprecio_id', $listaprecioId)
             ->where('product_id', $productId)
             ->first();
