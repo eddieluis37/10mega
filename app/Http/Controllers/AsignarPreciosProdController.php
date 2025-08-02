@@ -51,6 +51,9 @@ class AsignarPreciosProdController extends Controller
                 'pro.name as nameproducto',
                 'pro.id as productId',
                 'pro.cost as costo',
+                'pro.iva as porc_imp_iva',
+                'pro.otro_impuesto as porc_imp_ultra_pro',
+                'pro.impoconsumo as porc_imp_consumo',
                 DB::raw('(pro.cost + ' . $costoVariable . ') as costo_total'), // Sumar costo_variable a pro.cost
                 'lpd.porc_util_proyectada as porc_util_proyectada',
                 DB::raw('(pro.cost + ' . $costoVariable . ') / (1 - (porc_util_proyectada / 100) ) as precio_proyectado '),
@@ -59,6 +62,18 @@ class AsignarPreciosProdController extends Controller
                 DB::raw('((precio - (pro.cost + ' . $costoVariable . ')) - (porc_descuento / 100) * precio) as utilidad '),
                 'lpd.utilidad as porc_utilidad',
                 DB::raw('((precio - (pro.cost + ' . $costoVariable . ')) - (porc_descuento / 100) * precio) - ' . $costoFijo . ' as contribucion'),
+                //  NUEVO campo precio_venta:
+                DB::raw('
+                (
+                  lpd.precio * (1 - (lpd.porc_descuento / 100))
+                  * (
+                      1 + (
+                        (pro.iva + pro.otro_impuesto + pro.impoconsumo) / 100
+                      )
+                  )
+                ) 
+                as precio_venta
+            '),
                 'lpd.status as status',
             )
             ->where('lpd.listaprecio_id', $listaprecioId)
@@ -75,32 +90,46 @@ class AsignarPreciosProdController extends Controller
 
     public function updateAPPSwitch()
     {
-        $listaprecioId = request('listaprecioId');
-        $productId = request('productId');
-        $precio = request('precio');
-        $porc_descuento = request('porc_descuento');
-        $status = request('status');
+        $listaprecioId       = request('listaprecioId');
+        $productId           = request('productId');
+        $precio              = request('precio');
+        $porc_util_proyectada = request('porc_util_proyectada');
+        $porc_descuento      = request('porc_descuento');
+        $status              = request('status');
 
+        // Cargamos el detalle con su producto:
+        $detalle = \App\Models\ListaprecioDetalle::with('product')
+            ->where('listaprecio_id', $listaprecioId)
+            ->where('product_id', $productId)
+            ->first();
+
+        if (!$detalle) {
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
+
+        // Actualizamos los campos que vienen
         if (!is_null($precio)) {
-            DB::table('listapreciodetalles')
-                ->where('listaprecio_id', $listaprecioId)
-                ->where('product_id', $productId)
-                ->update(['precio' => $precio]);
+            $detalle->precio = $precio;
         }
-
+        if (!is_null($porc_util_proyectada)) {
+            $detalle->porc_util_proyectada = $porc_util_proyectada;
+        }
         if (!is_null($porc_descuento)) {
-            DB::table('listapreciodetalles')
-                ->where('listaprecio_id', $listaprecioId)
-                ->where('product_id', $productId)
-                ->update(['porc_descuento' => $porc_descuento]);
+            $detalle->porc_descuento = $porc_descuento;
+        }
+        if (!is_null($status)) {
+            $detalle->status = $status;
         }
 
-        if (!is_null($status)) {
-            DB::table('listapreciodetalles')
-                ->where('listaprecio_id', $listaprecioId)
-                ->where('product_id', $productId)
-                ->update(['status' => $status]);
-        }
+        // Recalculamos precio_venta según la fórmula:
+        $p       = $detalle->precio;
+        $d       = $detalle->porc_descuento / 100;
+        $iva     = $detalle->product->iva;
+        $ultra   = $detalle->product->otro_impuesto;
+        $consumo = $detalle->product->impoconsumo;
+        $detalle->precio_venta = ($p * (1 - $d)) * (1 + (($iva + $ultra + $consumo) / 100));
+
+        $detalle->save();
 
         return response()->json(['success' => true]);
     }

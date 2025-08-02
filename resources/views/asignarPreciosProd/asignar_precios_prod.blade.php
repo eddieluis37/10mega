@@ -100,11 +100,15 @@
                 <th class="table-th text-white text-center" title="Total costo = costo prod + costo variable 1357">T_COSTO</th>
                 <th class="table-th text-white text-center" title="Porcentaje de utilidad proyectada">%.U.P</th>
                 <th class="table-th text-white text-center" title="Precio proyectado">$.PROYE</th>
-                <th class="table-th text-white text-center">PRECIO</th>
+                <th class="table-th text-white text-center">PRECIO BASE</th>
                 <th class="table-th text-white text-center" title="Porcentaje de descuento">%DES</th>
                 <th class="table-th text-white text-center" title="Utilidad = ">UTILIDAD</th>
                 <th class="table-th text-white text-center" title="Porcentaje de utilidad">%.UT</th>
                 <th class="table-th text-white text-center" title="Contribucion = Utilidad - costo_fijo">CONTRIB</th>
+                <th class="table-th text-white text-center" title="Porcentaje de Iva">%IVA</th>
+                <th class="table-th text-white text-center" title="Porcentaje impuesto ultraProcesado">%UP</th>
+                <th class="table-th text-white text-center" title="Porcentaje impuesto al consumo">%IP</th>
+                <th class="table-th text-white text-center">PRECIO VENTA</th>
                 <th class="table-th text-white text-center">STATU</th>
               </tr>
             </thead>
