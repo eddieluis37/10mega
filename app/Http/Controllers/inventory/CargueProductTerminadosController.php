@@ -137,12 +137,12 @@ class CargueProductTerminadosController extends Controller
                 'loteProd' => 'required',
                 'quantity' => 'required',
                 'costo' => 'required',
-                'bodega' => 'required|exists:stores,id', 
+                'bodega' => 'required|exists:stores,id',
             ];
             $messages = [
                 'productloteId.required' => 'El id es requerido',
                 'producto.required' => 'Producto es requerido',
-                'producto.exists' => 'El producto no existe', 
+                'producto.exists' => 'El producto no existe',
                 'loteProd.required' => 'Lote es requerido',
                 'quantity.required' => 'Cantidad es requerida',
                 'costo.required' => 'Costo es requerido',
@@ -265,7 +265,7 @@ class CargueProductTerminadosController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request)
-    {     
+    {
         $storeId = $request->input('storeId');
         $categoriaId = $request->input('categoriaId');
         $loteId = $request->input('loteId');
@@ -318,7 +318,7 @@ class CargueProductTerminadosController extends Controller
             ->where('lote_id', $loteId)
             ->update([
                 'quantity' => $quantity,
-                'costo' => $costo                
+                'costo' => $costo
             ]);
 
         return response()->json(['success' => 'true']);
@@ -369,7 +369,7 @@ class CargueProductTerminadosController extends Controller
                                 'lote_id' => $lote->id,
                                 'store_id' => $detalle->store_id,
                             ],
-                            [                                
+                            [
                                 'cantidad_prod_term' => 0,
                                 'costo_unitario' => 0,
                                 'costo_total' => 0,
@@ -394,6 +394,16 @@ class CargueProductTerminadosController extends Controller
                             'total' => $detalle->quantity * $detalle->product->cost,
                             'fecha' => Carbon::now(),
                         ]);
+
+                        // 2) Ahora actualizamos el campo `cost` de la tabla products               
+                        $productId    = $detalle->product_id;
+                        $purchaseCost = $detalle->costo;
+
+                        $producto = Product::find($productId);
+                        if ($producto) {
+                            $producto->cost = $purchaseCost;
+                            $producto->save();
+                        }
                     }
                 }
             }
