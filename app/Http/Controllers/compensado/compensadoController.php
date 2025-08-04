@@ -86,13 +86,13 @@ class compensadoController extends Controller
 
         /**************************************** */
         $status = '';
-        $fechaCompensadoCierre = Carbon::parse($datacompensado[0]->fecha_cierre);
+        $fechacompensadocierre = Carbon::parse($datacompensado[0]->fecha_cierre);
         $date = Carbon::now();
         $currentDate = Carbon::parse($date->format('Y-m-d'));
-        if ($currentDate->gt($fechaCompensadoCierre)) {
+        if ($currentDate->gt($fechacompensadocierre)) {
             //'Date 1 is greater than Date 2';
             $status = 'false';
-        } elseif ($currentDate->lt($fechaCompensadoCierre)) {
+        } elseif ($currentDate->lt($fechacompensadocierre)) {
             //'Date 1 is less than Date 2';
             $status = 'true';
         } else {
@@ -134,13 +134,13 @@ class compensadoController extends Controller
 
         /**************************************** */
         $status = '';
-        $fechaCompensadoCierre = Carbon::parse($datacompensado[0]->fecha_cierre);
+        $fechacompensadocierre = Carbon::parse($datacompensado[0]->fecha_cierre);
         $date = Carbon::now();
         $currentDate = Carbon::parse($date->format('Y-m-d'));
-        if ($currentDate->gt($fechaCompensadoCierre)) {
+        if ($currentDate->gt($fechacompensadocierre)) {
             //'Date 1 is greater than Date 2';
             $status = 'false';
-        } elseif ($currentDate->lt($fechaCompensadoCierre)) {
+        } elseif ($currentDate->lt($fechacompensadocierre)) {
             //'Date 1 is less than Date 2';
             $status = 'true';
         } else {
