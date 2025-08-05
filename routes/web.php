@@ -126,6 +126,7 @@ use App\Http\Controllers\reportes\reporteventaprodController;
 use App\Http\Controllers\reportes\reportecomprarequeridaController;
 use App\Http\Controllers\reportes\reporteasignarpreciosController;
 use App\Http\Controllers\ProductLoteController;
+use App\Http\Controllers\promotion\promotionController;
 use App\Http\Controllers\sale\exportDespachoController;
 use App\Http\Controllers\sale\exportRemisionController;
 use App\Http\Controllers\ReporteCierreCajaController;
@@ -342,18 +343,18 @@ Route::middleware(['auth', 'can:acceder_compra_lote'])->group(function () {
 /*****************************COMPRAS-COMPENSADOS****************************************** */
 Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::get('compensado', [compensadoController::class, 'index'])->name('compensado.index');
-    
+
     Route::get('compensado/create_order/{id}', [compensadoController::class, 'create_order'])->name('compensado.create_order');
-    
+
     Route::get('compensado/create/{id}', [compensadoController::class, 'create'])->name('compensado.create');
-    
+
     Route::get('showlistcompensado', [compensadoController::class, 'show'])->name('compensado.showlist');
     Route::post('getproductos', [compensadoController::class, 'getproducts'])->name('compensado.getproductos');
     Route::get('/compensado/search-products', [compensadoController::class, 'searchProducts'])->name('compensado.search-products');
     Route::post('compensadosave', [compensadoController::class, 'store'])->name('compensado.save');
-    
+
     Route::post('compensadosavedetailorder', [compensadoController::class, 'savedetail_order'])->name('compensado.savedetail_order');
-    
+
     Route::post('compensadosavedetail', [compensadoController::class, 'savedetail'])->name('compensado.savedetail');
 
 
@@ -361,7 +362,7 @@ Route::middleware(['auth', 'can:acceder_compra_productos'])->group(function () {
     Route::post('compensadogetById', [compensadoController::class, 'edit'])->name('compensado.ById');
 
     Route::post('compensadogetByIdOrder', [compensadoController::class, 'editOrder'])->name('compensado.ByIdOrder');
-     Route::post('compensadoByIdOrder', [compensadoController::class, 'editCompensadoorder'])->name('compensado.editCompensadoorder');
+    Route::post('compensadoByIdOrder', [compensadoController::class, 'editCompensadoorder'])->name('compensado.editCompensadoorder');
 
 
     Route::post('compensadoById', [compensadoController::class, 'editCompensado'])->name('compensado.editCompensado');
@@ -488,6 +489,15 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     // Route::post('/sale/{saleId}/annul', [saleController::class, 'annulSale']); // esta funcionalidad de anulacion no realiza devolucion de dinero
 
     Route::get('/getDireccionesByClienteSale/{cliente_id}', [saleController::class, 'getDireccionesByClienteSale'])->name('sale.getDireccionesByClienteSale');
+
+    //*************************************
+
+
+    Route::get('promotion/create/{id}', [promotionController::class, 'create'])->name('promotion.create');
+    Route::get('showlistVentas', [promotionController::class, 'show'])->name('promotion.showlistVentas');
+    Route::post('salesavedetail', [promotionController::class, 'savedetail'])->name('promotion.savedetail');
+
+
 });
 
 /* VENTAS PARRILLA Tipo 2 = POS MOSTRADOR, Tpo 3 = DOMICILIO */
@@ -546,7 +556,7 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
 
     Route::get('inventario/si_por_centro_costo', [siporcentrocostoController::class, 'SiIndex'])->name('inventario.SiIndex');
     Route::get('SishowPorCentroCosto', [siporcentrocostoController::class, 'SishowPorCentroCosto'])->name('inventario.SishowPorCentroCosto');
-    
+
 
     Route::get('getStores', [porcentrocostoController::class, 'getStores'])->name('inventario.getStores');
     Route::get('getAllStores', [porcentrocostoController::class, 'getAllStores'])->name('inventario.getAllStores');
@@ -714,7 +724,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::get('showReportAjusteDeInv', [reporteajusteinventariosController::class, 'show'])->name('showReportAjusteDeInv.showajustedeinv');
 
 
-     Route::get('showCuentasPorCobrar', [cuentasporcobrarController::class, 'show'])->name('showCuentasPorCobrar');
+    Route::get('showCuentasPorCobrar', [cuentasporcobrarController::class, 'show'])->name('showCuentasPorCobrar');
 
 
 
