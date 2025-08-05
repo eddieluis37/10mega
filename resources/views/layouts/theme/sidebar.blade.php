@@ -542,7 +542,8 @@
                         Cierre de Inv KG
                     </a>
                 </li>
-                 <li>
+                  @can('ver_inventario_si')
+                <li>
                     <a href="{{ url('inventario/si_por_centro_costo') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -554,6 +555,7 @@
                          SI CentroCosto KG
                     </a>
                 </li>
+                @endcan
                 <li>
                     <a href="{{ url('inventory/utilidad') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square">

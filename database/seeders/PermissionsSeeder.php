@@ -15,7 +15,7 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $modules = ['administracion', 'contabilidad', 'combos', 'dishes', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'inventario_stockfisico', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas', 'CambiarPrecioVenta']; // Agrega los módulos necesarios
+        $modules = ['administracion', 'contabilidad', 'combos', 'dishes', 'lista_de_precio', 'terceros', 'productos', 'brand', 'usuarios', 'compras', 'compra_lote', 'compra_productos', 'alistamiento', 'traslado', 'inventario', 'inventario_si', 'inventario_stockfisico', 'cargue_productos_term', 'ventas', 'venta_pos', 'venta_domicilio', 'venta_autoservicio', 'venta_parrilla', 'venta_bar', 'orders', 'bodegas', 'CambiarPrecioVenta']; // Agrega los módulos necesarios
 
         // Crear o actualizar permisos
         foreach ($modules as $module) {
@@ -520,15 +520,18 @@ class PermissionsSeeder extends Seeder
             $usuario->assignRole($comprador);
         }
 
-        /* ******************** BAR ***************** */
         // 1. Crear o actualizar el rol "AdminBodega"
-        $adminBodega = Role::updateOrCreate(['name' => 'AdminBodega']);
+        
+        
+        
+        /* ******************** BAR ***************** */
+        $cajaBar = Role::updateOrCreate(['name' => 'CajeroBar']);
         User::updateOrCreate(
             ['email' => 'soachamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'BAR SOACHA',
                 'phone' => '3214154625',
-                'profile' => 'AdminBodega',
+                'profile' => 'CajeroBar',
                 'status' => 'Active',
                 'password' => bcrypt('Bar05Soacha.*')
             ]
@@ -538,27 +541,18 @@ class PermissionsSeeder extends Seeder
             [
                 'name' => 'BAR GALAN',
                 'phone' => '3214154625',
-                'profile' => 'AdminBodega',
+                'profile' => 'CajeroBar',
                 'status' => 'Active',
                 'password' => bcrypt('01Galanmegabar2025*.')
             ]
         );
-        User::updateOrCreate(
-            ['email' => 'galanmega2@carnesfriasmega.co'], // Condición para identificar el usuario
-            [
-                'name' => 'ADMIN GALAN 2',
-                'phone' => '3214154625',
-                'profile' => 'AdminBodega',
-                'status' => 'Active',
-                'password' => bcrypt('CarnesFriasMega2025@')
-            ]
-        );
+        
         User::updateOrCreate(
             ['email' => 'subamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'BAR SUBA',
                 'phone' => '3214154625',
-                'profile' => 'AdminBodega',
+                'profile' => 'CajeroBar',
                 'status' => 'Active',
                 'password' => bcrypt('02Subamegabar2025*.')
             ]
@@ -570,7 +564,7 @@ class PermissionsSeeder extends Seeder
             ->get();
 
         foreach ($usuarios as $usuario) {
-            $usuario->assignRole($adminBodega);
+            $usuario->assignRole($cajaBar);
         }
 
         // 3. Definir el listado de permisos a sincronizar
@@ -594,6 +588,7 @@ class PermissionsSeeder extends Seeder
             'crear_venta_pos',
             'editar_venta_pos',
             'ver_venta_domicilio',
+            'acceder_venta_bar',
             'acceder_venta_domicilio',
             'crear_venta_domicilio',
             'editar_venta_domicilio',
@@ -609,6 +604,12 @@ class PermissionsSeeder extends Seeder
             'crear_orders',
             'editar_orders',
             'eliminar_orders',
+
+            'ver_inventario',
+            'ver_inventario_si',
+
+            'acceder_inventario',
+            'acceder_inventario_si'
         ];
 
         // 4. Crear o actualizar cada permiso (esto asegura que, si ya existen, se mantengan actualizados)
@@ -621,6 +622,17 @@ class PermissionsSeeder extends Seeder
         $rolesUsuarios = [
             'AdminBodega' => 'ADMINISTRADOR CENTRO COSTO',
         ];
+
+        User::updateOrCreate(
+            ['email' => 'galanmega2@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'ADMIN GALAN 2',
+                'phone' => '3214154625',
+                'profile' => 'AdminBodega',
+                'status' => 'Active',
+                'password' => bcrypt('CarnesFriasMega2025@')
+            ]
+        );
 
         // 6. Para cada rol definido, se crea o actualiza y se sincronizan los permisos,
         //    luego se asigna al usuario correspondiente si existe.

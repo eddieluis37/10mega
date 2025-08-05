@@ -479,7 +479,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
 
     Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
 
-   // Route::get('/products/search', [saleController::class, 'search'])->name('products.search');
+    // Route::get('/products/search', [saleController::class, 'search'])->name('products.search');
     //Route::get('products/{sale}/search', [saleController::class, 'search'])->name('products.search');
     Route::get('/products/search/autoservicio', [saleautoservicioController::class, 'search'])->name('products.search.autoservicio');
 
@@ -499,8 +499,6 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('promotion/create/{id}', [promotionController::class, 'create'])->name('promotion.create');
     Route::get('showlistVentas', [promotionController::class, 'show'])->name('promotion.showlistVentas');
     Route::post('salesavedetail', [promotionController::class, 'savedetail'])->name('promotion.savedetail');
-
-
 });
 
 /* VENTAS PARRILLA Tipo 2 = POS MOSTRADOR, Tpo 3 = DOMICILIO */
@@ -556,11 +554,7 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
 
     Route::get('inventario/por_centro_costo', [porcentrocostoController::class, 'index'])->name('inventario.por_centro_costo');
     Route::get('showPorCentroCosto', [porcentrocostoController::class, 'showPorCentroCosto'])->name('inventario.showPorCentroCosto');
-
-    Route::get('inventario/si_por_centro_costo', [siporcentrocostoController::class, 'SiIndex'])->name('inventario.SiIndex');
-    Route::get('SishowPorCentroCosto', [siporcentrocostoController::class, 'SishowPorCentroCosto'])->name('inventario.SishowPorCentroCosto');
-
-
+   
     Route::get('getStores', [porcentrocostoController::class, 'getStores'])->name('inventario.getStores');
     Route::get('getAllStores', [porcentrocostoController::class, 'getAllStores'])->name('inventario.getAllStores');
 
@@ -580,8 +574,10 @@ Route::middleware(['auth', 'can:acceder_inventario'])->group(function () {
     Route::get('showCargarVentasInv', [CargarVentasController::class, 'show'])->name('inventory.showCargarVentas');
     Route::post('/updateCVInv', [CargarVentasController::class, 'updateCVInv'])->name('inventory.updateCVInv');
 });
-
-
+ Route::middleware(['auth', 'can:acceder_inventario_si'])->group(function () {
+        Route::get('inventario/si_por_centro_costo', [siporcentrocostoController::class, 'SiIndex'])->name('inventario.SiIndex');
+        Route::get('SishowPorCentroCosto', [siporcentrocostoController::class, 'SishowPorCentroCosto'])->name('inventario.SishowPorCentroCosto');
+    });
 
 Route::middleware(['auth', 'can:acceder_productos'])->group(function () {
     /**PRODUCTOS SIN LIVEWIRE**/
