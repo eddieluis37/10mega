@@ -7,6 +7,7 @@ use App\Models\centros\Centrocosto;
 use App\Services\TurnoDiarioService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Sale extends Model
 {
@@ -67,11 +68,21 @@ class Sale extends Model
         return $this->belongsTo(Centrocosto::class);
     }
 
-    /*   public function third()
+    /**
+     * Bodegas (stores) asociadas a esta venta,
+     * a través de su centrocosto_id.
+     */
+    public function stores(): HasManyThrough
     {
-        return $this->belongsTo(Third::class);
+        return $this->hasManyThrough(
+            Store::class,      // Modelo final
+            Centrocosto::class, // Modelo intermedio
+            'id',              // FK de centrocosto hacia sales.centrocosto_id
+            'centrocosto_id',  // FK de stores hacia centros.id
+            'centrocosto_id',  // Local key en sales
+            'id'               // Local key en centrocosto
+        );
     }
- */
 
     /**
      * El “tercero” (cliente) asociado a esta venta.

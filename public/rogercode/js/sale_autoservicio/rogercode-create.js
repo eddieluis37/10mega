@@ -119,6 +119,10 @@ function actualizarValoresProducto(productId, loteId) {
 }
 
 $(document).ready(function () {
+
+    // Obtenemos el saleId que expusimos en la vista
+  const saleId = window.SALE_ID || $('#saleId').val();
+  
     $(".select2Prod").select2({
         placeholder: "Seleccione un producto",
         width: "100%",
@@ -129,8 +133,9 @@ $(document).ready(function () {
             dataType: "json",
             delay: 250,
             data: function (params) {
-                return {
-                    q: params.term, // El término de búsqueda (puede ser nombre o código de barras)
+                 return {
+                    q: params.term, // término de búsqueda
+                    sale_id: saleId, // ID de la venta en curso
                 };
             },
             processResults: function (data) {

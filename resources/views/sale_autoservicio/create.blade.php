@@ -28,6 +28,7 @@
 									<div class="form-group">
 										<label for="" class="form-label">Centro costo</label>
 										<p>{{$datacompensado[0]->namecentrocosto}}</p>
+										<input type="hidden" id="saleId" value="{{ $id }}">
 									</div>
 								</div>
 							</div>

@@ -479,7 +479,10 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
 
     Route::get('/cargar-inventario-masivo', [saleController::class, 'cargarInventarioMasivo'])->name('cargar.inventario.masivo');
 
-    Route::get('/products/search', [saleController::class, 'search'])->name('products.search');
+   // Route::get('/products/search', [saleController::class, 'search'])->name('products.search');
+    //Route::get('products/{sale}/search', [saleController::class, 'search'])->name('products.search');
+    Route::get('/products/search/autoservicio', [saleautoservicioController::class, 'search'])->name('products.search.autoservicio');
+
 
     // Ruta para cargar la vista del formulario de devolución parcial
     // Esta ruta redirige a una vista donde se muestra el detalle de la venta
