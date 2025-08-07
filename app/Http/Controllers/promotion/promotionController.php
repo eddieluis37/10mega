@@ -185,8 +185,6 @@ class promotionController extends Controller
             ->make(true);
     }
 
-
-
     public $valorCambio;
 
     public function storeRegistroPago(Request $request, $ventaId)
@@ -296,7 +294,11 @@ class promotionController extends Controller
     }
 
     public function create($id)
-    {
+    { 
+        $centros = Centrocosto::Where('status', 1)->get();
+        $stores = Store::orderBy('id', 'asc')->get();
+        $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
+       
         $venta = Sale::find($id);
 
         $storeIds = [0];
@@ -350,12 +352,12 @@ class promotionController extends Controller
         $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
         $arrayTotales = $this->sumTotales($id);
 
-        $datacompensado = DB::table('promotions as pr')
+        $promotion = DB::table('promotions as pr')
             ->select('pr.*')
             ->where('pr.id', $id)
             ->get();
         $status = '';
-        $estadoVenta = ($datacompensado[0]->status);
+        $estadoVenta = ($promotion[0]->status);
 
         if ($estadoVenta) {
             //'Date 1 is greater than Date 2';
@@ -369,7 +371,7 @@ class promotionController extends Controller
         }
 
         $statusInventory = "";
-        if ($datacompensado[0]->status == "true") {
+        if ($promotion[0]->status == "true") {
             $statusInventory = "true";
         } else {
             $statusInventory = "false";
@@ -382,100 +384,8 @@ class promotionController extends Controller
 
         $detalleVenta = $this->getventasdetail($id);
 
-        return view('promotion.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
-    }
-
-    public function create_parrilla($id)
-    {
-        $venta = Sale::find($id);
-
-        $storeIds = [0];
-
-        // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
-        $productsQuery = Product::query();
-        $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
-            $q->whereIn('store_id', $storeIds)
-                ->where('stock_ideal', '>', 0);
-        });
-        $products = $productsQuery->get();
-
-        // Se obtienen todos los inventarios que cumplan la condición, cargando las relaciones 'store' y 'lote'
-        $inventarios = Inventario::with('store', 'lote')
-            ->whereIn('store_id', $storeIds)
-            ->where('stock_ideal', '>', 0)
-            ->get();
-
-        $results = [];
-
-        foreach ($products as $prod) {
-            // Filtrar todos los inventarios que correspondan al producto actual
-            $inventariosProducto = $inventarios->where('product_id', $prod->id);
-
-            foreach ($inventariosProducto as $inventario) {
-                // Validar la fecha de vencimiento del lote
-                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
-                    $text = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
-                        . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
-                        . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
-                        . " - " . $prod->name
-                        . " - Stk: " . $inventario->stock_ideal;
-
-                    $results[] = [
-                        // Se utiliza el id del inventario para que cada registro sea único
-                        'id'             => $inventario->id,
-                        'text'           => $text,
-                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
-                        'inventario_id'  => $inventario->id,
-                        'stock_ideal'    => $inventario->stock_ideal,
-                        'store_id'       => $inventario->store ? $inventario->store->id : null,
-                        'store_name'     => $inventario->store ? $inventario->store->name : null,
-                        'barcode'        => $prod->barcode,
-                        // Se conserva el id del producto en otra propiedad para otros usos
-                        'product_id'     => $prod->id,
-                    ];
-                }
-            }
-        }
-
-        $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
-        $arrayTotales = $this->sumTotales($id);
-
-        $datacompensado = DB::table('sales as sa')
-            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
-            ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto', 'tird.porc_descuento as porc_descuento_cliente')
-            ->where('sa.id', $id)
-            ->get();
-        $status = '';
-        $estadoVenta = ($datacompensado[0]->status);
-
-        if ($estadoVenta) {
-            //'Date 1 is greater than Date 2';
-            $status = 'false';
-        } elseif ($estadoVenta) {
-            //'Date 1 is less than Date 2';
-            $status = 'true';
-        } else {
-            //'Date 1 and Date 2 are equal';
-            $status = 'false';
-        }
-
-        $statusInventory = "";
-        if ($datacompensado[0]->status == "true") {
-            $statusInventory = "true";
-        } else {
-            $statusInventory = "false";
-        }
-
-        $display = "";
-        if ($status == "false" || $statusInventory == "true") {
-            $display = "display:none;";
-        }
-
-        $detalleVenta = $this->getventasdetail($id);
-
-        return view('promotion.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
-    }
+        return view('promotion.create', compact('promotion','centros','stores','categorias', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+    }   
 
     public function getventasdetalle($ventaId, $centrocostoId)
     {
@@ -493,157 +403,77 @@ class promotionController extends Controller
         return $detail;
     }
 
-    public function search(Request $request)
+     public function search(Request $request)
     {
-        $queryText = $request->input('q');
+        // 1) Leer parámetros
+        $term   = $request->input('q', '');
+        $saleId = $request->input('sale_id');
+        $sale   = Sale::findOrFail($saleId);
 
-        // 1) Obtener los IDs de las bodegas asociadas al usuario autenticado
-        $storeIds = DB::table('store_user')
-            ->where('user_id', auth()->id())
-            ->pluck('store_id')
+        // 2) Obtener IDs de las stores ligadas al centro de costo de la venta
+        $storeIds = Store::where('centrocosto_id', $sale->centrocosto_id)
+            ->pluck('id')
             ->toArray();
 
-        //
-        // 2) CONSULTA PARA PRODUCTOS “INVENTARIADOS” (cualquier tipo distinto de combo/receta,
-        //    o incluso también combo/receta si llegaran a tener inventario, aunque normalmente
-        //    se mantienen como “productos simples” aquí). La idea es replicar tu lógica existente:
-        //
-        $productsQuery = Product::query();
+        // 3) Armar query de productos con inventario > 0 en esas stores
+        $prodQ = Product::query()
+            ->whereHas('inventarios', function ($q) use ($storeIds) {
+                $q->whereIn('store_id', $storeIds)
+                    ->where('stock_ideal', '>', 0);
+            });
 
-        if ($queryText) {
-            if (preg_match('/^\d{13}$/', $queryText)) {
-                // Si es un código EAN-13, buscar sólo por barcode
-                $productsQuery->where('barcode', $queryText);
+        // aplicar filtro de búsqueda si hay término
+        if ($term) {
+            if (preg_match('/^\d{13}$/', $term)) {
+                $prodQ->where('barcode', $term);
             } else {
-                // Si no, buscar por nombre, código o código de lote
-                $productsQuery->where(function ($q) use ($queryText) {
-                    $q->where('name', 'LIKE', "%{$queryText}%")
-                        ->orWhere('code', 'LIKE', "%{$queryText}%")
-                        ->orWhereHas('lotes', function ($q2) use ($queryText) {
-                            $q2->where('codigo', 'LIKE', "%{$queryText}%");
+                $prodQ->where(function ($q) use ($term) {
+                    $q->where('name', 'LIKE', "%{$term}%")
+                        ->orWhere('code', 'LIKE', "%{$term}%")
+                        ->orWhereHas('lotes', function ($q2) use ($term) {
+                            $q2->where('codigo', 'LIKE', "%{$term}%");
                         });
                 });
             }
         }
 
-        // Filtrar para que sólo incluya productos que tengan INWERNTARIOS con stock_ideal > 0
-        // en alguna de las bodegas del usuario.
-        $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
-            $q->whereIn('store_id', $storeIds)
-                ->where('stock_ideal', '>', 0);
-        });
+        $products       = $prodQ->get();
+        $productIds     = $prodQ->pluck('id')->toArray();
 
-        // Obtener la colección de productos “inventariados”
-        $productosConInventario = $productsQuery->get();
-        // Extraer sólo los IDs de esos productos para luego filtrar inventarios
-        $productosConInventarioIds = $productsQuery->pluck('id')->toArray();
-
-        //
-        // 3) CONSULTA PARA INVENTARIOS VÁLIDOS (sólo de los productos que sí tienen stock_ideal > 0
-        //    en bodegas del usuario, y con lote vigente). Esto es exactamente igual a lo que ya
-        //    hacías, para luego recorrer e imprimir cada registro de inventario:
-        //
+        // 4) Obtener inventarios válidos de esos productos y stores
         $inventarios = Inventario::with(['store', 'lote'])
             ->whereIn('store_id', $storeIds)
+            ->whereIn('product_id', $productIds)
             ->where('stock_ideal', '>', 0)
-            ->whereIn('product_id', $productosConInventarioIds)
             ->whereHas('lote', function ($q) {
                 $q->where('fecha_vencimiento', '>=', Carbon::now());
             })
-            // Unimos con lotes únicamente para ordenar por fecha de vencimiento ascendente
-            ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
-            ->orderBy('lotes.fecha_vencimiento', 'asc')
-            ->orderBy('stock_ideal', 'desc')
-            ->select('inventarios.*')
             ->get();
 
-        //
-        // 4) CONSULTA PARA PRODUCTOS TIPO “combo” ó “receta” QUE NO TENGAN INVENTARIOS
-        //    (= No tengan relación en la tabla inventarios). Esto se logra con whereDoesntHave('inventarios').
-        //
-        $comboRecetaQuery = Product::query()
-            ->whereIn('type', ['combo', 'receta']);
-        //  ->whereDoesntHave('inventarios');
-
-        if ($queryText) {
-            if (preg_match('/^\d{13}$/', $queryText)) {
-                // Si el usuario busca por EAN-13 y coincide con barcode
-                $comboRecetaQuery->where('barcode', $queryText);
-            } else {
-                // Buscar por nombre, código de producto o código de lote
-                $comboRecetaQuery->where(function ($q) use ($queryText) {
-                    $q->where('name', 'LIKE', "%{$queryText}%")
-                        ->orWhere('code', 'LIKE', "%{$queryText}%")
-                        ->orWhereHas('lotes', function ($q2) use ($queryText) {
-                            $q2->where('codigo', 'LIKE', "%{$queryText}%");
-                        });
-                });
-            }
-        }
-
-        $productosComboRecetaSinInventario = $comboRecetaQuery->get();
-
-        //
-        // 5) ARMADO FINAL DE $results:
-        //    - Para cada registro de inventario de $inventarios lo mostramos con todos sus datos.
-        //    - Luego para cada producto combo/receta SIN inventario lo agregamos con un formato “básico”,
-        //      indicando que no hay bodega, lote ni stock.
-        //
+        // 5) Armar el array de resultados para Select2
         $results = [];
-
-        // 5.a) RECORRER PRODUCTOS “INVENTARIADOS”
-        foreach ($productosConInventario as $prod) {
-            // Filtrar inventarios de ese producto en particular
-            $inventariosProducto = $inventarios->where('product_id', $prod->id);
-
-            foreach ($inventariosProducto as $inventario) {
-                // Validar fecha de vencimiento del lote
-                if (
-                    $inventario->lote &&
-                    Carbon::parse($inventario->lote->fecha_vencimiento)->gte(Carbon::now())
-                ) {
-                    $texto = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
-                        . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
-                        . " - " . Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
-                        . " - " . $prod->name
-                        . " - Stk: " . $inventario->stock_ideal;
-
-                    $results[] = [
-                        'id'            => $inventario->id,                    // id único por inventario
-                        'text'          => $texto,
-                        'lote_id'       => $inventario->lote ? $inventario->lote->id : null,
-                        'inventario_id' => $inventario->id,
-                        'stock_ideal'   => $inventario->stock_ideal,
-                        'store_id'      => $inventario->store ? $inventario->store->id : null,
-                        'store_name'    => $inventario->store ? $inventario->store->name : null,
-                        'barcode'       => $prod->barcode,
-                        'product_id'    => $prod->id,
-                        'type'          => $prod->type,
-                    ];
-                }
+        foreach ($products as $prod) {
+            $invItems = $inventarios->where('product_id', $prod->id);
+            foreach ($invItems as $inv) {
+                $results[] = [
+                    'id'            => $inv->id,
+                    'text'          => sprintf(
+                        "Bg: %s - %s - %s - %s - Stk: %d",
+                        $inv->store->name,
+                        $inv->lote->codigo,
+                        Carbon::parse($inv->lote->fecha_vencimiento)->format('d/m/Y'),
+                        $prod->name,
+                        $inv->stock_ideal
+                    ),
+                    'lote_id'       => $inv->lote->id,
+                    'inventario_id' => $inv->id,
+                    'stock_ideal'   => $inv->stock_ideal,
+                    'store_id'      => $inv->store->id,
+                    'store_name'    => $inv->store->name,
+                    'barcode'       => $prod->barcode,
+                    'product_id'    => $prod->id,
+                ];
             }
-        }
-
-        // 5.b) RECORRER PRODUCTOS combo/receta SIN INVENTARIOS
-        foreach ($productosComboRecetaSinInventario as $prodCR) {
-            // Como no existen inventarios, montamos un mensaje “genérico”
-            $textoCR = strtoupper($prodCR->type) . ": " . $prodCR->name
-                . " (Código: " . $prodCR->code . ")"
-                . " – SIN INVENTARIO";
-
-            $results[] = [
-                // Podemos usar el mismo ID del producto, o un prefijo para evitar colisiones
-                'id'            => 'CR-' . $prodCR->id,
-                'text'          => $textoCR,
-                'lote_id'       => null,
-                'inventario_id' => null,
-                'stock_ideal'   => 0,
-                'store_id'      => null,
-                'store_name'    => null,
-                'barcode'       => $prodCR->barcode,
-                'product_id'    => $prodCR->id,
-                'type'          => $prodCR->type,
-            ];
         }
 
         return response()->json($results);

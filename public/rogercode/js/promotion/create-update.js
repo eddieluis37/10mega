@@ -14,7 +14,7 @@ btnAddVentaDomicilio.addEventListener("click", async (e) => {
             successToastMessage(resp.message);
             if (resp.registroId != 0) {
                 //for new register
-                window.location.href = `sale_autoservicio/create/${resp.registroId}`;
+                window.location.href = `promotion/create/${resp.registroId}`;
             } else {
                 refresh_table();
             }

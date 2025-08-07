@@ -30,6 +30,33 @@ var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
 
 $(document).ready(function () {
+    $(".select2").select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        allowClear: true,
+    });
+
+    // Al cambiar Centrocosto → recargar Bodegas
+    $("#inputcentro").on("change", function () {
+        const centro = $(this).val();
+        const $store = $("#inputstore");
+        $store
+            .empty()
+            .append('<option value="">Todas las bodegas</option>')
+            .trigger("change");        
+
+        $.ajax({
+            url: centro ? "/getStores" : "/getStoresAll",
+            data: centro ? { centroId: centro } : {},
+            success(data) {
+                data.forEach((s) => $store.append(new Option(s.name, s.id)));
+                $store.trigger("change");
+            },
+        });
+    });       
+});
+
+$(document).ready(function () {
     // Inicializar select2 usando AJAX para buscar productos
     $(".select2Prod").select2({
         placeholder: "Seleccione un producto o escanee el código de barras",
@@ -38,7 +65,7 @@ $(document).ready(function () {
         allowClear: true,
         minimumInputLength: 1,
         ajax: {
-            url: "/products/search/autoservicio",
+            url: "/products/search/promotion",
             dataType: "json",
             delay: 250,
             data: function (params) {
@@ -119,21 +146,20 @@ function actualizarValoresProducto(productId, loteId) {
 }
 
 $(document).ready(function () {
-
     // Obtenemos el saleId que expusimos en la vista
-  const saleId = window.SALE_ID || $('#saleId').val();
-  
+    const saleId = window.SALE_ID || $("#saleId").val();
+
     $(".select2Prod").select2({
         placeholder: "Seleccione un producto",
         width: "100%",
         theme: "bootstrap-5",
         allowClear: true,
         ajax: {
-            url: "/products/search/autoservicio",
+            url: "/products/search/promotion",
             dataType: "json",
             delay: 250,
             data: function (params) {
-                 return {
+                return {
                     q: params.term, // término de búsqueda
                     sale_id: saleId, // ID de la venta en curso
                 };
@@ -198,7 +224,7 @@ tbodyTable.addEventListener("click", (e) => {
             porc_iva.value = editReg.porc_iva;
             porc_otro_impuesto.value = editReg.porc_otro_impuesto;
             porc_impoconsumo.value = editReg.porc_impoconsumo;
-            porc_desc.value = editReg.porc_desc;            
+            porc_desc.value = editReg.porc_desc;
 
             // Usar inventario_id en el select2, no product_id
             let select = $(".select2Prod");
@@ -228,42 +254,41 @@ btnAdd.addEventListener("click", (e) => {
     // 1. Crea FormData a partir del form
     const dataform = new FormData(formDetail);
 
-    // 2. Extrae el tipobodega del <select> y lo añade explícitamente
-    const tipobodega = document.getElementById("tipobodega").value;
-    console.log("tipobodega a enviar:", tipobodega);
-    dataform.set("tipobodega", tipobodega);
-    // (o bien dataform.append("tipobodega", tipobodega) si no existiera aún)
+    // 2. Extrae el bodega del <select> y lo añade explícitamente
+    const bodega = document.getElementById("bodega").value;
+    console.log("bodega a enviar:", bodega);
+    dataform.set("bodega", bodega);
+    // (o bien dataform.append("bodega", bodega) si no existiera aún)
 
     // 3. Envía al método savedetail
     sendData("/salesavedetail", dataform, token)
-      .then((result) => {
-        console.log("Respuesta savedetail:", result);
+        .then((result) => {
+            console.log("Respuesta savedetail:", result);
 
-        if (result.status === 1) {
-            // reset campos
-            $("#regdetailId").val("0");
-            $("#producto").val("").trigger("change");
-            formDetail.reset();
-            showData(result);
-        }
+            if (result.status === 1) {
+                // reset campos
+                $("#regdetailId").val("0");
+                $("#producto").val("").trigger("change");
+                formDetail.reset();
+                showData(result);
+            }
 
-        if (result.status === 0) {
-            let errors = result.errors;
-            console.log("Errores validación:", errors);
-            $.each(errors, function (field, messages) {
-                let $input = $('[name="' + field + '"]');
-                let $errorContainer = $input
-                    .closest(".form-group")
-                    .find(".error-message");
-                $errorContainer.html(messages[0]).show();
-            });
-        }
-      })
-      .catch((err) => {
-        console.error("Error en la petición savedetail:", err);
-      });
+            if (result.status === 0) {
+                let errors = result.errors;
+                console.log("Errores validación:", errors);
+                $.each(errors, function (field, messages) {
+                    let $input = $('[name="' + field + '"]');
+                    let $errorContainer = $input
+                        .closest(".form-group")
+                        .find(".error-message");
+                    $errorContainer.html(messages[0]).show();
+                });
+            }
+        })
+        .catch((err) => {
+            console.error("Error en la petición savedetail:", err);
+        });
 });
-
 
 const showData = (data) => {
     let dataAll = data.array;

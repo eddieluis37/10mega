@@ -498,6 +498,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('promotions', [promotionController::class, 'index'])->name('promotions.index');
     Route::post('store-promotion', [promotionController::class, 'storePromotion'])->name('promotion.storePromotion');
     Route::get('promotion/create/{id}', [promotionController::class, 'create'])->name('promotion.create');
+    Route::get('/products/search/promotion', [promotionController::class, 'search'])->name('products.search_promotion');
     Route::get('showlistPromotions', [promotionController::class, 'show'])->name('promotion.showlistPromotions');      
     Route::post('salesavedetail', [promotionController::class, 'savedetail'])->name('promotion.savedetail');
 });
