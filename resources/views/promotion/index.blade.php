@@ -28,8 +28,8 @@
 								<th class="table-th text-white">#</th>
 								<th class="table-th text-white">USUARIO</th>
 								<th class="table-th text-white ">ESTADO</th>					
-								<th class="table-th text-white">DATE.INICIO</th>
-								<th class="table-th text-white">DATE.FINAL</th>								
+								<th class="table-th text-white">DATE.CREATE</th>
+								<th class="table-th text-white">DATE.UPDATE</th>								
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
 						</thead>
