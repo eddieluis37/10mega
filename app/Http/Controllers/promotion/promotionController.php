@@ -294,11 +294,11 @@ class promotionController extends Controller
     }
 
     public function create($id)
-    { 
+    {
         $centros = Centrocosto::Where('status', 1)->get();
         $stores = Store::orderBy('id', 'asc')->get();
         $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
-       
+
         $venta = Sale::find($id);
 
         $storeIds = [0];
@@ -384,8 +384,8 @@ class promotionController extends Controller
 
         $detalleVenta = $this->getventasdetail($id);
 
-        return view('promotion.create', compact('promotion','centros','stores','categorias', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
-    }   
+        return view('promotion.create', compact('promotion', 'centros', 'stores', 'categorias', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
+    }
 
     public function getventasdetalle($ventaId, $centrocostoId)
     {
@@ -403,27 +403,39 @@ class promotionController extends Controller
         return $detail;
     }
 
-     public function search(Request $request)
+    public function search(Request $request)
     {
         // 1) Leer parámetros
-        $term   = $request->input('q', '');
-        $saleId = $request->input('sale_id');
-        $sale   = Sale::findOrFail($saleId);
+        $term     = $request->input('q', '');
+        $storeReq = $request->input('storeId'); // obligamos a filtrar por bodega
 
-        // 2) Obtener IDs de las stores ligadas al centro de costo de la venta
-        $storeIds = Store::where('centrocosto_id', $sale->centrocosto_id)
-            ->pluck('id')
-            ->toArray();
+        // Si no se pasa storeId, devolvemos vacío (según tu requerimiento "solo por medio de la bodega")
+        if (empty($storeReq)) {
+            return response()->json([]);
+        }
 
-        // 3) Armar query de productos con inventario > 0 en esas stores
+        // Convertir a entero (o array si en el futuro envías múltiples ids)
+        $storeId = (int) $storeReq;
+        if ($storeId <= 0) {
+            return response()->json([]);
+        }
+
+        // (Opcional) validar que la bodega exista
+        $store = Store::find($storeId);
+        if (!$store) {
+            return response()->json([]);
+        }
+
+        // 2) Armar query de productos que tengan inventarios activos (>0) en LA bodega seleccionada
         $prodQ = Product::query()
-            ->whereHas('inventarios', function ($q) use ($storeIds) {
-                $q->whereIn('store_id', $storeIds)
+            ->whereHas('inventarios', function ($q) use ($storeId) {
+                $q->where('store_id', $storeId)
                     ->where('stock_ideal', '>', 0);
             });
 
-        // aplicar filtro de búsqueda si hay término
+        // 3) aplicar filtro de búsqueda si hay término
         if ($term) {
+            // Buscar por código de barras (13 dígitos) o por nombre/código/lote
             if (preg_match('/^\d{13}$/', $term)) {
                 $prodQ->where('barcode', $term);
             } else {
@@ -437,12 +449,18 @@ class promotionController extends Controller
             }
         }
 
-        $products       = $prodQ->get();
-        $productIds     = $prodQ->pluck('id')->toArray();
+        // 4) Obtener productos e ids resultantes
+        $products   = $prodQ->get();
+        $productIds = $products->pluck('id')->toArray();
 
-        // 4) Obtener inventarios válidos de esos productos y stores
+        // Si no hay productos, devolver vacío
+        if (empty($productIds)) {
+            return response()->json([]);
+        }
+
+        // 5) Obtener inventarios válidos de esos productos en LA bodega seleccionada
         $inventarios = Inventario::with(['store', 'lote'])
-            ->whereIn('store_id', $storeIds)
+            ->where('store_id', $storeId)
             ->whereIn('product_id', $productIds)
             ->where('stock_ideal', '>', 0)
             ->whereHas('lote', function ($q) {
@@ -450,9 +468,10 @@ class promotionController extends Controller
             })
             ->get();
 
-        // 5) Armar el array de resultados para Select2
+        // 6) Armar el array de resultados para Select2
         $results = [];
         foreach ($products as $prod) {
+            // filtrar inventarios por producto
             $invItems = $inventarios->where('product_id', $prod->id);
             foreach ($invItems as $inv) {
                 $results[] = [

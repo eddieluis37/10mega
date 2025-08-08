@@ -29,21 +29,22 @@ console.log("centro " + centrocosto);
 var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
 
-$(document).ready(function () {
+$(function () {
+    // inicializar selects básicos
     $(".select2").select2({
         theme: "bootstrap-5",
         width: "100%",
         allowClear: true,
     });
 
-    // Al cambiar Centrocosto → recargar Bodegas
+    // Cuando cambie el centro, recargar bodegas
     $("#inputcentro").on("change", function () {
         const centro = $(this).val();
         const $store = $("#inputstore");
         $store
             .empty()
             .append('<option value="">Todas las bodegas</option>')
-            .trigger("change");        
+            .trigger("change");
 
         $.ajax({
             url: centro ? "/getStores" : "/getStoresAll",
@@ -53,11 +54,9 @@ $(document).ready(function () {
                 $store.trigger("change");
             },
         });
-    });       
-});
+    });
 
-$(document).ready(function () {
-    // Inicializar select2 usando AJAX para buscar productos
+    // Inicializar select2 para productos con AJAX (filtrado por storeId)
     $(".select2Prod").select2({
         placeholder: "Seleccione un producto o escanee el código de barras",
         theme: "bootstrap-5",
@@ -69,22 +68,19 @@ $(document).ready(function () {
             dataType: "json",
             delay: 250,
             data: function (params) {
+                const storeId = $("#inputstore").val() || null;
                 return {
-                    q: params.term, // Término de búsqueda
+                    q: params.term, // término de búsqueda
+                    storeId: storeId, // FILTRAR por la bodega seleccionada
                 };
             },
             processResults: function (data) {
-                // Como el controlador retorna un id único (inventario_id) en el campo "id",
-                // simplemente se pasan los resultados al select2
-                return {
-                    results: data,
-                };
+                return { results: data };
             },
             cache: true,
         },
         templateResult: function (item) {
             if (item.loading) return item.text;
-            // Aquí se puede personalizar la plantilla de cada opción si es necesario
             return item.text;
         },
         templateSelection: function (item) {
@@ -92,26 +88,29 @@ $(document).ready(function () {
             return item.text;
         },
         escapeMarkup: function (markup) {
-            return markup; // Permite renderizar HTML en las plantillas
+            return markup;
         },
     });
 
-    // Al seleccionar una opción se extraen y asignan los valores a los campos ocultos
+    // Al seleccionar producto: llenar campos ocultos
     $("#producto").on("select2:select", function (e) {
         var data = e.params.data;
-        console.log("Opción seleccionada:", data);
-
         $("#lote_id").val(data.lote_id || "");
         $("#inventario_id").val(data.inventario_id || "");
         $("#stock_ideal").val(data.stock_ideal || "");
         $("#store_id").val(data.store_id || "");
         $("#store_name").val(data.store_name || "");
-
-        // Se utiliza el id del producto (product_id) para actualizar otros valores relacionados
-        actualizarValoresProducto(data.product_id, data.lote_id);
+        if (typeof actualizarValoresProducto === "function") {
+            actualizarValoresProducto(data.product_id, data.lote_id);
+        }
     });
 
-    // Limpia el mensaje de error al modificar el input de cantidad
+    // Cuando cambie la bodega: limpiar select2Prod (forzar nueva búsqueda en la nueva bodega)
+    $("#inputstore").on("change", function () {
+        $(".select2Prod").val(null).trigger("change");
+    });
+
+    // Limpieza de mensajes de error en quantity
     $("#quantity").on("input", function () {
         $(this).closest(".form-group").find(".error-message").text("");
     });
@@ -144,40 +143,6 @@ function actualizarValoresProducto(productId, loteId) {
         },
     });
 }
-
-$(document).ready(function () {
-    // Obtenemos el saleId que expusimos en la vista
-    const saleId = window.SALE_ID || $("#saleId").val();
-
-    $(".select2Prod").select2({
-        placeholder: "Seleccione un producto",
-        width: "100%",
-        theme: "bootstrap-5",
-        allowClear: true,
-        ajax: {
-            url: "/products/search/promotion",
-            dataType: "json",
-            delay: 250,
-            data: function (params) {
-                return {
-                    q: params.term, // término de búsqueda
-                    sale_id: saleId, // ID de la venta en curso
-                };
-            },
-            processResults: function (data) {
-                return {
-                    results: data,
-                };
-            },
-            cache: true,
-        },
-        placeholder: "Seleccione un producto o escanee el código de barras",
-        minimumInputLength: 1,
-        width: "100%",
-        theme: "bootstrap-5",
-        allowClear: true,
-    });
-});
 
 tbodyTable.addEventListener("click", (e) => {
     e.preventDefault();
@@ -383,25 +348,3 @@ quantity.addEventListener("change", function () {
 
 // Get the current date
 const date = new Date();
-
-// Create a dynamic password by combining letters and the current date
-const passwordHoy =
-    "admin" + date.getFullYear() + (date.getMonth() + 1) + date.getDate();
-
-btnRemove.addEventListener("click", (e) => {
-    e.preventDefault();
-    const priceInput = document.querySelector("#price");
-    const passwordInput = document.querySelector("#password");
-    const password = passwordInput.value;
-
-    // Check if the password is correct
-    if (password === passwordHoy) {
-        // Disable the readonly attribute of the price input field
-        priceInput.removeAttribute("readonly");
-    } else {
-        // Set the readonly attribute of the price input field
-        priceInput.setAttribute("readonly", true);
-        // Display an error message
-        alert("Contraseña incorrecta");
-    }
-});
