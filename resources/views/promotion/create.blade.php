@@ -1,9 +1,9 @@
 @extends('layouts.theme.app')
 @section('content')
 <style>
-.input {
-    height: 38px;
-}
+    .input {
+        height: 38px;
+    }
 </style>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="row sales layout-top-spacing">
@@ -45,7 +45,7 @@
                                     @endforeach
                                 </select>
                                 <span class="text-danger error-message"></span>
-                            </div>                            
+                            </div>
 
                             <div class="col-sm-12 col-md-3">
                                 <label for="inputcategoria" class="form-label">Categoria</label>
@@ -74,9 +74,9 @@
 
 
                                 <script>
-                                $(document).ready(function() {
+                                    $(document).ready(function() {
 
-                                });
+                                    });
                                 </script>
                                 <div class="col-md-10">
                                     <div class="task-header">
@@ -127,66 +127,75 @@
                                         <span class="text-danger error-message"></span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label for="" class="form-label">Precio venta</label>
-                                    <div class="input-group flex-nowrap">
-                                        <span class="input-group-text" id="addon-wrapping">$</span>
-                                        @can('ver_CambiarPrecioVenta')
-                                        <!-- El usuario tiene permiso para editar -->
-                                        <input type="text" id="price" name="price" class="form-control input"
-                                            placeholder="">
-                                        @else
-                                        <!-- El usuario no tiene permiso, campo de solo lectura -->
-                                        <input type="text" id="price" name="price" class="form-control input" readonly
-                                            placeholder="">
-                                        @endcan
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="" class="form-label">I.V.A</label>
-                                    <div class="input-group flex-nowrap">
-
-                                        <input type="text" id="porc_iva" name="porc_iva" class="form-control input"
-                                            readonly placeholder="">
-                                        <span class="input-group-text" id="addon-wrapping">%</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="" class="form-label">I.U.P</label>
-                                    <div class="input-group flex-nowrap">
-
-                                        <input type="text" id="porc_otro_impuesto" name="porc_otro_impuesto"
-                                            class="form-control input" readonly placeholder="">
-                                        <span class="input-group-text" id="addon-wrapping">%</span>
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-2">
-                                    <label for="" class="form-label">I.A.C</label>
-                                    <div class="input-group flex-nowrap">
-
-                                        <input type="text" id="porc_impoconsumo" name="porc_impoconsumo"
-                                            class="form-control input" readonly placeholder="">
-                                        <span class="input-group-text" id="addon-wrapping">%</span>
-                                    </div>
-                                </div>
 
                                 <div class="col-md-2">
                                     <label for="" class="form-label">Descuento</label>
                                     <div class="input-group flex-nowrap">
-
                                         <input type="text" id="porc_desc" name="porc_desc" class="form-control input"
-                                            readonly placeholder="">
+                                            placeholder="">
                                         <span class="input-group-text" id="addon-wrapping">%</span>
                                     </div>
                                 </div>
 
+
                                 <div class="col-md-2">
-                                    <div class="" style="margin-top:30px;">
+                                    <div class="task-header">
+                                        <div class="form-group">
+                                            <label for="date1" class="form-label">Fecha incio</label>
+                                            <input type="date" class="form-control" name="fecha_entrega" id="fecha_entrega" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+                                            <span class="text-danger error-message"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="task-header">
+                                        <div class="form-group">
+                                            <label for="hora_inicial_entrega" class="form-label">Hora inicial</label>
+                                            <select class="form-control form-control-sm input" name="hora_inicial_entrega" id="hora_inicial_entrega" required>
+                                                <option value="">Seleccione hora de entrega</option>
+                                                @php
+                                                $startTime = strtotime('06:00');
+                                                $endTime = strtotime('17:00');
+                                                $interval = 60 * 60; // 1 hour interval
+                                                for ($i = $startTime; $i <= $endTime; $i +=$interval) { echo '<option value="' . date('H:i', $i) . '">' . date('h:i A', $i) . '</option>' ; } @endphp </select>
+                                                    <span class="text-danger error-message"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="task-header">
+                                        <div class="form-group">
+                                            <label for="date1" class="form-label">Fecha final</label>
+                                            <input type="date" class="form-control" name="fecha_entrega" id="fecha_entrega" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+                                            <span class="text-danger error-message"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="task-header">
+                                        <div class="form-group">
+                                            <label for="hora_final_entrega" class="form-label">Hora final</label>
+                                            <select class="form-control form-control-sm input" name="hora_final_entrega" id="hora_final_entrega" required>
+                                                <option value="">Seleccione hora de entrega</option>
+                                                @php
+                                                $startTime = strtotime('07:00');
+                                                $endTime = strtotime('18:00');
+                                                $interval = 60 * 60; // 1 hour interval
+                                                for ($i = $startTime; $i <= $endTime; $i +=$interval) { echo '<option value="' . date('H:i', $i) . '">' . date('h:i A', $i) . '</option>' ; } @endphp </select>
+                                                    <span class="text-danger error-message"></span>
+                                        </div>
+                                    </div>
+                                </div>                             
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        <label for="observations">Observaciones</label>
+                                        <textarea class="form-control" id="observacion" name="observacion" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="" style="margin-top:50px;">
                                         <div class="d-grid gap-2">
-                                            <button id="btnAdd" class="btn btn-primary btn-block">Añadir
-                                                Producto</button>
+                                            <button id="btnAdd" class="btn btn-primary btn-block">Añadir</button>
                                         </div>
                                     </div>
                                 </div>
@@ -204,20 +213,20 @@
                     <table id="tableDespostere" class="table table-sm table-striped table-bordered">
                         <thead class="text-white" style="background: #3B3F5C">
                             <tr>
-                                <th class="table-th text-white">Producto</th>
-                                <th class="table-th text-white">Cant</th>
-                                <th class="table-th text-white">Valor.U</th>
-                                <th class="table-th text-white">%Des</th>
-                                <th class="table-th text-white">Des</th>
-                                <th class="table-th text-white">{{$promotion[0]->status}}%DCl</th>
-                                <th class="table-th text-white">Total.B</th>
-                                <th class="table-th text-white">%IVA</th>
-                                <th class="table-th text-white">IVA</th>
-                                <th class="table-th text-white">%I.S</th>
-                                <th class="table-th text-white">I.S</th>
-                                <th class="table-th text-white">%I.C</th>
-                                <th class="table-th text-white">I.C</th>
-                                <th class="table-th text-white">Total</th>
+                                <th class="table-th text-white">CENTROCOSTO</th>
+                                <th class="table-th text-white">BODEGA</th>
+                                <th class="table-th text-white">CATEGORIA</th>
+                                <th class="table-th text-white">LOTE</th>
+                                <th class="table-th text-white">FECHA.VENCE</th>
+                                <th class="table-th text-white">PRODUCTO</th>
+                                <th class="table-th text-white">CANT</th>
+                                <th class="table-th text-white">%DESC</th>
+                                <th class="table-th text-white">FECHA.INICIO</th>
+                                <th class="table-th text-white">HORA.INICIO</th>
+                                <th class="table-th text-white">FECHA.FINAL</th>
+                                <th class="table-th text-white">HORA.FINAL</th>
+                                <th class="table-th text-white">OBSERVACION</th>
+                                <th class="table-th text-white">USUARIO</th>
                                 <th class="table-th text-white text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -295,31 +304,31 @@
 </div>
 </div>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const costoInput = document.getElementById("price");
+    document.addEventListener("DOMContentLoaded", function() {
+        const costoInput = document.getElementById("price");
 
-    // Función para formatear el número con puntos
-    function formatCurrency(value) {
-        return value
-            .replace(/\D/g, "") // Elimina caracteres que no sean dígitos
-            .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos como separadores de miles
-    }
-
-    costoInput.addEventListener("input", function(e) {
-        const value = e.target.value;
-        e.target.value = formatCurrency(value);
-    });
-
-    costoInput.addEventListener("blur", function(e) {
-        // Opcional: Agrega un "0" si el campo está vacío al salir
-        if (!e.target.value) {
-            e.target.value = "0";
+        // Función para formatear el número con puntos
+        function formatCurrency(value) {
+            return value
+                .replace(/\D/g, "") // Elimina caracteres que no sean dígitos
+                .replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega puntos como separadores de miles
         }
-    });
 
-    $('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
-    $('#cambiarContraseDiv').hide(); // 
-});
+        costoInput.addEventListener("input", function(e) {
+            const value = e.target.value;
+            e.target.value = formatCurrency(value);
+        });
+
+        costoInput.addEventListener("blur", function(e) {
+            // Opcional: Agrega un "0" si el campo está vacío al salir
+            if (!e.target.value) {
+                e.target.value = "0";
+            }
+        });
+
+        $('#storeDiv').hide(); // Ocultar el div store para prueba al cargar la página
+        $('#cambiarContraseDiv').hide(); // 
+    });
 </script>
 
 @endsection
