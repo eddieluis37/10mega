@@ -30,14 +30,14 @@ var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
 
 $(function () {
-    // inicializar selects básicos
+    // Inicializar selects básicos
     $(".select2").select2({
         theme: "bootstrap-5",
         width: "100%",
         allowClear: true,
     });
 
-    // Cuando cambie el centro, recargar bodegas
+    // Recarga bodegas cuando cambia centro
     $("#inputcentro").on("change", function () {
         const centro = $(this).val();
         const $store = $("#inputstore");
@@ -56,7 +56,7 @@ $(function () {
         });
     });
 
-    // Inicializar select2 para productos con AJAX (filtrado por storeId)
+    // Inicializar select2Prod con AJAX, enviando storeId y categoryId
     $(".select2Prod").select2({
         placeholder: "Seleccione un producto o escanee el código de barras",
         theme: "bootstrap-5",
@@ -69,9 +69,12 @@ $(function () {
             delay: 250,
             data: function (params) {
                 const storeId = $("#inputstore").val() || null;
+                const categoryId = $("#inputcategoria").val(); // puede ser "", "-1", o id numérico
+
                 return {
-                    q: params.term, // término de búsqueda
-                    storeId: storeId, // FILTRAR por la bodega seleccionada
+                    q: params.term,
+                    storeId: storeId,
+                    categoryId: categoryId,
                 };
             },
             processResults: function (data) {
@@ -105,12 +108,12 @@ $(function () {
         }
     });
 
-    // Cuando cambie la bodega: limpiar select2Prod (forzar nueva búsqueda en la nueva bodega)
-    $("#inputstore").on("change", function () {
+    // Cuando cambie la bodega o la categoría: limpiar select2Prod (forzar nueva búsqueda)
+    $("#inputstore, #inputcategoria").on("change", function () {
         $(".select2Prod").val(null).trigger("change");
     });
 
-    // Limpieza de mensajes de error en quantity
+    // Mantener limpieza de mensajes de error en quantity
     $("#quantity").on("input", function () {
         $(this).closest(".form-group").find(".error-message").text("");
     });

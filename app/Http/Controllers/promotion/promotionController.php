@@ -406,36 +406,49 @@ class promotionController extends Controller
     public function search(Request $request)
     {
         // 1) Leer parámetros
-        $term     = $request->input('q', '');
-        $storeReq = $request->input('storeId'); // obligamos a filtrar por bodega
+        $term       = $request->input('q', '');
+        $storeReq   = $request->input('storeId');     // obligatorio (filtrar por bodega)
+        $categoryReq = $request->input('categoryId');  // opcional (filtrar por categoría)
 
-        // Si no se pasa storeId, devolvemos vacío (según tu requerimiento "solo por medio de la bodega")
+        // VALIDACIONES BÁSICAS: storeId obligatorio
         if (empty($storeReq)) {
             return response()->json([]);
         }
 
-        // Convertir a entero (o array si en el futuro envías múltiples ids)
         $storeId = (int) $storeReq;
         if ($storeId <= 0) {
             return response()->json([]);
         }
 
-        // (Opcional) validar que la bodega exista
+        // Validar que la bodega exista (opcional pero recomendado)
         $store = Store::find($storeId);
         if (!$store) {
             return response()->json([]);
         }
 
-        // 2) Armar query de productos que tengan inventarios activos (>0) en LA bodega seleccionada
+        // Determinar si aplicar filtro de categoría
+        $applyCategoryFilter = false;
+        $categoryId = null;
+        if (is_numeric($categoryReq) && (int)$categoryReq > 0) {
+            $applyCategoryFilter = true;
+            $categoryId = (int) $categoryReq;
+        }
+
+        // 2) Armar query de productos que tengan inventarios activos (>0) en la bodega seleccionada
         $prodQ = Product::query()
             ->whereHas('inventarios', function ($q) use ($storeId) {
                 $q->where('store_id', $storeId)
                     ->where('stock_ideal', '>', 0);
             });
 
-        // 3) aplicar filtro de búsqueda si hay término
+        // 3) Aplicar filtro por categoría si aplica
+        if ($applyCategoryFilter) {
+            // filtro directo por campo category_id
+            $prodQ->where('category_id', $categoryId);
+        }
+
+        // 4) aplicar filtro de búsqueda si hay término
         if ($term) {
-            // Buscar por código de barras (13 dígitos) o por nombre/código/lote
             if (preg_match('/^\d{13}$/', $term)) {
                 $prodQ->where('barcode', $term);
             } else {
@@ -449,16 +462,15 @@ class promotionController extends Controller
             }
         }
 
-        // 4) Obtener productos e ids resultantes
+        // 5) Obtener productos e ids resultantes
         $products   = $prodQ->get();
         $productIds = $products->pluck('id')->toArray();
 
-        // Si no hay productos, devolver vacío
         if (empty($productIds)) {
             return response()->json([]);
         }
 
-        // 5) Obtener inventarios válidos de esos productos en LA bodega seleccionada
+        // 6) Obtener inventarios válidos de esos productos en LA bodega seleccionada
         $inventarios = Inventario::with(['store', 'lote'])
             ->where('store_id', $storeId)
             ->whereIn('product_id', $productIds)
@@ -468,21 +480,20 @@ class promotionController extends Controller
             })
             ->get();
 
-        // 6) Armar el array de resultados para Select2
+        // 7) Armar el array de resultados para Select2
         $results = [];
         foreach ($products as $prod) {
-            // filtrar inventarios por producto
             $invItems = $inventarios->where('product_id', $prod->id);
             foreach ($invItems as $inv) {
                 $results[] = [
                     'id'            => $inv->id,
                     'text'          => sprintf(
-                        "Bg: %s - %s - %s - %s - Stk: %d",
+                        "Bg: %s - %s - %s - %s - Stk: %s",
                         $inv->store->name,
                         $inv->lote->codigo,
                         Carbon::parse($inv->lote->fecha_vencimiento)->format('d/m/Y'),
                         $prod->name,
-                        $inv->stock_ideal
+                        (string) $inv->stock_ideal
                     ),
                     'lote_id'       => $inv->lote->id,
                     'inventario_id' => $inv->id,
@@ -491,12 +502,14 @@ class promotionController extends Controller
                     'store_name'    => $inv->store->name,
                     'barcode'       => $prod->barcode,
                     'product_id'    => $prod->id,
+                    'category_id'   => $prod->category_id,
                 ];
             }
         }
 
         return response()->json($results);
     }
+
 
     public function create_reg_pago($id)
     {
