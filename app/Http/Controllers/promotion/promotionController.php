@@ -586,7 +586,7 @@ class promotionController extends Controller
         return response()->json(['products' => $prod]);
     }
 
-    public function savedetail(Request $request)
+    public function promotiondetail(Request $request)
     {
         try {
             $prodParam = $request->producto;

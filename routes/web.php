@@ -500,7 +500,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('promotion/create/{id}', [promotionController::class, 'create'])->name('promotion.create');
     Route::get('/products/search/promotion', [promotionController::class, 'search'])->name('products.search_promotion');
     Route::get('showlistPromotions', [promotionController::class, 'show'])->name('promotion.showlistPromotions');      
-    Route::post('salesavedetail', [promotionController::class, 'savedetail'])->name('promotion.savedetail');
+    Route::post('promotionsdetail', [promotionController::class, 'promotiondetail'])->name('promotion.promotionsdetail');
 });
 
 /* VENTAS PARRILLA Tipo 2 = POS MOSTRADOR, Tpo 3 = DOMICILIO */

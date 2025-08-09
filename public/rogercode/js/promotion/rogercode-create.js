@@ -223,15 +223,15 @@ btnAdd.addEventListener("click", (e) => {
     const dataform = new FormData(formDetail);
 
     // 2. Extrae el bodega del <select> y lo añade explícitamente
-    const bodega = document.getElementById("bodega").value;
+    const bodega = document.getElementById("inputstore").value;
     console.log("bodega a enviar:", bodega);
     dataform.set("bodega", bodega);
     // (o bien dataform.append("bodega", bodega) si no existiera aún)
 
     // 3. Envía al método savedetail
-    sendData("/salesavedetail", dataform, token)
+    sendData("/promotionsdetail", dataform, token)
         .then((result) => {
-            console.log("Respuesta savedetail:", result);
+            console.log("Respuesta promotiondetail:", result);
 
             if (result.status === 1) {
                 // reset campos
@@ -254,7 +254,7 @@ btnAdd.addEventListener("click", (e) => {
             }
         })
         .catch((err) => {
-            console.error("Error en la petición savedetail:", err);
+            console.error("Error en la petición promotiondetail:", err);
         });
 });
 

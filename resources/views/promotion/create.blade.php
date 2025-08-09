@@ -152,7 +152,7 @@
                                         <div class="form-group">
                                             <label for="hora_inicial_entrega" class="form-label">Hora inicial</label>
                                             <select class="form-control form-control-sm input" name="hora_inicial_entrega" id="hora_inicial_entrega" required>
-                                                <option value="">Seleccione hora de entrega</option>
+                                                <option value="">Escoge hora inicio</option>
                                                 @php
                                                 $startTime = strtotime('06:00');
                                                 $endTime = strtotime('17:00');
@@ -176,7 +176,7 @@
                                         <div class="form-group">
                                             <label for="hora_final_entrega" class="form-label">Hora final</label>
                                             <select class="form-control form-control-sm input" name="hora_final_entrega" id="hora_final_entrega" required>
-                                                <option value="">Seleccione hora de entrega</option>
+                                                <option value="">Escoge hora final</option>
                                                 @php
                                                 $startTime = strtotime('07:00');
                                                 $endTime = strtotime('18:00');
