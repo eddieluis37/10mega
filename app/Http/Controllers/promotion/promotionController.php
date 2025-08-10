@@ -29,6 +29,7 @@ use App\Models\Notacredito;
 use App\Models\NotaCreditoDetalle;
 use App\Models\Productcomposition;
 use App\Models\Promotion;
+use App\Models\PromotionDetail;
 use App\Models\Sale;
 use App\Models\SaleCaja;
 use App\Models\SaleDetail;
@@ -564,15 +565,26 @@ class promotionController extends Controller
         return $array;
     }
 
-    public function getventasdetail($ventaId)
+    public function getventasdetail($ventaId, $centrocostoId = null)
     {
-        $detalles = DB::table('sale_details as de')
-            ->join('products as pro', 'de.product_id', '=', 'pro.id')
-            ->select('de.*', 'pro.name as nameprod', 'pro.code', 'de.porc_iva', 'de.iva', 'de.porc_otro_impuesto',)
-            ->where([
-                ['de.sale_id', $ventaId],
-                /*   ['de.status', 1] */
-            ])->get();
+        $q = DB::table('promotion_details as pd')
+            ->leftJoin('products as pro', 'pd.product_id', '=', 'pro.id')
+            ->leftJoin('stores as st', 'pd.store_id', '=', 'st.id')           
+            ->leftJoin('lotes as l', 'pd.lote_id', '=', 'l.id')
+            ->select(
+                'pd.*',
+                'pro.name as nameprod',
+                'pro.code as product_code',
+                'st.name as store_name',              
+                'l.codigo as lote_codigo'
+            )
+            ->where('pd.promotion_id', $ventaId);
+
+        if (!is_null($centrocostoId) && $centrocostoId !== '') {
+            $q->where('pd.store_id', $centrocostoId);
+        }
+
+        $detalles = $q->orderBy('pd.id','desc')->get();       
 
         return $detalles;
     }
@@ -612,13 +624,7 @@ class promotionController extends Controller
                         'message' => 'No se encontró el producto combo/receta.'
                     ], 422);
                 }
-
-                //
-                // === 1) ASIGNAR DINÁMICAMENTE LA BODEGA QUE CONTENGA PALABRAS DEL NOMBRE DE USUARIO ===
-                //
-                // Tomo el nombre completo del usuario autenticado, lo separo en palabras
-                $userName   = auth()->user()->name;
-                $nameWords  = preg_split('/\s+/', $userName, -1, PREG_SPLIT_NO_EMPTY);
+               
 
                 // Valor enviado desde la vista: AUTOMÁTICAMENTE será 'AUTOSERVICIO', 'BAR' o 'PARRILLA'
                 $bodegaTipo = $request->input('tipobodega');
@@ -627,15 +633,6 @@ class promotionController extends Controller
                 $userStoreIds = DB::table('store_user')
                     ->where('user_id', auth()->id())
                     ->pluck('store_id');
-
-                /* // Query para encontrar la primera bodega cuyo nombre contenga alguna palabra del usuario
-                $store = Store::whereIn('id', $userStoreIds)
-                    ->where(function ($q) use ($nameWords) {
-                        foreach ($nameWords as $word) {
-                            $q->orWhere('name', 'LIKE', "%{$word}%");
-                        }
-                    })
-                    ->first(); */
 
                 // Busco la primera bodega cuyo nombre contenga la palabra enviada
                 $store = Store::whereIn('id', $userStoreIds)
@@ -691,13 +688,11 @@ class promotionController extends Controller
             $rules = [
                 'ventaId'  => 'required',
                 'producto' => 'required',
-                'price'    => 'required',
                 'quantity' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,2})?$/', 'min:0.1'],
             ];
             $messages = [
                 'ventaId.required'  => 'El compensado es requerido',
                 'producto.required' => 'El producto es requerido',
-                'price.required'    => 'El precio de compra es requerido',
                 'quantity.required' => 'La cantidad es requerida.',
                 'quantity.numeric'  => 'La cantidad debe ser un número.',
                 'quantity.min'      => 'La cantidad debe ser mayor a 0.1.',
@@ -729,93 +724,64 @@ class promotionController extends Controller
                 ], 422);
             }
 
-            //
-            // 3) Cálculos de precios, descuentos e impuestos
-            //
-            $formatCantidad = new metodosrogercodeController();
-            $price    = $formatCantidad->MoneyToNumber($request->price);
-            $quantity = $request->quantity;
-
-            $precioBruto  = $price * $quantity;
+            
+          
+            $quantity = $request->quantity;   
             $porcDesc     = $request->get('porc_desc', 0);
-            $descProd     = $precioBruto * ($porcDesc / 100);
-            $porcDescClie = $request->get('porc_descuento_cliente', 0);
-            $descClie     = $precioBruto * ($porcDescClie / 100);
-            $totalDesc    = $descProd + $descClie;
-            $netoSinImp   = $precioBruto - $totalDesc;
-
-            $porcIva         = $request->get('porc_iva', 0);
-            $porcOtroImpto   = $request->get('porc_otro_impuesto', 0);
-            $porcImpoconsumo = $request->get('porc_impoconsumo', 0);
-            $iva             = $netoSinImp * ($porcIva / 100);
-            $otroImpto       = $netoSinImp * ($porcOtroImpto / 100);
-            $impoconsumo     = $netoSinImp * ($porcImpoconsumo / 100);
-            $totalImpuestos  = $iva + $otroImpto + $impoconsumo;
+          
 
             //
-            // 4) Preparar datos para guardar sale_detail
+            // Preparar datos para guardar sale_detail
             //
             if ($isComboRecetaSinInventario) {
                 $dataDetail = [
-                    'sale_id'           => $request->ventaId,
-                    'inventario_id'     => null,
-                    'store_id'          => $storeId,
-                    'product_id'        => $product->id,
-                    'price'             => $price,
-                    'quantity'          => $quantity,
+                    'promotion_id'      => $request->ventaId,
+                    'centrocosto_id'    => $request->input('centrocosto_id'),                    
+                    'store_id'          => $storeId,                  
                     'lote_id'           => $loteId,
+                    'inventario_id'     => null,
+                    'product_id'        => $product->id,                    
+                    'quantity'          => $quantity,                   
                     'porc_desc'         => $porcDesc,
-                    'descuento'         => $descProd,
-                    'descuento_cliente' => $descClie,
-                    'porc_iva'          => $porcIva,
-                    'iva'               => $iva,
-                    'porc_otro_impuesto' => $porcOtroImpto,
-                    'otro_impuesto'     => $otroImpto,
-                    'porc_impoconsumo'  => $porcImpoconsumo,
-                    'impoconsumo'       => $impoconsumo,
-                    'total_bruto'       => $precioBruto,
-                    'total'             => $netoSinImp + $totalImpuestos,
+                    'fecha_inicio'   => $request->input('fecha_inicio'),
+                    'hora_inicio'    => $request->input('hora_inicio'),
+                    'fecha_final'    => $request->input('fecha_final'),
+                    'hora_final'     => $request->input('hora_final'),
+                    'observacion'    => $request->input('observacion'),
+                    'user_id'        => auth()->id(),
+                    'status'         => $request->input('status') ?? '1',
                 ];
             } else {
                 $dataDetail = [
-                    'sale_id'           => $request->ventaId,
-                    'inventario_id'     => $inventario->id,
-                    'store_id'          => $inventario->store_id,
-                    'product_id'        => $inventario->product_id,
-                    'price'             => $price,
+                    'promotion_id'      => $request->ventaId,
+                    'centrocosto_id'    => $request->input('centrocosto_id'),                    
+                    'store_id'          => $inventario->store_id,                                                      
                     'quantity'          => $quantity,
                     'lote_id'           => $inventario->lote_id,
+                    'inventario_id'     => $inventario->id,
+                    'product_id'        => $inventario->product_id, 
                     'porc_desc'         => $porcDesc,
-                    'descuento'         => $descProd,
-                    'descuento_cliente' => $descClie,
-                    'porc_iva'          => $porcIva,
-                    'iva'               => $iva,
-                    'porc_otro_impuesto' => $porcOtroImpto,
-                    'otro_impuesto'     => $otroImpto,
-                    'porc_impoconsumo'  => $porcImpoconsumo,
-                    'impoconsumo'       => $impoconsumo,
-                    'total_bruto'       => $precioBruto,
-                    'total'             => $netoSinImp + $totalImpuestos,
+                    'fecha_inicio'   => $request->input('fecha_inicio'),
+                    'hora_inicio'    => $request->input('hora_inicio'),
+                    'fecha_final'    => $request->input('fecha_final'),
+                    'hora_final'     => $request->input('hora_final'),
+                    'observacion'    => $request->input('observacion'),
+                    'user_id'        => auth()->id(),
+                    'status'         => $request->input('status') ?? '1',
                 ];
             }
 
             // 5) Guardar o actualizar detalle
             if ($request->regdetailId > 0) {
-                SaleDetail::find($request->regdetailId)->update($dataDetail);
+                PromotionDetail::find($request->regdetailId)->update($dataDetail);
             } else {
-                SaleDetail::create($dataDetail);
+                PromotionDetail::create($dataDetail);
             }
 
             // 6) Actualizar totales de la venta
-            $sale        = Sale::find($request->ventaId);
-            $detalles    = $sale->details;
-            $sale->items = $detalles->count();
-            $sale->total_bruto           = $detalles->sum(fn($d) => $d->quantity * $d->price);
-            $sale->descuentos            = $detalles->sum(fn($d) => $d->descuento + $d->descuento_cliente);
-            $sale->total_valor_a_pagar   = $detalles->sum('total');
-            $sale->total_iva             = $detalles->sum('iva');
-            $sale->total_otros_impuestos = $detalles->sum('otro_impuesto');
-            $sale->save();
+            $promotion        = Promotion::find($request->ventaId);
+            $promotion->status = '2';
+            $promotion->save();
 
             // 7) Respuesta exitosa
             return response()->json([

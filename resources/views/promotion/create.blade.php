@@ -137,12 +137,11 @@
                                     </div>
                                 </div>
 
-
                                 <div class="col-md-2">
                                     <div class="task-header">
                                         <div class="form-group">
-                                            <label for="date1" class="form-label">Fecha incio</label>
-                                            <input type="date" class="form-control" name="fecha_entrega" id="fecha_entrega" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+                                            <label for="fecha_inicio" class="form-label">Fecha incio</label>
+                                            <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
                                             <span class="text-danger error-message"></span>
                                         </div>
                                     </div>
@@ -150,8 +149,8 @@
                                 <div class="col-md-2">
                                     <div class="task-header">
                                         <div class="form-group">
-                                            <label for="hora_inicial_entrega" class="form-label">Hora inicial</label>
-                                            <select class="form-control form-control-sm input" name="hora_inicial_entrega" id="hora_inicial_entrega" required>
+                                            <label for="hora_inicio" class="form-label">Hora inicial</label>
+                                            <select class="form-control form-control-sm input" name="hora_inicio" id="hora_inicio" required>
                                                 <option value="">Escoge hora inicio</option>
                                                 @php
                                                 $startTime = strtotime('06:00');
@@ -165,8 +164,8 @@
                                 <div class="col-md-2">
                                     <div class="task-header">
                                         <div class="form-group">
-                                            <label for="date1" class="form-label">Fecha final</label>
-                                            <input type="date" class="form-control" name="fecha_entrega" id="fecha_entrega" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
+                                            <label for="fecha_final" class="form-label">Fecha final</label>
+                                            <input type="date" class="form-control" name="fecha_final" id="fecha_final" placeholder="Last name" aria-label="Last name" value="{{date('Y-m-d')}}">
                                             <span class="text-danger error-message"></span>
                                         </div>
                                     </div>
@@ -174,8 +173,8 @@
                                 <div class="col-md-2">
                                     <div class="task-header">
                                         <div class="form-group">
-                                            <label for="hora_final_entrega" class="form-label">Hora final</label>
-                                            <select class="form-control form-control-sm input" name="hora_final_entrega" id="hora_final_entrega" required>
+                                            <label for="hora_final" class="form-label">Hora final</label>
+                                            <select class="form-control form-control-sm input" name="hora_final" id="hora_final" required>
                                                 <option value="">Escoge hora final</option>
                                                 @php
                                                 $startTime = strtotime('07:00');
@@ -236,18 +235,9 @@
                                 <!--td>{{$proddetail->id}}</td-->
                                 <td>{{$proddetail->nameprod}}</td>
                                 <td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
-                                <td>${{ number_format($proddetail->price, 0, ',', '.')}}</td>
+                               
                                 <td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
-                                <td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
-                                <td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
-                                <td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
-                                <td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
-                                <td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
-                                <td>{{ number_format($proddetail->porc_otro_impuesto, 0, ',', '.')}}</td>
-                                <td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
-                                <td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
-                                <td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
-                                <td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
+                           
                                 <td class="text-center">
                                     @if($promotion[0]->status == '0')
                                     <button class="btn btn-dark fas fa-edit" name="btnEdit"

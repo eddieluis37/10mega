@@ -501,6 +501,14 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('/products/search/promotion', [promotionController::class, 'search'])->name('products.search_promotion');
     Route::get('showlistPromotions', [promotionController::class, 'show'])->name('promotion.showlistPromotions');      
     Route::post('promotionsdetail', [promotionController::class, 'promotiondetail'])->name('promotion.promotionsdetail');
+
+  //  Route::post('/promotionsdetail', [promotionController::class, 'promotiondetail']);
+    Route::post('/promotionsdetail/delete', [promotionController::class, 'deletepromotiondetail']);
+    Route::get('/promotionsdetalle/{promotionId}/{centrocostoId?}', [promotionController::class, 'getpromotionsdetalle']);
+    Route::get('/promotionsdetail/{id}', [promotionController::class, 'showDetail']); // para edición
+
+
+
 });
 
 /* VENTAS PARRILLA Tipo 2 = POS MOSTRADOR, Tpo 3 = DOMICILIO */
