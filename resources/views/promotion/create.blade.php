@@ -184,7 +184,7 @@
                                                     <span class="text-danger error-message"></span>
                                         </div>
                                     </div>
-                                </div>                             
+                                </div>
                                 <div class="col-md-10">
                                     <div class="form-group">
                                         <label for="observations">Observaciones</label>
@@ -232,12 +232,55 @@
                         <tbody id="tbodyDetail">
                             @foreach($detalleVenta as $proddetail)
                             <tr>
-                                <!--td>{{$proddetail->id}}</td-->
-                                <td>{{$proddetail->nameprod}}</td>
-                                <td>{{ number_format($proddetail->quantity, 2, '.', '.')}}</td>
-                               
-                                <td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
-                           
+                                <!-- CENTROCOSTO -->
+                                <td>{{ $proddetail->centro_costo_name ?? '-' }}</td>
+
+                                <!-- BODEGA -->
+                                <td>{{ $proddetail->store_name ?? '-' }}</td>
+
+                                <!-- CATEGORIA -->
+                                <td>{{ $proddetail->category_name ?? '-' }}</td>
+
+                                <!-- LOTE -->
+                                <td>{{ $proddetail->lote_codigo ?? '-' }}</td>
+
+                                <!-- FECHA.VENCE -->
+                                <td>
+                                    @if(!empty($proddetail->lote_fecha_vence))
+                                    {{ \Carbon\Carbon::parse($proddetail->lote_fecha_vence)->format('Y-m-d') }}
+                                    @else
+                                    -
+                                    @endif
+                                </td>
+
+                                <!-- PRODUCTO -->
+                                <td>{{ $proddetail->nameprod ?? '-' }}</td>
+
+                                <!-- CANT -->
+                                <td>{{ number_format($proddetail->quantity, 2, '.', ',') }}</td>
+
+                                <!-- %DESC -->
+                                <td>{{ number_format($proddetail->porc_desc, 0, ',', '.') }}%</td>
+
+                                <!-- FECHA.INICIO -->
+                                <td>{{ optional($proddetail->fecha_inicio) ? \Carbon\Carbon::parse($proddetail->fecha_inicio)->format('Y-m-d') : '-' }}</td>
+
+                                <!-- HORA.INICIO -->
+                                <td>{{ $proddetail->hora_inicio ?? '-' }}</td>
+
+                                <!-- FECHA.FINAL -->
+                                <td>{{ optional($proddetail->fecha_final) ? \Carbon\Carbon::parse($proddetail->fecha_final)->format('Y-m-d') : '-' }}</td>
+
+                                <!-- HORA.FINAL -->
+                                <td>{{ $proddetail->hora_final ?? '-' }}</td>
+
+                                <!-- OBSERVACION -->
+                                <td>{{ $proddetail->observacion ?? '-' }}</td>
+
+                                <!-- USUARIO -->
+                                <td>{{ $proddetail->user_name ?? '-' }}</td>
+
+                                <!-- ACCIONES -->
                                 <td class="text-center">
                                     @if($promotion[0]->status == '0')
                                     <button class="btn btn-dark fas fa-edit" name="btnEdit"

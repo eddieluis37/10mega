@@ -569,25 +569,39 @@ class promotionController extends Controller
     {
         $q = DB::table('promotion_details as pd')
             ->leftJoin('products as pro', 'pd.product_id', '=', 'pro.id')
-            ->leftJoin('stores as st', 'pd.store_id', '=', 'st.id')           
+            ->leftJoin('stores as st', 'pd.store_id', '=', 'st.id')
+            ->leftJoin('centro_costo as cc', 'st.centrocosto_id', '=', 'cc.id') // nombre tabla según tu modelo Centrocosto
+            ->leftJoin('categories as cat', 'pro.category_id', '=', 'cat.id')   // ajustar nombre de tabla si es diferente
             ->leftJoin('lotes as l', 'pd.lote_id', '=', 'l.id')
+            ->leftJoin('users as u', 'pd.user_id', '=', 'u.id')
             ->select(
                 'pd.*',
                 'pro.name as nameprod',
                 'pro.code as product_code',
-                'st.name as store_name',              
-                'l.codigo as lote_codigo'
+                'st.name as store_name',
+                'cc.name as centro_costo_name',
+                'cat.name as category_name',
+                'l.codigo as lote_codigo',
+                // Intento leer una columna de vencimiento común en lotes; ajústalo si tu campo tiene otro nombre
+                DB::raw("COALESCE(l.fecha_vencimiento, l.fecha_vencimiento, NULL) as lote_fecha_vence"),
+                'u.name as user_name'
             )
             ->where('pd.promotion_id', $ventaId);
 
+        // Si recibes un id de centro de costo, filtramos por el centro de costo de la bodega
+        // También incluimos pd.store_id por compatibilidad (si pasaran un id de bodega en vez de centro_costo)
         if (!is_null($centrocostoId) && $centrocostoId !== '') {
-            $q->where('pd.store_id', $centrocostoId);
+            $q->where(function ($sub) use ($centrocostoId) {
+                $sub->where('st.centrocosto_id', $centrocostoId)
+                    ->orWhere('pd.store_id', $centrocostoId);
+            });
         }
 
-        $detalles = $q->orderBy('pd.id','desc')->get();       
+        $detalles = $q->orderBy('pd.id', 'desc')->get();
 
         return $detalles;
     }
+
 
     public function getproducts(Request $request)
     {
@@ -624,7 +638,7 @@ class promotionController extends Controller
                         'message' => 'No se encontró el producto combo/receta.'
                     ], 422);
                 }
-               
+
 
                 // Valor enviado desde la vista: AUTOMÁTICAMENTE será 'AUTOSERVICIO', 'BAR' o 'PARRILLA'
                 $bodegaTipo = $request->input('tipobodega');
@@ -724,11 +738,11 @@ class promotionController extends Controller
                 ], 422);
             }
 
-            
-          
-            $quantity = $request->quantity;   
+
+
+            $quantity = $request->quantity;
             $porcDesc     = $request->get('porc_desc', 0);
-          
+
 
             //
             // Preparar datos para guardar sale_detail
@@ -736,12 +750,12 @@ class promotionController extends Controller
             if ($isComboRecetaSinInventario) {
                 $dataDetail = [
                     'promotion_id'      => $request->ventaId,
-                    'centrocosto_id'    => $request->input('centrocosto_id'),                    
-                    'store_id'          => $storeId,                  
+                    'centrocosto_id'    => $request->input('centrocosto_id'),
+                    'store_id'          => $storeId,
                     'lote_id'           => $loteId,
                     'inventario_id'     => null,
-                    'product_id'        => $product->id,                    
-                    'quantity'          => $quantity,                   
+                    'product_id'        => $product->id,
+                    'quantity'          => $quantity,
                     'porc_desc'         => $porcDesc,
                     'fecha_inicio'   => $request->input('fecha_inicio'),
                     'hora_inicio'    => $request->input('hora_inicio'),
@@ -754,12 +768,12 @@ class promotionController extends Controller
             } else {
                 $dataDetail = [
                     'promotion_id'      => $request->ventaId,
-                    'centrocosto_id'    => $request->input('centrocosto_id'),                    
-                    'store_id'          => $inventario->store_id,                                                      
+                    'centrocosto_id'    => $request->input('centrocosto_id'),
+                    'store_id'          => $inventario->store_id,
                     'quantity'          => $quantity,
                     'lote_id'           => $inventario->lote_id,
                     'inventario_id'     => $inventario->id,
-                    'product_id'        => $inventario->product_id, 
+                    'product_id'        => $inventario->product_id,
                     'porc_desc'         => $porcDesc,
                     'fecha_inicio'   => $request->input('fecha_inicio'),
                     'hora_inicio'    => $request->input('hora_inicio'),
@@ -780,7 +794,7 @@ class promotionController extends Controller
 
             // 6) Actualizar totales de la venta
             $promotion        = Promotion::find($request->ventaId);
-            $promotion->status = '2';
+            $promotion->status = '1';
             $promotion->save();
 
             // 7) Respuesta exitosa
