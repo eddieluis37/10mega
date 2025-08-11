@@ -307,14 +307,14 @@
                                 <td></td>
                                 <th></th>
                                 <th></th>
-                                <th>${{number_format($arrayTotales['TotalBruto'], 0, ',', '.')}} </th>
+                                <th>{{number_format($arrayTotales['TotalCantidad'], 0, ',', '.')}} </th>
+                                <th>{{number_format($arrayTotales['TotalPorDesc'], 0, ',', '.')}} </th>
                                 <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <th>${{number_format($arrayTotales['TotalValorAPagar'], 0, ',', '.')}} </th>
+                                <td></td>                                
                             </tr>
                         </tfoot>
                     </table>

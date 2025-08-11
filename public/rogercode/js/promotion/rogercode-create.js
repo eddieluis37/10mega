@@ -265,26 +265,24 @@ const showData = (data) => {
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
             <tr>                              
-                <td>${element.nameprod}</td>
-                <td>${element.quantity}</td>
-                <td>$${formatCantidadSinCero(element.price)}</td> 
+                <td>${element.centro_costo_name ?? '-'}</td>
+                <td>${element.store_name ?? '-'}</td>
+                <td>${element.category_name ?? '-'}</td>
+                <td>${element.lote_codigo ?? '-'}</td>
+                <td>${element.lote_fecha_vence ?? '-'}</td>
+                <td>${element.nameprod ?? '-'}</td>
+                <td>${element.quantity}</td>              
                 <td>${formatCantidadSinCero(
                     element.porc_desc
-                )}</td>                 
-                <td>$${formatCantidadSinCero(element.descuento)}</td> 
-                <td>$${formatCantidadSinCero(element.descuento_cliente)}</td>
-                <td>$${formatCantidadSinCero(element.total_bruto)}</td>   
-                <td>${formatCantidadSinCero(element.porc_iva)}</td> 
-                <td>$${formatCantidadSinCero(element.iva)}</td> 
-                <td>${formatCantidadSinCero(
-                    element.porc_otro_impuesto
-                )}</td>     
-                <td>$${formatCantidadSinCero(element.otro_impuesto)}</td>   
-                <td>${formatCantidadSinCero(element.porc_impoconsumo)}</td> 
-                <td>$${formatCantidadSinCero(
-                    element.impoconsumo
-                )}</td>               
-                <td>$${formatCantidadSinCero(element.total)}</td>        
+                )}</td> 
+                <td>${element.fecha_inicio ?? '-'}</td>    
+                <td>${element.hora_inicio ?? '-'}</td>    
+                <td>${element.fecha_final ?? '-'}</td>    
+                <td>${element.hora_final ?? '-'}</td>   
+
+                <td>${element.observacion ?? '-'}</td>    
+                <td>${element.user_name ?? '-'}</td>     
+
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${
                         element.id
@@ -308,18 +306,17 @@ const showData = (data) => {
             <td></td>    
             <td></td>
             <td></td>                               
-            <th>$${formatCantidadSinCero(arrayTotales.TotalBruto)}</th> 
+            <th>${formatCantidadSinCero(arrayTotales.TotalCantidad)}</th> 
+            <th>${formatCantidadSinCero(
+                arrayTotales.TotalPorDesc
+            )}</th>   
             <td></td>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
-            <td></td>          
-            <th>$${formatCantidadSinCero(
-                arrayTotales.TotalValorAPagar
-            )}</th>            
+            <td></td>        
             <td class="text-center">
-            
             </td>
         </tr>
     `;

@@ -546,15 +546,20 @@ class promotionController extends Controller
     {
         $TotalBrutoSinDescuento = Sale::where('id', $id)->value('total_bruto');
         $TotalDescuentos = Sale::where('id', $id)->value('descuentos');
-        $TotalBruto = (float)SaleDetail::Where([['sale_id', $id]])->sum('total_bruto');
+        $TotalCantidad = (float)PromotionDetail::Where([['promotion_id', $id]])
+        ->where('status', '1')
+        ->sum('quantity');
+         $TotalPorDesc = (float)PromotionDetail::Where([['promotion_id', $id]])
+        ->where('status', '1')
+        ->sum('porc_desc');       
         $TotalIva = (float)SaleDetail::Where([['sale_id', $id]])->sum('iva');
         $TotalOtroImpuesto = (float)SaleDetail::Where([['sale_id', $id]])->sum('otro_impuesto');
         $TotalImpAlConusmo = (float)SaleDetail::Where([['sale_id', $id]])->sum('impoconsumo');
         $TotalValorAPagar = (float)SaleDetail::Where([['sale_id', $id]])->sum('total');
 
         $array = [
-            'TotalBruto' => $TotalBruto,
-            'TotalBrutoSinDescuento' => $TotalBrutoSinDescuento,
+            'TotalCantidad' => $TotalCantidad,
+            'TotalPorDesc' => $TotalPorDesc,
             'TotalDescuentos' => $TotalDescuentos,
             'TotalValorAPagar' => $TotalValorAPagar,
             'TotalIva' => $TotalIva,
