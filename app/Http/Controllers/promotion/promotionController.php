@@ -544,27 +544,17 @@ class promotionController extends Controller
 
     public function sumTotales($id)
     {
-        $TotalBrutoSinDescuento = Sale::where('id', $id)->value('total_bruto');
-        $TotalDescuentos = Sale::where('id', $id)->value('descuentos');
+       
         $TotalCantidad = (float)PromotionDetail::Where([['promotion_id', $id]])
         ->where('status', '1')
         ->sum('quantity');
          $TotalPorDesc = (float)PromotionDetail::Where([['promotion_id', $id]])
         ->where('status', '1')
-        ->sum('porc_desc');       
-        $TotalIva = (float)SaleDetail::Where([['sale_id', $id]])->sum('iva');
-        $TotalOtroImpuesto = (float)SaleDetail::Where([['sale_id', $id]])->sum('otro_impuesto');
-        $TotalImpAlConusmo = (float)SaleDetail::Where([['sale_id', $id]])->sum('impoconsumo');
-        $TotalValorAPagar = (float)SaleDetail::Where([['sale_id', $id]])->sum('total');
+        ->sum('porc_desc');              
 
         $array = [
             'TotalCantidad' => $TotalCantidad,
-            'TotalPorDesc' => $TotalPorDesc,
-            'TotalDescuentos' => $TotalDescuentos,
-            'TotalValorAPagar' => $TotalValorAPagar,
-            'TotalIva' => $TotalIva,
-            'TotalOtroImpuesto' => $TotalOtroImpuesto,
-            'TotalImpAlConusmo' => $TotalImpAlConusmo,
+            'TotalPorDesc' => $TotalPorDesc,            
         ];
 
         return $array;
@@ -829,18 +819,17 @@ class promotionController extends Controller
      */
     public function edit(Request $request)
     {
-
-        $reg = Sale::where('id', $request->id)->first();
+        $reg = Promotion::where('id', $request->id)->first();
         return response()->json([
             'status' => 1,
             'reg' => $reg
         ]);
     }
 
-    public function editCompensado(Request $request)
+    public function editPromotion(Request $request)
     {
-        $reg = SaleDetail::find($request->id);
-        // Asegúrate de que el modelo SaleDetail tenga en su $fillable el campo 'inventario_id'
+        $reg = PromotionDetail::find($request->id);
+        // Asegúrate de que el modelo PromotionDetail tenga en su $fillable el campo 'inventario_id'
         return response()->json([
             'status' => 1,
             'reg' => $reg
@@ -856,7 +845,7 @@ class promotionController extends Controller
     public function destroy(Request $request)
     {
         try {
-            $compe = SaleDetail::where('id', $request->id)->first();
+            $compe = PromotionDetail::where('id', $request->id)->first();
             $compe->delete();
 
             $arraydetail = $this->getventasdetail($request->ventaId);
@@ -865,11 +854,11 @@ class promotionController extends Controller
 
 
             $sale = Sale::find($request->ventaId);
-            $sale->items = SaleDetail::where('sale_id', $sale->id)->count();
+            $sale->items = PromotionDetail::where('sale_id', $sale->id)->count();
             $sale->descuentos = 0;
             $sale->total_iva = 0;
             $sale->total_otros_impuestos = 0;
-            $saleDetails = SaleDetail::where('sale_id', $sale->id)->get();
+            $saleDetails = PromotionDetail::where('sale_id', $sale->id)->get();
             $totalBruto = 0;
             $totalDesc = 0;
             $total_valor_a_pagar = $saleDetails->where('sale_id', $sale->id)->sum('total');
@@ -903,7 +892,7 @@ class promotionController extends Controller
     public function destroyVenta(Request $request)
     {
         try {
-            $compe = Sale::where('id', $request->id)->first();
+            $compe = Promotion::where('id', $request->id)->first();
             $compe->status = 0;
             $compe->save();
 

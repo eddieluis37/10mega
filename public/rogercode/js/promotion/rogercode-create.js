@@ -181,37 +181,26 @@ tbodyTable.addEventListener("click", (e) => {
         let id = element.getAttribute("data-id");
         const dataform = new FormData();
         dataform.append("id", Number(id));
-        sendData("/saleById", dataform, token).then((result) => {
+        sendData("/promotionById", dataform, token).then((result) => {
             console.log(result);
             let editReg = result.reg;
             console.log(editReg);
             // Asignar datos a los campos del formulario
             regDetail.value = editReg.id;
-            price.value = formatCantidadSinCero(editReg.price);
-            quantity.value = editReg.quantity;
-            porc_iva.value = editReg.porc_iva;
-            porc_otro_impuesto.value = editReg.porc_otro_impuesto;
-            porc_impoconsumo.value = editReg.porc_impoconsumo;
-            porc_desc.value = editReg.porc_desc;
 
-            // Usar inventario_id en el select2, no product_id
-            let select = $(".select2Prod");
-            if (
-                select.find("option[value='" + editReg.inventario_id + "']")
-                    .length
-            ) {
-                // Si la opción ya existe, se asigna el valor y se dispara el cambio
-                select.val(editReg.inventario_id).trigger("change");
-            } else {
-                // Si no existe, se crea la opción usando el texto del registro o un valor por defecto
-                let newOption = new Option(
-                    editReg.text || "Producto editado",
-                    editReg.inventario_id,
-                    true,
-                    true
-                );
-                select.append(newOption).trigger("change");
-            }
+            $('#producto').val(result.reg.inventario_id).trigger('change');  // Select2 producto:contentReference[oaicite:10]{index=10}
+
+            quantity.value = editReg.quantity;
+            $("#porc_desc").val(result.reg.porc_desc);        
+
+            // Fechas
+            $("#fecha_inicio").val(result.reg.fecha_inicio); // YYYY-MM-DD:contentReference[oaicite:11]{index=11}
+            $("#fecha_final").val(result.reg.fecha_final);
+            // Horas
+            $("#hora_inicio").val(result.reg.hora_inicio); // HH:mm:contentReference[oaicite:12]{index=12}
+            $("#hora_final").val(result.reg.hora_final);
+            // Observaciones
+            $("#observacion").val(result.reg.observacion);
         });
     }
 });
@@ -265,23 +254,21 @@ const showData = (data) => {
     dataAll.forEach((element, indice) => {
         showRegTbody.innerHTML += `
             <tr>                              
-                <td>${element.centro_costo_name ?? '-'}</td>
-                <td>${element.store_name ?? '-'}</td>
-                <td>${element.category_name ?? '-'}</td>
-                <td>${element.lote_codigo ?? '-'}</td>
-                <td>${element.lote_fecha_vence ?? '-'}</td>
-                <td>${element.nameprod ?? '-'}</td>
+                <td>${element.centro_costo_name ?? "-"}</td>
+                <td>${element.store_name ?? "-"}</td>
+                <td>${element.category_name ?? "-"}</td>
+                <td>${element.lote_codigo ?? "-"}</td>
+                <td>${element.lote_fecha_vence ?? "-"}</td>
+                <td>${element.nameprod ?? "-"}</td>
                 <td>${element.quantity}</td>              
-                <td>${formatCantidadSinCero(
-                    element.porc_desc
-                )}</td> 
-                <td>${element.fecha_inicio ?? '-'}</td>    
-                <td>${element.hora_inicio ?? '-'}</td>    
-                <td>${element.fecha_final ?? '-'}</td>    
-                <td>${element.hora_final ?? '-'}</td>   
+                <td>${formatCantidadSinCero(element.porc_desc)}</td> 
+                <td>${element.fecha_inicio ?? "-"}</td>    
+                <td>${element.hora_inicio ?? "-"}</td>    
+                <td>${element.fecha_final ?? "-"}</td>    
+                <td>${element.hora_final ?? "-"}</td>   
 
-                <td>${element.observacion ?? '-'}</td>    
-                <td>${element.user_name ?? '-'}</td>     
+                <td>${element.observacion ?? "-"}</td>    
+                <td>${element.user_name ?? "-"}</td>     
 
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${
@@ -307,9 +294,7 @@ const showData = (data) => {
             <td></td>
             <td></td>                               
             <th>${formatCantidadSinCero(arrayTotales.TotalCantidad)}</th> 
-            <th>${formatCantidadSinCero(
-                arrayTotales.TotalPorDesc
-            )}</th>   
+            <th>${formatCantidadSinCero(arrayTotales.TotalPorDesc)}</th>   
             <td></td>
             <td></td>
             <td></td>

@@ -324,7 +324,7 @@
                             @csrf
                             <div class="col-md-12 text-right mt-1">
                                 <button id="cargarInventarioBtn" type="submit"
-                                    class="btn btn-success btn-block">Pagar</button>
+                                    class="btn btn-success btn-block">Activar</button>
                                 <!-- <a href="registrar_pago/{{$id}}" target="_blank" class="btn btn-success">Pagar</a> -->
                             </div>
                         </form>
