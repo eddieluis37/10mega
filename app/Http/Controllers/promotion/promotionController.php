@@ -544,17 +544,17 @@ class promotionController extends Controller
 
     public function sumTotales($id)
     {
-       
+
         $TotalCantidad = (float)PromotionDetail::Where([['promotion_id', $id]])
-        ->where('status', '1')
-        ->sum('quantity');
-         $TotalPorDesc = (float)PromotionDetail::Where([['promotion_id', $id]])
-        ->where('status', '1')
-        ->sum('porc_desc');              
+            ->where('status', '1')
+            ->sum('quantity');
+        $TotalPorDesc = (float)PromotionDetail::Where([['promotion_id', $id]])
+            ->where('status', '1')
+            ->sum('porc_desc');
 
         $array = [
             'TotalCantidad' => $TotalCantidad,
-            'TotalPorDesc' => $TotalPorDesc,            
+            'TotalPorDesc' => $TotalPorDesc,
         ];
 
         return $array;
@@ -829,10 +829,74 @@ class promotionController extends Controller
     public function editPromotion(Request $request)
     {
         $reg = PromotionDetail::find($request->id);
-        // Asegúrate de que el modelo PromotionDetail tenga en su $fillable el campo 'inventario_id'
+
+        if (!$reg) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Registro no encontrado'
+            ]);
+        }
+
+        // Cargar relaciones / registros relacionados (fallback si no tienes relaciones Eloquent definidas)
+        $store = $reg->store_id ? Store::find($reg->store_id) : null;
+        $lote = $reg->lote_id ? Lote::find($reg->lote_id) : null;
+        $product = $reg->product_id ? Product::find($reg->product_id) : null;
+        $inventario = $reg->inventario_id ? Inventario::find($reg->inventario_id) : null;
+
+        // Valores con fallback por si los campos tienen nombres distintos en tu BD
+        $storeName = $store->name ?? $reg->store_name ?? '-';
+        $loteCodigo = $lote->codigo ?? $reg->lote_codigo ?? '-';
+
+        // Fecha de vencimiento: intenta varios nombres posibles
+        $fechaVenceRaw = $lote->fecha_vencimiento ??
+            $lote->fecha_vence ??
+            $inventario->fecha_vencimiento ??
+            $reg->lote_fecha_vence ??
+            null;
+
+        $fechaVence = $fechaVenceRaw ? Carbon::parse($fechaVenceRaw)->format('d/m/Y') : '-';
+
+        $productName = $product->name ?? $reg->nameprod ?? '-';
+
+        // Stock: intenta varias columnas comunes en inventarios
+        $stockRaw = $inventario->cantidad ??
+            $inventario->cantidad_inventario_inicial ??
+            $inventario->cantidad_actual ??
+            $inventario->stock_ideal ?? // por si la columna se llama así
+            0;
+
+        $stock = number_format((float)$stockRaw, 2, '.', '');
+
+        // Texto completo para Select2 (ajusta formato según prefieras)
+        $select2Text = "Bg: {$storeName} - {$loteCodigo} - {$fechaVence} - {$productName} - Stk: {$stock}";
+
         return response()->json([
             'status' => 1,
-            'reg' => $reg
+            'reg' => $reg,
+            'select2_text' => $select2Text,
+            // opcionales: devuelvo también los objetos por si los necesitas en el JS
+            'store' => $store,
+            'lote' => $lote,
+            'product' => $product,
+            'inventario' => $inventario,
+        ]);
+    }
+
+     // Eliminar detalle
+    public function deletepromotiondetail(Request $request)
+    {
+        $id = $request->id;
+        $detail = PromotionDetail::find($id);
+        if (!$detail) return response()->json(['status'=>0,'message'=>'Detalle no encontrado'],404);
+
+        $promotionId = $detail->promotion_id;
+        $detail->delete();
+
+        return response()->json([
+            'status'=>1,
+            'message'=>'Detalle eliminado',
+            'array' => $this->getpromotionsdetalle($promotionId, $request->centrocostoId ?? null),
+            'arrayTotales' => $this->sumTotals($promotionId)
         ]);
     }
 
@@ -853,27 +917,14 @@ class promotionController extends Controller
             $arrayTotales = $this->sumTotales($request->ventaId);
 
 
-            $sale = Sale::find($request->ventaId);
-            $sale->items = PromotionDetail::where('sale_id', $sale->id)->count();
-            $sale->descuentos = 0;
-            $sale->total_iva = 0;
-            $sale->total_otros_impuestos = 0;
-            $saleDetails = PromotionDetail::where('sale_id', $sale->id)->get();
-            $totalBruto = 0;
-            $totalDesc = 0;
-            $total_valor_a_pagar = $saleDetails->where('sale_id', $sale->id)->sum('total');
-            $sale->total_valor_a_pagar = $total_valor_a_pagar;
-            $totalBruto = $saleDetails->sum(function ($saleDetail) {
-                return $saleDetail->quantity * $saleDetail->price;
-            });
-            $totalDesc = $saleDetails->sum(function ($saleDetail) {
-                return $saleDetail->descuento + $saleDetail->descuento_cliente;
-            });
-            $sale->total_bruto = $totalBruto;
-            $sale->descuentos = $totalDesc;
+            $sale = Promotion::find($request->ventaId);
+            $sale->items = PromotionDetail::where('promotion_id', $sale->id)->count();
+        
+            $saleDetails = PromotionDetail::where('promotion_id', $sale->id)->get();           
+           
+                      
+            $sale->status = '3';
             $sale->save();
-
-
 
             return response()->json([
                 'status' => 1,

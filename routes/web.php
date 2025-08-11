@@ -502,7 +502,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('showlistPromotions', [promotionController::class, 'show'])->name('promotion.showlistPromotions');      
     Route::post('promotionsdetail', [promotionController::class, 'promotiondetail'])->name('promotion.promotionsdetail');
     Route::post('promotionById', [promotionController::class, 'editPromotion'])->name('promotion.editPromotion');
-
+    Route::post('promotiondown', [promotionController::class, 'destroy'])->name('promotion.down');
 
   //  Route::post('/promotionsdetail', [promotionController::class, 'promotiondetail']);
     Route::post('/promotionsdetail/delete', [promotionController::class, 'deletepromotiondetail']);

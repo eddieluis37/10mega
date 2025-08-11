@@ -168,7 +168,7 @@ tbodyTable.addEventListener("click", (e) => {
                 const dataform = new FormData();
                 dataform.append("id", Number(id));
                 dataform.append("ventaId", Number(venta_id.value));
-                sendData("/ventadown", dataform, token).then((result) => {
+                sendData("/promotiondown", dataform, token).then((result) => {
                     console.log(result);
                     showData(result);
                 });
@@ -182,25 +182,39 @@ tbodyTable.addEventListener("click", (e) => {
         const dataform = new FormData();
         dataform.append("id", Number(id));
         sendData("/promotionById", dataform, token).then((result) => {
-            console.log(result);
             let editReg = result.reg;
-            console.log(editReg);
-            // Asignar datos a los campos del formulario
+            
             regDetail.value = editReg.id;
+            quantity.value = editReg.quantity;            
 
-            $('#producto').val(result.reg.inventario_id).trigger('change');  // Select2 producto:contentReference[oaicite:10]{index=10}
+            // Texto preformateado devuelto por el controller
+            const selectText =
+                result.select2_text || editReg.text || "Producto";
 
-            quantity.value = editReg.quantity;
-            $("#porc_desc").val(result.reg.porc_desc);        
+            // Select2: asignar opción por inventario_id (value) y mostrar el texto que armamos
+            const select = $(".select2Prod");
+            const inventarioId = editReg.inventario_id;
 
-            // Fechas
-            $("#fecha_inicio").val(result.reg.fecha_inicio); // YYYY-MM-DD:contentReference[oaicite:11]{index=11}
-            $("#fecha_final").val(result.reg.fecha_final);
-            // Horas
-            $("#hora_inicio").val(result.reg.hora_inicio); // HH:mm:contentReference[oaicite:12]{index=12}
-            $("#hora_final").val(result.reg.hora_final);
-            // Observaciones
-            $("#observacion").val(result.reg.observacion);
+            if (select.find("option[value='" + inventarioId + "']").length) {
+                select.val(inventarioId).trigger("change");
+            } else {
+                // creamos la opción y la seleccionamos
+                const newOption = new Option(
+                    selectText,
+                    inventarioId,
+                    true,
+                    true
+                );
+                select.append(newOption).trigger("change");
+            }
+
+            // Resto de asignaciones (ejemplo)
+            $("#porc_desc").val(editReg.porc_desc ?? "");
+            $("#fecha_inicio").val(editReg.fecha_inicio ?? "");
+            $("#hora_inicio").val(editReg.hora_inicio ?? "");
+            $("#fecha_final").val(editReg.fecha_final ?? "");
+            $("#hora_final").val(editReg.hora_final ?? "");
+            $("#observacion").val(editReg.observacion ?? "");
         });
     }
 });
