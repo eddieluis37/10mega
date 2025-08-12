@@ -25,6 +25,9 @@ class CreateSaleDetailsTable extends Migration
 
             $table->unsignedBigInteger('inventario_id')->nullable();
             $table->foreign('inventario_id')->references('id')->on('inventarios'); 
+
+            $table->unsignedBigInteger('applied_promotion_id')->nullable();
+            $table->foreign('applied_promotion_id')->references('id')->on('promotion_details'); 
            
             $table->foreignId('product_id')->constrained(); 
             $table->decimal('quantity',8,2)->default(0)->nullable();         

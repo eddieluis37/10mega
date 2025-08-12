@@ -24,9 +24,5 @@ class Promotion extends Model
     {
         return $this->hasMany(PromotionDetail::class);
     }
-
-    public function details()
-    {
-        return $this->hasMany(PromotionDetail::class);
-    }
+    
 }

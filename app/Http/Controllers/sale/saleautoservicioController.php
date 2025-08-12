@@ -358,7 +358,7 @@ class saleautoservicioController extends Controller
         $cXc->fecha_vencimiento = now()->addDays($diasCredito);
         $cXc->save();
     }
-  
+
     public function create_autoservicio($id)
     {
         $venta = Sale::find($id);
@@ -456,7 +456,7 @@ class saleautoservicioController extends Controller
         $detail = DB::table('sale_details as sd')
             ->join('products as pro', 'sd.product_id', '=', 'pro.id')
             ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
-            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')           
+            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')
             ->where([
                 ['i.store_id', $centrocostoId],
                 ['sd.sale_id', $ventaId],
@@ -549,82 +549,6 @@ class saleautoservicioController extends Controller
         return response()->json($results);
     }
 
-
-    public function create_reg_pago($id)
-    {
-        $forma_pago_tarjeta = Formapago::Where('tipoformapago', '=', 'TARJETA')->get();
-        $forma_pago_otros = Formapago::Where('tipoformapago', '=', 'OTROS')->get();
-        $forma_pago_credito = Formapago::Where('tipoformapago', '=', 'CREDITO')->get();
-
-        $dataVenta = DB::table('sales as sa')
-            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
-            ->select('sa.*', 'tird.name as namethird', 'c.name as namebodega', 'tird.porc_descuento', 'sa.total_iva', 'sa.vendedor_id')
-            ->where('sa.id', $id)
-            ->get();
-
-        $vendedorId = $dataVenta[0]->vendedor_id;
-        $vendedor = Third::where('id', $vendedorId)->value('name');
-        $dataVenta[0]->vendedor_name = $vendedor;
-
-        // dd($dataVenta);
-
-        $venta = Sale::find($id);
-        $producto = Product::get();
-
-        $arrayTotales = $this->sumTotales($id);
-
-        $descuento = $dataVenta[0]->porc_descuento / 100 * $arrayTotales['TotalValorAPagar'];
-        $subtotal = $arrayTotales['TotalBrutoSinDescuento'] - $arrayTotales['TotalDescuentos'];
-
-        return view('sale.registrar_pago', compact('venta', 'arrayTotales', 'producto', 'dataVenta', 'descuento', 'subtotal', 'forma_pago_tarjeta', 'forma_pago_otros', 'forma_pago_credito'));
-    }
-
-    public function sumTotales($id)
-    {
-        $TotalBrutoSinDescuento = Sale::where('id', $id)->value('total_bruto');
-        $TotalDescuentos = Sale::where('id', $id)->value('descuentos');
-        $TotalBruto = (float)SaleDetail::Where([['sale_id', $id]])->sum('total_bruto');
-        $TotalIva = (float)SaleDetail::Where([['sale_id', $id]])->sum('iva');
-        $TotalOtroImpuesto = (float)SaleDetail::Where([['sale_id', $id]])->sum('otro_impuesto');
-        $TotalImpAlConusmo = (float)SaleDetail::Where([['sale_id', $id]])->sum('impoconsumo');
-        $TotalValorAPagar = (float)SaleDetail::Where([['sale_id', $id]])->sum('total');
-
-        $array = [
-            'TotalBruto' => $TotalBruto,
-            'TotalBrutoSinDescuento' => $TotalBrutoSinDescuento,
-            'TotalDescuentos' => $TotalDescuentos,
-            'TotalValorAPagar' => $TotalValorAPagar,
-            'TotalIva' => $TotalIva,
-            'TotalOtroImpuesto' => $TotalOtroImpuesto,
-            'TotalImpAlConusmo' => $TotalImpAlConusmo,
-        ];
-
-        return $array;
-    }
-
-    public function getventasdetail($ventaId)
-    {
-        $detalles = DB::table('sale_details as de')
-            ->join('products as pro', 'de.product_id', '=', 'pro.id')
-            ->select('de.*', 'pro.name as nameprod', 'pro.code', 'de.porc_iva', 'de.iva', 'de.porc_otro_impuesto',)
-            ->where([
-                ['de.sale_id', $ventaId],
-                /*   ['de.status', 1] */
-            ])->get();
-
-        return $detalles;
-    }
-
-    public function getproducts(Request $request)
-    {
-        $prod = Product::Where([
-            /*   ['category_id',$request->categoriaId], */
-            ['status', 1]
-        ])->get();
-        return response()->json(['products' => $prod]);
-    }
-
     public function savedetail(Request $request)
     {
         try {
@@ -652,13 +576,6 @@ class saleautoservicioController extends Controller
                     ], 422);
                 }
 
-                //
-                // === 1) ASIGNAR DINÁMICAMENTE LA BODEGA QUE CONTENGA PALABRAS DEL NOMBRE DE USUARIO ===
-                //
-                // Tomo el nombre completo del usuario autenticado, lo separo en palabras
-                $userName   = auth()->user()->name;
-                $nameWords  = preg_split('/\s+/', $userName, -1, PREG_SPLIT_NO_EMPTY);
-
                 // Valor enviado desde la vista: AUTOMÁTICAMENTE será 'AUTOSERVICIO', 'BAR' o 'PARRILLA'
                 $bodegaTipo = $request->input('tipobodega');
 
@@ -666,15 +583,6 @@ class saleautoservicioController extends Controller
                 $userStoreIds = DB::table('store_user')
                     ->where('user_id', auth()->id())
                     ->pluck('store_id');
-
-                /* // Query para encontrar la primera bodega cuyo nombre contenga alguna palabra del usuario
-                $store = Store::whereIn('id', $userStoreIds)
-                    ->where(function ($q) use ($nameWords) {
-                        foreach ($nameWords as $word) {
-                            $q->orWhere('name', 'LIKE', "%{$word}%");
-                        }
-                    })
-                    ->first(); */
 
                 // Busco la primera bodega cuyo nombre contenga la palabra enviada
                 $store = Store::whereIn('id', $userStoreIds)
@@ -875,6 +783,72 @@ class saleautoservicioController extends Controller
         }
     }
 
+    public function getventasdetail($ventaId)
+    {
+        $detalles = DB::table('sale_details as de')
+            ->join('products as pro', 'de.product_id', '=', 'pro.id')
+            ->select('de.*', 'pro.name as nameprod', 'pro.code', 'de.porc_iva', 'de.iva', 'de.porc_otro_impuesto',)
+            ->where([
+                ['de.sale_id', $ventaId],
+                /*   ['de.status', 1] */
+            ])->get();
+
+        return $detalles;
+    }
+
+    public function create_reg_pago($id)
+    {
+        $forma_pago_tarjeta = Formapago::Where('tipoformapago', '=', 'TARJETA')->get();
+        $forma_pago_otros = Formapago::Where('tipoformapago', '=', 'OTROS')->get();
+        $forma_pago_credito = Formapago::Where('tipoformapago', '=', 'CREDITO')->get();
+
+        $dataVenta = DB::table('sales as sa')
+            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
+            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
+            ->select('sa.*', 'tird.name as namethird', 'c.name as namebodega', 'tird.porc_descuento', 'sa.total_iva', 'sa.vendedor_id')
+            ->where('sa.id', $id)
+            ->get();
+
+        $vendedorId = $dataVenta[0]->vendedor_id;
+        $vendedor = Third::where('id', $vendedorId)->value('name');
+        $dataVenta[0]->vendedor_name = $vendedor;
+
+        // dd($dataVenta);
+
+        $venta = Sale::find($id);
+        $producto = Product::get();
+
+        $arrayTotales = $this->sumTotales($id);
+
+        $descuento = $dataVenta[0]->porc_descuento / 100 * $arrayTotales['TotalValorAPagar'];
+        $subtotal = $arrayTotales['TotalBrutoSinDescuento'] - $arrayTotales['TotalDescuentos'];
+
+        return view('sale.registrar_pago', compact('venta', 'arrayTotales', 'producto', 'dataVenta', 'descuento', 'subtotal', 'forma_pago_tarjeta', 'forma_pago_otros', 'forma_pago_credito'));
+    }
+
+    public function sumTotales($id)
+    {
+        $TotalBrutoSinDescuento = Sale::where('id', $id)->value('total_bruto');
+        $TotalDescuentos = Sale::where('id', $id)->value('descuentos');
+        $TotalBruto = (float)SaleDetail::Where([['sale_id', $id]])->sum('total_bruto');
+        $TotalIva = (float)SaleDetail::Where([['sale_id', $id]])->sum('iva');
+        $TotalOtroImpuesto = (float)SaleDetail::Where([['sale_id', $id]])->sum('otro_impuesto');
+        $TotalImpAlConusmo = (float)SaleDetail::Where([['sale_id', $id]])->sum('impoconsumo');
+        $TotalValorAPagar = (float)SaleDetail::Where([['sale_id', $id]])->sum('total');
+
+        $array = [
+            'TotalBruto' => $TotalBruto,
+            'TotalBrutoSinDescuento' => $TotalBrutoSinDescuento,
+            'TotalDescuentos' => $TotalDescuentos,
+            'TotalValorAPagar' => $TotalValorAPagar,
+            'TotalIva' => $TotalIva,
+            'TotalOtroImpuesto' => $TotalOtroImpuesto,
+            'TotalImpAlConusmo' => $TotalImpAlConusmo,
+        ];
+
+        return $array;
+    }
+
     public function store_autoservicio(Request $request) // Guardar venta autoservicio por domicilio
     {
         try {
@@ -1011,7 +985,7 @@ class saleautoservicioController extends Controller
             'status' => 1,
             'reg' => $reg
         ]);
-    }  
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -1987,5 +1961,14 @@ class saleautoservicioController extends Controller
             Log::error("Error en devolución parcial para venta ID {$sale->id}: " . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function getproducts(Request $request)
+    {
+        $prod = Product::Where([
+            /*   ['category_id',$request->categoriaId], */
+            ['status', 1]
+        ])->get();
+        return response()->json(['products' => $prod]);
     }
 }
