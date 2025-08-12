@@ -38,6 +38,10 @@ class CreateSaleDetailsTable extends Migration
             $table->decimal('otro_impuesto',12,0)->default(0)->nullable(); 
             $table->decimal('porc_impoconsumo',10,2)->default(0)->nullable(); 
             $table->decimal('impoconsumo',12,2)->default(0)->nullable(); 
+            
+            $table->decimal('promo_percent',10,2)->default(0)->nullable(); 
+            $table->decimal('promo_value',12,2)->default(0)->nullable(); 
+
             $table->decimal('total_bruto',12,0)->default(0)->nullable();        
             $table->decimal('total',12,0)->default(0)->nullable(); 
             

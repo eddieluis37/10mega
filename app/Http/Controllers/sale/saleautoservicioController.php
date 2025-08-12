@@ -342,8 +342,6 @@ class saleautoservicioController extends Controller
         }
     }
 
-
-
     public function cuentasPorCobrar($ventaId)
     {
         $venta = Sale::find($ventaId);
@@ -360,99 +358,7 @@ class saleautoservicioController extends Controller
         $cXc->fecha_vencimiento = now()->addDays($diasCredito);
         $cXc->save();
     }
-
-    public function create($id)
-    {
-        $venta = Sale::find($id);
-
-        $storeIds = [0];
-
-        // Se obtienen los productos que tengan inventarios en las bodegas seleccionadas con stock_ideal > 0
-        $productsQuery = Product::query();
-        $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
-            $q->whereIn('store_id', $storeIds)
-                ->where('stock_ideal', '>', 0);
-        });
-        $products = $productsQuery->get();
-
-        // Se obtienen todos los inventarios que cumplan la condición, cargando las relaciones 'store' y 'lote'
-        $inventarios = Inventario::with('store', 'lote')
-            ->whereIn('store_id', $storeIds)
-            ->where('stock_ideal', '>', 0)
-            ->get();
-
-        $results = [];
-
-        foreach ($products as $prod) {
-            // Filtrar todos los inventarios que correspondan al producto actual
-            $inventariosProducto = $inventarios->where('product_id', $prod->id);
-
-            foreach ($inventariosProducto as $inventario) {
-                // Validar la fecha de vencimiento del lote
-                if ($inventario->lote && \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->gte(\Carbon\Carbon::now())) {
-                    $text = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
-                        . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
-                        . " - " . \Carbon\Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
-                        . " - " . $prod->name
-                        . " - Stk: " . $inventario->stock_ideal;
-
-                    $results[] = [
-                        // Se utiliza el id del inventario para que cada registro sea único
-                        'id'             => $inventario->id,
-                        'text'           => $text,
-                        'lote_id'        => $inventario->lote ? $inventario->lote->id : null,
-                        'inventario_id'  => $inventario->id,
-                        'stock_ideal'    => $inventario->stock_ideal,
-                        'store_id'       => $inventario->store ? $inventario->store->id : null,
-                        'store_name'     => $inventario->store ? $inventario->store->name : null,
-                        'barcode'        => $prod->barcode,
-                        // Se conserva el id del producto en otra propiedad para otros usos
-                        'product_id'     => $prod->id,
-                    ];
-                }
-            }
-        }
-
-        $ventasdetalle = $this->getventasdetalle($id, $venta->centrocosto_id);
-        $arrayTotales = $this->sumTotales($id);
-
-        $datacompensado = DB::table('sales as sa')
-            ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
-            ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
-            ->select('sa.*', 'tird.name as namethird', 'c.name as namecentrocosto', 'tird.porc_descuento as porc_descuento_cliente')
-            ->where('sa.id', $id)
-            ->get();
-        $status = '';
-        $estadoVenta = ($datacompensado[0]->status);
-
-        if ($estadoVenta) {
-            //'Date 1 is greater than Date 2';
-            $status = 'false';
-        } elseif ($estadoVenta) {
-            //'Date 1 is less than Date 2';
-            $status = 'true';
-        } else {
-            //'Date 1 and Date 2 are equal';
-            $status = 'false';
-        }
-
-        $statusInventory = "";
-        if ($datacompensado[0]->status == "true") {
-            $statusInventory = "true";
-        } else {
-            $statusInventory = "false";
-        }
-
-        $display = "";
-        if ($status == "false" || $statusInventory == "true") {
-            $display = "display:none;";
-        }
-
-        $detalleVenta = $this->getventasdetail($id);
-
-        return view('sale.create', compact('datacompensado', 'results', 'id', 'detalleVenta', 'ventasdetalle', 'arrayTotales', 'status', 'statusInventory', 'display'));
-    }
-
+  
     public function create_autoservicio($id)
     {
         $venta = Sale::find($id);
@@ -550,9 +456,7 @@ class saleautoservicioController extends Controller
         $detail = DB::table('sale_details as sd')
             ->join('products as pro', 'sd.product_id', '=', 'pro.id')
             ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
-            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')
-            /*  ->selectRaw('i.invinicial + i.compraLote + i.alistamiento +
-            i.compensados + i.trasladoing - (i.venta + i.trasladosal) stock') */
+            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')           
             ->where([
                 ['i.store_id', $centrocostoId],
                 ['sd.sale_id', $ventaId],
@@ -644,8 +548,6 @@ class saleautoservicioController extends Controller
 
         return response()->json($results);
     }
-
-
 
 
     public function create_reg_pago($id)
@@ -1109,19 +1011,7 @@ class saleautoservicioController extends Controller
             'status' => 1,
             'reg' => $reg
         ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+    }  
 
     /**
      * Remove the specified resource from storage.
@@ -1866,7 +1756,6 @@ class saleautoservicioController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 
     public function partialReturn(Request $request)
     {
