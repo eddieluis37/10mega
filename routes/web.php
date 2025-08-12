@@ -495,7 +495,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
 
     //*************************************
 
-    Route::get('promotions', [promotionController::class, 'index'])->name('promotions.index');
+    Route::get('promotions', [promotionController::class, 'index'])->name('promotion.index');
     Route::post('store-promotion', [promotionController::class, 'storePromotion'])->name('promotion.storePromotion');
     Route::get('promotion/create/{id}', [promotionController::class, 'create'])->name('promotion.create');
     Route::get('/products/search/promotion', [promotionController::class, 'search'])->name('products.search_promotion');
@@ -509,7 +509,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
     Route::get('/promotionsdetalle/{promotionId}/{centrocostoId?}', [promotionController::class, 'getpromotionsdetalle']);
     Route::get('/promotionsdetail/{id}', [promotionController::class, 'showDetail']); // para edición
 
-
+    Route::get('/promotion/create/activar_promocion/{id}', [promotionController::class, 'activarPromocion'])->name('promotions.activar');
 
 });
 

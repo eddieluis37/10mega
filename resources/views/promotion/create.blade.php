@@ -320,7 +320,7 @@
                     </table>
                     @if($promotion[0]->status == '0')
                     <div class="col-md-12">
-                        <form method="GET" action="registrar_pago/{{$id}}">
+                        <form method="GET" action="activar_promocion/{{$id}}">
                             @csrf
                             <div class="col-md-12 text-right mt-1">
                                 <button id="cargarInventarioBtn" type="submit"

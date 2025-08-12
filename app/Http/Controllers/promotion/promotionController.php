@@ -789,7 +789,7 @@ class promotionController extends Controller
 
             // 6) Actualizar totales de la venta
             $promotion        = Promotion::find($request->ventaId);
-            $promotion->status = '1';
+            $promotion->status = '0';
             $promotion->save();
 
             // 7) Respuesta exitosa
@@ -882,19 +882,37 @@ class promotionController extends Controller
         ]);
     }
 
-     // Eliminar detalle
+    // Activa la promoción (por ejemplo cambia status a '1')
+    public function activarPromocion(Request $request, $id)
+    {
+        $promo = Promotion::find($id);
+
+        if (! $promo) {
+            return redirect()->back()->with('error', 'Promoción no encontrada.');
+        }
+
+        $promo->status = '1'; // o true dependiendo de tu campo
+        $promo->save();
+
+        return redirect()
+            ->route('promotion.index')
+
+            ->with('success', 'Promoción activada correctamente.');
+    }
+
+    // Eliminar detalle
     public function deletepromotiondetail(Request $request)
     {
         $id = $request->id;
         $detail = PromotionDetail::find($id);
-        if (!$detail) return response()->json(['status'=>0,'message'=>'Detalle no encontrado'],404);
+        if (!$detail) return response()->json(['status' => 0, 'message' => 'Detalle no encontrado'], 404);
 
         $promotionId = $detail->promotion_id;
         $detail->delete();
 
         return response()->json([
-            'status'=>1,
-            'message'=>'Detalle eliminado',
+            'status' => 1,
+            'message' => 'Detalle eliminado',
             'array' => $this->getpromotionsdetalle($promotionId, $request->centrocostoId ?? null),
             'arrayTotales' => $this->sumTotals($promotionId)
         ]);
@@ -919,10 +937,10 @@ class promotionController extends Controller
 
             $sale = Promotion::find($request->ventaId);
             $sale->items = PromotionDetail::where('promotion_id', $sale->id)->count();
-        
-            $saleDetails = PromotionDetail::where('promotion_id', $sale->id)->get();           
-           
-                      
+
+            $saleDetails = PromotionDetail::where('promotion_id', $sale->id)->get();
+
+
             $sale->status = '3';
             $sale->save();
 

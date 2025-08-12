@@ -20,9 +20,13 @@ class Promotion extends Model
         return $this->belongsTo(User::class);
     }
 
-     public function promotionDetails()
+    public function promotionDetails()
     {
         return $this->hasMany(PromotionDetail::class);
     }
 
+    public function details()
+    {
+        return $this->hasMany(PromotionDetail::class);
+    }
 }

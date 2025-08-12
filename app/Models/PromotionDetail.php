@@ -7,5 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class PromotionDetail extends Model
 {
-     protected $fillable = ['promotion_id','centrocosto_id','store_id','lote_id','inventario_id','product_id','quantity','porc_desc','fecha_inicio','hora_inicio','fecha_final','hora_final','observacion','user_id','status'];
+     protected $fillable = ['promotion_id', 'centrocosto_id', 'store_id', 'lote_id', 'inventario_id', 'product_id', 'quantity', 'porc_desc', 'fecha_inicio', 'hora_inicio', 'fecha_final', 'hora_final', 'observacion', 'user_id', 'status'];
+
+     public function promotion()
+     {
+          return $this->belongsTo(Promotion::class);
+     }
 }
