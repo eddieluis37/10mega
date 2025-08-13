@@ -275,6 +275,10 @@ const showData = (data) => {
                 )}</td>                 
                 <td>$${formatCantidadSinCero(element.descuento)}</td> 
                 <td>$${formatCantidadSinCero(element.descuento_cliente)}</td>
+                <td>${formatCantidadSinCero(
+                    element.promo_percent
+                )}</td>
+                <td>$${formatCantidadSinCero(element.promo_value)}</td>  
                 <td>$${formatCantidadSinCero(element.total_bruto)}</td>   
                 <td>${formatCantidadSinCero(element.porc_iva)}</td> 
                 <td>$${formatCantidadSinCero(element.iva)}</td> 
@@ -309,7 +313,9 @@ const showData = (data) => {
             <td></td>
             <td></td>    
             <td></td>
-            <td></td>                               
+            <td></td>  
+            <td></td>    
+            <td></td>                             
             <th>$${formatCantidadSinCero(arrayTotales.TotalBruto)}</th> 
             <td></td>
             <td></td>

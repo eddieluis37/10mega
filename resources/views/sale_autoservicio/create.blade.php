@@ -177,8 +177,6 @@
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
-
-
 								<div class="col-md-2">
 									<label for="" class="form-label">I.A.C</label>
 									<div class="input-group flex-nowrap">
@@ -191,13 +189,20 @@
 								<div class="col-md-2">
 									<label for="" class="form-label">Descuento</label>
 									<div class="input-group flex-nowrap">
-
 										<input type="text" id="porc_desc" name="porc_desc" class="form-control input" readonly placeholder="">
 										<span class="input-group-text" id="addon-wrapping">%</span>
 									</div>
 								</div>
 
 								<div class="col-md-2">
+									<label for="" class="form-label">Promoción</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="promo_percent" name="promo_percent" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+
+								<div class="col-md-12 text-center mt-1">
 									<div class="" style="margin-top:30px;">
 										<div class="d-grid gap-2">
 											<button id="btnAdd" class="btn btn-primary btn-block">Añadir Producto</button>
@@ -224,6 +229,8 @@
 								<th class="table-th text-white">%Des</th>
 								<th class="table-th text-white">Des</th>
 								<th class="table-th text-white">{{$datacompensado[0]->porc_descuento_cliente}}%DCl</th>
+								<th class="table-th text-white">%Pro</th>
+								<th class="table-th text-white">Pro</th>
 								<th class="table-th text-white">Total.B</th>
 								<th class="table-th text-white">%IVA</th>
 								<th class="table-th text-white">IVA</th>
@@ -245,6 +252,10 @@
 								<td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
+								
+								<td>{{ number_format($proddetail->promo_percent, 0, ',', '.')}}</td>
+								<td>${{ number_format($proddetail->promo_value, 0, ',', '.')}}</td>
+								
 								<td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
 								<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
@@ -275,6 +286,8 @@
 								<th></th>
 								<th></th>
 								<td></td>
+								<th></th>
+								<th></th>
 								<th></th>
 								<th></th>
 								<th>${{number_format($arrayTotales['TotalBruto'], 0, ',', '.')}} </th>

@@ -15,16 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('promotion_id')->constrained();
 
-            $table->unsignedBigInteger('centrocosto_id')->nullable();
-            $table->foreign('centrocosto_id')->references('id')->on('centro_costo');
+            $table->unsignedBigInteger('inventario_id')->nullable();
+            $table->foreign('inventario_id')->references('id')->on('inventarios');
 
             $table->unsignedBigInteger('store_id')->nullable();
-            $table->foreign('store_id')->references('id')->on('stores');          
+            $table->foreign('store_id')->references('id')->on('stores');
 
-            $table->foreignId('lote_id')->constrained('lotes')->onDelete('cascade'); //Relación Lotes - Productos - Categorías
-
-            $table->unsignedBigInteger('inventario_id')->nullable();
-            $table->foreign('inventario_id')->references('id')->on('inventarios'); 
+            $table->foreignId('lote_id')->constrained('lotes')->onDelete('cascade'); //Relación Lotes - Productos - Categorías           
 
             $table->foreignId('product_id')->constrained();
             $table->decimal('quantity', 8, 2)->default(0)->nullable();

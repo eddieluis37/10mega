@@ -28,6 +28,7 @@ use App\Models\MovimientoInventario;
 use App\Models\Notacredito;
 use App\Models\NotaCreditoDetalle;
 use App\Models\Productcomposition;
+use App\Models\PromotionDetail;
 use App\Models\Sale;
 use App\Models\SaleCaja;
 use App\Models\SaleDetail;
@@ -465,6 +466,73 @@ class saleautoservicioController extends Controller
         return $detail;
     }
 
+
+    /**
+     * Busca PromotionDetail aplicable.
+     *
+     * @param int $productId
+     * @param int|null $storeId
+     * @param float $quantity
+     * @param int|null $loteId
+     * @param int|null $inventarioId
+     * @return PromotionDetail|null
+     */
+    private function getApplicablePromotionDetail($productId, $storeId, $quantity, $loteId = null, $inventarioId = null)
+    {
+        $now = Carbon::now();
+        $dateNow = $now->toDateString();
+        $timeNow = $now->format('H:i:s');
+
+        $q = PromotionDetail::query()
+            ->whereHas('promotion', fn($qq) => $qq->where('status', '1')) // promotion activo
+            // cantidad minima requerida <= cantidad proporcionada
+            ->where('quantity', '<=', $quantity)
+            // fecha válida (si tus campos permiten null, ajustar)
+            ->whereDate('fecha_inicio', '<=', $dateNow)
+            ->whereDate('fecha_final', '>=', $dateNow)
+            // hora válida: si hora_inicio/hora_final son null -> todo el día; sino validar rango
+            ->where(function ($qq) use ($timeNow) {
+                $qq->where(function ($t) {
+                    $t->whereNull('hora_inicio')->whereNull('hora_final');
+                })->orWhere(function ($t) use ($timeNow) {
+                    $t->whereTime('hora_inicio', '<=', $timeNow)
+                        ->whereTime('hora_final', '>=', $timeNow);
+                });
+            })
+            // coincidencias posibles
+            ->where(function ($w) use ($productId, $loteId, $inventarioId, $storeId) {
+                $w->where('product_id', $productId);
+
+                if (!is_null($loteId)) {
+                    $w->orWhere('lote_id', $loteId);
+                }
+                if (!is_null($inventarioId)) {
+                    $w->orWhere('inventario_id', $inventarioId);
+                }
+                if (!is_null($storeId)) {
+                    $w->orWhere('store_id', $storeId);
+                }
+            });
+
+        // Priorizar por coincidencia exacta (product first, luego lote, inventario, store),
+        // y dentro de cada grupo elegir mayor porc_desc
+        $prioritySql = "CASE 
+        WHEN product_id = ? THEN 1 
+        WHEN lote_id = ? THEN 2 
+        WHEN inventario_id = ? THEN 3 
+        WHEN store_id = ? THEN 4 
+        ELSE 5 END";
+
+        $q->orderByRaw($prioritySql, [
+            $productId,
+            $loteId ?? 0,
+            $inventarioId ?? 0,
+            $storeId ?? 0
+        ])->orderByDesc('porc_desc');
+
+        return $q->first();
+    }
+
     /**
      * Busca productos para autoservicio filtrando bodegas
      * según el centro de costo de la venta en curso.
@@ -475,24 +543,22 @@ class saleautoservicioController extends Controller
      */
     public function search(Request $request)
     {
-        // 1) Leer parámetros
         $term   = $request->input('q', '');
         $saleId = $request->input('sale_id');
         $sale   = Sale::findOrFail($saleId);
 
-        // 2) Obtener IDs de las stores ligadas al centro de costo de la venta
+        // stores del centro de costo
         $storeIds = Store::where('centrocosto_id', $sale->centrocosto_id)
             ->pluck('id')
             ->toArray();
 
-        // 3) Armar query de productos con inventario > 0 en esas stores
+        // Query de productos con inventario > 0 en esas bodegas
         $prodQ = Product::query()
             ->whereHas('inventarios', function ($q) use ($storeIds) {
                 $q->whereIn('store_id', $storeIds)
                     ->where('stock_ideal', '>', 0);
             });
 
-        // aplicar filtro de búsqueda si hay término
         if ($term) {
             if (preg_match('/^\d{13}$/', $term)) {
                 $prodQ->where('barcode', $term);
@@ -507,10 +573,10 @@ class saleautoservicioController extends Controller
             }
         }
 
-        $products       = $prodQ->get();
-        $productIds     = $prodQ->pluck('id')->toArray();
+        $products   = $prodQ->get();
+        $productIds = $products->pluck('id')->toArray();
 
-        // 4) Obtener inventarios válidos de esos productos y stores
+        // Inventarios válidos
         $inventarios = Inventario::with(['store', 'lote'])
             ->whereIn('store_id', $storeIds)
             ->whereIn('product_id', $productIds)
@@ -520,14 +586,36 @@ class saleautoservicioController extends Controller
             })
             ->get();
 
-        // 5) Armar el array de resultados para Select2
         $results = [];
+
         foreach ($products as $prod) {
             $invItems = $inventarios->where('product_id', $prod->id);
             foreach ($invItems as $inv) {
+                // Buscar promoción aplicable considerando cantidad = 1 (búsqueda)
+                $appliedPromotion = $this->getApplicablePromotionDetail(
+                    $prod->id,
+                    $inv->store_id,
+                    1,               // asumimos qty 1 para indicar si aplica con cantidad 1
+                    $inv->lote_id,
+                    $inv->id
+                );
+
+                $promo_percent = 0;
+                $promo_min_quantity = null;
+                $promo_applies = false;
+                $applied_promotion_id = null;
+
+                if ($appliedPromotion) {
+                    $promo_percent = floatval($appliedPromotion->porc_desc);
+                    $promo_min_quantity = floatval($appliedPromotion->quantity);
+                    $applied_promotion_id = $appliedPromotion->id;
+                    // si la promoción requiere <= 1 (es decir quantity <= 1) entonces aplica a qty 1
+                    $promo_applies = ($appliedPromotion->quantity <= 1);
+                }
+
                 $results[] = [
-                    'id'            => $inv->id,
-                    'text'          => sprintf(
+                    'id'               => $inv->id,
+                    'text'             => sprintf(
                         "Bg: %s - %s - %s - %s - Stk: %d",
                         $inv->store->name,
                         $inv->lote->codigo,
@@ -535,19 +623,107 @@ class saleautoservicioController extends Controller
                         $prod->name,
                         $inv->stock_ideal
                     ),
-                    'lote_id'       => $inv->lote->id,
-                    'inventario_id' => $inv->id,
-                    'stock_ideal'   => $inv->stock_ideal,
-                    'store_id'      => $inv->store->id,
-                    'store_name'    => $inv->store->name,
-                    'barcode'       => $prod->barcode,
-                    'product_id'    => $prod->id,
+                    'lote_id'          => $inv->lote->id,
+                    'inventario_id'    => $inv->id,
+                    'stock_ideal'      => $inv->stock_ideal,
+                    'store_id'         => $inv->store->id,
+                    'store_name'       => $inv->store->name,
+                    'barcode'          => $prod->barcode,
+                    'product_id'       => $prod->id,
+                    // datos de promoción
+                    'promo_percent'    => $promo_percent,
+                    'promo_min_quantity' => $promo_min_quantity,
+                    'promo_applies'    => $promo_applies,
+                    'applied_promotion_id' => $applied_promotion_id,
                 ];
             }
         }
 
         return response()->json($results);
     }
+
+
+    public function SaObtenerPreciosProducto(Request $request)
+    {
+        $centrocostoId = $request->input('centrocosto');
+        $clienteId     = $request->input('cliente');
+        $productId     = $request->input('productId');
+        $inventarioId  = $request->input('inventario_id', null); // opcional
+        $quantity      = $request->input('quantity', 1); // opcional, por defecto 1
+
+        $cliente = Third::find($clienteId);
+        if (!$cliente) {
+            return response()->json(['error' => 'Cliente no encontrado'], 404);
+        }
+
+        // Obtener el precio desde listapreciodetalle (igual que antes)
+        $producto = Listapreciodetalle::join('products as prod', 'listapreciodetalles.product_id', '=', 'prod.id')
+            ->join('thirds as t', 'listapreciodetalles.listaprecio_id', '=', 't.id')
+            ->where('prod.id', $productId)
+            ->where('t.id', $cliente->listaprecio_genericid)
+            ->select(
+                'listapreciodetalles.precio',
+                'prod.iva',
+                'prod.otro_impuesto',
+                'prod.impoconsumo',
+                'listapreciodetalles.porc_descuento'
+            )
+            ->first();
+
+        if (!$producto) {
+            return response()->json(['error' => 'Product not found'], 404);
+        }
+
+        // Determinar store_id para buscar promociones:
+        // preferimos inventario->store_id si se envió inventario_id, si no, tomamos la primera store del centro de costo
+        $storeId = null;
+        $loteId = null;
+        if ($inventarioId) {
+            $inv = Inventario::find($inventarioId);
+            if ($inv) {
+                $storeId = $inv->store_id;
+                $loteId = $inv->lote_id;
+            }
+        }
+        if (!$storeId) {
+            $firstStore = Store::where('centrocosto_id', $centrocostoId)->first();
+            $storeId = $firstStore ? $firstStore->id : null;
+        }
+
+        // Buscar promotion detail aplicable usando la cantidad (si viene)
+        $appliedPromotion = $this->getApplicablePromotionDetail($productId, $storeId, $quantity, $loteId, $inventarioId);
+
+        $promo_percent = 0;
+        $promo_min_quantity = null;
+        $promo_value = 0;
+        $applied_promotion_id = null;
+
+        $unitPrice = floatval($producto->precio);
+        $lineBase = $unitPrice * floatval($quantity); // valor bruto sin impuestos y sin descuentos de cliente
+
+        if ($appliedPromotion) {
+            $promo_percent = floatval($appliedPromotion->porc_desc);
+            $promo_min_quantity = floatval($appliedPromotion->quantity);
+            $applied_promotion_id = $appliedPromotion->id;
+
+            // Calculamos el valor total de la promoción sobre la base lineal (puedes cambiar la base según reglas)
+            $promo_value = round(($lineBase * $promo_percent) / 100.0, 2);
+        }
+
+        return response()->json([
+            'precio' => $producto->precio,
+            'iva' => $producto->iva,
+            'otro_impuesto' => $producto->otro_impuesto,
+            'impoconsumo' => $producto->impoconsumo,
+            'porc_descuento' => $producto->porc_descuento,
+            // promoción calculada
+            'promo_percent' => $promo_percent,
+            'promo_min_quantity' => $promo_min_quantity,
+            'promo_value' => $promo_value,
+            'applied_promotion_id' => $applied_promotion_id,
+        ]);
+    }
+
 
     public function savedetail(Request $request)
     {
@@ -795,6 +971,8 @@ class saleautoservicioController extends Controller
 
         return $detalles;
     }
+
+
 
     public function create_reg_pago($id)
     {
@@ -1060,32 +1238,6 @@ class saleautoservicioController extends Controller
         }
     }
 
-    public function SaObtenerPreciosProducto(Request $request)
-    {
-        $centrocostoId = $request->input('centrocosto');
-        $clienteId = $request->input('cliente');
-        $cliente = Third::find($clienteId);
-        $producto = Listapreciodetalle::join('products as prod', 'listapreciodetalles.product_id', '=', 'prod.id')
-            ->join('thirds as t', 'listapreciodetalles.listaprecio_id', '=', 't.id')
-            ->where('prod.id', $request->productId)
-            ->where('t.id', $cliente->listaprecio_genericid)
-            ->select('listapreciodetalles.precio', 'prod.iva', 'prod.otro_impuesto', 'prod.impoconsumo', 'listapreciodetalles.porc_descuento') // Select only the
-            ->first();
-        if ($producto) {
-            return response()->json([
-                'precio' => $producto->precio,
-                'iva' => $producto->iva,
-                'otro_impuesto' => $producto->otro_impuesto,
-                'impoconsumo' => $producto->impoconsumo,
-                'porc_descuento' => $producto->porc_descuento
-            ]);
-        } else {
-            // En caso de que el producto no sea encontrado
-            return response()->json([
-                'error' => 'Product not found'
-            ], 404);
-        }
-    }
 
     public function storeAutoservicioMostrador(Request $request) // Autoservicio-Mostrador
     {

@@ -28,6 +28,7 @@ use App\Models\MovimientoInventario;
 use App\Models\Notacredito;
 use App\Models\NotaCreditoDetalle;
 use App\Models\Productcomposition;
+use App\Models\PromotionDetail;
 use App\Models\Sale;
 use App\Models\SaleCaja;
 use App\Models\SaleDetail;
@@ -216,7 +217,7 @@ class saleController extends Controller
                                    <i class="fas fa-undo-alt"></i>
                                  </a>';
                     }
-                   /*  // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
+                    /*  // Mostrar botón de anulación solo si no hay notas de crédito o hay exactamente 1
                     if ($creditNotesCount == 0 || $creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
@@ -238,7 +239,7 @@ class saleController extends Controller
                                     <i class="fas fa-undo"></i>
                                  </button>';
                     }
-                   /*  if ($creditNotesCount == 1) {
+                    /*  if ($creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
                                  </a>';
@@ -372,7 +373,7 @@ class saleController extends Controller
                                     <i class="fas fa-undo"></i>
                                  </button>';
                     }
-                   /*  if ($creditNotesCount == 1) {
+                    /*  if ($creditNotesCount == 1) {
                         $btn .= '<a href="#" class="btn btn-danger" title="Anular la venta" onclick="confirmAnulacion(' . $data->id . ')">
                                     <i class="fas fa-trash"></i>
                                  </a>';
@@ -473,6 +474,73 @@ class saleController extends Controller
                 ->with('error', 'Error al procesar el pago: ' . $th->getMessage());
         }
     }
+
+    /**
+     * Busca PromotionDetail aplicable.
+     *
+     * @param int $productId
+     * @param int|null $storeId
+     * @param float $quantity
+     * @param int|null $loteId
+     * @param int|null $inventarioId
+     * @return PromotionDetail|null
+     */
+    private function getApplicablePromotionDetail($productId, $storeId, $quantity, $loteId = null, $inventarioId = null)
+    {
+        $now = Carbon::now();
+        $dateNow = $now->toDateString();
+        $timeNow = $now->format('H:i:s');
+
+        $q = PromotionDetail::query()
+            ->whereHas('promotion', fn($qq) => $qq->where('status', '1')) // promotion activo
+            // cantidad minima requerida <= cantidad proporcionada
+          //  ->where('quantity', '<=', $quantity)
+            // fecha válida (si tus campos permiten null, ajustar)
+            ->whereDate('fecha_inicio', '<=', $dateNow)
+            ->whereDate('fecha_final', '>=', $dateNow)
+            // hora válida: si hora_inicio/hora_final son null -> todo el día; sino validar rango
+           /*  ->where(function ($qq) use ($timeNow) {
+                $qq->where(function ($t) {
+                    $t->whereNull('hora_inicio')->whereNull('hora_final');
+                })->orWhere(function ($t) use ($timeNow) {
+                    $t->whereTime('hora_inicio', '<=', $timeNow)
+                        ->whereTime('hora_final', '>=', $timeNow);
+                });
+            }) */
+            // coincidencias posibles
+            ->where(function ($w) use ($productId, $loteId, $inventarioId, $storeId) {
+                $w->where('product_id', $productId);
+
+                if (!is_null($loteId)) {
+                    $w->Where('lote_id', $loteId);
+                }
+                if (!is_null($inventarioId)) {
+                    $w->Where('inventario_id', $inventarioId);
+                }
+                if (!is_null($storeId)) {
+                    $w->Where('store_id', $storeId);
+                }
+            });
+
+        // Priorizar por coincidencia exacta (product first, luego lote, inventario, store),
+        // y dentro de cada grupo elegir mayor porc_desc
+        $prioritySql = "CASE 
+        WHEN product_id = ? THEN 1 
+        WHEN lote_id = ? THEN 2 
+        WHEN inventario_id = ? THEN 3 
+        WHEN store_id = ? THEN 4 
+        ELSE 5 END";
+
+        $q->orderByRaw($prioritySql, [
+            $productId,
+            $loteId ?? 0,
+            $inventarioId ?? 0,
+            $storeId ?? 0
+        ])->orderByDesc('porc_desc');
+
+        return $q->first();
+    }
+
 
 
 
@@ -695,159 +763,105 @@ class saleController extends Controller
 
     public function search(Request $request)
     {
-        $queryText = $request->input('q');
+        $term   = $request->input('q', '');
+        $saleId = $request->input('sale_id');
+        $sale   = Sale::findOrFail($saleId);
 
-        // 1) Obtener los IDs de las bodegas asociadas al usuario autenticado
-        $storeIds = DB::table('store_user')
-            ->where('user_id', auth()->id())
-            ->pluck('store_id')
+        // stores del centro de costo
+        $storeIds = Store::where('centrocosto_id', $sale->centrocosto_id)
+            ->pluck('id')
             ->toArray();
 
-        //
-        // 2) CONSULTA PARA PRODUCTOS “INVENTARIADOS” (cualquier tipo distinto de combo/receta,
-        //    o incluso también combo/receta si llegaran a tener inventario, aunque normalmente
-        //    se mantienen como “productos simples” aquí). La idea es replicar tu lógica existente:
-        //
-        $productsQuery = Product::query();
+        // Query de productos con inventario > 0 en esas bodegas
+        $prodQ = Product::query()
+            ->whereHas('inventarios', function ($q) use ($storeIds) {
+                $q->whereIn('store_id', $storeIds)
+                    ->where('stock_ideal', '>', 0);
+            });
 
-        if ($queryText) {
-            if (preg_match('/^\d{13}$/', $queryText)) {
-                // Si es un código EAN-13, buscar sólo por barcode
-                $productsQuery->where('barcode', $queryText);
+        if ($term) {
+            if (preg_match('/^\d{13}$/', $term)) {
+                $prodQ->where('barcode', $term);
             } else {
-                // Si no, buscar por nombre, código o código de lote
-                $productsQuery->where(function ($q) use ($queryText) {
-                    $q->where('name', 'LIKE', "%{$queryText}%")
-                        ->orWhere('code', 'LIKE', "%{$queryText}%")
-                        ->orWhereHas('lotes', function ($q2) use ($queryText) {
-                            $q2->where('codigo', 'LIKE', "%{$queryText}%");
+                $prodQ->where(function ($q) use ($term) {
+                    $q->where('name', 'LIKE', "%{$term}%")
+                        ->orWhere('code', 'LIKE', "%{$term}%")
+                        ->orWhereHas('lotes', function ($q2) use ($term) {
+                            $q2->where('codigo', 'LIKE', "%{$term}%");
                         });
                 });
             }
         }
 
-        // Filtrar para que sólo incluya productos que tengan INWERNTARIOS con stock_ideal > 0
-        // en alguna de las bodegas del usuario.
-        $productsQuery->whereHas('inventarios', function ($q) use ($storeIds) {
-            $q->whereIn('store_id', $storeIds)
-                ->where('stock_ideal', '>', 0);
-        });
+        $products   = $prodQ->get();
+        $productIds = $products->pluck('id')->toArray();
 
-        // Obtener la colección de productos “inventariados”
-        $productosConInventario = $productsQuery->get();
-        // Extraer sólo los IDs de esos productos para luego filtrar inventarios
-        $productosConInventarioIds = $productsQuery->pluck('id')->toArray();
-
-        //
-        // 3) CONSULTA PARA INVENTARIOS VÁLIDOS (sólo de los productos que sí tienen stock_ideal > 0
-        //    en bodegas del usuario, y con lote vigente). Esto es exactamente igual a lo que ya
-        //    hacías, para luego recorrer e imprimir cada registro de inventario:
-        //
+        // Inventarios válidos
         $inventarios = Inventario::with(['store', 'lote'])
             ->whereIn('store_id', $storeIds)
+            ->whereIn('product_id', $productIds)
             ->where('stock_ideal', '>', 0)
-            ->whereIn('product_id', $productosConInventarioIds)
             ->whereHas('lote', function ($q) {
                 $q->where('fecha_vencimiento', '>=', Carbon::now());
             })
-            // Unimos con lotes únicamente para ordenar por fecha de vencimiento ascendente
-            ->join('lotes', 'inventarios.lote_id', '=', 'lotes.id')
-            ->orderBy('lotes.fecha_vencimiento', 'asc')
-            ->orderBy('stock_ideal', 'desc')
-            ->select('inventarios.*')
             ->get();
 
-        //
-        // 4) CONSULTA PARA PRODUCTOS TIPO “combo” ó “receta” QUE NO TENGAN INVENTARIOS
-        //    (= No tengan relación en la tabla inventarios). Esto se logra con whereDoesntHave('inventarios').
-        //
-        $comboRecetaQuery = Product::query()
-            ->whereIn('type', ['combo', 'receta']);
-        //  ->whereDoesntHave('inventarios');
-
-        if ($queryText) {
-            if (preg_match('/^\d{13}$/', $queryText)) {
-                // Si el usuario busca por EAN-13 y coincide con barcode
-                $comboRecetaQuery->where('barcode', $queryText);
-            } else {
-                // Buscar por nombre, código de producto o código de lote
-                $comboRecetaQuery->where(function ($q) use ($queryText) {
-                    $q->where('name', 'LIKE', "%{$queryText}%")
-                        ->orWhere('code', 'LIKE', "%{$queryText}%")
-                        ->orWhereHas('lotes', function ($q2) use ($queryText) {
-                            $q2->where('codigo', 'LIKE', "%{$queryText}%");
-                        });
-                });
-            }
-        }
-
-        $productosComboRecetaSinInventario = $comboRecetaQuery->get();
-
-        //
-        // 5) ARMADO FINAL DE $results:
-        //    - Para cada registro de inventario de $inventarios lo mostramos con todos sus datos.
-        //    - Luego para cada producto combo/receta SIN inventario lo agregamos con un formato “básico”,
-        //      indicando que no hay bodega, lote ni stock.
-        //
         $results = [];
 
-        // 5.a) RECORRER PRODUCTOS “INVENTARIADOS”
-        foreach ($productosConInventario as $prod) {
-            // Filtrar inventarios de ese producto en particular
-            $inventariosProducto = $inventarios->where('product_id', $prod->id);
+        foreach ($products as $prod) {
+            $invItems = $inventarios->where('product_id', $prod->id);
+            foreach ($invItems as $inv) {
+                // Buscar promoción aplicable considerando cantidad = 1 (búsqueda)
+                $appliedPromotion = $this->getApplicablePromotionDetail(
+                    $prod->id,
+                    $inv->store_id,
+                    1,               // asumimos qty 1 para indicar si aplica con cantidad 1
+                    $inv->lote_id,
+                    $inv->id
+                );
 
-            foreach ($inventariosProducto as $inventario) {
-                // Validar fecha de vencimiento del lote
-                if (
-                    $inventario->lote &&
-                    Carbon::parse($inventario->lote->fecha_vencimiento)->gte(Carbon::now())
-                ) {
-                    $texto = "Bg: " . ($inventario->store ? $inventario->store->name : 'N/A')
-                        . " - " . ($inventario->lote ? $inventario->lote->codigo : 'Sin código')
-                        . " - " . Carbon::parse($inventario->lote->fecha_vencimiento)->format('d/m/Y')
-                        . " - " . $prod->name
-                        . " - Stk: " . $inventario->stock_ideal;
+                $promo_percent = 0;
+                $promo_min_quantity = null;
+                $promo_applies = false;
+                $applied_promotion_id = null;
 
-                    $results[] = [
-                        'id'            => $inventario->id,                    // id único por inventario
-                        'text'          => $texto,
-                        'lote_id'       => $inventario->lote ? $inventario->lote->id : null,
-                        'inventario_id' => $inventario->id,
-                        'stock_ideal'   => $inventario->stock_ideal,
-                        'store_id'      => $inventario->store ? $inventario->store->id : null,
-                        'store_name'    => $inventario->store ? $inventario->store->name : null,
-                        'barcode'       => $prod->barcode,
-                        'product_id'    => $prod->id,
-                        'type'          => $prod->type,
-                    ];
+                if ($appliedPromotion) {
+                    $promo_percent = floatval($appliedPromotion->porc_desc);
+                    $promo_min_quantity = floatval($appliedPromotion->quantity);
+                    $applied_promotion_id = $appliedPromotion->id;
+                    // si la promoción requiere <= 1 (es decir quantity <= 1) entonces aplica a qty 1
+                    $promo_applies = ($appliedPromotion->quantity <= 1);
                 }
+
+                $results[] = [
+                    'id'               => $inv->id,
+                    'text'             => sprintf(
+                        "Bg: %s - %s - %s - %s - Stk: %d",
+                        $inv->store->name,
+                        $inv->lote->codigo,
+                        Carbon::parse($inv->lote->fecha_vencimiento)->format('d/m/Y'),
+                        $prod->name,
+                        $inv->stock_ideal
+                    ),
+                    'lote_id'          => $inv->lote->id,
+                    'inventario_id'    => $inv->id,
+                    'stock_ideal'      => $inv->stock_ideal,
+                    'store_id'         => $inv->store->id,
+                    'store_name'       => $inv->store->name,
+                    'barcode'          => $prod->barcode,
+                    'product_id'       => $prod->id,
+                    // datos de promoción
+                    'promo_percent'    => $promo_percent,
+                    'promo_min_quantity' => $promo_min_quantity,
+                    'promo_applies'    => $promo_applies,
+                    'applied_promotion_id' => $applied_promotion_id,
+                ];
             }
-        }
-
-        // 5.b) RECORRER PRODUCTOS combo/receta SIN INVENTARIOS
-        foreach ($productosComboRecetaSinInventario as $prodCR) {
-            // Como no existen inventarios, montamos un mensaje “genérico”
-            $textoCR = strtoupper($prodCR->type) . ": " . $prodCR->name
-                . " (Código: " . $prodCR->code . ")"
-                . " – SIN INVENTARIO";
-
-            $results[] = [
-                // Podemos usar el mismo ID del producto, o un prefijo para evitar colisiones
-                'id'            => 'CR-' . $prodCR->id,
-                'text'          => $textoCR,
-                'lote_id'       => null,
-                'inventario_id' => null,
-                'stock_ideal'   => 0,
-                'store_id'      => null,
-                'store_name'    => null,
-                'barcode'       => $prodCR->barcode,
-                'product_id'    => $prodCR->id,
-                'type'          => $prodCR->type,
-            ];
         }
 
         return response()->json($results);
     }
+
 
     public function create_reg_pago($id)
     {
@@ -1075,11 +1089,15 @@ class saleController extends Controller
             $quantity = $request->quantity;
 
             $precioBruto  = $price * $quantity;
+
+            $porcPromo    = $request->get('promo_percent', 0);             
+            $promoValue   = $precioBruto * ($porcPromo / 100);
+
             $porcDesc     = $request->get('porc_desc', 0);
             $descProd     = $precioBruto * ($porcDesc / 100);
             $porcDescClie = $request->get('porc_descuento_cliente', 0);
             $descClie     = $precioBruto * ($porcDescClie / 100);
-            $totalDesc    = $descProd + $descClie;
+            $totalDesc    = $descProd + $descClie + $promoValue;
             $netoSinImp   = $precioBruto - $totalDesc;
 
             $porcIva         = $request->get('porc_iva', 0);
@@ -1111,6 +1129,8 @@ class saleController extends Controller
                     'otro_impuesto'     => $otroImpto,
                     'porc_impoconsumo'  => $porcImpoconsumo,
                     'impoconsumo'       => $impoconsumo,
+                    'promo_percent'     => $porcPromo,
+                    'promo_value'       => $promoValue,
                     'total_bruto'       => $precioBruto,
                     'total'             => $netoSinImp + $totalImpuestos,
                 ];
@@ -1132,6 +1152,8 @@ class saleController extends Controller
                     'otro_impuesto'     => $otroImpto,
                     'porc_impoconsumo'  => $porcImpoconsumo,
                     'impoconsumo'       => $impoconsumo,
+                    'promo_percent'     => $porcPromo,
+                    'promo_value'       => $promoValue,
                     'total_bruto'       => $precioBruto,
                     'total'             => $netoSinImp + $totalImpuestos,
                 ];
@@ -1149,7 +1171,7 @@ class saleController extends Controller
             $detalles    = $sale->details;
             $sale->items = $detalles->count();
             $sale->total_bruto           = $detalles->sum(fn($d) => $d->quantity * $d->price);
-            $sale->descuentos            = $detalles->sum(fn($d) => $d->descuento + $d->descuento_cliente);
+            $sale->descuentos            = $detalles->sum(fn($d) => $d->descuento + $d->descuento_cliente + $d->promo_value);
             $sale->total_valor_a_pagar   = $detalles->sum('total');
             $sale->total_iva             = $detalles->sum('iva');
             $sale->total_otros_impuestos = $detalles->sum('otro_impuesto');
@@ -1512,29 +1534,84 @@ class saleController extends Controller
     public function SaObtenerPreciosProducto(Request $request)
     {
         $centrocostoId = $request->input('centrocosto');
-        $clienteId = $request->input('cliente');
+        $clienteId     = $request->input('cliente');
+        $productId     = $request->input('productId');
+        $inventarioId  = $request->input('inventario_id', null); // opcional
+        $quantity      = $request->input('quantity', 1); // opcional, por defecto 1
+
         $cliente = Third::find($clienteId);
+        if (!$cliente) {
+            return response()->json(['error' => 'Cliente no encontrado'], 404);
+        }
+
+        // Obtener el precio desde listapreciodetalle (igual que antes)
         $producto = Listapreciodetalle::join('products as prod', 'listapreciodetalles.product_id', '=', 'prod.id')
             ->join('thirds as t', 'listapreciodetalles.listaprecio_id', '=', 't.id')
-            ->where('prod.id', $request->productId)
+            ->where('prod.id', $productId)
             ->where('t.id', $cliente->listaprecio_genericid)
-            ->select('listapreciodetalles.precio', 'prod.iva', 'prod.otro_impuesto', 'prod.impoconsumo', 'listapreciodetalles.porc_descuento') // Select only the
+            ->select(
+                'listapreciodetalles.precio',
+                'prod.iva',
+                'prod.otro_impuesto',
+                'prod.impoconsumo',
+                'listapreciodetalles.porc_descuento'
+            )
             ->first();
-        if ($producto) {
-            return response()->json([
-                'precio' => $producto->precio,
-                'iva' => $producto->iva,
-                'otro_impuesto' => $producto->otro_impuesto,
-                'impoconsumo' => $producto->impoconsumo,
-                'porc_descuento' => $producto->porc_descuento
-            ]);
-        } else {
-            // En caso de que el producto no sea encontrado
-            return response()->json([
-                'error' => 'Product not found'
-            ], 404);
+
+        if (!$producto) {
+            return response()->json(['error' => 'Product not found'], 404);
         }
+
+        // Determinar store_id para buscar promociones:
+        // preferimos inventario->store_id si se envió inventario_id, si no, tomamos la primera store del centro de costo
+        $storeId = null;
+        $loteId = null;
+        if ($inventarioId) {
+            $inv = Inventario::find($inventarioId);
+            if ($inv) {
+                $storeId = $inv->store_id;
+                $loteId = $inv->lote_id;
+            }
+        }
+        if (!$storeId) {
+            $firstStore = Store::where('centrocosto_id', $centrocostoId)->first();
+            $storeId = $firstStore ? $firstStore->id : null;
+        }
+
+        // Buscar promotion detail aplicable usando la cantidad (si viene)
+        $appliedPromotion = $this->getApplicablePromotionDetail($productId, $storeId, $quantity, $loteId, $inventarioId);
+
+        $promo_percent = 0;
+        $promo_min_quantity = null;
+        $promo_value = 0;
+        $applied_promotion_id = null;
+
+        $unitPrice = floatval($producto->precio);
+        $lineBase = $unitPrice * floatval($quantity); // valor bruto sin impuestos y sin descuentos de cliente
+
+        if ($appliedPromotion) {
+            $promo_percent = floatval($appliedPromotion->porc_desc);
+            $promo_min_quantity = floatval($appliedPromotion->quantity);
+            $applied_promotion_id = $appliedPromotion->id;
+
+            // Calculamos el valor total de la promoción sobre la base lineal (puedes cambiar la base según reglas)
+            $promo_value = round(($lineBase * $promo_percent) / 100.0, 2);
+        }
+
+        return response()->json([
+            'precio' => $producto->precio,
+            'iva' => $producto->iva,
+            'otro_impuesto' => $producto->otro_impuesto,
+            'impoconsumo' => $producto->impoconsumo,
+            'porc_descuento' => $producto->porc_descuento,
+            // promoción calculada
+            'promo_percent' => $promo_percent,
+            'promo_min_quantity' => $promo_min_quantity,
+            'promo_value' => $promo_value,
+            'applied_promotion_id' => $applied_promotion_id,
+        ]);
     }
+
 
     public function storeVentaMostrador(Request $request) // POS-Mostrador
     {
@@ -2072,7 +2149,7 @@ class saleController extends Controller
     }
 
 
-    
+
     public function annulSale($saleId)
     {
         // Se obtiene la venta junto con sus detalles (relación 'details')
