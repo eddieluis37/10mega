@@ -24,6 +24,31 @@
 </style>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+@php
+    // Mapear devoluciones (vienen desde controller en $arrayTotales['totalesDevolucion_porForma'])
+    $devoluciones = $arrayTotales['totalesDevolucion_porForma'] ?? [];
+
+    // Reconstruyo detalle de formas de pago usadas en notas de crédito para mostrar nombre/tipo
+    $creditForms = $caja->sales
+        ->pluck('notacredito')   // Notacredito|null
+        ->filter()
+        ->pluck('formaPago')     // Formapago|null
+        ->filter()
+        ->unique('id')
+        ->values();
+
+    $devolucionesDetalle = [];
+    foreach ($creditForms as $fp) {
+        $devolucionesDetalle[] = [
+            'id'     => $fp->id,
+            'nombre' => $fp->nombre ?? ($fp->descripcion ?? ('Forma ' . $fp->id)),
+            'tipo'   => strtoupper($fp->tipoformapago ?? ''),
+            'total'  => floatval($devoluciones[$fp->id] ?? 0),
+        ];
+    }
+@endphp
+
+
 <div class="row sales layout-top-spacing">
 	<div class="col-sm-12">
 		<br>
@@ -197,6 +222,33 @@
 															style="text-align: right; font-weight: bold; color: black" readonly>
 													</td>
 												</tr>
+												
+												<!-- Totales de devoluciones por forma (detalle) -->
+												@if(count($devolucionesDetalle) > 0)
+													<tr>
+														<th colspan="2" style="text-align: left">
+															<span class="small-muted">Devoluciones (Notas de crédito) por forma de pago</span>
+														</th>
+													</tr>
+													@foreach($devolucionesDetalle as $dev)
+														<tr>
+															<th style="text-align: left; font-weight: 600;">
+																{{ $dev['nombre'] }} <span class="small-muted">({{ $dev['tipo'] }})</span>
+															</th>
+															<td>
+																<!-- mostramos el total de devoluciones por forma -->
+																<input
+																	type="text"
+																	class="devolucion-por-forma"
+																	data-forma-id="{{ $dev['id'] }}"
+																	data-tipo="{{ $dev['tipo'] }}"
+																	value="$ {{ number_format($dev['total'], 0, ',', '.') }}"
+																	style="text-align: right; font-weight: bold; color: #c0392b" readonly>
+															</td>
+														</tr>
+													@endforeach
+												@endif
+
 												<tr>
 													<th scope="row" style="text-align: left">Total</th>
 													<td>

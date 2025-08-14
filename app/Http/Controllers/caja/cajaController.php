@@ -188,10 +188,12 @@ class cajaController extends Controller
      */
     public function create($id)
     {
-        // Obtener la caja junto con las ventas del turno vigente del cajero
-        $caja = Caja::with(['sales' => function ($query) {
-            // $query->turnoVigente();
-        }])->find($id);
+        // Obtener la caja junto con relaciones necesarias para evitar N+1
+        $caja = Caja::with([
+            'sales.notacredito.formaPago',
+            'sales.formaPagoTarjeta',
+            'salidasEfectivo'
+        ])->find($id);
 
         if (!$caja) {
             return redirect()->back()->with('error', 'Caja no encontrada.');
@@ -217,7 +219,6 @@ class cajaController extends Controller
             return redirect()->back()->with('error', 'No se pudo determinar el consecutivo de las facturas.');
         }
 
-
         // Actualizar los campos en la caja
         $caja->update([
             'cantidad_facturas' => $ventas->count(),
@@ -225,7 +226,7 @@ class cajaController extends Controller
             'factura_final'     => $facturaFinal,
         ]);
 
-        // Calcular totales usando la relación salesByCajero
+        // Calcular totales usando la relación salesByCajero (ahora con devoluciones descontadas)
         $arrayTotales = $this->sumTotales($caja);
 
         // Pasar la caja actualizada y los totales a la vista
@@ -233,61 +234,124 @@ class cajaController extends Controller
     }
 
     /**
-     * Calcula los totales de ventas en efectivo, tarjetas, otros y crédito para la caja
-     * utilizando la relación salesByCajero.
+     * Calcula los totales de ventas (ajustados por notas de crédito) para la caja
      *
      * @param  \App\Models\caja\Caja  $caja
      * @return array
      */
     protected function sumTotales(Caja $caja)
     {
-        // Obtener las ventas del cajero para el turno vigente
-        // $ventas = $caja->salesByCajero()->whereDate('fecha_cierre', now()->toDateString())->get();
+        // Asegúrate que las relaciones estén cargadas
+        $caja->loadMissing(['sales.notacredito.formaPago', 'sales.formaPagoTarjeta', 'salidasEfectivo']);
 
-        // Extraemos sólo la parte Y-m-d de la fecha de inicio del turno
-        $fechaInicio = $caja->fecha_hora_inicio->toDateString(); // ej. "2025-05-12"
+        // Fecha inicio del turno (Y-m-d)
+        $fechaInicio = $caja->fecha_hora_inicio->toDateString();
 
-        // Filtramos las ventas de este cajero en esa misma fecha de cierre
+        // Filtramos las ventas de este cajero en esa fecha y estados válidos
         $ventas = $caja
             ->sales()
             ->whereDate('fecha_cierre', $fechaInicio)
             ->whereIn('status', ['1', '3'])
             ->get();
 
+        // Totales brutos de ventas (antes de devoluciones)
         $valorApagarEfectivo = $ventas->sum('valor_a_pagar_efectivo');
         $valorCambio         = $ventas->sum('cambio');
-
-        // efectivo neto antes de retiros
         $valorEfectivoBruto  = $valorApagarEfectivo - $valorCambio;
 
-        $valorEfectivo       = $valorApagarEfectivo - $valorCambio;
         $valorApagarTarjeta  = $ventas->sum('valor_a_pagar_tarjeta');
         $valorApagarOtros    = $ventas->sum('valor_a_pagar_otros');
         $valorApagarCredito  = $ventas->sum('valor_a_pagar_credito');
 
-        $valorTotal          = $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito;
+        // Totales por forma de tarjeta (agrupados por ID de formaPago)
+        $totalesTarjeta = $ventas
+            ->filter(fn($s) => $s->formaPagoTarjeta)
+            ->groupBy(fn($s) => $s->formaPagoTarjeta->id)
+            ->map(fn($group) => $group->sum('valor_a_pagar_tarjeta'))
+            ->toArray();
+
+        // --- 1) Determinar todas las formas de pago usadas en las notas de crédito ---
+        $creditForms = $ventas
+            ->pluck('notacredito')      // colección de Notacredito|null
+            ->filter()                  // remueve nulls
+            ->pluck('formaPago')        // colección de Formapago
+            ->filter()                  // por si alguno es null
+            ->unique('id')
+            ->values();
+
+        // --- 2) Totales de devolución por cada forma de pago (notas de crédito) ---
+        $totalesDevolucion = [];
+        foreach ($creditForms as $fp) {
+            $totalesDevolucion[$fp->id] = $ventas
+                ->filter(fn($s) => $s->notacredito && $s->notacredito->formaPago->id === $fp->id)
+                ->sum(fn($s) => $s->notacredito->total);
+        }
+
+        // --- 3) Restar devoluciones de los totales correspondientes ---
+        foreach ($creditForms as $fp) {
+            $devol = $totalesDevolucion[$fp->id] ?? 0;
+            $tipo  = strtoupper($fp->tipoformapago ?? '');
+
+            switch ($tipo) {
+                case 'EFECTIVO':
+                    // restar del efectivo
+                    $valorApagarEfectivo = max(0, $valorApagarEfectivo - $devol);
+                    $valorEfectivoBruto  = max(0, $valorEfectivoBruto - $devol);
+                    break;
+
+                case 'TARJETA':
+                    // restar del total de tarjetas y del bucket del ID de tarjeta
+                    $valorApagarTarjeta = max(0, $valorApagarTarjeta - $devol);
+                    if (isset($totalesTarjeta[$fp->id])) {
+                        $totalesTarjeta[$fp->id] = max(0, $totalesTarjeta[$fp->id] - $devol);
+                    }
+                    break;
+
+                case 'OTROS':
+                case 'CHEQUE':
+                    $valorApagarOtros = max(0, $valorApagarOtros - $devol);
+                    break;
+
+                case 'CREDITO':
+                    $valorApagarCredito = max(0, $valorApagarCredito - $devol);
+                    break;
+
+                default:
+                    // Si hay tipos personalizados, intenta deducirlos por campos comunes.
+                    // Como fallback, resta del valorTotal (se recalculará luego).
+                    // No hacemos nada aquí específico.
+                    break;
+            }
+        }
+
+        // Re-calcular total general (después de devoluciones)
+        $valorTotal = max(0, $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito);
 
         // 4) Suma de todos los retiros de efectivo (vr_efectivo)
         $valorTotalSalidaEfectivo = $caja
             ->salidasEfectivo()
             ->sum('vr_efectivo');
 
-        // 5) Calculamos el efectivo disponible descontando retiros
-        $valorEfectivoNeto = $valorEfectivoBruto - $valorTotalSalidaEfectivo;
-
+        // 5) Calculamos el efectivo disponible descontando retiros y devoluciones en efectivo ya descontadas arriba
+        $valorEfectivoNeto = max(0, ($valorEfectivoBruto) - $valorTotalSalidaEfectivo);
 
         return [
-            'valorApagarEfectivo' => $valorApagarEfectivo,
-            'valorCambio'         => $valorCambio,
-            'valorEfectivo'       => $valorEfectivo,
-            'valorApagarTarjeta'  => $valorApagarTarjeta,
-            'valorApagarOtros'    => $valorApagarOtros,
-            'valorApagarCredito'  => $valorApagarCredito,
-            'valorTotal'          => $valorTotal,
+            // valores ajustados
+            'valorApagarEfectivo'        => $valorApagarEfectivo,
+            'valorCambio'                => $valorCambio,
+            'valorEfectivo'              => $valorEfectivoBruto,
+            'valorApagarTarjeta'         => $valorApagarTarjeta,
+            'valorApagarOtros'           => $valorApagarOtros,
+            'valorApagarCredito'         => $valorApagarCredito,
+            'valorTotal'                 => $valorTotal,
             'valorTotalSalidaEfectivo'   => $valorTotalSalidaEfectivo,
+            'valorEfectivoNeto'          => $valorEfectivoNeto,
+
+            // detalles útiles para la vista / debugging
+            'totalesDevolucion_porForma' => $totalesDevolucion, // [formaPagoId => sumaDevoluciones]
+            'totalesTarjeta_porForma'    => $totalesTarjeta,    // [formaPagoTarjetaId => totalTarjetaDespuesDevolucion]
         ];
     }
-
 
 
     /**
