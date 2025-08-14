@@ -22,14 +22,7 @@ $("#valor_real").on("input", function () {
     document.getElementById("valor_real").value = formatCantidadSinCero(valorIngresado);
     document.getElementById("diferencia").value = formatCantidadSinCero(valorDiferencia);
 
-  /*   if (valorDiferencia >= -10000) {
-        $("#btnGuardar").prop("disabled", false);
-    } else {
-        $("#btnGuardar").prop("disabled", true);
-    }
-    console.log(valorDiferencia); */
-
-    if (valorIngresado >= 1) {
+      if (valorIngresado >= 1) {
         $("#btnGuardar").prop("disabled", false);
     } else {
         $("#btnGuardar").prop("disabled", true);

@@ -112,14 +112,6 @@
 									</div>
 								</div>
 							</div>
-							<!-- <div class="col-md-3">
-								<div class="task-header">
-									<div class="form-group">
-										<label class="form-label">Fecha hora cierre turno</label>
-										<p>{{ $caja->fecha_hora_cierre }}</p>
-									</div>
-								</div>
-							</div> -->
 							<div class="col-md-3">
 								<div class="task-header">
 									<div class="form-group">
@@ -164,8 +156,6 @@
 					</div>
 				</div>
 			</div>
-
-
 			<div class="row justify-content-center mt-2">
 				<div class="col-md-6">
 					<div class="widget widget-chart-one">
@@ -222,7 +212,6 @@
 						</div>
 					</div>
 				</div>
-
 				<div class="col-md-6">
 					<div class="widget widget-chart-one">
 						<div class="widget-content mt-0">
