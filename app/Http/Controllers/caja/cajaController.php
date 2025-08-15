@@ -345,9 +345,7 @@ class cajaController extends Controller
             'valorApagarCredito'         => $valorApagarCredito,
             'valorTotal'                 => $valorTotal,
             'valorTotalSalidaEfectivo'   => $valorTotalSalidaEfectivo,
-            'valorEfectivoNeto'          => $valorEfectivoNeto,
-
-            // detalles útiles para la vista / debugging
+            'valorEfectivoNeto'          => $valorEfectivoNeto,          
             'totalesDevolucion_porForma' => $totalesDevolucion, // [formaPagoId => sumaDevoluciones]
             'totalesTarjeta_porForma'    => $totalesTarjeta,    // [formaPagoTarjetaId => totalTarjetaDespuesDevolucion]
         ];
