@@ -95,7 +95,7 @@
             <td class="right">{{ number_format($arrayTotales['valorEfectivo'] ?? 0,0,',','.') }}</td>
         </tr>
         <tr>
-            <th>QR / Tarjeta</th>
+            <th>Medios Electronicos</th>
             <td class="right">{{ number_format($arrayTotales['valorApagarTarjeta'] ?? 0,0,',','.') }}</td>
         </tr>
         <tr>
