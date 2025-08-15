@@ -34,6 +34,6 @@ class Notacredito extends Model
 
     public function formaPago()
     {
-        return $this->belongsTo(FormaPago::class, 'forma_pago_id');
+        return $this->belongsTo(Formapago::class, 'forma_pago_id');
     }
 }
