@@ -257,7 +257,7 @@ class resumenDiarioController extends Controller
         }
 
         // Re-calcular total general (después de devoluciones)
-        $valorTotal = max(0, $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito);
+        $valorTotal = max(0, $valorApagarEfectivo + $valorApagarTarjeta + $valorApagarOtros + $valorApagarCredito);
 
         // 4) Suma de todos los retiros de efectivo (vr_efectivo)
         $valorTotalSalidaEfectivo = $caja

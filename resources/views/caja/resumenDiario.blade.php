@@ -252,7 +252,7 @@
         <tr>
             <th>EFECTIVO A ENTREGAR</th>
             <td class="right bold">
-                {{ number_format( ($caja->base ?? 0) + ($arrayTotales['valorEfectivo'] ?? 0) - ($totalGastos ?? 0), 0, ',', '.') }}
+                {{ number_format(  ($arrayTotales['valorEfectivo'] ?? 0) - ($totalGastos ?? 0), 0, ',', '.') }}
             </td>
         </tr>
 
