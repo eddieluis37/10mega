@@ -25,6 +25,8 @@ class exportFacturaController extends Controller
             ->join('users as u', 'sales.user_id', '=', 'u.id')
             ->join('centro_costo as c', 'sales.centrocosto_id', '=', 'c.id')
             ->leftJoin('formapagos as fp', 'sales.forma_pago_tarjeta_id', '=', 'fp.id')
+            ->leftJoin('formapagos as fpt2', 'sales.forma_pago_tarjeta2_id', '=', 'fpt2.id')
+            ->leftJoin('formapagos as fpt3', 'sales.forma_pago_tarjeta3_id', '=', 'fpt3.id')
             ->leftJoin('formapagos as fp2', 'sales.forma_pago_otros_id', '=', 'fp2.id')
             ->leftJoin('formapagos as fp3', 'sales.forma_pago_credito_id', '=', 'fp3.id')
             ->select(
@@ -32,6 +34,8 @@ class exportFacturaController extends Controller
                 'u.name as nameuser',
                 'third.name as namethird',
                 'fp.nombre as formapago1',
+                'fpt2.nombre as formapagot2',
+                'fpt3.nombre as formapagot3',
                 'fp2.nombre as formapago2',
                 'fp3.nombre as formapago3',
                 'third.identification',

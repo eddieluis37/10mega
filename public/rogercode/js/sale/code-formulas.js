@@ -38,6 +38,24 @@ $("#valor_a_pagar_tarjeta").on("change", function () {
     calculavalorapagar();
 });
 
+// Evento: Cambio en el valor de tarjeta (entrada manual)
+$("#valor_a_pagar_tarjeta2").on("change", function () {
+    let valorTarjetaManual2 = formatMoneyNumber($(this).val());
+    $(this).val(formatCantidadSinCero(valorTarjetaManual2));
+
+    // Se recalculan totales y cambio (manteniendo el valor ingresado manualmente)
+    calculavalorapagar();
+});
+
+// Evento: Cambio en el valor de tarjeta (entrada manual)
+$("#valor_a_pagar_tarjeta3").on("change", function () {
+    let valorTarjetaManual3 = formatMoneyNumber($(this).val());
+    $(this).val(formatCantidadSinCero(valorTarjetaManual3));
+
+    // Se recalculan totales y cambio (manteniendo el valor ingresado manualmente)
+    calculavalorapagar();
+});
+
 // Eventos para otros métodos de pago
 $("#valor_a_pagar_otros").on("change", function () {
     let valorOtros = formatMoneyNumber($(this).val());
@@ -55,10 +73,12 @@ $("#valor_a_pagar_credito").on("change", function () {
 function calculavalorapagar() {
     let efectivo = formatMoneyNumber($("#valor_a_pagar_efectivo").val());
     let tarjeta = formatMoneyNumber($("#valor_a_pagar_tarjeta").val());
+    let tarjeta2 = formatMoneyNumber($("#valor_a_pagar_tarjeta2").val());
+    let tarjeta3 = formatMoneyNumber($("#valor_a_pagar_tarjeta3").val());
     let otros = formatMoneyNumber($("#valor_a_pagar_otros").val());
     let credito = formatMoneyNumber($("#valor_a_pagar_credito").val());
 
-    let totalPagado = efectivo + tarjeta + otros + credito;
+    let totalPagado = efectivo + tarjeta + tarjeta2 + tarjeta3 + otros + credito;
     $("#valor_pagado").val(formatCantidadSinCero(totalPagado));
     calcularCambio();
 }

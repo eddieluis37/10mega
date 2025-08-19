@@ -218,6 +218,20 @@
 			</tr>
 			@endif
 
+			@if($sale->valor_a_pagar_tarjeta2 != 0)
+			<tr>
+				<td style="text-align: right; padding: 5px;"><strong>{{ $sale->formapagot2 }}:</strong></td>
+				<td style="text-align: right; padding: 5px;"><strong>{{ number_format($sale->valor_a_pagar_tarjeta2, 0, ',', '.') }}</strong></td>
+			</tr>
+			@endif
+
+			@if($sale->valor_a_pagar_tarjeta3 != 0)
+			<tr>
+				<td style="text-align: right; padding: 5px;"><strong>{{ $sale->formapagot3 }}:</strong></td>
+				<td style="text-align: right; padding: 5px;"><strong>{{ number_format($sale->valor_a_pagar_tarjeta3, 0, ',', '.') }}</strong></td>
+			</tr>
+			@endif
+
 			@if($sale->valor_a_pagar_otros != 0)
 			<tr>
 				<td style="text-align: right; padding: 5px;"><strong>{{ $sale->formapago2 }}:</strong></td>

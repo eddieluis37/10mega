@@ -261,6 +261,8 @@ class saleautoservicioController extends Controller
         // Obtener y sanitizar los valores del request
         $valor_a_pagar_efectivo = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_efectivo'));
         $forma_pago_tarjeta_id  = $request->input('forma_pago_tarjeta_id');
+        $forma_pago_tarjeta2_id  = $request->input('forma_pago_tarjeta2_id');
+        $forma_pago_tarjeta3_id  = $request->input('forma_pago_tarjeta3_id');
         $forma_pago_otros_id    = $request->input('forma_pago_otros_id');
         $forma_pago_credito_id  = $request->input('forma_pago_credito_id');
 
@@ -269,6 +271,8 @@ class saleautoservicioController extends Controller
         $codigo_pago_credito    = $request->input('codigo_pago_credito');
 
         $valor_a_pagar_tarjeta  = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_tarjeta'));
+        $valor_a_pagar_tarjeta2  = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_tarjeta2'));
+        $valor_a_pagar_tarjeta3  = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_tarjeta3'));
         $valor_a_pagar_otros    = str_replace(['.', ',', '$', '#'], '', $request->input('valor_a_pagar_otros'));
 
         $valor_a_pagar_credito  = $request->input('valor_a_pagar_credito');
@@ -310,12 +314,16 @@ class saleautoservicioController extends Controller
             $venta = Sale::findOrFail($ventaId);
             $venta->user_id                  = $request->user()->id;
             $venta->forma_pago_tarjeta_id    = $forma_pago_tarjeta_id;
+            $venta->forma_pago_tarjeta2_id    = $forma_pago_tarjeta2_id;
+            $venta->forma_pago_tarjeta3_id    = $forma_pago_tarjeta3_id;
             $venta->forma_pago_otros_id      = $forma_pago_otros_id;
             $venta->forma_pago_credito_id    = $forma_pago_credito_id;
             $venta->codigo_pago_tarjeta      = $codigo_pago_tarjeta;
             $venta->codigo_pago_otros        = $codigo_pago_otros;
             $venta->codigo_pago_credito      = $codigo_pago_credito;
             $venta->valor_a_pagar_tarjeta    = $valor_a_pagar_tarjeta;
+            $venta->valor_a_pagar_tarjeta2    = $valor_a_pagar_tarjeta2;
+            $venta->valor_a_pagar_tarjeta3    = $valor_a_pagar_tarjeta3;
             $venta->valor_a_pagar_efectivo   = $valor_a_pagar_efectivo;
             $venta->valor_a_pagar_otros      = $valor_a_pagar_otros;
             $venta->valor_a_pagar_credito    = $valor_a_pagar_credito;

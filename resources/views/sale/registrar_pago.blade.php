@@ -71,7 +71,7 @@
                     <input type="hidden" id="saleId" name="saleId" value="{{$venta->id}}">
                     <div class="row">
                         <div class="col-md-4">
-                            <label for="" class="form-label">Medios Electronicos</label>
+                            <label for="" class="form-label">Medios Electronicos1</label>
                             <select class="form-control form-control-sm input" name="forma_pago_tarjeta_id" id="forma_pago_tarjeta_id" required>
                                 <option value="">Seleccione medio de pago</option>
                                 <option value="1">No Aplica</option>
@@ -92,6 +92,58 @@
                             <div class="input-group flex-nowrap">
                                 <span class="input-group-text" id="addon-wrapping">$</span>
                                 <input class="form-control form-control-sm" type="text" name="valor_a_pagar_tarjeta" id="valor_a_pagar_tarjeta" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Medios Electronicos2</label>
+                            <select class="form-control form-control-sm input" name="forma_pago_tarjeta2_id" id="forma_pago_tarjeta2_id">
+                                <option value="">Seleccione medio de pago</option>
+                                <option value="1">No Aplica</option>
+                                @foreach($forma_pago_tarjeta as $formaPagoTarjeta)
+                                <option value="{{$formaPagoTarjeta->id}}" {{ $formaPagoTarjeta->id == 0 ? 'selected' : '' }}>{{$formaPagoTarjeta->nombre}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Código de Verificación</label>
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">N°</span>
+                                <input type="text" id="codigo_pago_tarjeta" name="codigo_pago_tarjeta" class="form-control input" placeholder="">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Valor</label>
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">$</span>
+                                <input class="form-control form-control-sm" type="text" name="valor_a_pagar_tarjeta2" id="valor_a_pagar_tarjeta2" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Medios Electronicos3</label>
+                            <select class="form-control form-control-sm input" name="forma_pago_tarjeta3_id" id="forma_pago_tarjeta3_id">
+                                <option value="">Seleccione medio de pago</option>
+                                <option value="1">No Aplica</option>
+                                @foreach($forma_pago_tarjeta as $formaPagoTarjeta)
+                                <option value="{{$formaPagoTarjeta->id}}" {{ $formaPagoTarjeta->id == 0 ? 'selected' : '' }}>{{$formaPagoTarjeta->nombre}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Código de Verificación</label>
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">N°</span>
+                                <input type="text" id="codigo_pago_tarjeta" name="codigo_pago_tarjeta" class="form-control input" placeholder="">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label">Valor</label>
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">$</span>
+                                <input class="form-control form-control-sm" type="text" name="valor_a_pagar_tarjeta3" id="valor_a_pagar_tarjeta3" value="0">
                             </div>
                         </div>
                     </div>
@@ -132,7 +184,7 @@
                 </div>
             </div>
         </div>
-      
+
         <div class="widget-content mt-1">
             <div class="card">
                 <div class="card-body">
@@ -164,7 +216,7 @@
                     </div>
                 </div>
             </div>
-        </div>   
+        </div>
     </div>
 
     <div class="col-sm-5">
@@ -281,6 +333,8 @@
         const inputIds = [
             "valor_a_pagar_efectivo",
             "valor_a_pagar_tarjeta",
+            "valor_a_pagar_tarjeta2",
+            "valor_a_pagar_tarjeta3",
             "valor_a_pagar_otros",
             "valor_a_pagar_credito"
         ];
