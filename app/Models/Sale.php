@@ -27,6 +27,8 @@ class Sale extends Model
         'fecha_venta',
         'valor_a_pagar_efectivo',
         'valor_a_pagar_tarjeta',
+        'valor_a_pagar_tarjeta2',
+        'valor_a_pagar_tarjeta3',
         'valor_a_pagar_otros',
         'valor_a_pagar_credito',
         'total',
@@ -135,6 +137,16 @@ class Sale extends Model
     public function formaPagoTarjeta()
     {
         return $this->belongsTo(\App\Models\Formapago::class, 'forma_pago_tarjeta_id');
+    }
+
+    public function formaPagoTarjeta2()
+    {
+        return $this->belongsTo(\App\Models\Formapago::class, 'forma_pago_tarjeta2_id');
+    }
+
+    public function formaPagoTarjeta3()
+    {
+        return $this->belongsTo(\App\Models\Formapago::class, 'forma_pago_tarjeta3_id');
     }
 
     public function formaPagoCredito()

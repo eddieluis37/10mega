@@ -67,10 +67,11 @@ class ReporteCierreCajaController extends Controller
             'sales' => fn($q) => $q->whereIn('status', ['1', '3']),
             'sales.tercero',
             'sales.formaPagoTarjeta',
+            'sales.formaPagoTarjeta2',
+            'sales.formaPagoTarjeta3',
             'sales.formaPagoCredito',
             'sales.notacredito.formaPago',     // <-- nota de crédito y su formaPago
         ])->findOrFail($id);
-
         // 2. Determinar todas las formas de pago usadas en las notas de crédito de estas ventas
         $creditForms = $caja->sales
             ->pluck('notacredito')             // colección de Notacredito|null
@@ -78,7 +79,6 @@ class ReporteCierreCajaController extends Controller
             ->pluck('formaPago')               // colección de Formapago
             ->unique('id')
             ->values();
-
         // 3. Totales por cada forma de pago de nota de crédito
         $totalesDevolucion = [];
         foreach ($creditForms as $fp) {
@@ -86,7 +86,6 @@ class ReporteCierreCajaController extends Controller
                 ->filter(fn($s) => $s->notacredito && $s->notacredito->formaPago->id === $fp->id)
                 ->sum(fn($s) => $s->notacredito->total);
         }
-
         // 4. (Tus cálculos existentes de totales de factura, efectivo, cambio, tarjeta y crédito…)
         $totalFactura  = $caja->sales->sum('total_valor_a_pagar');
         $totalEfectivo = $caja->sales->sum('valor_a_pagar_efectivo') - $caja->sales->sum('cambio');
@@ -94,18 +93,23 @@ class ReporteCierreCajaController extends Controller
         $tarjetas      = Formapago::where('tipoformapago', 'TARJETA')->get();
         // 4. Totales por tarjeta (agrupados por ID de formaPago)
         $totalesTarjeta = $caja->sales
-            ->filter(fn($s) => $s->formaPagoTarjeta)
-            ->groupBy(fn($s) => $s->formaPagoTarjeta->id)
-            ->map(fn($group) => $group->sum('valor_a_pagar_tarjeta'))
+            ->filter(fn($s) => $s->formaPagoTarjeta || $s->formaPagoTarjeta2 || $s->formaPagoTarjeta3)
+            ->groupBy(fn($s) => $s->formaPagoTarjeta->id ?? ($s->formaPagoTarjeta2->id ?? ($s->formaPagoTarjeta3->id)))
+            ->map(fn($group) => [
+                'tarjeta1' => $group->sum('valor_a_pagar_tarjeta'),
+                'tarjeta2' => $group->sum('valor_a_pagar_tarjeta2'),
+                'tarjeta3' => $group->sum('valor_a_pagar_tarjeta3'),
+            ])
             ->toArray();
-
         // 5. Filtrar solo las tarjetas que en totalesTarjeta tienen > 0
         $activeTarjetas = $tarjetas->filter(
-            fn($t) => (isset($totalesTarjeta[$t->id]) && $totalesTarjeta[$t->id] > 0)
+            fn($t) => (isset($totalesTarjeta[$t->id]) &&
+                ($totalesTarjeta[$t->id]['tarjeta1'] > 0 ||
+                    $totalesTarjeta[$t->id]['tarjeta2'] > 0 ||
+                    $totalesTarjeta[$t->id]['tarjeta3'] > 0))
         );
         $totalCredito   = $caja->sales->sum('valor_a_pagar_credito');
         $showCredito    = $totalCredito > 0;
-
         // 5. Pasar todo a la vista
         return view('reportes.cierre_caja', compact(
             'caja',
@@ -117,8 +121,8 @@ class ReporteCierreCajaController extends Controller
             'totalesTarjeta',
             'totalCredito',
             'showCredito',
-            'creditForms',        // <–– nuevas columnas DEV
-            'totalesDevolucion'   // <–– totales por forma de pago de nota
+            'creditForms',
+            'totalesDevolucion'
         ));
     }
 }

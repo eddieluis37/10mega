@@ -135,6 +135,7 @@
       <div class="info-item"><strong>Diferencia:</strong> ${{ number_format($caja->diferencia, 0) }}</div>
     </div>
 
+    blade
     <!-- Tabla de Detalle de Facturas -->
     <table>
       <thead>
@@ -143,24 +144,28 @@
           <th>#FACTURA</th>
           <th>TOTAL FACTURA</th>
           <th>EFECTIVO</th>
-
           {{-- Encabezados de TARJETA --}}
-          @foreach($activeTarjetas as $tarjeta)
-          <th>{{ $tarjeta->nombre }}</th>
+          @foreach($caja->sales as $sale)
+          @if($sale->formaPagoTarjeta)
+          <th>{{ $sale->formaPagoTarjeta->nombre }}</th>
+          @endif
+          @if($sale->formaPagoTarjeta2)
+          <th>{{ $sale->formaPagoTarjeta2->nombre }}</th>
+          @endif
+          @if($sale->formaPagoTarjeta3)
+          <th>{{ $sale->formaPagoTarjeta3->nombre }}</th>
+          @endif
           @endforeach
-
           {{-- Crédito --}}
           @if($showCredito)
           <th>CREDITO</th>
           @endif
-
           {{-- Encabezados dinámicos de DEV + siglas --}}
           @foreach($creditForms as $fp)
           <th>DEV {{ strtoupper($fp->nombre) }}</th>
           @endforeach
         </tr>
       </thead>
-
       <tbody>
         @foreach($caja->sales as $sale)
         <tr>
@@ -168,7 +173,6 @@
           <td>{{ $sale->consecutivo }}</td>
           <td>${{ number_format($sale->total_valor_a_pagar,0,',','.') }}</td>
           <td>${{ number_format($sale->valor_a_pagar_efectivo - $sale->cambio,0,',','.') }}</td>
-
           {{-- Valores de TARJETA --}}
           @foreach($activeTarjetas as $tarjeta)
           <td>
@@ -176,8 +180,17 @@
             ${{ number_format($sale->valor_a_pagar_tarjeta,0,',','.') }}
             @else $0 @endif
           </td>
+          <td>
+            @if(optional($sale->formaPagoTarjeta)->id === $tarjeta->id)
+            ${{ number_format($sale->valor_a_pagar_tarjeta2,0,',','.') }}
+            @else $0 @endif
+          </td>
+          <td>
+            @if(optional($sale->formaPagoTarjeta)->id === $tarjeta->id)
+            ${{ number_format($sale->valor_a_pagar_tarjeta3,0,',','.') }}
+            @else $0 @endif
+          </td>
           @endforeach
-
           {{-- Valor de CRÉDITO --}}
           @if($showCredito)
           <td>
@@ -186,7 +199,6 @@
             @else $0 @endif
           </td>
           @endif
-
           {{-- Valor de DEV (nota de crédito) --}}
           @foreach($creditForms as $fp)
           <td>
@@ -200,32 +212,29 @@
         </tr>
         @endforeach
       </tbody>
-
       <tfoot>
         <tr>
           <td colspan="2">TOTALES</td>
           <td>${{ number_format($totalFactura,0,',','.') }}</td>
           <td>${{ number_format($totalEfectivo,0,',','.') }}</td>
-
           {{-- Totales TARJETA --}}
           @foreach($activeTarjetas as $tarjeta)
-          <td>${{ number_format($totalesTarjeta[$tarjeta->id] ?? 0,0,',','.') }}</td>
+          <td>${{ number_format($totalesTarjeta[$tarjeta->id]['tarjeta1'] ?? 0,0,',','.') }}</td>
+          <td>${{ number_format($totalesTarjeta[$tarjeta->id]['tarjeta2'] ?? 0,0,',','.') }}</td>
+          <td>${{ number_format($totalesTarjeta[$tarjeta->id]['tarjeta3'] ?? 0,0,',','.') }}</td>
           @endforeach
-
           {{-- Total CRÉDITO --}}
           @if($showCredito)
           <td>${{ number_format($totalCredito,0,',','.') }}</td>
           @endif
-
           {{-- Totales DEV por forma de pago --}}
           @foreach($creditForms as $fp)
           <td>${{ number_format($totalesDevolucion[$fp->id] ?? 0,0,',','.') }}</td>
           @endforeach
         </tr>
       </tfoot>
-
-      
     </table>
+
   </div>
 </body>
 

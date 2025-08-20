@@ -259,7 +259,7 @@ class cajaController extends Controller
         $valorCambio         = $ventas->sum('cambio');
         $valorEfectivoBruto  = $valorApagarEfectivo - $valorCambio;
 
-        $valorApagarTarjeta  = $ventas->sum('valor_a_pagar_tarjeta');
+        $valorApagarTarjeta  = $ventas->sum('valor_a_pagar_tarjeta') + $ventas->sum('valor_a_pagar_tarjeta2') + $ventas->sum('valor_a_pagar_tarjeta3');
         $valorApagarOtros    = $ventas->sum('valor_a_pagar_otros');
         $valorApagarCredito  = $ventas->sum('valor_a_pagar_credito');
 
@@ -345,7 +345,7 @@ class cajaController extends Controller
             'valorApagarCredito'         => $valorApagarCredito,
             'valorTotal'                 => $valorTotal,
             'valorTotalSalidaEfectivo'   => $valorTotalSalidaEfectivo,
-            'valorEfectivoNeto'          => $valorEfectivoNeto,          
+            'valorEfectivoNeto'          => $valorEfectivoNeto,
             'totalesDevolucion_porForma' => $totalesDevolucion, // [formaPagoId => sumaDevoluciones]
             'totalesTarjeta_porForma'    => $totalesTarjeta,    // [formaPagoTarjetaId => totalTarjetaDespuesDevolucion]
         ];
