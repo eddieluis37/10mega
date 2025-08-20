@@ -178,7 +178,7 @@ class resumenDiarioController extends Controller
         $valorCambio         = $ventas->sum('cambio');
         $valorEfectivoBruto  = $valorApagarEfectivo - $valorCambio;
 
-        $valorApagarTarjeta  = $ventas->sum('valor_a_pagar_tarjeta');
+        $valorApagarTarjeta  = $ventas->sum('valor_a_pagar_tarjeta') + $ventas->sum('valor_a_pagar_tarjeta2') + $ventas->sum('valor_a_pagar_tarjeta3') ;
         $valorApagarOtros    = $ventas->sum('valor_a_pagar_otros');
         $valorApagarCredito  = $ventas->sum('valor_a_pagar_credito');
 

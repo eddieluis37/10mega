@@ -257,7 +257,7 @@
         </tr>
 
         <tr>
-            <th>TOTAL PAGOS CON CODIGO QR (estimado)</th>
+            <th>TOTAL PAGOS ELECTRONICOS</th>
             <td class="right">{{ number_format(($arrayTotales['valorApagarTarjeta'] ?? 0),0,',','.') }}</td>
         </tr>
 
