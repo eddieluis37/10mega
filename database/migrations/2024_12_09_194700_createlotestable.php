@@ -12,10 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lotes', function (Blueprint $table) {
-            $table->id();
-         /*    $table->unsignedBigInteger('product_id')->nullable();
-            $table->foreign('product_id')->references('id')->on('products');
- */
+            $table->id();        
             $table->unsignedBigInteger('category_id')->nullable(); // Restricción de categoría para el lote
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
 
