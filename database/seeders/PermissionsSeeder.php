@@ -271,6 +271,17 @@ class PermissionsSeeder extends Seeder
             ]
         );
 
+        User::updateOrCreate(
+            ['email' => 'coord-logistica@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'ALEJANDRA',
+                'phone' => '3214154625',
+                'profile' => 'Comercial',
+                'status' => 'Active',
+                'password' => bcrypt('a22.C0orDinadoralog1s+')
+            ]
+        );
+
         $user = User::where('name', 'ROBERTO BARROSO')->first();
         if ($user) {
             $user->assignRole($comercial);
