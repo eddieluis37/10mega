@@ -134,8 +134,6 @@
       <div class="info-item"><strong>Turno:</strong> {{ $caja->id }}</div>
       <div class="info-item"><strong>Diferencia:</strong> ${{ number_format($caja->diferencia, 0) }}</div>
     </div>
-
-    blade
     <!-- Tabla de Detalle de Facturas -->
     <table>
       <thead>
