@@ -70,8 +70,9 @@ class ReporteCierreCajaController extends Controller
             'sales.formaPagoTarjeta2',
             'sales.formaPagoTarjeta3',
             'sales.formaPagoCredito',
-            'sales.notacredito.formaPago',     // <-- nota de crédito y su formaPago
+            'sales.notacredito.formaPago',
         ])->findOrFail($id);
+
         // 2. Determinar todas las formas de pago usadas en las notas de crédito de estas ventas
         $creditForms = $caja->sales
             ->pluck('notacredito')             // colección de Notacredito|null
@@ -79,6 +80,7 @@ class ReporteCierreCajaController extends Controller
             ->pluck('formaPago')               // colección de Formapago
             ->unique('id')
             ->values();
+
         // 3. Totales por cada forma de pago de nota de crédito
         $totalesDevolucion = [];
         foreach ($creditForms as $fp) {
@@ -86,35 +88,57 @@ class ReporteCierreCajaController extends Controller
                 ->filter(fn($s) => $s->notacredito && $s->notacredito->formaPago->id === $fp->id)
                 ->sum(fn($s) => $s->notacredito->total);
         }
-        // 4. (Tus cálculos existentes de totales de factura, efectivo, cambio, tarjeta y crédito…)
+
+        // 4. Totales generales
         $totalFactura  = $caja->sales->sum('total_valor_a_pagar');
         $totalEfectivo = $caja->sales->sum('valor_a_pagar_efectivo') - $caja->sales->sum('cambio');
         $totalCambio   = $caja->sales->sum('cambio');
-        $tarjetas      = Formapago::where('tipoformapago', 'TARJETA')->get();
-        // 4. Totales por tarjeta (agrupados por ID de formaPago)
-        $totalesTarjeta = $caja->sales
-            ->filter(fn($s) => $s->formaPagoTarjeta || $s->formaPagoTarjeta2 || $s->formaPagoTarjeta3)
-            ->groupBy(fn($s) => $s->formaPagoTarjeta->id ?? ($s->formaPagoTarjeta2->id ?? ($s->formaPagoTarjeta3->id)))
-            ->map(fn($group) => [
-                'tarjeta1' => $group->sum('valor_a_pagar_tarjeta'),
-                'tarjeta2' => $group->sum('valor_a_pagar_tarjeta2'),
-                'tarjeta3' => $group->sum('valor_a_pagar_tarjeta3'),
-            ])
-            ->toArray();
-        // 5. Filtrar solo las tarjetas que en totalesTarjeta tienen > 0
-        $activeTarjetas = $tarjetas->filter(
-            fn($t) => (isset($totalesTarjeta[$t->id]) &&
-                ($totalesTarjeta[$t->id]['tarjeta1'] > 0 ||
-                    $totalesTarjeta[$t->id]['tarjeta2'] > 0 ||
-                    $totalesTarjeta[$t->id]['tarjeta3'] > 0))
-        );
+
+        // 5. Reconstruir totales por tarjeta por posición (más fiable que groupBy mixto)
+        $totalesTarjeta = []; // estructura: [tarjeta_id => ['tarjeta1' => x,'tarjeta2'=>y,'tarjeta3'=>z]]
+        foreach ($caja->sales as $s) {
+            if ($s->formaPagoTarjeta) {
+                $id = $s->formaPagoTarjeta->id;
+                $totalesTarjeta[$id]['tarjeta1'] = ($totalesTarjeta[$id]['tarjeta1'] ?? 0) + ($s->valor_a_pagar_tarjeta ?? 0);
+            }
+            if ($s->formaPagoTarjeta2) {
+                $id = $s->formaPagoTarjeta2->id;
+                $totalesTarjeta[$id]['tarjeta2'] = ($totalesTarjeta[$id]['tarjeta2'] ?? 0) + ($s->valor_a_pagar_tarjeta2 ?? 0);
+            }
+            if ($s->formaPagoTarjeta3) {
+                $id = $s->formaPagoTarjeta3->id;
+                $totalesTarjeta[$id]['tarjeta3'] = ($totalesTarjeta[$id]['tarjeta3'] ?? 0) + ($s->valor_a_pagar_tarjeta3 ?? 0);
+            }
+        }
+
+        // 6. Obtener sólo las tarjetas que realmente tienen totales > 0 y además saber qué posiciones mostrar
+        $activeTarjetasIds = [];
+        $tarjetaColumns = []; // [tarjeta_id => ['tarjeta1','tarjeta2',...]]
+        foreach ($totalesTarjeta as $tid => $positions) {
+            $cols = [];
+            if (($positions['tarjeta1'] ?? 0) > 0) $cols[] = 'tarjeta1';
+            if (($positions['tarjeta2'] ?? 0) > 0) $cols[] = 'tarjeta2';
+            if (($positions['tarjeta3'] ?? 0) > 0) $cols[] = 'tarjeta3';
+            if (count($cols)) {
+                $activeTarjetasIds[] = $tid;
+                $tarjetaColumns[$tid] = $cols;
+            }
+        }
+
+        // traer modelos Formapago sólo de los ids activos, manteniendo orden y datos
+        $activeTarjetas = Formapago::whereIn('id', $activeTarjetasIds)
+            ->where('tipoformapago', 'TARJETA')
+            ->get()
+            ->keyBy('id');
+
         $totalCredito   = $caja->sales->sum('valor_a_pagar_credito');
         $showCredito    = $totalCredito > 0;
-        // 5. Pasar todo a la vista
+
+        // 7. Pasar todo a la vista
         return view('reportes.cierre_caja', compact(
             'caja',
-            'tarjetas',
-            'activeTarjetas',
+            'activeTarjetas',   // collection keyed by id
+            'tarjetaColumns',   // array con posiciones por tarjeta
             'totalFactura',
             'totalEfectivo',
             'totalCambio',
