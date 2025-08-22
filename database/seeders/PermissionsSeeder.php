@@ -271,17 +271,6 @@ class PermissionsSeeder extends Seeder
             ]
         );
 
-         User::updateOrCreate(
-            ['email' => 'admin-chia@carnesfriasmega.co'], // Condición para identificar el usuario
-            [
-                'name' => 'ROBERTO BARROSO',
-                'phone' => '3214154625',
-                'profile' => 'AdminCentroCosto',
-                'status' => 'Active',
-                'password' => bcrypt('P@SsAdmin2025Mega')
-            ]
-        );
-
         User::updateOrCreate(
             ['email' => 'coord-logistica@carnesfriasmega.co'], // Condición para identificar el usuario
             [
@@ -292,6 +281,18 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('a22.C0orDinadoralog1s+')
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'admin-chia@carnesfriasmega.co'],
+            [
+                'name' => 'ADMIN CHIA',
+                'phone' => '3214154625',
+                'profile' => 'AdminCentroCosto',
+                'status' => 'Active',
+                'password' => bcrypt('P@SsAdmin2025Mega')
+            ]
+        );
+
 
         $user = User::where('name', 'ROBERTO BARROSO')->first();
         if ($user) {
@@ -566,9 +567,9 @@ class PermissionsSeeder extends Seeder
         }
 
         // 1. Crear o actualizar el rol "AdminBodega"
-        
-        
-        
+
+
+
         /* ******************** BAR ***************** */
         $cajaBar = Role::updateOrCreate(['name' => 'CajeroBar']);
         User::updateOrCreate(
@@ -591,7 +592,7 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('01Galanmegabar2025*.')
             ]
         );
-        
+
         User::updateOrCreate(
             ['email' => 'subamegabar@carnesfriasmega.co'], // Condición para identificar el usuario
             [
@@ -604,7 +605,7 @@ class PermissionsSeeder extends Seeder
         );
 
         $usuarios = User::where('name', 'like', '%BAR%')
-           // ->orWhere('name', 'like', '%ADMIN%')
+            // ->orWhere('name', 'like', '%ADMIN%')
             //  ->orWhereIn('id', $idsUsuarios)
             ->get();
 
