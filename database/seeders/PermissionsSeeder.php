@@ -271,6 +271,17 @@ class PermissionsSeeder extends Seeder
             ]
         );
 
+         User::updateOrCreate(
+            ['email' => 'admin-chia@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'ROBERTO BARROSO',
+                'phone' => '3214154625',
+                'profile' => 'AdminCentroCosto',
+                'status' => 'Active',
+                'password' => bcrypt('P@SsAdmin2025Mega')
+            ]
+        );
+
         User::updateOrCreate(
             ['email' => 'coord-logistica@carnesfriasmega.co'], // Condición para identificar el usuario
             [
@@ -384,6 +395,29 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('02CajaSub@.2025*')
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'cajero-chia1@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'CAJERO 1 CHIA',
+                'phone' => '3214154625',
+                'profile' => 'Cajero',
+                'status' => 'Active',
+                'password' => bcrypt('BsmCajaChi@1')
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'cajero-chia2@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'CAJERO 2 CHIA',
+                'phone' => '3214154625',
+                'profile' => 'Cajero',
+                'status' => 'Active',
+                'password' => bcrypt('ZupCajaChi@2')
+            ]
+        );
+
 
         $usuarios = User::where('name', 'like', '%CAJERO%')
             // ->orWhere('name', 'like', '%CAJERO%')
