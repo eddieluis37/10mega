@@ -287,7 +287,7 @@ class PermissionsSeeder extends Seeder
             [
                 'name' => 'ADMIN CHIA',
                 'phone' => '3214154625',
-                'profile' => 'AdminCentroCosto',
+                'profile' => 'Admin',
                 'status' => 'Active',
                 'password' => bcrypt('P@SsAdmin2025Mega')
             ]
