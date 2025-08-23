@@ -555,6 +555,13 @@ class PermissionsSeeder extends Seeder
             'acceder_cargue_productos_term',
             'crear_cargue_productos_term',
             'editar_cargue_productos_term',
+
+
+            'ver_contabilidad',
+            'acceder_contabilidad',
+            'crear_contabilidad',
+            'editar_contabilidad',           
+            
         ]);
 
 
