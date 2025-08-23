@@ -30,11 +30,11 @@ class CentroCostoProductController extends Controller
         $category = Category::orderBy('name', 'asc')->get();
         //  $centros = Store::Where('status', 1)->get();
         $centros = Store::orderBy('name', 'asc')->get();
-        $centroCostoProductos = Centro_costo_product::all();
+      //  $centroCostoProductos = Centro_costo_product::all();
 
         $newToken = Crypt::encrypt(csrf_token());
 
-        return view("inventory.centro_costo_products", compact('category', 'centros', 'centroCostoProductos'));
+        return view("inventory.centro_costo_products", compact('category', 'centros'));
 
         // return view('hola');
         //  return view('inventory.diary');

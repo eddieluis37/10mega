@@ -462,6 +462,22 @@ class PermissionsSeeder extends Seeder
             'crear_orders',
             'editar_orders',
             'eliminar_orders',
+
+            'ver_inventario',
+            'acceder_inventario',
+            'crear_inventario',
+
+            'ver_inventario_si',
+            'acceder_inventario_si',
+            'crear_inventario_si',
+
+            'ver_inventario_stockfisico',
+            'acceder_inventario_stockfisico',
+            'crear_inventario_stockfisico',           
+
+            'ver_contabilidad',
+            'acceder_contabilidad',
+            'crear_contabilidad',
         ]);
 
 
@@ -560,8 +576,8 @@ class PermissionsSeeder extends Seeder
             'ver_contabilidad',
             'acceder_contabilidad',
             'crear_contabilidad',
-            'editar_contabilidad',           
-            
+            'editar_contabilidad',
+
         ]);
 
 
