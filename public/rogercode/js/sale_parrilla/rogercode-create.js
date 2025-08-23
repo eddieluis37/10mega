@@ -29,8 +29,21 @@ console.log("centro " + centrocosto);
 var cliente = document.getElementById("cliente").value;
 console.log("cliente " + cliente);
 
-$(document).ready(function () {
-    // Inicializar select2 usando AJAX para buscar productos
+// Helpers de formato
+function parseNumber(value) {
+    if (value === null || value === undefined || value === '') return 0;
+    // Quitar símbolos de moneda, espacios, miles y comas si se usan como separador de miles
+    const v = String(value).replace(/\s/g, '').replace(/\$/g, '').replace(/\./g, '').replace(/,/g, '.');
+    // Si venía "1.234.567,89" ya convertimos a "1234567.89"
+    const n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+}
+
+// Lee saleId expuesto en la vista (input hidden o variable global window.SALE_ID)
+const saleId = window.SALE_ID || $("#saleId").val() || null;
+
+$(function () {
+    // Inicializar Select2 - un único inicializador, evita duplicados
     $(".select2Prod").select2({
         placeholder: "Seleccione un producto o escanee el código de barras",
         theme: "bootstrap-5",
@@ -43,110 +56,165 @@ $(document).ready(function () {
             delay: 250,
             data: function (params) {
                 return {
-                    q: params.term, // Término de búsqueda
+                    q: params.term || "",
+                    sale_id: saleId,
                 };
             },
             processResults: function (data) {
-                // Como el controlador retorna un id único (inventario_id) en el campo "id",
-                // simplemente se pasan los resultados al select2
-                return {
-                    results: data,
-                };
+                // data debe venir en el formato que definimos en el backend
+                return { results: data };
             },
             cache: true,
         },
         templateResult: function (item) {
+            if (!item) return;
             if (item.loading) return item.text;
-            // Aquí se puede personalizar la plantilla de cada opción si es necesario
-            return item.text;
+            return item.text; // ya viene con formato en backend
         },
         templateSelection: function (item) {
-            if (!item.id) return item.text;
-            return item.text;
+            if (!item) return;
+            return item.text || item.product_id || item.id;
         },
-        escapeMarkup: function (markup) {
-            return markup; // Permite renderizar HTML en las plantillas
+        escapeMarkup: function (m) {
+            return m;
         },
     });
 
-    // Al seleccionar una opción se extraen y asignan los valores a los campos ocultos
-    $("#producto").on("select2:select", function (e) {
-        var data = e.params.data;
-        console.log("Opción seleccionada:", data);
+    // Cuando se selecciona una opción del select2 (inventario -> producto)
+    $(".select2Prod").on("select2:select", function (e) {
+        const data = e.params.data;
+        console.log("Select2 seleccionado:", data);
 
+        // Rellenar campos ocultos del formulario
         $("#lote_id").val(data.lote_id || "");
-        $("#inventario_id").val(data.inventario_id || "");
+        $("#inventario_id").val(data.inventario_id || data.id || "");
         $("#stock_ideal").val(data.stock_ideal || "");
         $("#store_id").val(data.store_id || "");
         $("#store_name").val(data.store_name || "");
 
-        // Se utiliza el id del producto (product_id) para actualizar otros valores relacionados
-        actualizarValoresProducto(data.product_id, data.lote_id);
+        // Si el select2 devuelve product_id usa ese, si no intenta derivar del inventario
+        const productId = data.product_id || data.productId || null;
+        const inventarioId = data.inventario_id || data.id || null;
+
+        // Llamar al endpoint para obtener precios y promociones (cantidad por defecto 1)
+        obtenerPreciosYPromo(productId, inventarioId, 1);
     });
 
-    // Limpia el mensaje de error al modificar el input de cantidad
+    // Al cambiar la cantidad, recalcular promo_value en tiempo real
     $("#quantity").on("input", function () {
+        // limpia posibles mensajes de error
         $(this).closest(".form-group").find(".error-message").text("");
+
+        const qty = parseNumber($(this).val());
+        const productId = $("#producto").val()
+            ? $("#producto").select2("data")[0]?.product_id || null
+            : $("#product_id").val() || null;
+        const inventarioId = $("#inventario_id").val() || null;
+
+        // Si no hay productId, nada que hacer
+        if (!productId) return;
+
+        // Elegimos: -> solicitar al servidor la promo calculada para la cantidad actual,
+        // así respetamos reglas exactas (se sobrecarga poco, es seguro).
+        obtenerPreciosYPromo(productId, inventarioId, qty);
+    });
+
+    // Si el input price es editable y quieres que al cambiar price se recalcule la promo:
+    $("#price").on("input", function () {
+        const qty = parseNumber($("#quantity").val()) || 1;
+        const productId = $("#producto").val()
+            ? $("#producto").select2("data")[0]?.product_id || null
+            : $("#product_id").val() || null;
+        const inventarioId = $("#inventario_id").val() || null;
+        if (!productId) return;
+        // Recalcular usando server para mantener reglas centrales
+        obtenerPreciosYPromo(productId, inventarioId, qty);
     });
 });
 
-function actualizarValoresProducto(productId, loteId) {
+/**
+ * Llama al endpoint /sa-obtener-precios-producto para obtener:
+ * - precio unitario (precio)
+ * - impuestos (iva, otro_impuesto, impoconsumo)
+ * - porc_descuento (de la lista de precio)
+ * - promo_percent, promo_min_quantity, promo_value (según quantity enviado)
+ *
+ * Actualiza campos del formulario: #price, #porc_iva, #porc_otro_impuesto, #porc_impoconsumo,
+ * #porc_desc, #promo_percent, #promo_value, #applied_promotion_id, etc.
+ */
+function obtenerPreciosYPromo(productId, inventarioId, quantity) {
+    // Protección básica
+    if (!productId) return;
+
+    // Lee valores actuales de centro de costo y cliente
+    const centrocosto = $("#centrocosto").val() || null;
+    const cliente = $("#cliente").val() || null;
+
     $.ajax({
         url: "/sa-obtener-precios-producto",
-        type: "GET",
+        method: "GET",
+        dataType: "json",
         data: {
             productId: productId,
-            loteId: loteId, // Se envía el lote_id seleccionado
-            centrocosto: $("#centrocosto").val(), // Obtén el valor del campo centrocosto
-            cliente: $("#cliente").val(), // Obtén el valor del campo centrocosto
+            inventario_id: inventarioId,
+            quantity: quantity,
+            centrocosto: centrocosto,
+            cliente: cliente,
         },
-        success: function (response) {
-            // Actualiza los valores en los campos de entrada del centro de costo
+        success: function (resp) {
+            // RESPUESTA esperada:
+            // { precio, iva, otro_impuesto, impoconsumo, porc_descuento,
+            //   promo_percent, promo_min_quantity, promo_value, applied_promotion_id }
 
-            const formattedPrice = formatCantidadSinCero(response.precio);
-
+            // Precio unitario (para mostrar en input de price)
+        
+            const formattedPrice = formatCantidadSinCero(resp.precio);
             $("#price").val(formattedPrice);
-            $("#porc_iva").val(response.iva);
-            $("#porc_otro_impuesto").val(response.otro_impuesto);
-            $("#porc_impoconsumo").val(response.impoconsumo);
-            $("#porc_desc").val(response.porc_descuento);
+
+            // Impuestos/porcentajes
+            $("#porc_iva").val(resp.iva ?? 0);
+            $("#porc_otro_impuesto").val(resp.otro_impuesto ?? 0);
+            $("#porc_impoconsumo").val(resp.impoconsumo ?? 0);
+
+            // Descuento de lista de precio
+            $("#porc_desc").val(resp.porc_descuento ?? 0);
+
+            // Promoción
+            const promoPercent = parseFloat(resp.promo_percent || 0);
+            const promoMinQ = resp.promo_min_quantity ?? null;
+            const promoValue = parseFloat(resp.promo_value || 0);
+            const appliedPromotionId = resp.applied_promotion_id || null;
+
+            $("#promo_percent").val(promoPercent.toFixed(2));
+            $("#promo_min_quantity").val(promoMinQ ?? "");
+            $("#applied_promotion_id").val(appliedPromotionId ?? "");
+
+            // campo visible o label para mostrar valor promoción por línea
+            $("#promo_value").val((promoValue)); // ejemplo: input oculto
+            $("#promo_value_display").text(
+                promoValue ? (promoValue) : "$0.00"
+            );
+
+            // También podrías recalcular y mostrar el total pre-visualizado:
+            // total_bruto_input = price * quantity
+            const qty = parseNumber($("#quantity").val()) || quantity || 1;
+           /*  const totalBruto = precioUnitario * qty;
+            $("#total_bruto_preview").text((totalBruto)); */
         },
         error: function (xhr, status, error) {
-            // Maneja el error si la solicitud AJAX falla
-            console.log(error);
+            console.error(
+                "Error al obtener precios/promo:",
+                error,
+                xhr.responseText
+            );
+            // limpiar campos de promo si se produjo error
+            $("#promo_percent").val("0.00");
+            $("#promo_value").val("0.00");
+            $("#applied_promotion_id").val("");
+            $("#promo_value_display").text("$0.00");
         },
     });
 }
-
-$(document).ready(function () {
-    $(".select2Prod").select2({
-        placeholder: "Seleccione un producto",
-        width: "100%",
-        theme: "bootstrap-5",
-        allowClear: true,
-        ajax: {
-            url: "/products/search/parrilla",
-            dataType: "json",
-            delay: 250,
-            data: function (params) {
-                return {
-                    q: params.term, // El término de búsqueda (puede ser nombre o código de barras)
-                };
-            },
-            processResults: function (data) {
-                return {
-                    results: data,
-                };
-            },
-            cache: true,
-        },
-        placeholder: "Seleccione un producto o escanee el código de barras",
-        minimumInputLength: 1,
-        width: "100%",
-        theme: "bootstrap-5",
-        allowClear: true,
-    });
-});
 
 tbodyTable.addEventListener("click", (e) => {
     e.preventDefault();
@@ -193,7 +261,8 @@ tbodyTable.addEventListener("click", (e) => {
             porc_iva.value = editReg.porc_iva;
             porc_otro_impuesto.value = editReg.porc_otro_impuesto;
             porc_impoconsumo.value = editReg.porc_impoconsumo;
-            porc_desc.value = editReg.porc_desc;            
+            porc_desc.value = editReg.porc_desc;
+            promo_percent.value = editReg.promo_percent;       
 
             // Usar inventario_id en el select2, no product_id
             let select = $(".select2Prod");
@@ -231,34 +300,33 @@ btnAdd.addEventListener("click", (e) => {
 
     // 3. Envía al método savedetail
     sendData("/salesavedetail", dataform, token)
-      .then((result) => {
-        console.log("Respuesta savedetail:", result);
+        .then((result) => {
+            console.log("Respuesta savedetail:", result);
 
-        if (result.status === 1) {
-            // reset campos
-            $("#regdetailId").val("0");
-            $("#producto").val("").trigger("change");
-            formDetail.reset();
-            showData(result);
-        }
+            if (result.status === 1) {
+                // reset campos
+                $("#regdetailId").val("0");
+                $("#producto").val("").trigger("change");
+                formDetail.reset();
+                showData(result);
+            }
 
-        if (result.status === 0) {
-            let errors = result.errors;
-            console.log("Errores validación:", errors);
-            $.each(errors, function (field, messages) {
-                let $input = $('[name="' + field + '"]');
-                let $errorContainer = $input
-                    .closest(".form-group")
-                    .find(".error-message");
-                $errorContainer.html(messages[0]).show();
-            });
-        }
-      })
-      .catch((err) => {
-        console.error("Error en la petición savedetail:", err);
-      });
+            if (result.status === 0) {
+                let errors = result.errors;
+                console.log("Errores validación:", errors);
+                $.each(errors, function (field, messages) {
+                    let $input = $('[name="' + field + '"]');
+                    let $errorContainer = $input
+                        .closest(".form-group")
+                        .find(".error-message");
+                    $errorContainer.html(messages[0]).show();
+                });
+            }
+        })
+        .catch((err) => {
+            console.error("Error en la petición savedetail:", err);
+        });
 });
-
 
 const showData = (data) => {
     let dataAll = data.array;
@@ -275,6 +343,10 @@ const showData = (data) => {
                 )}</td>                 
                 <td>$${formatCantidadSinCero(element.descuento)}</td> 
                 <td>$${formatCantidadSinCero(element.descuento_cliente)}</td>
+                <td>${formatCantidadSinCero(
+                    element.promo_percent
+                )}</td>
+                <td>$${formatCantidadSinCero(element.promo_value)}</td> 
                 <td>$${formatCantidadSinCero(element.total_bruto)}</td>   
                 <td>${formatCantidadSinCero(element.porc_iva)}</td> 
                 <td>$${formatCantidadSinCero(element.iva)}</td> 
@@ -306,6 +378,8 @@ const showData = (data) => {
         <tr>
             <th>Totales</th>
             <td></td>
+            <td></td>
+            <td></td>    
             <td></td>
             <td></td>    
             <td></td>
