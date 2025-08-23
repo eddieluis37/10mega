@@ -197,7 +197,7 @@ class porcentrocostoController extends Controller
 
         $data = DB::table('centro_costo_products as ccp')
             ->join('products as pro', 'pro.id', '=', 'ccp.products_id')
-            ->join('centro_costo_store as ccs', 'ccs.centro_costo_id', '=', 'ccp.centrocosto_id')
+          //  ->join('centro_costo_store as ccs', 'ccs.centro_costo_id', '=', 'ccp.centrocosto_id')
             ->join('categories as cat', 'pro.category_id', '=', 'cat.id')
             ->select(
                 'cat.name as namecategoria',
@@ -215,7 +215,7 @@ class porcentrocostoController extends Controller
                 'ccp.stock as stock',
                 'ccp.fisico as fisico'
             )
-            ->where('ccs.store_id', $centrocostoId)
+          //  ->where('ccs.store_id', $centrocostoId)
             ->where(function ($query) {
                 $query->where('ccp.tipoinventario', 'cerrado')
                     ->orWhere('ccp.tipoinventario', 'inicial');
