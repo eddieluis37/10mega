@@ -199,7 +199,7 @@
 											</thead>
 											<tbody>
 												<tr>
-													<th scope="row" style="text-align: left">Medios electrónicos</th>
+													<th scope="row" style="text-align: left">MediosElectró-Devol</th>
 													<td>
 														<input type="text" id="valor_a_pagar_tarjeta" name="valor_a_pagar_tarjeta"
 															value="$ {{ number_format($arrayTotales['valorApagarTarjeta'], 0, ',', '.') }}"
@@ -249,14 +249,14 @@
 													@endforeach
 												@endif
 
-												<tr>
+												<!-- <tr>
 													<th scope="row" style="text-align: left">Total</th>
 													<td>
 														<input type="text" name="valorTotal"
 															value="$ {{ number_format($arrayTotales['valorTotal'], 0, ',', '.') }}"
 															style="text-align: right; font-weight: bold; color: black" readonly>
 													</td>
-												</tr>
+												</tr> -->
 											</tbody>
 										</table>
 									</div><!-- /.table-responsive -->
@@ -288,7 +288,7 @@
 												</td>
 											</tr>
 											<tr>
-												<th scope="row" style="text-align: left">Efectivo</th>
+												<th scope="row" style="text-align: left">Efectivo-Devolución</th>
 												<td>
 													<input type="text" id="efectivo" name="efectivo"
 														value="$ {{ number_format($arrayTotales['valorEfectivo'], 0, ',', '.') }}"
