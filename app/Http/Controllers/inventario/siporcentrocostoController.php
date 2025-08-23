@@ -29,7 +29,8 @@ class siporcentrocostoController extends Controller
 
         $centros = Centrocosto::Where('status', 1)->get();
         $stores = Store::orderBy('id', 'asc')->get();
-        $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
+        // $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
+        $categorias = Category::orderBy('name', 'asc')->get();
 
         // llama al metodo para calcular el stock
         //   $this->totales(request());
@@ -39,7 +40,7 @@ class siporcentrocostoController extends Controller
         return view('inventario.si_por_centro_costo.index', compact('centros', 'stores', 'categorias', 'startDate', 'endDate', 'totalStock'));
     }
 
-    public function SishowPorCentroCosto(Request $request)    
+    public function SishowPorCentroCosto(Request $request)
     {
         $centroId    = $request->input('centroId',   -1);
         $storeId     = $request->input('storeId',    -1);
@@ -126,8 +127,8 @@ class siporcentrocostoController extends Controller
                     'codigoLote'            => $inventario->lote->codigo,
                     'fechaVencimientoLote'  => $inventario->lote->fecha_vencimiento,
                     'CategoriaNombre'       => $inventario->product->category->name,
-                    'ProductoNombre'        => $inventario->product->name,                   
-                    'StockIdeal'            => $inventario->stock_ideal,                  
+                    'ProductoNombre'        => $inventario->product->name,
+                    'StockIdeal'            => $inventario->stock_ideal,
                 ];
             }
             //  Log::info('Inventarios:', ['inventarios' => $resultados]); // larvel.log

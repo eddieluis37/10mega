@@ -29,7 +29,9 @@ class porcentrocostoController extends Controller
 
         $centros = Centrocosto::Where('status', 1)->get();
         $stores = Store::orderBy('id', 'asc')->get();
-        $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
+    //    $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
+
+        $categorias = Category::orderBy('name', 'asc')->get();
 
         // llama al metodo para calcular el stock
         //   $this->totales(request());
