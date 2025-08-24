@@ -568,7 +568,7 @@ class saleparrillaController extends Controller
         // 1) Obtener los IDs de las bodegas asociadas al usuario autenticado
         $storeIds = DB::table('store_user')
             ->where('user_id', auth()->id())
-            ->whereIn('store_id', ['15', '19', '28'])
+            ->whereIn('store_id', ['2'])
             ->pluck('store_id')
             ->toArray();
 
