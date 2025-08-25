@@ -118,10 +118,13 @@ class saleparrillaController extends Controller
         return view('sale_autoservicio.index', compact('ventas', 'direccion', 'centros', 'defaultCentro', 'clientes', 'vendedores', 'domiciliarios', 'subcentrodecostos'));
     }
 
-    public function showAutoservicio()
+    public function showParrilla()
     {
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
         $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
+
+        // Obtener el id del usuario autenticado
+        $userId = Auth::id(); // Aquí obtenemos solo el ID del usuario autenticado
 
         $data = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
@@ -138,6 +141,7 @@ class saleparrillaController extends Controller
                     AND p.type IN ('combo','receta')
                 ) > 0 as has_comanda")
             ])
+            ->where('sa.user_id', $userId)
             ->whereIn('c.id', $userCentrocostos)
             ->whereIn('sa.tipo', ['4', '5'])
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
@@ -187,7 +191,7 @@ class saleparrillaController extends Controller
                     <i class="fas fa-receipt"></i>
                  </a>';
                 }
-                
+
                 // Si el campo tipo es '5', se muestran los botones de Despacho y Remisión
                 if ($data->tipo == '5') {
                     $btn .= '<a href="sale/showDespacho/' . $data->id . '" class="btn btn-warning" title="Ver Despacho" target="_blank">
@@ -1292,7 +1296,7 @@ class saleparrillaController extends Controller
             ], 404);
         }
     }
-   
+
     public function storeAutoservicioMostrador(Request $request) // Autoservicio-Mostrador
     {
         //   $centros = Centrocosto::WhereIn('id', [1])->get();

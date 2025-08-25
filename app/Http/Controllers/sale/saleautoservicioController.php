@@ -124,6 +124,9 @@ class saleautoservicioController extends Controller
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
         $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
 
+        // Obtener el id del usuario autenticado
+        $userId = Auth::id(); // Aquí obtenemos solo el ID del usuario autenticado
+
         $data = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
@@ -139,6 +142,7 @@ class saleautoservicioController extends Controller
                     AND p.type IN ('combo','receta')
                 ) > 0 as has_comanda")
             ])
+            ->where('sa.user_id', $userId)
             ->whereIn('c.id', $userCentrocostos)
             ->whereIn('sa.tipo', ['4', '5'])
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
