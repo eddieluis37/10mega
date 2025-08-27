@@ -259,8 +259,29 @@ class PermissionsSeeder extends Seeder
         if ($user) {
             $user->syncPermissions($allPermissions); // Asigna todos los permisos
         }
+      
+        User::updateOrCreate(
+            ['email' => 'auxiliar_erp@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'AUXILIAR',
+                'phone' => '3214154625',
+                'profile' => 'Comercial',
+                'status' => 'Active',
+                'password' => bcrypt('Am3G4+ERP')
+            ]
+        );
 
-       
+         User::updateOrCreate(
+            ['email' => 'comercial1@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'COMERCIAL',
+                'phone' => '3214154625',
+                'profile' => 'Comercial',
+                'status' => 'Active',
+                'password' => bcrypt('MeG4coMer*@l')
+            ]
+        );
+
         User::updateOrCreate(
             ['email' => 'coord-logistica@carnesfriasmega.co'], // Condición para identificar el usuario
             [
