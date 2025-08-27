@@ -80,7 +80,7 @@ class UserSeeder extends Seeder
             'email' => 'costos@carnesfriasmega.co',
             'profile' => 'Costos',
             'status' => 'Active',
-            'password' => bcrypt('costos@carnesfriasmega.co')
+            'password' => bcrypt('Cost0s+M3g*')
         ]);
         User::create([
             'name' => 'Tesoreria',

@@ -311,12 +311,22 @@ class PermissionsSeeder extends Seeder
                 'password' => bcrypt('SubG3r3nt3M@*')
             ]
         );
+         User::updateOrCreate(
+            ['email' => 'marketing@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'MELIZA',
+                'phone' => '3014154625',
+                'profile' => 'Comercial',
+                'status' => 'Active',
+                'password' => bcrypt('M4k3th1nDMeg@')
+            ]
+        );
         User::updateOrCreate(
             ['email' => 'administradora@carnesfriasmega.co'], // Condición para identificar el usuario
             [
                 'name' => 'ELSA LILIANA BELLO SENA',
                 'phone' => '3014154625',
-                'profile' => 'Comercial',
+                'profile' => 'Admin',
                 'status' => 'Active',
                 'password' => bcrypt('Bell02005*')
             ]
@@ -740,6 +750,26 @@ class PermissionsSeeder extends Seeder
                 'profile' => 'FacturacionPlanta',
                 'status' => 'Active',
                 'password' => bcrypt('Fact02Planta.*')
+            ]
+        );
+        User::updateOrCreate(
+            ['email' => 'facturacionplanta3@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'FACTURACIÓN PLANTA 3',
+                'phone' => '3214154625',
+                'profile' => 'FacturacionPlanta',
+                'status' => 'Active',
+                'password' => bcrypt('Fact03Planta.*')
+            ]
+        );
+        User::updateOrCreate(
+            ['email' => 'facturacionplanta4@carnesfriasmega.co'], // Condición para identificar el usuario
+            [
+                'name' => 'FACTURACIÓN PLANTA 4',
+                'phone' => '3214154625',
+                'profile' => 'FacturacionPlanta',
+                'status' => 'Active',
+                'password' => bcrypt('Fact024lanta.*')
             ]
         );
 
