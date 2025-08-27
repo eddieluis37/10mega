@@ -260,17 +260,7 @@ class PermissionsSeeder extends Seeder
             $user->syncPermissions($allPermissions); // Asigna todos los permisos
         }
 
-        User::updateOrCreate(
-            ['email' => 'implementador@carnesfriasmega.co'], // Condición para identificar el usuario
-            [
-                'name' => 'ROBERTO BARROSO',
-                'phone' => '3214154625',
-                'profile' => 'Comercial',
-                'status' => 'Active',
-                'password' => bcrypt('Imple2025*.')
-            ]
-        );
-
+       
         User::updateOrCreate(
             ['email' => 'coord-logistica@carnesfriasmega.co'], // Condición para identificar el usuario
             [
