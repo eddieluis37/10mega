@@ -43,7 +43,7 @@
                                     <select class="form-control form-control-sm select2Prod" name="producto" id="producto" required="">
                                         <option value="">Seleccione el producto</option>
                                         @foreach ($prod as $p)
-                                        <option value="{{$p->id}}">{{$p->name}}</option>
+                                        <option value="{{$p->id}}">{{$p->name}} - Cod:{{$p->code}}</option>
                                         @endforeach
                                     </select>
                                     <span class="text-danger error-message"></span>
