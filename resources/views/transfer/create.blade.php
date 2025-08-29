@@ -92,7 +92,7 @@
 								
 								<div class="col-md-2">
 									<div class="form-group">
-										<label for="" class="form-label">KG|UND|trasladar</label>
+										<label for="" class="form-label">KG|UND|traslado</label>
 										<div class="input-group flex-nowrap">
 											<input type="text" id="kgrequeridos" name="kgrequeridos" class="form-control" placeholder="EJ: 10.00">
 											<span class="input-group-text" id="addon-wrapping">Q</span>
