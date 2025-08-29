@@ -25,7 +25,7 @@ use App\Models\Lote;
 use App\Models\MovimientoInventario;
 use App\Models\updating\updating_transfer;
 use App\Models\updating\updating_transfer_details;
-
+use GuzzleHttp\Client;
 
 class transferController extends Controller
 {
@@ -986,7 +986,6 @@ class transferController extends Controller
                     }
                 },
             ],
-            // Opcional: si quieres poder enviar lote desde el front
             'loteTraslado'  => 'sometimes|nullable|integer',
         ]);
 
@@ -997,6 +996,9 @@ class transferController extends Controller
                 'errors'  => $validator->errors(),
             ], 422);
         }
+
+        // arreglo para guardar errores en llamadas a Traza
+        $trazaErrors = [];
 
         DB::beginTransaction();
         try {
@@ -1009,6 +1011,11 @@ class transferController extends Controller
             $details = transfer_details::where('transfers_id', $transfer->id)
                 ->where('status', '1')
                 ->get();
+
+            // preparar cliente HTTP (si no existe TRAZA_URL fallará)
+            $trazaUrl = config('services.traza.url', env('TRAZA_API_URL'));
+            $trazaKey = config('services.traza.key', env('TRAZA_API_KEY'));
+            $http = new Client(['timeout' => 10]);
 
             foreach ($details as $detail) {
                 // 4) Me aseguro de tener loteId
@@ -1055,7 +1062,6 @@ class transferController extends Controller
                     'product_id' => $productId,
                 ]);
 
-                // Si ya existía, solo sumo; si es nuevo, seteo stock igual a cantidad
                 $invDestino->stock_ideal      = ($invDestino->exists
                     ? $invDestino->stock_ideal + $quantity
                     : $quantity);
@@ -1070,6 +1076,71 @@ class transferController extends Controller
                     'product_id'       => $productId,
                     'cantidad'         => $quantity,
                 ]);
+
+                // -------------- ENVÍO A TRAZA (si destino es 34) ---------------
+                if ((int)$request->bodegaDestino === 34 && ! empty($trazaUrl) && ! empty($trazaKey)) {
+                    try {
+                        // obtengo datos del producto / lote si existen
+                        $product = Product::with(['brand', 'category', 'unitOfMeasure'])->find($productId);
+
+                        // intento obtener info del lote desde tabla lotes (ajusta si tu tabla/modelo es otro)
+                        $lote = null;
+                        if (class_exists(\App\Models\Lote::class)) {
+                            $lote = Lote::find($loteId);
+                        } else {
+                            $lote = DB::table('lotes')->where('id', $loteId)->first();
+                        }
+
+                        $payload = [
+                            'insumo_erp_id'   => $product->erp_id ?? $product->id ?? $productId,
+                            'nombre_insumo'   => $product->name ?? $product->nombre ?? 'Producto ' . $productId,
+                            'lote_insumo'     => $lote->code ?? $lote->codigo ?? $loteId,
+                            'saldo_actual'    => $invDestino->stock_ideal ?? $quantity,
+                            'unidad_medida'   => $product->unitOfMeasure->name ?? $product->unidad ?? 'N/A',
+                            'precio_unitario' => $product->cost ?? $product->precio ?? 0,
+                            'nombre_proveedor' => $product->brand->name ?? $product->brand_name ?? null,
+                            'tipo_insumo'     => $product->category_id ?? $product->category->id ?? null,
+                            'fecha_vencimiento' => $lote->fecha_vencimiento ?? $lote->fecha ?? null,
+                            'id_categoria'    => $product->category->id ?? $product->category_id ?? null,
+                            'nombre_categoria' => $product->category->name ?? $product->category_name ?? null,
+                        ];
+
+                        // hacemos GET con query params para imitar tu ejemplo (si prefieres POST cambia a post + json)
+                        $response = $http->get($trazaUrl, [
+                            'headers' => [
+                                'X-API-KEY' => $trazaKey,
+                                'Accept' => 'application/json',
+                            ],
+                            'query' => $payload,
+                        ]);
+
+                        // opcional: parseo respuesta y guardo si quieres
+                        $statusCode = $response->getStatusCode();
+                        $body = (string) $response->getBody();
+                        if ($statusCode >= 400) {
+                            $trazaErrors[] = [
+                                'product_id' => $productId,
+                                'lote_id' => $loteId,
+                                'error' => "Status {$statusCode}",
+                                'response' => $body,
+                            ];
+                            Log::warning("Traza WS returned status {$statusCode}", ['product' => $productId, 'lote' => $loteId, 'body' => $body]);
+                        }
+                    } catch (\Throwable $ex) {
+                        // no interrumpe el proceso principal, sólo registramos el error
+                        $trazaErrors[] = [
+                            'product_id' => $productId,
+                            'lote_id'    => $loteId,
+                            'error'      => $ex->getMessage(),
+                        ];
+                        Log::error('Error enviando a Traza', [
+                            'product_id' => $productId,
+                            'lote_id' => $loteId,
+                            'exception' => $ex->getMessage(),
+                        ]);
+                    }
+                }
+                // ---------------------------------------------------------------
             }
 
             // 7) Marcar transferencia como “procesada”
@@ -1078,10 +1149,18 @@ class transferController extends Controller
 
             DB::commit();
 
-            return response()->json([
+            $response = [
                 'status'  => 1,
                 'message' => 'Inventario actualizado correctamente.',
-            ]);
+            ];
+
+            if (! empty($trazaErrors)) {
+                // devolvemos aviso de errores en las llamadas traza
+                $response['warning'] = 'Algunas llamadas al servicio de Traza fallaron.';
+                $response['traza_errors'] = $trazaErrors;
+            }
+
+            return response()->json($response);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

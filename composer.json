@@ -10,7 +10,7 @@
         "barryvdh/laravel-dompdf": "^2.0",
         "darryldecode/cart": "^4.2",
         "doctrine/dbal": "^3.0",
-        "guzzlehttp/guzzle": "^7.2",
+        "guzzlehttp/guzzle": "^7.9",
         "kylekatarnls/laravel-carbon-2": "^1.0",
         "laravel/framework": "^10.0",
         "laravel/passport": "^11.0",

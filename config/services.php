@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'traza' => [
+        'url' => env('TRAZA_API_URL'),
+        'key' => env('TRAZA_API_KEY'),
+    ],
+
 ];
