@@ -1080,24 +1080,19 @@ class transferController extends Controller
                 // -------------- ENVÍO A TRAZA (si destino es 34) ---------------
                 if ((int)$request->bodegaDestino === 34 && ! empty($trazaUrl) && ! empty($trazaKey)) {
                     try {
-                        // obtengo datos del producto / lote si existen
+                        // obtengo datos del producto / lote si existen (igual que antes)
                         $product = Product::with(['brand', 'category', 'unitOfMeasure'])->find($productId);
-
-                        // intento obtener info del lote desde tabla lotes (ajusta si tu tabla/modelo es otro)
-                        $lote = null;
-                        if (class_exists(\App\Models\Lote::class)) {
-                            $lote = Lote::find($loteId);
-                        } else {
-                            $lote = DB::table('lotes')->where('id', $loteId)->first();
-                        }
+                        $lote = class_exists(\App\Models\Lote::class)
+                            ? Lote::find($loteId)
+                            : DB::table('lotes')->where('id', $loteId)->first();
 
                         $payload = [
                             'insumo_erp_id'   => $product->erp_id ?? $product->id ?? $productId,
                             'nombre_insumo'   => $product->name ?? $product->nombre ?? 'Producto ' . $productId,
                             'lote_insumo'     => $lote->code ?? $lote->codigo ?? $loteId,
-                            'saldo_actual'    => $invDestino->stock_ideal ?? $quantity,
+                            'saldo_actual'    => number_format($invDestino->stock_ideal ?? $quantity, 2, '.', ''),
                             'unidad_medida'   => $product->unitOfMeasure->name ?? $product->unidad ?? 'N/A',
-                            'precio_unitario' => $product->cost ?? $product->precio ?? 0,
+                            'precio_unitario' => number_format($product->cost ?? $product->precio ?? 0, 2, '.', ''),
                             'nombre_proveedor' => $product->brand->name ?? $product->brand_name ?? null,
                             'tipo_insumo'     => $product->category_id ?? $product->category->id ?? null,
                             'fecha_vencimiento' => $lote->fecha_vencimiento ?? $lote->fecha ?? null,
@@ -1105,29 +1100,31 @@ class transferController extends Controller
                             'nombre_categoria' => $product->category->name ?? $product->category_name ?? null,
                         ];
 
-                        // hacemos GET con query params para imitar tu ejemplo (si prefieres POST cambia a post + json)
-                        $response = $http->get($trazaUrl, [
+                        $response = $http->post($trazaUrl, [
                             'headers' => [
                                 'X-API-KEY' => $trazaKey,
-                                'Accept' => 'application/json',
+                                'Accept'    => 'application/json',
+                                'Content-Type' => 'application/json',
                             ],
-                            'query' => $payload,
+                            'json' => $payload,
+                            'timeout' => 15,
                         ]);
 
-                        // opcional: parseo respuesta y guardo si quieres
                         $statusCode = $response->getStatusCode();
                         $body = (string) $response->getBody();
+
                         if ($statusCode >= 400) {
                             $trazaErrors[] = [
                                 'product_id' => $productId,
-                                'lote_id' => $loteId,
-                                'error' => "Status {$statusCode}",
-                                'response' => $body,
+                                'lote_id'    => $loteId,
+                                'error'      => "Status {$statusCode}",
+                                'response'   => $body,
                             ];
                             Log::warning("Traza WS returned status {$statusCode}", ['product' => $productId, 'lote' => $loteId, 'body' => $body]);
+                        } else {
+                            Log::info('Traza sync OK', ['product' => $productId, 'lote' => $loteId, 'response' => $body]);
                         }
                     } catch (\Throwable $ex) {
-                        // no interrumpe el proceso principal, sólo registramos el error
                         $trazaErrors[] = [
                             'product_id' => $productId,
                             'lote_id'    => $loteId,
@@ -1135,12 +1132,11 @@ class transferController extends Controller
                         ];
                         Log::error('Error enviando a Traza', [
                             'product_id' => $productId,
-                            'lote_id' => $loteId,
-                            'exception' => $ex->getMessage(),
+                            'lote_id'    => $loteId,
+                            'exception'  => $ex->getMessage(),
                         ]);
                     }
                 }
-                // ---------------------------------------------------------------
             }
 
             // 7) Marcar transferencia como “procesada”
