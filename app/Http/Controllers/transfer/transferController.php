@@ -1093,10 +1093,10 @@ class transferController extends Controller
                         $nombreInsumo = trim((string) ($product->name ?? $product->nombre ?? "Producto {$productId}"));
                         $loteCode = trim((string) ($lote->code ?? $lote->codigo ?? "Lote_{$loteId}"));
                         $saldoActual = number_format($invDestino->stock_ideal ?? $quantity, 2, '.', '');
-                        $unidadMedida = trim((string) ($product->unitOfMeasure->name ?? $product->unidad ?? 'KG'));
+                        $unidadMedida = trim((string) 'KG');
                         $precioUnitario = number_format($product->cost ?? $product->precio ?? 0, 2, '.', '');
                         $nombreProveedor = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
-                        $tipoInsumo = (string) ($product->category_id ?? $product->category->id ?? '1');
+                        $tipoInsumo = trim((string) ($product->category_id ?? $product->category->id ?? '1'));
                         $fechaVenc = isset($lote->fecha_vencimiento) ? (string)$lote->fecha_vencimiento : (string)($lote->fecha ?? null);
                         $idCategoria = (string) ($product->category->id ?? $product->category_id ?? '');
                         $nombreCategoria = trim((string) ($product->category->name ?? $product->category_name ?? ''));
