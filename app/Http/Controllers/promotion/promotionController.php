@@ -300,7 +300,7 @@ class promotionController extends Controller
         $stores = Store::orderBy('id', 'asc')->get();
         $categorias = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
 
-        $venta = Sale::find($id);
+        $venta = Promotion::find($id);
 
         $storeIds = [0];
 
@@ -390,16 +390,16 @@ class promotionController extends Controller
 
     public function getventasdetalle($ventaId, $centrocostoId)
     {
-        $detail = DB::table('sale_details as sd')
-            ->join('products as pro', 'sd.product_id', '=', 'pro.id')
+        $detail = DB::table('promotion_details as pd')
+            ->join('products as pro', 'pd.product_id', '=', 'pro.id')
             ->join('inventarios as i', 'pro.id', '=', 'i.product_id')
-            ->select('sd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')
+            ->select('pd.*', 'pro.name as nameprod', 'pro.code',  'i.stock_ideal as stock')
             /*  ->selectRaw('i.invinicial + i.compraLote + i.alistamiento +
             i.compensados + i.trasladoing - (i.venta + i.trasladosal) stock') */
             ->where([
                 ['i.store_id', $centrocostoId],
-                ['sd.sale_id', $ventaId],
-            ])->orderBy('sd.id', 'DESC')->get();
+                ['pd.promotion_id', $ventaId],
+            ])->orderBy('pd.id', 'DESC')->get();
 
         return $detail;
     }
