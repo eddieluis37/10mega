@@ -624,19 +624,11 @@ class compensadoController extends Controller
                 $currentDateTime = Carbon::now();
                 if (Carbon::parse($currentDateTime->format('Y-m-d'))->gt(Carbon::parse($data->fecha_cierre))) {
                     $btn = '
-                        <div class="text-center">
-                        <a href="" class="btn btn-dark" title="DesposteCerradoPorFecha" target="_blank">
-                            <i class="fas fa-check-circle"></i>
-                        </a>
+                        <div class="text-center">                       
                           <a href="compensado/ordencomprapdfCompensado/' . $data->id . '" class="btn btn-primary" title="OrdenDeCompra" target="_blank">
                         <i class="far fa-file-pdf"></i>
 					    </a>					   
-					    <button class="btn btn-dark" title="Editar Compensado" onclick="showDataForm(' . $data->id . ')" disabled>
-                            <i class="fas fa-edit"></i>
-					    </button>
-					    <button class="btn btn-dark" title="Borrar Compensado" disabled>
-						    <i class="fas fa-trash"></i>
-					    </button>
+					   
                         <a href="compensado/pdfCompensado/' . $data->id . '" class="btn btn-dark" title="VerCompraVencidaPorFecha" target="_blank">
                         <i class="far fa-file-pdf"></i>
 					    </a>
@@ -667,21 +659,16 @@ class compensadoController extends Controller
                         ';
                 } else {
                     $btn = '
-                        <div class="text-center">
-                        <a href="" class="btn btn-dark" title="CompraCerrado" target="_blank">
-                            <i class="fas fa-check-circle"></i>
-                        </a>
-                          </a>
-                          <a href="compensado/ordencomprapdfCompensado/' . $data->id . '" class="btn btn-primary" title="OrdenDeCompra" target="_blank">
+                        <div class="text-center">                     
+                       
+                         <a href="compensado/ordencomprapdfCompensado/' . $data->id . '" class="btn btn-primary" title="OrdenDeCompra" target="_blank">
                         <i class="far fa-file-pdf"></i>
 					    </a>	
-					    <button class="btn btn-dark" title="Compensado" disabled>
-						    <i class="fas fa-eye"></i>
-					    </button>
+					   
                         <a href="compensado/pdfCompensado/' . $data->id . '" class="btn btn-dark" title="VerCompraCerrada" target="_blank">
                         <i class="far fa-file-pdf"></i>
 					    </a>					  
-                        </div>
+                        </div>                         
                         ';
                 }
                 return $btn;
@@ -692,7 +679,16 @@ class compensadoController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     *
+     * <a href="" class="btn btn-dark" title="CompraCerrado" target="_blank">
+                            <i class="fas fa-check-circle"></i>
+        </a>
+        <button class="btn btn-dark" title="Editar Compensado" onclick="showDataForm(' . $data->id . ')" disabled>
+                            <i class="fas fa-edit"></i>
+					    </button>
+					    <button class="btn btn-dark" title="Borrar Compensado" disabled>
+						    <i class="fas fa-trash"></i>
+					    </button>
+
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -882,7 +878,7 @@ class compensadoController extends Controller
                 // 2) Ahora actualizamos el campo `cost` de la tabla products               
                 $productId    = $detalle->products_id;
                 $purchaseCost = $detalle->pcompra;
-                
+
                 $producto = Product::find($productId);
                 if ($producto) {
                     $producto->cost = $purchaseCost;

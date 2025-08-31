@@ -142,6 +142,20 @@
                         <div class="col-sm-12 col-md-3">
                             <div class="task-header">
                                 <div class="form-group">
+                                    <label>TipoInsumo</label>
+                                     <select class="form-control form-control" name="tipoinsumo" id="tipoinsumo">
+                                            <option value="">Seleccione</option>
+                                            <option value="1">CARNICO</option>
+                                            <option value="2">NO CARNICO</option>
+                                            <option value="3">VEGETAL</option>
+                                        </select>
+                                    <span class="text-danger error-message"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            <div class="task-header">
+                                <div class="form-group">
                                     <label>Presentación</label>
                                     <select class="form-control selectVisceras" name="presentacion" id="presentacion" required="">
                                         <option value="">Buscar una presentacion</option>
@@ -239,7 +253,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-12 col-md-12">
                             <div class="mb-3">
                                 <label for="formFile" class="form-label">Seleccione la imagen</label>
                                 <input class="form-control" type="file" id="formFile">

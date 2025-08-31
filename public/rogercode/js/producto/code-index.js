@@ -159,6 +159,7 @@ const showForm = (data) => {
     );
 
     // Convierte a numero
+    const tipoInsumoNumber = Number(resp.tipo_insumo);
     const ivaNumber = Number(resp.iva);
     const otroImpuestoNumber = Number(resp.otro_impuesto);
     const impoconsumoNumber = Number(resp.impoconsumo);
@@ -166,6 +167,7 @@ const showForm = (data) => {
     // Log de tipos y valores despues de conversion
     console.log("Despues de conversion:");
     console.log("iva:", ivaNumber, "Type:", typeof ivaNumber);
+    console.log("tipoinsumo:", tipoInsumoNumber, "Type:", typeof tipoInsumoNumber);
     console.log(
         "otro_impuesto:",
         otroImpuestoNumber,
@@ -189,6 +191,7 @@ const showForm = (data) => {
     $("#marca").val(resp.brand_id).trigger("change");
     $("#nivel").val(resp.level_product_id).trigger("change");
     $("#presentacion").val(resp.unitofmeasure_id).trigger("change");
+    $("#tipoinsumo").val(tipoInsumoNumber).trigger("change");
     $("#quantity").val(resp.quantity).trigger("change");
 
     $("#nameproducto").val(resp.name).trigger("change");

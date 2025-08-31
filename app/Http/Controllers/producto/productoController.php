@@ -315,6 +315,7 @@ class productoController extends Controller
                 $prod->brand_id          = $request->marca;
                 $prod->level_product_id  = $request->nivel;
                 $prod->unitofmeasure_id  = $request->presentacion;
+                $prod->tipo_insumo       = $request->tipoinsumo;
                 $prod->quantity          = $request->quantity;
 
                 $prod->name              = $request->nameproducto;
@@ -352,6 +353,7 @@ class productoController extends Controller
                 $updateProd->brand_id          = $request->marca;
                 $updateProd->level_product_id  = $request->nivel;
                 $updateProd->unitofmeasure_id  = $request->presentacion;
+                $updateProd->tipo_insumo       = $request->tipoinsumo;
                 $updateProd->quantity          = $request->quantity;
 
                 $updateProd->name              = $request->nameproducto;
