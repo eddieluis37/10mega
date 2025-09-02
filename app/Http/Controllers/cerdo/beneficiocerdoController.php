@@ -31,7 +31,7 @@ class beneficiocerdoController extends Controller
 		$sacrificios = Sacrificiocerdo::orderBy('name', 'asc')->get();
 		// $centros = Centrocosto::Where('status', 1)->get();
 		//dd($sacrificios);
-		$bodegas = Store::whereIn('id', [22])
+		$bodegas = Store::whereIn('id', [10, 22])
 			->orderBy('id', 'asc')
 			->get();
 
