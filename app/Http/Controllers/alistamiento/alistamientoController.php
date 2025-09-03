@@ -813,7 +813,7 @@ class alistamientoController extends Controller
                     // **Actualizar el campo cost en la tabla products**
                     $product = Product::find($detalle->products_id);
                     if ($product) {
-                        $product->cost = $detalle->costo_kilo;
+                        $product->cost = $detalle->costo_Kilo;
                         $product->save();
                     }
                 }
