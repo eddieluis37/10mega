@@ -30,13 +30,13 @@ class CargueProductTerminadosController extends Controller
      */
     public function index()
     {
-        $category = Category::whereIn('id', [1])->orderBy('name', 'asc')->get();
+        $category = Category::whereIn('id', [1, 13, 14, 15])->orderBy('name', 'asc')->get();
         /*  $category = Category::orderBy('name', 'asc')->get(); */
         //  $centros = Centrocosto::whereIn('id', [1])->orderBy('name', 'asc')->get();
         // $centroCostoProductos = Centro_costo_product::all();
         $bodegas = Store::whereIn('id', [1, 4, 5, 6, 33])->orderBy('name', 'asc')->get();
         $lote = Lote::orderBy('id', 'desc')->get();
-        $prod = Product::Where('category_id', 1)->get();
+        $prod = Product::whereIn('category_id', [1, 13, 14, 15])->get();
 
         $newToken = Crypt::encrypt(csrf_token());
 
