@@ -26,6 +26,8 @@ function initializeDataTable({
     categoriaId = "",
     startDate = "",
     endDate = "",
+    vendedorId = "",
+    domiciliarioId = "",
 } = {}) {
     dataTable = $("#tableInventory").DataTable({
         paging: false,
@@ -41,6 +43,8 @@ function initializeDataTable({
                 categoria: categoriaId,
                 startDate: startDate,
                 endDate: endDate,
+                vendedor: vendedorId,
+                domiciliario: domiciliarioId,
             },
         },
         columns: [
@@ -239,10 +243,16 @@ function initializeDataTable({
 
 $(document).ready(function () {
     // 1) Inicializamos con valores vacíos
+    $(".select2").select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        allowClear: true,
+    });
+
     initializeDataTable();
 
     // 2) Cada vez que cambie cualquier filtro, destruimos y recreamos la tabla
-    $("#centrocosto, #categoria, #startDate, #endDate").on(
+    $("#centrocosto, #categoria, #startDate, #endDate, #vendedor, #domiciliario").on(
         "change",
         function () {
             const filtros = {
@@ -250,6 +260,8 @@ $(document).ready(function () {
                 categoriaId: $("#categoria").val(),
                 startDate: $("#startDate").val(),
                 endDate: $("#endDate").val(),
+                vendedorId: $("#vendedor").val(),
+                domiciliarioId: $("#domiciliario").val(),
             };
             dataTable.destroy();
             initializeDataTable(filtros);

@@ -65,6 +65,33 @@
             <input type="datetime-local" class="form-control" value="{{ $endDate ?? date('Y-m-d') }}T23:00" name="endDate" id="endDate" required>
           </div>
         </div>
+
+        <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Vendedor</label>
+            <select class="form-control form-control-sm select2" name="vendedor" id="vendedor" required>
+              <option value="">Seleccione vendedor</option>
+              @foreach($vendedores as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Domiciliario</label>
+            <select class="form-control form-control-sm select2" name="domiciliario" id="domiciliario" required>
+              <option value="">Seleccione domiciliario</option>
+              @foreach($domiciliarios as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
         <div class="table-responsive mt-1" style="overflow-x: auto;">
           <table id="tableInventory" class="table table-success table-striped mt-1">
             <thead class="text-white" style="background: #3B3F5C">
