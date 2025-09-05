@@ -675,6 +675,7 @@ class saleautoservicioController extends Controller
             ->where('t.id', $cliente->listaprecio_genericid)
             ->select(
                 'listapreciodetalles.precio',
+                'listapreciodetalles.precio_venta',
                 'prod.iva',
                 'prod.otro_impuesto',
                 'prod.impoconsumo',
@@ -724,6 +725,7 @@ class saleautoservicioController extends Controller
 
         return response()->json([
             'precio' => $producto->precio,
+            'precio_venta' => $producto->precio_venta,
             'iva' => $producto->iva,
             'otro_impuesto' => $producto->otro_impuesto,
             'impoconsumo' => $producto->impoconsumo,
@@ -869,6 +871,7 @@ class saleautoservicioController extends Controller
             //
             $formatCantidad = new metodosrogercodeController();
             $price    = $formatCantidad->MoneyToNumber($request->price);
+            $price_venta    = $formatCantidad->MoneyToNumber($request->price_venta);
             $quantity = $request->quantity;
 
             $precioBruto  = $price * $quantity;
@@ -909,6 +912,7 @@ class saleautoservicioController extends Controller
                     'porc_impoconsumo'  => $porcImpoconsumo,
                     'impoconsumo'       => $impoconsumo,
                     'total_bruto'       => $precioBruto,
+                    'price_venta'       => $price_venta,
                     'total'             => $netoSinImp + $totalImpuestos,
                 ];
             } else {
@@ -930,6 +934,7 @@ class saleautoservicioController extends Controller
                     'porc_impoconsumo'  => $porcImpoconsumo,
                     'impoconsumo'       => $impoconsumo,
                     'total_bruto'       => $precioBruto,
+                    'price_venta'       => $price_venta,
                     'total'             => $netoSinImp + $totalImpuestos,
                 ];
             }

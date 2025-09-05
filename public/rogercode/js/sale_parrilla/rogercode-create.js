@@ -17,6 +17,7 @@ let tbodyTable = document.querySelector("#tableDespostere tbody");
 const venta_id = document.querySelector("#ventaId");
 const quantity = document.querySelector("#quantity");
 const price = document.querySelector("#price");
+const price_venta = document.querySelector("#price_venta");
 const iva = document.querySelector("#iva");
 const regDetail = document.querySelector("#regdetailId");
 const tableFoot = document.querySelector("#tabletfoot");
@@ -171,6 +172,9 @@ function obtenerPreciosYPromo(productId, inventarioId, quantity) {
             const formattedPrice = formatCantidadSinCero(resp.precio);
             $("#price").val(formattedPrice);
 
+            const formattedPriceVenta = formatCantidadSinCero(resp.precio_venta);
+            $("#price_venta").val(formattedPriceVenta);
+
             // Impuestos/porcentajes
             $("#porc_iva").val(resp.iva ?? 0);
             $("#porc_otro_impuesto").val(resp.otro_impuesto ?? 0);
@@ -257,6 +261,7 @@ tbodyTable.addEventListener("click", (e) => {
             // Asignar datos a los campos del formulario
             regDetail.value = editReg.id;
             price.value = formatCantidadSinCero(editReg.price);
+            price_venta.value = formatCantidadSinCero(editReg.price_venta);
             quantity.value = editReg.quantity;
             porc_iva.value = editReg.porc_iva;
             porc_otro_impuesto.value = editReg.porc_otro_impuesto;
@@ -357,7 +362,8 @@ const showData = (data) => {
                 <td>${formatCantidadSinCero(element.porc_impoconsumo)}</td> 
                 <td>$${formatCantidadSinCero(
                     element.impoconsumo
-                )}</td>               
+                )}</td>    
+                <td>$${formatCantidadSinCero(element.price_venta)}</td>           
                 <td>$${formatCantidadSinCero(element.total)}</td>        
                 <td class="text-center">
                     <button class="btn btn-dark fas fa-edit" data-id="${
@@ -385,6 +391,7 @@ const showData = (data) => {
             <td></td>
             <td></td>                               
             <th>$${formatCantidadSinCero(arrayTotales.TotalBruto)}</th> 
+            <td></td>
             <td></td>
             <td></td>
             <td></td>
@@ -419,6 +426,13 @@ price.addEventListener("change", function () {
     price.value = formatCantidadSinCero(enteredValue);
 });
 
+price_venta.addEventListener("change", function () {
+    const enteredValue = formatMoneyNumber(price_venta.value);
+    console.log("Entered value: " + enteredValue);
+    price_venta.value = formatCantidadSinCero(enteredValue);
+});
+
+
 quantity.addEventListener("change", function () {
     const enteredValue = Number(quantity.value);
     console.log("Valor ingresado: " + enteredValue);
@@ -427,25 +441,3 @@ quantity.addEventListener("change", function () {
 
 // Get the current date
 const date = new Date();
-
-// Create a dynamic password by combining letters and the current date
-const passwordHoy =
-    "admin" + date.getFullYear() + (date.getMonth() + 1) + date.getDate();
-
-btnRemove.addEventListener("click", (e) => {
-    e.preventDefault();
-    const priceInput = document.querySelector("#price");
-    const passwordInput = document.querySelector("#password");
-    const password = passwordInput.value;
-
-    // Check if the password is correct
-    if (password === passwordHoy) {
-        // Disable the readonly attribute of the price input field
-        priceInput.removeAttribute("readonly");
-    } else {
-        // Set the readonly attribute of the price input field
-        priceInput.setAttribute("readonly", true);
-        // Display an error message
-        alert("Contraseña incorrecta");
-    }
-});

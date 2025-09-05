@@ -210,7 +210,7 @@ class saleparrillaController extends Controller
 
                 // Según el estado de la venta se muestran otras acciones:
                 if ($data->status == 0) {
-                    $btn .= '<a href="sale_autoservicio/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
+                    $btn .= '<a href="sale_parrilla/create/' . $data->id . '" class="btn btn-dark" title="Detalles">
                                 <i class="fas fa-directions"></i>
                              </a>';
                 } elseif ($data->status == 1) {

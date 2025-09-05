@@ -9,7 +9,7 @@ class SaleDetail extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sale_id','inventario_id','store_id','lote_id','product_id','price','quantity','porc_desc','descuento','descuento_cliente','porc_iva','iva','porc_otro_impuesto','otro_impuesto','porc_impoconsumo','impoconsumo','promo_percent','promo_value','total_bruto','total','status'];
+    protected $fillable = ['sale_id','inventario_id','store_id','lote_id','product_id','price','quantity','porc_desc','descuento','descuento_cliente','porc_iva','iva','porc_otro_impuesto','otro_impuesto','porc_impoconsumo','impoconsumo','promo_percent','promo_value','total_bruto','price_venta','total','status'];
 
     public function sale(){
         return $this->belongsTo(Sale::class, 'sale_id', 'id');

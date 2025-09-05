@@ -38,7 +38,7 @@
 										<label>Bodega</label>
 										<div>
 											<select class="form-control form-control-sm" name="tipobodega" id="tipobodega" required="">
-											 	<option value="BAR">BAR</option>											
+												<option value="BAR">BAR</option>
 											</select>
 											<span class="text-danger error-message"></span>
 										</div>
@@ -197,6 +197,22 @@
 								</div>
 
 								<div class="col-md-2">
+									<label for="" class="form-label">Promoción</label>
+									<div class="input-group flex-nowrap">
+										<input type="text" id="promo_percent" name="promo_percent" class="form-control input" readonly placeholder="">
+										<span class="input-group-text" id="addon-wrapping">%</span>
+									</div>
+								</div>
+
+								<div class="col-md-2">
+									<label for="" class="form-label">Precio venta</label>
+									<div class="input-group flex-nowrap">
+										<span class="input-group-text" id="addon-wrapping">$</span>
+										<input type="text" id="price_venta" name="price_venta" class="form-control input" readonly placeholder="">
+									</div>
+								</div>
+
+								<div class="col-md-10 text-center mt-1">
 									<div class="" style="margin-top:30px;">
 										<div class="d-grid gap-2">
 											<button id="btnAdd" class="btn btn-primary btn-block">Añadir Producto</button>
@@ -219,10 +235,12 @@
 							<tr>
 								<th class="table-th text-white">Producto</th>
 								<th class="table-th text-white">Cant</th>
-								<th class="table-th text-white">Valor.U</th>
+								<th class="table-th text-white">Valor.B</th>
 								<th class="table-th text-white">%Des</th>
 								<th class="table-th text-white">Des</th>
 								<th class="table-th text-white">{{$datacompensado[0]->porc_descuento_cliente}}%DCl</th>
+								<th class="table-th text-white">%Pro</th>
+								<th class="table-th text-white">Pro</th>
 								<th class="table-th text-white">Total.B</th>
 								<th class="table-th text-white">%IVA</th>
 								<th class="table-th text-white">IVA</th>
@@ -230,6 +248,7 @@
 								<th class="table-th text-white">I.S</th>
 								<th class="table-th text-white">%I.C</th>
 								<th class="table-th text-white">I.C</th>
+								<th class="table-th text-white">Valor.V</th>
 								<th class="table-th text-white">Total</th>
 								<th class="table-th text-white text-center">Acciones</th>
 							</tr>
@@ -244,6 +263,10 @@
 								<td>{{ number_format($proddetail->porc_desc, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->descuento_cliente, 0, ',', '.')}}</td>
+
+								<td>{{ number_format($proddetail->promo_percent, 0, ',', '.')}}</td>
+								<td>${{ number_format($proddetail->promo_value, 0, ',', '.')}}</td>
+
 								<td>${{ number_format($proddetail->total_bruto, 0, ',', '.')}}</td>
 								<td>{{ number_format($proddetail->porc_iva, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->iva, 0, ',', '.')}}</td>
@@ -251,6 +274,7 @@
 								<td>${{ number_format($proddetail->otro_impuesto, 0, ',', '.')}}</td>
 								<td>{{ number_format($proddetail->porc_impoconsumo, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->impoconsumo, 0, ',', '.')}}</td>
+								<td>${{ number_format($proddetail->price_venta, 0, ',', '.')}}</td>
 								<td>${{ number_format($proddetail->total, 0, ',', '.')}}</td>
 								<td class="text-center">
 									@if($datacompensado[0]->status == '0')
@@ -276,7 +300,10 @@
 								<td></td>
 								<th></th>
 								<th></th>
+								<th></th>
+								<th></th>
 								<th>${{number_format($arrayTotales['TotalBruto'], 0, ',', '.')}} </th>
+								<td></td>
 								<td></td>
 								<td></td>
 								<td></td>
