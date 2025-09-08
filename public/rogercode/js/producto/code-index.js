@@ -33,6 +33,7 @@ $(document).ready(function () {
                 { data: "type", name: "type" },
                 { data: "name", name: "name" },
                 { data: "code", name: "code" },
+                { data: "barcode", name: "barcode" },
                 {
                     data: "price_fama",
                     name: "price_fama",

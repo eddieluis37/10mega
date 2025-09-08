@@ -24,6 +24,7 @@
 								<th class="table-th text-white ">TIPO</th>
 								<th class="table-th text-white ">NOMBRE</th>
 								<th class="table-th text-white ">CODE</th>
+								<th class="table-th text-white ">BARCODE</th>
 								<th class="table-th text-white">PRECIO_M</th>
 								<th class="table-th text-white">IVA</th>
 								<th class="table-th text-white">IUP</th>
