@@ -67,13 +67,17 @@ class compensadoController extends Controller
 
     public function create_order($id)
     {
-        $datacompensado = DB::table('compensadores as comp')
+        $datacompensado1 = DB::table('compensadores as comp')
             ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
             ->join('stores as s', 'comp.store_id', '=', 's.id')
-            ->join('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
+            ->leftJoin('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
             ->select('comp.*', 'tird.name as namethird', 's.name as namestore', 'centro.name as namecentrocosto')
-            ->where('comp.id', $id)
-            ->get();
+            ->where('comp.id', 1)
+            ->first(); // <-- aquí       
+
+        if (!$datacompensado1) {
+            return redirect()->back()->with('error', 'Registro de compensador no encontrado.');
+        }
 
         $lotes = Lote::orderBy('id', 'desc')->get();
 
@@ -85,19 +89,19 @@ class compensadoController extends Controller
             ->get();
 
         /**************************************** */
-        $status = '';
-        $fechacompensadocierre = Carbon::parse($datacompensado[0]->fecha_cierre);
-        $date = Carbon::now();
-        $currentDate = Carbon::parse($date->format('Y-m-d'));
-        if ($currentDate->gt($fechacompensadocierre)) {
-            //'Date 1 is greater than Date 2';
-            $status = 'false';
-        } elseif ($currentDate->lt($fechacompensadocierre)) {
-            //'Date 1 is less than Date 2';
-            $status = 'true';
-        } else {
-            //'Date 1 and Date 2 are equal';
-            $status = 'false';
+        $status = 'false';
+        if (!empty($datacompensado1->fecha_cierre)) {
+            $fechacompensadocierre = Carbon::parse($datacompensado1->fecha_cierre);
+            $date = Carbon::now();
+            $currentDate = Carbon::parse($date->format('Y-m-d'));
+
+            if ($currentDate->gt($fechacompensadocierre)) {
+                $status = 'false';
+            } elseif ($currentDate->lt($fechacompensadocierre)) {
+                $status = 'true';
+            } else {
+                $status = 'false';
+            }
         }
         /**************************************** */
 
@@ -105,23 +109,23 @@ class compensadoController extends Controller
 
         $arrayTotales = $this->sumTotalesOrder($id);
         //dd($arrayTotales);
-        return view('compensado.create_order', compact('datacompensado', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
+        return view('compensado.create_order', compact('datacompensado1', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
     }
 
     public function create($id)
     {
-        //$category = Category::WhereIn('id',[1,2,3])->get();
-        //$providers = Third::Where('status',1)->get();
-        //$centros = Centrocosto::Where('status',1)->get();
-        $datacompensado = DB::table('compensadores as comp')
-            /*    ->join('categories as cat', 'comp.categoria_id', '=', 'cat.id') */
+
+        $datacompensado2 = DB::table('compensadores as comp')
             ->join('thirds as tird', 'comp.thirds_id', '=', 'tird.id')
             ->join('stores as s', 'comp.store_id', '=', 's.id')
-            //    ->join('lotes as l', 'comp.lote_id', '=', 'l.id')
-            ->join('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
+            ->leftJoin('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
             ->select('comp.*', 'tird.name as namethird', 's.name as namestore', 'centro.name as namecentrocosto')
             ->where('comp.id', $id)
-            ->get();
+            ->first();
+
+        if (!$datacompensado2) {
+            return redirect()->back()->with('error', 'Registro de compensador no encontrado.');
+        }
 
         $lotes = Lote::orderBy('id', 'desc')->get();
 
@@ -134,7 +138,7 @@ class compensadoController extends Controller
 
         /**************************************** */
         $status = '';
-        $fechacompensadocierre = Carbon::parse($datacompensado[0]->fecha_cierre);
+        $fechacompensadocierre = Carbon::parse($datacompensado2->fecha_cierre);
         $date = Carbon::now();
         $currentDate = Carbon::parse($date->format('Y-m-d'));
         if ($currentDate->gt($fechacompensadocierre)) {
@@ -151,9 +155,26 @@ class compensadoController extends Controller
 
         $detail = $this->getcompensadoresdetail($id);
 
+        /**************************************** */
+        $status = 'false';
+        if (!empty($datacompensado2->fecha_cierre)) {
+            $fechacompensadocierre = Carbon::parse($datacompensado2->fecha_cierre);
+            $date = Carbon::now();
+            $currentDate = Carbon::parse($date->format('Y-m-d'));
+
+            if ($currentDate->gt($fechacompensadocierre)) {
+                $status = 'false';
+            } elseif ($currentDate->lt($fechacompensadocierre)) {
+                $status = 'true';
+            } else {
+                $status = 'false';
+            }
+        }
+        /**************************************** */
+
         $arrayTotales = $this->sumTotales($id);
         //dd($arrayTotales);
-        return view('compensado.create', compact('datacompensado', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
+        return view('compensado.create', compact('datacompensado2', 'lotes', 'prod', 'id', 'detail', 'arrayTotales', 'status'));
     }
 
     public function getcompensadoresdetailorder($compensadoId)
@@ -540,9 +561,16 @@ class compensadoController extends Controller
             if ($getReg == null) {
                 $currentDateTime = Carbon::now();
                 $currentDateFormat = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date = Carbon::parse($currentDateTime->format('Y-m-d'));
-                $current_date->modify('next monday'); // Move to the next Monday
-                $dateNextMonday = $current_date->format('Y-m-d'); // Output the date in Y-m-d format
+
+                // Opción por defecto: mismo día del próximo mes (sin overflow de día)
+                $dateNextMonth = Carbon::now()->addMonthNoOverflow()->format('Y-m-d');
+
+                // Alternativas (descomentar la que prefieras):
+                // Primer día del próximo mes:
+                // $dateNextMonth = Carbon::now()->addMonth()->startOfMonth()->format('Y-m-d');
+
+                // Último día del próximo mes:
+                // $dateNextMonth = Carbon::now()->addMonth()->endOfMonth()->format('Y-m-d');
 
                 $id_user = Auth::user()->id;
 
@@ -555,7 +583,7 @@ class compensadoController extends Controller
                 /*    $comp->fecha_compensado = $currentDateFormat; */
                 $comp->fecha_compensado = $request->fecha_compensado;
                 $comp->fecha_ingreso = $request->fecha_ingreso;
-                $comp->fecha_cierre = $dateNextMonday;
+                $comp->fecha_cierre = $dateNextMonth;
                 $comp->factura = $request->factura;
                 $comp->observacion = $request->observacion;
                 $comp->save();

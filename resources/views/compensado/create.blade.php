@@ -27,7 +27,7 @@
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Proveedor</label>
-										<p>{{$datacompensado[0]->namethird}}</p>
+										<p>{{$datacompensado2->namethird}}</p>
 									</div>
 								</div>
 							</div>
@@ -35,7 +35,7 @@
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Bodega</label>
-										<p>{{$datacompensado[0]->namestore}}</p>
+										<p>{{$datacompensado2->namestore}}</p>
 									</div>
 								</div>
 							</div>
@@ -43,7 +43,7 @@
 								<div class="task-header">
 									<div class="form-group">
 										<label for="" class="form-label">Centro de costo</label>
-										<p>{{$datacompensado[0]->namecentrocosto}}</p>
+										<p>{{$datacompensado2->namecentrocosto}}</p>
 									</div>
 								</div>
 							</div>
