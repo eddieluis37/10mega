@@ -533,9 +533,9 @@ class PermissionsSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'comprasmega1@carnesfriasmega.co'], // Condición para identificar el usuario
             [
-                'name' => 'COMPRAS 1',
+                'name' => 'COMPRAS 1 YULIE',
                 'phone' => '3014154625',
-                'profile' => 'Comprador',
+                'profile' => 'FacturacionPlanta',
                 'status' => 'Active',
                 'password' => bcrypt('C0mpraM3g@1*')
             ]
