@@ -1096,7 +1096,8 @@ class transferController extends Controller
                         $unidadMedida = trim((string) 'KG');
                         $precioUnitario = number_format($product->cost ?? $product->precio ?? 0, 2, '.', '');
                         $nombreProveedor = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
-                        $tipoInsumo = 2; // 1: Insumo, 2: Producto Terminado
+                        //$tipoInsumo = 2; // 1:CARNICO, 2: NO CARNICO, 3: VEGETAL
+                        $tipoInsumo = $product->tipo_insumo ?? 3;
                         $marca = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
                         $fechaIngreso = isset($lote->fecha_ingreso) ? (string)$lote->fecha_ingreso : (string)($lote->fecha ?? null);
                         $fechaVenc = isset($lote->fecha_vencimiento) ? (string)$lote->fecha_vencimiento : (string)($lote->fecha ?? null);
