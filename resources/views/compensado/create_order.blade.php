@@ -197,7 +197,7 @@
 									<tr>
 										<th>Totales</th>
 										<th>{{number_format($arrayTotales['pesoTotalGlobal'], 2, '.', '.')}}</td>
-										<th>{{number_format($arrayTotales['totalGlobal'], 0, ',', '.')}} </th>
+										<th>{{number_format($arrayTotales['totalPrecioUnitCot'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalPorcDesc'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalDescCot'], 0, ',', '.')}} </th>
 										<th>{{number_format($arrayTotales['totalBrutoCot'], 0, ',', '.')}} </th>

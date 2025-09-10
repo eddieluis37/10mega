@@ -441,6 +441,7 @@ class compensadoController extends Controller
 
         // Calcular los totales
         $pesoTotalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('peso_cotiza');
+        $totalPrecioUnitCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('precio_cotiza');
         $totalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('subtotal_cotiza');
         $totalPorcDesc = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_descuento_cotiza');
         $totalDescCot = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('descuento_cotiza');
@@ -464,6 +465,7 @@ class compensadoController extends Controller
         // Preparar el array de resultados
         $array = [
             'pesoTotalGlobal' => $pesoTotalGlobal,
+            'totalPrecioUnitCot' => $totalPrecioUnitCot,
             'totalGlobal' => $totalGlobal,
             'totalPorcDesc' => $totalPorcDesc,
             'totalDescCot' => $totalDescCot,
@@ -485,6 +487,7 @@ class compensadoController extends Controller
 
         // Calcular los totales
         $pesoTotalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('peso');
+        $totalPrecioUnit = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('precio_cotiza');
         $totalGlobal = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('subtotal');
         $totalPorcDesc = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('porc_descuento');
         $totalDesc = (float)Compensadores_detail::Where([['compensadores_id', $id], ['status', 1]])->sum('descuento');
@@ -507,6 +510,7 @@ class compensadoController extends Controller
         // Preparar el array de resultados
         $array = [
             'pesoTotalGlobal' => $pesoTotalGlobal,
+            'totalPrecioUnit' => $totalPrecioUnit,
             'totalGlobal' => $totalGlobal,
             'totalPorcDesc' => $totalPorcDesc,
             'totalDesc' => $totalDesc,

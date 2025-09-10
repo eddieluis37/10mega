@@ -225,7 +225,7 @@ const showData = (data) => {
             <th></th>      
             <th>${arrayTotales.pesoTotalGlobal}</td>
             <th>${formatCantidadSinCero(arrayTotales.totalGlobal)}</th>
-            <th>${formatCantidadSinCero(arrayTotales.totalPorcDesc)}</th>
+            <th>${formatCantidadSinCero(arrayTotales.totalPrecioUnit)}</th>
             <th>${formatCantidadSinCero(arrayTotales.totalDesc)}</th>
             <th>${formatCantidadSinCero(arrayTotales.totalBruto)}</th>
             <th>${formatCantidadSinCero(arrayTotales.totalPorcIva)}</th>
