@@ -72,7 +72,7 @@ class compensadoController extends Controller
             ->join('stores as s', 'comp.store_id', '=', 's.id')
             ->leftJoin('centro_costo as centro', 'centro.id', '=', 's.centrocosto_id')
             ->select('comp.*', 'tird.name as namethird', 's.name as namestore', 'centro.name as namecentrocosto')
-            ->where('comp.id', 1)
+            ->where('comp.id', $id)
             ->first(); // <-- aquí       
 
         if (!$datacompensado1) {
