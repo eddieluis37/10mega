@@ -136,7 +136,7 @@ class CargueProductTerminadosController extends Controller
                 'producto' => 'required|exists:products,id',
                 'loteProd' => 'required',
                 'quantity' => 'required',
-                'costo' => 'required',
+                'costo'         => 'required|numeric|gt:0',
                 'bodega' => 'required|exists:stores,id',
             ];
             $messages = [
@@ -145,7 +145,9 @@ class CargueProductTerminadosController extends Controller
                 'producto.exists' => 'El producto no existe',
                 'loteProd.required' => 'Lote es requerido',
                 'quantity.required' => 'Cantidad es requerida',
-                'costo.required' => 'Costo es requerido',
+                'costo.required'         => 'Costo es requerido',
+                'costo.numeric'          => 'Costo debe ser un número válido',
+                'costo.gt'               => 'El costo debe ser mayor que 0',
                 'bodega.required' => 'La bodega es requerida',
                 'bodega.exists' => 'La bodega no existe',
             ];
