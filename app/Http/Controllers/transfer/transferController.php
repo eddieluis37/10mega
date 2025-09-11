@@ -435,14 +435,14 @@ class transferController extends Controller
             ->where('i.lote_id', $loteId)
             ->where('p.status', '1')
             ->where('p.id', $productId)
-            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
+            ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'p.cost', 'i.costo_total')
             ->first();
 
         if ($producto) {
             return response()->json([
                 'stockOrigen' => $producto->stock_ideal,
                 'fisicoOrigen' => $producto->cantidad_inventario_inicial,
-                'costoOrigen' => $producto->costo_unitario,
+                'costoOrigen' => $producto->cost,
                 'costoTotalOrigen' => $producto->costo_total,
             ]);
         } else {
@@ -632,7 +632,7 @@ class transferController extends Controller
                 ->where('i.lote_id', $loteId)
                 ->where('p.status', '1')
                 ->where('p.id', $productId)
-                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
+                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'p.cost', 'i.costo_total')
                 ->first();
 
             // Obtener producto en bodega destino
@@ -642,7 +642,7 @@ class transferController extends Controller
                 ->where('i.lote_id', $loteId)
                 ->where('p.status', '1')
                 ->where('p.id', $productId)
-                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'i.costo_unitario', 'i.costo_total')
+                ->select('i.stock_ideal', 'i.cantidad_inventario_inicial', 'p.cost', 'i.costo_total')
                 ->first();
 
             // Asignar valores por defecto si prodDestino es null
@@ -657,7 +657,7 @@ class transferController extends Controller
             $newStockDestino = $stockDestino + $formatkgrequeridos;
 
             // Calcular subtotal costo traslado
-            $costoUnitarioOrigen = optional($prodOrigen)->costo_unitario ?? 0;
+            $costoUnitarioOrigen = optional($prodOrigen)->cost ?? 0;
             $subTotalTraslado = $formatkgrequeridos * $costoUnitarioOrigen;
 
 
@@ -844,7 +844,7 @@ class transferController extends Controller
             ->where('i.lote_id', $loteId)
             ->where('p.status', '1')
             ->where('p.id', $productId)
-            ->select('i.stock_ideal', 'i.costo_unitario')
+            ->select('i.stock_ideal', 'p.cost')
             ->first();
         if (!$inventarioOrigen) {
             return response()->json([
@@ -881,7 +881,7 @@ class transferController extends Controller
         $newStockDestino = $stockDestino + $newKgs;
 
         // Calcular el subtotal del traslado
-        $subtotal = $newKgs * $inventarioOrigen->costo_unitario;
+        $subtotal = $newKgs * $inventarioOrigen->cost;
 
         // Actualizar el detalle
         $detail->kgrequeridos = $newKgs;
