@@ -36,4 +36,9 @@ return [
         'key' => env('TRAZA_API_KEY'),
     ],
 
+    'erp' => [
+        'url' => env('ERP_APP_A_URL'),
+        'key' => env('ERP_API_KEY'),
+        'hmac_secret' => env('ERP_HMAC_SECRET'),
+    ],
 ];

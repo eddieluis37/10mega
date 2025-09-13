@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\TrazaInventoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,14 +23,20 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-//Route::get('/productos', [productoController::class, 'getProductos']);
-
-//Route::get('products', [ProductController::class, 'index']);
 
 
 
-Route::middleware('check_api_key')
+
+Route::prefix('v1')->middleware(['check_api_key'])->group(function () {
+    Route::get('products', [ProductController::class, 'index'])->middleware('throttle:60,1');
+    Route::post('traza/inventario/movimiento', [TrazaInventoryController::class, 'store'])->middleware('throttle:120,1');
+});
+
+
+
+/* Route::middleware('check_api_key')
      ->get('products', [ProductController::class, 'index']);
+ */
 
 
 
