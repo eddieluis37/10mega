@@ -25,18 +25,20 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-
+/* 
 
 Route::prefix('v1')->middleware(['check_api_key'])->group(function () {
     Route::get('products', [ProductController::class, 'index'])->middleware('throttle:60,1');
     Route::post('traza/inventario/movimiento', [TrazaInventoryController::class, 'store'])->middleware('throttle:120,1');
 });
-
-
-
-/* Route::middleware('check_api_key')
-     ->get('products', [ProductController::class, 'index']);
  */
+
+Route::post('traza/inventario/movimiento', [TrazaInventoryController::class, 'store'])->middleware('check_api_key');
+
+
+ Route::middleware('check_api_key')
+     ->get('products', [ProductController::class, 'index']);
+
 
 
 
