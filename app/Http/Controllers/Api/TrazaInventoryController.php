@@ -1,88 +1,95 @@
 <?php
 
+<?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreTrazaMovementRequest;
+use App\Http\Requests\StoreTrazaMovementRequest; // si usaste FormRequest previamente
 use App\Models\Lote;
 use App\Models\Inventario;
 use App\Models\MovimientoInventario;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 
 class TrazaInventoryController extends Controller
 {
+    /**
+     * Recibe movimiento desde TRAZA y crea/actualiza inventario y movimiento.
+     *
+     * No usa external_reference. Si el inventario ya existe, se ACTUALIZA con los nuevos valores.
+     */
     public function store(StoreTrazaMovementRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        // Puedes configurar un store destino por defecto en config/traza.php o usar fijo 37
+        // store destino por defecto (ajusta o permite que venga en $data si prefieres)
         $storeDestinoId = config('traza.default_store_destino_id', 37);
 
-        // Idempotencia: si te llega external_reference, evita duplicados
-        if (!empty($data['external_reference'])) {
-            $exists = MovimientoInventario::where('external_reference', $data['external_reference'])->first();
-            if ($exists) {
-                return response()->json([
-                    'status' => 'ignored',
-                    'message' => 'Movimiento ya procesado (external_reference duplicado).',
-                    'movimiento_id' => $exists->id
-                ], 200);
-            }
-        }
+        // Normalizar/castear valores
+        $productId = (int) $data['id_producto_terminado'];
+        $cantidad  = (float) $data['cantidad'];
+        $costoUnitario = (float) $data['costo_unidad'];
+        $fechaVencimiento = isset($data['fecha_vencimiento']) && $data['fecha_vencimiento']
+            ? Carbon::parse($data['fecha_vencimiento'])
+            : null;
 
         DB::beginTransaction();
         try {
             // 1) Crear o recuperar lote por codigo
             $lote = Lote::firstOrCreate(
                 ['codigo' => $data['lote_codigo']],
-                [
-                    // asigna fecha_vencimiento si llega
-                    'fecha_vencimiento' => isset($data['fecha_vencimiento']) ? Carbon::parse($data['fecha_vencimiento']) : null,
-                    // agrega otros campos por defecto si tu modelo lo requiere
-                ]
+                ['fecha_vencimiento' => $fechaVencimiento]
             );
 
-            // 2) Inventario: firstOrCreate y luego sobrescribir cantidad y costo
-            $inventario = Inventario::firstOrCreate(
-                [
-                    'product_id' => $data['id_producto_terminado'],
+            // 2) Buscar inventario y bloquear fila para evitar race conditions
+            $inventario = Inventario::where('product_id', $productId)
+                ->where('lote_id', $lote->id)
+                ->where('store_id', $storeDestinoId)
+                ->lockForUpdate()
+                ->first();
+
+            $inventarioCreated = false;
+            if (! $inventario) {
+                // crea inventario si no existe
+                $inventario = Inventario::create([
+                    'product_id' => $productId,
                     'lote_id' => $lote->id,
                     'store_id' => $storeDestinoId,
-                ],
-                [
-                    'cantidad_prod_term' => 0,
-                    'costo_unitario' => 0,
-                    'costo_total' => 0,
-                ]
-            );
+                    'cantidad_prod_term' => $cantidad,
+                    'costo_unitario' => $costoUnitario,
+                    'costo_total' => $cantidad * $costoUnitario,
+                ]);
+                $inventarioCreated = true;
+                $action = 'created';
+            } else {
+                // existe -> ACTUALIZAR sobrescribiendo cantidad y costo con los valores nuevos
+                $inventario->cantidad_prod_term = $cantidad;
+                $inventario->costo_unitario = $costoUnitario;
+                $inventario->costo_total = $cantidad * $costoUnitario;
+                $inventario->save();
+                $action = 'updated';
+            }
 
-            // Sobrescribimos con lo que trae TRAZA
-            $inventario->cantidad_prod_term = $data['cantidad'];
-            $inventario->costo_unitario = $data['costo_unidad'];
-            $inventario->costo_total = $data['cantidad'] * $data['costo_unidad'];
-            $inventario->save();
-
-            // 3) Registrar movimiento de inventario
+            // 3) Registrar movimiento de inventario (histórico)
             $mov = MovimientoInventario::create([
                 'tipo' => 'products_terminados',
                 'store_origen_id' => null,
                 'store_destino_id' => $storeDestinoId,
                 'lote_id' => $lote->id,
-                'product_id' => $data['id_producto_terminado'],
-                'cantidad' => $data['cantidad'],
-                'costo_unitario' => $data['costo_unidad'],
-                'total' => $data['cantidad'] * $data['costo_unidad'],
+                'product_id' => $productId,
+                'cantidad' => $cantidad,
+                'costo_unitario' => $costoUnitario,
+                'total' => $cantidad * $costoUnitario,
                 'fecha' => Carbon::now(),
-                'external_reference' => $data['external_reference'] ?? null,
             ]);
 
-            // 4) Actualizar campo cost de products con el costo de compra recibido
-            $producto = Product::find($data['id_producto_terminado']);
+            // 4) Actualizar el campo cost del producto con el nuevo costo recibido
+            $producto = Product::find($productId);
             if ($producto) {
-                $producto->cost = $data['costo_unidad'];
+                $producto->cost = $costoUnitario;
                 $producto->save();
             }
 
@@ -90,15 +97,19 @@ class TrazaInventoryController extends Controller
 
             return response()->json([
                 'status' => 'ok',
-                'message' => 'Movimiento procesado.',
+                'action' => $action, // 'created' o 'updated' sobre inventario
                 'lote_id' => $lote->id,
                 'inventario_id' => $inventario->id,
                 'movimiento_id' => $mov->id,
-            ], 201);
+            ], $inventarioCreated ? 201 : 200);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            // log::error($e->getMessage()) // registra en logs
+            // registra el error para debugging
+            logger()->error('Error procesando movimiento TRAZA: '.$e->getMessage(), [
+                'exception' => $e
+            ]);
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error procesando movimiento: ' . $e->getMessage()
