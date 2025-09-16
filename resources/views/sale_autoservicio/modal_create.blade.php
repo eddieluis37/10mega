@@ -81,11 +81,11 @@
 							<div class="col-md-6">
 								<div class="task-header">
 									<div class="form-group">
-										<label for="" class="form-label">Sub centro de costo</label>
+										<label for="" class="form-label">Sub centro costo</label>
 										<select class="form-control form-control-sm input" name="subcentrodecosto" id="subcentrodecosto" required>
 											<option value="">Seleccione subCentroDeCosto</option>
 											@foreach($subcentrodecostos as $subcentrodecosto)
-											<option value="{{$subcentrodecosto->id}}" {{ $subcentrodecosto->id == 0 ? 'selected' : '' }}>{{$subcentrodecosto->name}}</option>
+											<option value="{{$subcentrodecosto->id}}" {{ $subcentrodecosto->id == 7 ? 'selected' : '' }}>{{$subcentrodecosto->name}}</option>
 											@endforeach
 										</select>
 										<span class="text-danger error-message"></span>
