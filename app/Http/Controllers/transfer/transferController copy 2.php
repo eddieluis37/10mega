@@ -1096,6 +1096,7 @@ class transferController extends Controller
                         $unidadMedida = trim((string) 'KG');
                         $precioUnitario = number_format($product->cost ?? $product->precio ?? 0, 2, '.', '');
                         $nombreProveedor = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
+                        //$tipoInsumo = 2; // 1:CARNICO, 2: NO CARNICO, 3: VEGETAL
                         $tipoInsumo = $product->tipo_insumo ?? 3;
                         $marca = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
                         $fechaIngreso = isset($lote->fecha_ingreso) ? (string)$lote->fecha_ingreso : (string)($lote->fecha ?? null);
@@ -1105,11 +1106,16 @@ class transferController extends Controller
 
                         // Armamos payload usando strings + varias variantes de nombre (por compatibilidad)
                         $payload = [
+                            // variantes del id/insumo por si la API valida por nombre diferente
                             'insumo_erp_id'   => $insumoIdStr,
                             'insumo'          => $insumoIdStr,
                             'Insumo'          => $insumoIdStr,
+
+                            // nombre
                             'nombre_insumo'   => $nombreInsumo,
                             'nombre'          => $nombreInsumo,
+
+                            // resto de campos (todos como string)
                             'lote_insumo'     => $loteCode,
                             'saldo_actual'    => (string)$saldoActual,
                             'unidad_medida'   => $unidadMedida,
@@ -1121,7 +1127,7 @@ class transferController extends Controller
                             'nombre_categoria' => $nombreCategoria,
                         ];
 
-                        // Enviamos POST JSON
+                        // Si la API requiere application/json (POST), enviamos JSON
                         $response = $http->post($trazaUrl, [
                             'headers' => [
                                 'X-API-KEY' => $trazaKey,
@@ -1132,49 +1138,15 @@ class transferController extends Controller
                             'timeout' => 15,
                         ]);
 
-                        // Leemos cuerpo y chequeamos si la API reportó 'success' => false (aunque devuelva 200)
-                        $statusCode = $response->getStatusCode();
-                        $body = (string) $response->getBody();
-                        $decoded = null;
-                        if (! empty($body)) {
-                            $decoded = json_decode($body, true);
-                        }
-
-                        // Si la API devolvió JSON y success === false (o status == 0), registramos como error de Traza
-                        $apiReportedError = false;
-                        if (is_array($decoded)) {
-                            if ((isset($decoded['success']) && $decoded['success'] === false)
-                                || (isset($decoded['status']) && ($decoded['status'] === 0 || $decoded['status'] === '0'))
-                            ) {
-                                $apiReportedError = true;
-                            }
-                        }
-
-                        if ($apiReportedError) {
-                            $trazaErrors[] = [
-                                'product_id' => $productId,
-                                'lote_id'    => $loteId,
-                                'http_status' => $statusCode,
-                                'response_raw' => $body,
-                                'response_json' => $decoded,
-                            ];
-
-                            Log::warning('Traza API returned success=false', [
-                                'product_id' => $productId,
-                                'lote_id' => $loteId,
-                                'status' => $statusCode,
-                                'response' => $decoded ?? $body,
-                            ]);
-                        } else {
-                            // OK normal
-                            Log::info('Traza sync OK', ['product' => $productId, 'lote' => $loteId, 'status' => $statusCode]);
-                        }
+                        // OK: guardamos info si queremos
+                        Log::info('Traza sync OK', ['product' => $productId, 'lote' => $loteId, 'status' => $response->getStatusCode()]);
                     } catch (ClientException $e) {
                         // 4xx: normalmente 422 con cuerpo JSON explicando errores de validación
                         $resp = $e->getResponse();
                         $status = $resp ? $resp->getStatusCode() : null;
                         $body = $resp ? (string)$resp->getBody() : $e->getMessage();
 
+                        // Intentamos decodificar JSON de respuesta para obtener errores concretos
                         $decoded = null;
                         try {
                             $decoded = json_decode($body, true);
