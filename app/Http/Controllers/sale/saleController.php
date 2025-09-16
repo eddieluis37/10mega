@@ -1657,7 +1657,7 @@ class saleController extends Controller
             $venta = new Sale();
             $venta->user_id = $id_user;
             $venta->centrocosto_id = $defaultCentro->id;
-            $venta->subcentrocostos_id = 2;
+            $venta->subcentrocostos_id = 7;
             $venta->third_id = ($defaultCentro->id == 8) ? 157 : 1;
             $venta->vendedor_id = 1;
 
