@@ -40,14 +40,6 @@ class ReportsSalesXsCController extends Component
 
     public function render()
     {
-        /*   if ($this->IdInicial > 0 && $this->IdFinal > 0) {
-            $this->SalesById($this->IdInicial, $this->IdFinal); // Llamar al método SalesById() con los Ids de ventas
-        } else {
-            $this->SalesByDate(); // Llamar al método SalesByDate() para obtener los resultados por fechas
-        } */
-
-
-        //   $this->SalesById($this->IdInicial, $this->IdFinal); // Llamar al método SalesById() con los Ids de ventas
 
         $this->SalesByDate(); // Llamar al método SalesByDate() para obtener los resultados por fechas
 
@@ -114,7 +106,7 @@ class ReportsSalesXsCController extends Component
         ];
     }
 
-     public function SalesByDate()
+    public function SalesByDate()
     {
         if ($this->reportType == 0) // ventas del dia
         {
@@ -175,7 +167,6 @@ class ReportsSalesXsCController extends Component
             'Total' => $this->results->sum('Total'),
         ];
     }
-
 
 
 
