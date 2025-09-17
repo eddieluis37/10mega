@@ -11,55 +11,33 @@ class CheckApiKey
 {
     public function handle(Request $request, Closure $next)
     {
-        // 1) Soporte X-API-KEY o Authorization: Bearer <key>
-        $clientKey = $request->header('X-API-KEY') ?: $request->bearerToken();
-        $expectedKey = config('api.key');
+        $clientKey = $request->header('X-API-KEY') ?: $request->bearerToken() ?: '';
+        $expectedKey = (string) config('api.key', '');
 
-        if (!$clientKey || !$expectedKey || !hash_equals((string) $expectedKey, (string) $clientKey)) {
-            Log::warning('Unauthorized request - invalid API key', [
-                'ip' => $request->ip(),
-                'path' => $request->path(),
-                'headers' => ['x-api-key' => $request->header('X-API-KEY') ? 'present' : 'absent']
-            ]);
-            return response()->json([
-                'message' => 'Unauthorized – invalid API key'
-            ], Response::HTTP_UNAUTHORIZED);
+        // Normalizar y trim
+        $clientKey = trim($clientKey);
+        $expectedKey = trim($expectedKey);
+
+        // Function to mask (show first 4 and last 4 chars)
+        $mask = function (?string $k) {
+            if (!$k) return null;
+            $len = strlen($k);
+            if ($len <= 8) return str_repeat('*', $len);
+            return substr($k, 0, 4) . '...' . substr($k, -4);
+        };
+
+        Log::info('CheckApiKey debug', [
+            'request_path' => $request->path(),
+            'provided_key_masked' => $mask($clientKey),
+            'expected_key_masked' => $mask($expectedKey),
+            'header_sent' => $request->header('X-API-KEY') ? 'X-API-KEY' : ($request->bearerToken() ? 'Authorization:Bearer' : 'none'),
+        ]);
+
+        // Comparación segura
+        if (!$clientKey || !hash_equals($expectedKey, $clientKey)) {
+            return response()->json(['message' => 'Unauthorized – invalid API key'], 401);
         }
 
-        // 2) Opcional: validar HMAC signature si hay secret configurado
-        $hmacSecret = config('api.hmac_secret');
-        if ($hmacSecret) {
-            $signatureHeader = $request->header('X-SIGNATURE'); // esperamos formato: "sha256=<hex>"
-            $body = $request->getContent(); // cuerpo raw
-            $calculated = 'sha256=' . hash_hmac('sha256', $body, $hmacSecret);
-
-            if (!$signatureHeader || !hash_equals($calculated, $signatureHeader)) {
-                Log::warning('Unauthorized request - invalid HMAC signature', [
-                    'ip' => $request->ip(),
-                    'path' => $request->path(),
-                    'provided_signature' => $signatureHeader ? 'present' : 'absent'
-                ]);
-                return response()->json([
-                    'message' => 'Unauthorized – invalid signature'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-        }
-
-       /*  // 3) Opcional: allowlist de IPs (si está configurada)
-        $allowlist = config('api.allowlist_ips', []);
-        if (!empty($allowlist) && is_array($allowlist)) {
-            if (!in_array($request->ip(), $allowlist)) {
-                Log::warning('Unauthorized request - ip not allowed', [
-                    'ip' => $request->ip(),
-                    'allowed' => $allowlist
-                ]);
-                return response()->json([
-                    'message' => 'Unauthorized – ip not allowed'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-        } */
-
-        // Si todo OK, seguimos
         return $next($request);
     }
 }
