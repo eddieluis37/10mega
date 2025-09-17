@@ -26,6 +26,16 @@
           <h4 style="color:white;"><strong>Reporte de compras por proveedor</strong></h3>
         </div>
       </div>
+       <div class="col-sm-12 col-md-3">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Proveedor</label>
+            <select class="form-control form-control-sm select2" name="vendedor" id="vendedor" required>
+              <option value="">Seleccione vendedor</option>
+            
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
       <div class="row g-3 mt-3">
         <div class="col-sm-6 col-md-3">
           <h6>Fecha y hora inicial</h6>
