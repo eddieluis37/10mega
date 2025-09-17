@@ -11,15 +11,22 @@ class CheckApiKey
 {
     public function handle(Request $request, Closure $next)
     {
+        // obtener key provista (X-API-KEY o Authorization Bearer)
         $clientKey = $request->header('X-API-KEY') ?: $request->bearerToken() ?: '';
-        $expectedKey = (string) config('api.key', '');
+        $clientKey = is_string($clientKey) ? trim($clientKey) : '';
 
-        // Normalizar y trim
-        $clientKey = trim($clientKey);
-        $expectedKey = trim($expectedKey);
+        // obtener esperado desde config; puede ser "key1,key2"
+        $expectedRaw = config('api.key', '') ?? '';
+        $expectedRaw = is_string($expectedRaw) ? trim($expectedRaw) : '';
 
-        // Function to mask (show first 4 and last 4 chars)
-        $mask = function (?string $k) {
+        // preparar lista permitida
+        $allowed = [];
+        if ($expectedRaw !== '') {
+            $allowed = array_map('trim', explode(',', $expectedRaw));
+        }
+
+        // función para enmascarar la key en logs (mostrar 4 primeros y 4 últimos)
+        $mask = function(?string $k) {
             if (!$k) return null;
             $len = strlen($k);
             if ($len <= 8) return str_repeat('*', $len);
@@ -27,15 +34,16 @@ class CheckApiKey
         };
 
         Log::info('CheckApiKey debug', [
-            'request_path' => $request->path(),
-            'provided_key_masked' => $mask($clientKey),
-            'expected_key_masked' => $mask($expectedKey),
-            'header_sent' => $request->header('X-API-KEY') ? 'X-API-KEY' : ($request->bearerToken() ? 'Authorization:Bearer' : 'none'),
+            'path' => $request->path(),
+            'provided_masked' => $mask($clientKey),
+            'expected_masked' => $mask($expectedRaw),
+            'allowed_count' => count($allowed),
+            'header_used' => $request->header('X-API-KEY') ? 'X-API-KEY' : ($request->bearerToken() ? 'Authorization:Bearer' : 'none'),
         ]);
 
-        // Comparación segura
-        if (!$clientKey || !hash_equals($expectedKey, $clientKey)) {
-            return response()->json(['message' => 'Unauthorized – invalid API key'], 401);
+        // validación segura: si expectedRaw vacío tratamos como no autorizado
+        if (empty($clientKey) || empty($allowed) || !in_array($clientKey, $allowed, true)) {
+            return response()->json(['message' => 'Unauthorized – invalid API key'], Response::HTTP_UNAUTHORIZED);
         }
 
         return $next($request);
