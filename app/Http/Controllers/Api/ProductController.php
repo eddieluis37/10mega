@@ -16,7 +16,7 @@ class ProductController extends Controller
     public function index(): JsonResponse
     {
         $products = Product::where('category_id', 1)
-            ->get(['name', 'code', 'unitofmeasure_id', 'price_fama']);
+            ->get(['name', 'id', 'unitofmeasure_id', 'price_fama']);
 
         return response()->json([
             'data' => $products,
