@@ -43,7 +43,7 @@
 						Vigencia: {{ \Carbon\Carbon::parse($sale->fecha_final)->format('d-m-Y') }}
 					</span> -->
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Responsable de IVA</span>
-					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Actividad Economica 4620 Tartifa</span>
+					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">Actividad Economica 4620 Tarifa</span>
 					<span style="font-size: 11px; font-weight: bold; display: block; margin: 0;">11.04 Maquina contamegachorizos@gmail.com</span>
 					<img src="{{ public_path('assets/img/logo/logo-mega.jpg') }}" alt="" class="invoice-logo" width="33%" style="padding-top: -70px; position: relative">
 				</td>
