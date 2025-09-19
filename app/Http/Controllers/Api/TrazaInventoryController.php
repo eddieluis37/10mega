@@ -16,8 +16,6 @@ class TrazaInventoryController extends Controller
 {
     /**
      * Recibe movimiento desde TRAZA y crea/actualiza inventario y movimiento.
-     *
-     * No usa external_reference. Si el inventario ya existe, se ACTUALIZA con los nuevos valores.
      */
     public function store(StoreTrazaMovementRequest $request): JsonResponse
     {
@@ -28,8 +26,26 @@ class TrazaInventoryController extends Controller
 
         // Normalizar/castear valores
         $productId = (int) $data['id_producto_terminado'];
-        $cantidad  = (float) $data['cantidad'];
-        $costoUnitario = (float) $data['costo_unidad'];
+
+        // cantidad como float (si quieres, puedes aplicar limpieza similar a costo)
+        $cantidad = (float) $data['cantidad'];
+
+        // --- LIMPIEZA de costo_unitario: quitar símbolos, gestionar comas/puntos ---
+        $rawCosto = isset($data['costo_unidad']) ? trim($data['costo_unidad']) : '0';
+        // mantener sólo dígitos, coma, punto y signo menos
+        $rawCosto = preg_replace('/[^\d\.,\-]/', '', $rawCosto);
+
+        // Si hay tanto coma como punto, asumimos que la coma es separador de miles -> eliminar comas
+        if (strpos($rawCosto, ',') !== false && strpos($rawCosto, '.') !== false) {
+            $rawCosto = str_replace(',', '', $rawCosto);
+        } elseif (strpos($rawCosto, ',') !== false) {
+            // si sólo hay coma, la convertimos a punto decimal
+            $rawCosto = str_replace(',', '.', $rawCosto);
+        }
+
+        $costoUnitario = $rawCosto;
+        // ---------------------------------------------------------------------
+
         $fechaVencimiento = isset($data['fecha_vencimiento']) && $data['fecha_vencimiento']
             ? Carbon::parse($data['fecha_vencimiento'])
             : null;
@@ -51,7 +67,7 @@ class TrazaInventoryController extends Controller
 
             $inventarioCreated = false;
             if (! $inventario) {
-                // crea inventario si no existe
+                // crea inventario si no existe (usa cantidad y costo recibidos)
                 $inventario = Inventario::create([
                     'product_id' => $productId,
                     'lote_id' => $lote->id,
@@ -63,10 +79,15 @@ class TrazaInventoryController extends Controller
                 $inventarioCreated = true;
                 $action = 'created';
             } else {
-                // existe -> ACTUALIZAR sobrescribiendo cantidad y costo con los valores nuevos
-                $inventario->cantidad_prod_term = $cantidad;
+                // existe -> SUMAR la nueva cantidad a la que ya tenía (no sobrescribir)
+                $inventario->cantidad_prod_term += $cantidad;
+
+                // actualizar costo unitario con el nuevo valor recibido (según tu petición)
                 $inventario->costo_unitario = $costoUnitario;
-                $inventario->costo_total = $cantidad * $costoUnitario;
+
+                // recalcular total con la nueva cantidad acumulada y el nuevo costo unitario
+                $inventario->costo_total = $inventario->cantidad_prod_term * $costoUnitario;
+
                 $inventario->save();
                 $action = 'updated';
             }
@@ -100,11 +121,10 @@ class TrazaInventoryController extends Controller
                 'inventario_id' => $inventario->id,
                 'movimiento_id' => $mov->id,
             ], $inventarioCreated ? 201 : 200);
-
         } catch (\Throwable $e) {
             DB::rollBack();
             // registra el error para debugging
-            logger()->error('Error procesando movimiento TRAZA: '.$e->getMessage(), [
+            logger()->error('Error procesando movimiento TRAZA: ' . $e->getMessage(), [
                 'exception' => $e
             ]);
 
