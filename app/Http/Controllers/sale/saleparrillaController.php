@@ -143,7 +143,7 @@ class saleparrillaController extends Controller
             ])
             ->where('sa.user_id', $userId)
             ->whereIn('c.id', $userCentrocostos)
-            ->whereIn('sa.tipo', ['4', '5'])
+            ->whereIn('sa.tipo', ['2', '3'])
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
             ->whereMonth('sa.fecha_venta', Carbon::now()->month)
             ->whereDay('sa.fecha_venta', Carbon::now()->day)
