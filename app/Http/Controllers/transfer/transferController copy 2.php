@@ -1226,4 +1226,290 @@ class transferController extends Controller
             ], 500);
         }
     }
+
+     public function add_shopping_para_mejorar(Request $request)
+    {
+        // 1) Validaciones previas
+        $validator = Validator::make($request->all(), [
+            'transferId'    => 'required|exists:transfers,id',
+            'stockOrigen'   => 'required|numeric',
+            'bodegaOrigen'  => 'required|exists:stores,id',
+            'bodegaDestino' => [
+                'required',
+                'exists:stores,id',
+                function ($attr, $value, $fail) {
+                    if (! DB::table('store_user')
+                        ->where('user_id', auth()->id())
+                        ->where('store_id', $value)
+                        ->exists()) {
+                        $fail('Usuario no autorizado para operar en esta bodega.');
+                    }
+                },
+            ],
+            'loteTraslado'  => 'sometimes|nullable|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Datos inválidos.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        // arreglo para guardar errores en llamadas a Traza
+        $trazaErrors = [];
+
+        DB::beginTransaction();
+        try {
+            // 2) Obtengo la transferencia válida
+            $transfer = Transfer::where('id', $request->transferId)
+                ->where('status', '1')
+                ->firstOrFail();
+
+            // 3) Traigo los detalles activos
+            $details = transfer_details::where('transfers_id', $transfer->id)
+                ->where('status', '1')
+                ->get();
+
+            // preparar cliente HTTP (si no existe TRAZA_URL fallará)
+            $trazaUrl = config('services.traza.url', env('TRAZA_API_URL'));
+            $trazaKey = config('services.traza.key', env('TRAZA_API_KEY'));
+            $http = new Client(['timeout' => 10]);
+
+            foreach ($details as $detail) {
+                // 4) Me aseguro de tener loteId
+                $loteId = $detail->lote_prod_traslado_id
+                    ?? $request->input('loteTraslado', null);
+
+                if (! $loteId) {
+                    throw new \Exception(
+                        "Detalle ID {$detail->id}: lote de traslado no definido."
+                    );
+                }
+
+                $productId = $detail->product_id;
+                $quantity  = $detail->kgrequeridos;
+
+                // 5) Origen
+                $invOrigen = Inventario::where('store_id', $request->bodegaOrigen)
+                    ->where('lote_id', $loteId)
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if (! $invOrigen) {
+                    throw new \Exception(
+                        "No se encontró inventario en origen para producto ID {$productId} y lote ID {$loteId}."
+                    );
+                }
+                $invOrigen->stock_ideal      -= $quantity;
+                $invOrigen->cantidad_traslado = ($invOrigen->cantidad_traslado ?? 0) + $quantity;
+                $invOrigen->save();
+
+                MovimientoInventario::create([
+                    'tipo'            => 'traslado_salida',
+                    'transfer_id'     => $transfer->id,
+                    'store_origen_id' => $request->bodegaOrigen,
+                    'lote_id'         => $loteId,
+                    'product_id'      => $productId,
+                    'cantidad'        => $quantity,
+                ]);
+
+                // 6) Destino
+                $invDestino = Inventario::firstOrNew([
+                    'store_id'   => $request->bodegaDestino,
+                    'lote_id'    => $loteId,
+                    'product_id' => $productId,
+                ]);
+
+                $invDestino->stock_ideal      = ($invDestino->exists
+                    ? $invDestino->stock_ideal + $quantity
+                    : $quantity);
+                $invDestino->cantidad_traslado = ($invDestino->cantidad_traslado ?? 0) + $quantity;
+                $invDestino->save();
+
+                MovimientoInventario::create([
+                    'tipo'             => 'traslado_ingreso',
+                    'transfer_id'      => $transfer->id,
+                    'store_destino_id' => $request->bodegaDestino,
+                    'lote_id'          => $loteId,
+                    'product_id'       => $productId,
+                    'cantidad'         => $quantity,
+                ]);
+
+                // -------------- ENVÍO A TRAZA (si destino es 34) ---------------
+                if ((int)$request->bodegaDestino === 34 && ! empty($trazaUrl) && ! empty($trazaKey)) {
+                    try {
+                        // obtenemos product y lote igual que antes
+                        $product = Product::with(['brand', 'category', 'unitOfMeasure'])->find($productId);
+                        $lote = class_exists(\App\Models\Lote::class)
+                            ? Lote::find($loteId)
+                            : DB::table('lotes')->where('id', $loteId)->first();
+
+                        // Normalizamos valores y los casteamos a string (evita error 422 que pide "cadena")
+                        $insumoIdStr = (string) ($product->erp_id ?? $product->id ?? $productId);
+                        $nombreInsumo = trim((string) ($product->name ?? $product->nombre ?? "Producto {$productId}"));
+                        $loteCode = trim((string) ($lote->code ?? $lote->codigo ?? "Lote_{$loteId}"));
+                        $saldoActual = number_format($invDestino->stock_ideal ?? $quantity, 2, '.', '');
+                        $unidadMedida = trim((string) 'KG');
+                        $precioUnitario = number_format($product->cost ?? $product->precio ?? 0, 2, '.', '');
+                        $nombreProveedor = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
+                        $tipoInsumo = $product->tipo_insumo ?? 3;
+                        $marca = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
+                        $fechaIngreso = isset($lote->fecha_ingreso) ? (string)$lote->fecha_ingreso : (string)($lote->fecha ?? null);
+                        $fechaVenc = isset($lote->fecha_vencimiento) ? (string)$lote->fecha_vencimiento : (string)($lote->fecha ?? null);
+                        $idCategoria = (string) ($product->category->id ?? $product->category_id ?? '');
+                        $nombreCategoria = trim((string) ($product->category->name ?? $product->category_name ?? ''));
+
+                        // Armamos payload usando strings + varias variantes de nombre (por compatibilidad)
+                        $payload = [
+                            'insumo_erp_id'   => $insumoIdStr,
+                            'insumo'          => $insumoIdStr,
+                            'Insumo'          => $insumoIdStr,
+                            'nombre_insumo'   => $nombreInsumo,
+                            'nombre'          => $nombreInsumo,
+                            'lote_insumo'     => $loteCode,
+                            'saldo_actual'    => (string)$saldoActual,
+                            'unidad_medida'   => $unidadMedida,
+                            'precio_unitario' => (string)$precioUnitario,
+                            'nombre_proveedor' => $nombreProveedor,
+                            'tipo_insumo'     => $tipoInsumo,
+                            'fecha_vencimiento' => $fechaVenc,
+                            'id_categoria'    => $idCategoria,
+                            'nombre_categoria' => $nombreCategoria,
+                        ];
+
+                        // Enviamos POST JSON
+                        $response = $http->post($trazaUrl, [
+                            'headers' => [
+                                'X-API-KEY' => $trazaKey,
+                                'Accept'    => 'application/json',
+                                'Content-Type' => 'application/json',
+                            ],
+                            'json' => $payload,
+                            'timeout' => 15,
+                        ]);
+
+                        // Leemos cuerpo y chequeamos si la API reportó 'success' => false (aunque devuelva 200)
+                        $statusCode = $response->getStatusCode();
+                        $body = (string) $response->getBody();
+                        $decoded = null;
+                        if (! empty($body)) {
+                            $decoded = json_decode($body, true);
+                        }
+
+                        // Si la API devolvió JSON y success === false (o status == 0), registramos como error de Traza
+                        $apiReportedError = false;
+                        if (is_array($decoded)) {
+                            if ((isset($decoded['success']) && $decoded['success'] === false)
+                                || (isset($decoded['status']) && ($decoded['status'] === 0 || $decoded['status'] === '0'))
+                            ) {
+                                $apiReportedError = true;
+                            }
+                        }
+
+                        if ($apiReportedError) {
+                            $trazaErrors[] = [
+                                'product_id' => $productId,
+                                'lote_id'    => $loteId,
+                                'http_status' => $statusCode,
+                                'response_raw' => $body,
+                                'response_json' => $decoded,
+                            ];
+
+                            Log::warning('Traza API returned success=false', [
+                                'product_id' => $productId,
+                                'lote_id' => $loteId,
+                                'status' => $statusCode,
+                                'response' => $decoded ?? $body,
+                            ]);
+                        } else {
+                            // OK normal
+                            Log::info('Traza sync OK', ['product' => $productId, 'lote' => $loteId, 'status' => $statusCode]);
+                        }
+                    } catch (ClientException $e) {
+                        // 4xx: normalmente 422 con cuerpo JSON explicando errores de validación
+                        $resp = $e->getResponse();
+                        $status = $resp ? $resp->getStatusCode() : null;
+                        $body = $resp ? (string)$resp->getBody() : $e->getMessage();
+
+                        $decoded = null;
+                        try {
+                            $decoded = json_decode($body, true);
+                        } catch (\Throwable $_) {
+                            $decoded = null;
+                        }
+
+                        $trazaErrors[] = [
+                            'product_id' => $productId,
+                            'lote_id'    => $loteId,
+                            'http_status' => $status,
+                            'response_raw' => $body,
+                            'response_json' => $decoded,
+                        ];
+
+                        Log::error('Error enviando a Traza (ClientException)', [
+                            'product_id' => $productId,
+                            'lote_id' => $loteId,
+                            'status' => $status,
+                            'response' => $decoded ?? $body,
+                        ]);
+                    } catch (RequestException $e) {
+                        // otros errores de request (timeout, DNS, etc.)
+                        $resp = $e->getResponse();
+                        $body = $resp ? (string)$resp->getBody() : $e->getMessage();
+
+                        $trazaErrors[] = [
+                            'product_id' => $productId,
+                            'lote_id'    => $loteId,
+                            'error'      => $body,
+                        ];
+
+                        Log::error('Error enviando a Traza (RequestException)', [
+                            'product_id' => $productId,
+                            'lote_id' => $loteId,
+                            'error' => $body,
+                        ]);
+                    } catch (\Throwable $ex) {
+                        $trazaErrors[] = [
+                            'product_id' => $productId,
+                            'lote_id'    => $loteId,
+                            'error'      => $ex->getMessage(),
+                        ];
+                        Log::error('Error enviando a Traza', [
+                            'product_id' => $productId,
+                            'lote_id' => $loteId,
+                            'exception' => $ex->getMessage(),
+                        ]);
+                    }
+                }
+            }
+
+            // 7) Marcar transferencia como “procesada”
+            $transfer->inventario = 'added';
+            $transfer->save();
+
+            DB::commit();
+
+            $response = [
+                'status'  => 1,
+                'message' => 'Inventario actualizado correctamente.',
+            ];
+
+            if (! empty($trazaErrors)) {
+                // devolvemos aviso de errores en las llamadas traza
+                $response['warning'] = 'Algunas llamadas al servicio de Traza fallaron.';
+                $response['traza_errors'] = $trazaErrors;
+            }
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Error al actualizar el inventario.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
