@@ -494,12 +494,12 @@ class saleController extends Controller
         $q = PromotionDetail::query()
             ->whereHas('promotion', fn($qq) => $qq->where('status', '1')) // promotion activo
             // cantidad minima requerida <= cantidad proporcionada
-          //  ->where('quantity', '<=', $quantity)
+            //  ->where('quantity', '<=', $quantity)
             // fecha válida (si tus campos permiten null, ajustar)
             ->whereDate('fecha_inicio', '<=', $dateNow)
             ->whereDate('fecha_final', '>=', $dateNow)
             // hora válida: si hora_inicio/hora_final son null -> todo el día; sino validar rango
-           /*  ->where(function ($qq) use ($timeNow) {
+            /*  ->where(function ($qq) use ($timeNow) {
                 $qq->where(function ($t) {
                     $t->whereNull('hora_inicio')->whereNull('hora_final');
                 })->orWhere(function ($t) use ($timeNow) {
@@ -762,6 +762,128 @@ class saleController extends Controller
     }
 
     public function search(Request $request)
+    {
+        $term = $request->input('q', '');
+        $saleId = $request->input('sale_id');
+        $sale = Sale::findOrFail($saleId);
+
+        // --- NORMALIZAR TÉRMINO ---
+        $originalTerm = $term;
+        // quitamos 's08' si aparece al inicio (no sensible a mayúsc/minúsc)
+        $cleanTerm = preg_replace('/^S08/i', '', $originalTerm);
+        $cleanTerm = trim($cleanTerm);
+
+        // candidatos para coincidencia exacta de barcode (13 dígitos)
+        $barcodeCandidates = [];
+        if (preg_match('/^\d{13}$/', $originalTerm)) {
+            $barcodeCandidates[] = $originalTerm;
+        }
+        if ($cleanTerm !== $originalTerm && preg_match('/^\d{13}$/', $cleanTerm)) {
+            $barcodeCandidates[] = $cleanTerm;
+        }
+        // --- /NORMALIZAR TÉRMINO ---
+
+        // stores del centro de costo
+        $storeIds = Store::where('centrocosto_id', $sale->centrocosto_id)
+            ->pluck('id')
+            ->toArray();
+
+        // Query de productos con inventario > 0 en esas bodegas
+        $prodQ = Product::query()
+            ->whereHas('inventarios', function ($q) use ($storeIds) {
+                $q->whereIn('store_id', $storeIds)
+                    ->where('stock_ideal', '>', 0);
+            });
+
+        if ($originalTerm) {
+            // Si tenemos candidatos válidos de barcode (13 dígitos), buscar por ellos
+            if (!empty($barcodeCandidates)) {
+                // evita duplicados
+                $barcodeCandidates = array_values(array_unique($barcodeCandidates));
+                $prodQ->whereIn('barcode', $barcodeCandidates);
+            } else {
+                // búsqueda por nombre / code / lote usando el término original (no limpio)
+                $prodQ->where(function ($q) use ($originalTerm) {
+                    $q->where('name', 'LIKE', "%{$originalTerm}%")
+                        ->orWhere('code', 'LIKE', "%{$originalTerm}%")
+                        ->orWhereHas('lotes', function ($q2) use ($originalTerm) {
+                            $q2->where('codigo', 'LIKE', "%{$originalTerm}%");
+                        });
+                });
+            }
+        }
+
+        $products = $prodQ->get();
+        $productIds = $products->pluck('id')->toArray();
+
+        // Inventarios válidos
+        $inventarios = Inventario::with(['store', 'lote'])
+            ->whereIn('store_id', $storeIds)
+            ->whereIn('product_id', $productIds)
+            ->where('stock_ideal', '>', 0)
+            ->whereHas('lote', function ($q) {
+                $q->where('fecha_vencimiento', '>=', Carbon::now());
+            })
+            ->get();
+
+        $results = [];
+
+        foreach ($products as $prod) {
+            $invItems = $inventarios->where('product_id', $prod->id);
+            foreach ($invItems as $inv) {
+                // Buscar promoción aplicable considerando cantidad = 1 (búsqueda)
+                $appliedPromotion = $this->getApplicablePromotionDetail(
+                    $prod->id,
+                    $inv->store_id,
+                    1,
+                    $inv->lote_id,
+                    $inv->id
+                );
+
+                $promo_percent = 0;
+                $promo_min_quantity = null;
+                $promo_applies = false;
+                $applied_promotion_id = null;
+
+                if ($appliedPromotion) {
+                    $promo_percent = floatval($appliedPromotion->porc_desc);
+                    $promo_min_quantity = floatval($appliedPromotion->quantity);
+                    $applied_promotion_id = $appliedPromotion->id;
+                    $promo_applies = ($appliedPromotion->quantity <= 1);
+                }
+
+                $results[] = [
+                    'id'                  => $inv->id,
+                    'text'                => sprintf(
+                        "Bg: %s - %s - %s - %s - Stk: %d",
+                        $inv->store->name,
+                        $inv->lote->codigo,
+                        Carbon::parse($inv->lote->fecha_vencimiento)->format('d/m/Y'),
+                        $prod->name,
+                        $inv->stock_ideal
+                    ),
+                    'lote_id'             => $inv->lote->id,
+                    'inventario_id'       => $inv->id,
+                    'stock_ideal'         => $inv->stock_ideal,
+                    'store_id'            => $inv->store->id,
+                    'store_name'          => $inv->store->name,
+                    'barcode'             => $prod->barcode,
+                    // barcode limpio (si tenía prefijo s08, se lo quitamos)
+                    'barcode_clean'       => preg_replace('/^s08/i', '', $prod->barcode),
+                    'product_id'          => $prod->id,
+                    'promo_percent'       => $promo_percent,
+                    'promo_min_quantity'  => $promo_min_quantity,
+                    'promo_applies'       => $promo_applies,
+                    'applied_promotion_id' => $applied_promotion_id,
+                ];
+            }
+        }
+
+        return response()->json($results);
+    }
+
+
+    public function searchOk(Request $request)
     {
         $term   = $request->input('q', '');
         $saleId = $request->input('sale_id');
@@ -1091,7 +1213,7 @@ class saleController extends Controller
 
             $precioBruto  = $price * $quantity;
 
-            $porcPromo    = $request->get('promo_percent', 0);             
+            $porcPromo    = $request->get('promo_percent', 0);
             $promoValue   = $precioBruto * ($porcPromo / 100);
 
             $porcDesc     = $request->get('porc_desc', 0);
