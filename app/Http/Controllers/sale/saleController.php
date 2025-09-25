@@ -2726,8 +2726,8 @@ class saleController extends Controller
             $sale->save();
 
             DB::commit();
-            return redirect()->route('sale.index')
-                ->with('success', 'Devolución parcial y recalculo de totales completados.');
+            return redirect()->route('sale.index_autoservicio')
+                ->with('success', 'Devolución parcial y recalculo de totales.');
         } catch (\Exception $e) {
             DB::rollback();
             Log::error("Error en devolución parcial para venta ID {$sale->id}: " . $e->getMessage());
