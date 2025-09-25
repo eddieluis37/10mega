@@ -76,6 +76,7 @@ function initializeDataTable(
                     }
                 },
             },
+            { data: "ProductoCode", name: "ProductoCode" },
             {
                 data: "ProductoNombre",
                 name: "ProductoNombre",

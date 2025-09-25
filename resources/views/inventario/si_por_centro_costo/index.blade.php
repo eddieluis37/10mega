@@ -184,6 +184,7 @@
               <th class="table-th text-white" title="Lote">Lote</th>
               <th class="table-th text-white" title="Fecha de vencimiento lote">FVENC</th>
               <th class="table-th text-white" title="Categoria">CAT</th>
+              <th class="table-th text-white" title="Categoria">CODE</th>
               <th class="table-th text-white" title="Productos">PRODUCTO</th>
               <th class="table-th text-white" title="Stock Ideal">SI</th>
             </tr>
@@ -193,6 +194,7 @@
           <tfoot>
             <tr>
               <th>Total</th>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
