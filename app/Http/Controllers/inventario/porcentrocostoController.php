@@ -128,6 +128,7 @@ class porcentrocostoController extends Controller
                     'codigoLote'            => $inventario->lote->codigo,
                     'fechaVencimientoLote'  => $inventario->lote->fecha_vencimiento,
                     'CategoriaNombre'       => $inventario->product->category->name,
+                    'ProductoCode'          => $inventario->product->code,
                     'ProductoNombre'        => $inventario->product->name,
                     'CantidadInicial'       => $inventario->cantidad_inventario_inicial,
                     'compraLote'            => $desposteres + $despostecerdos,
