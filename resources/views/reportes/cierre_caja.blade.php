@@ -115,60 +115,81 @@
   </style>
 
   <!-- styles y contenedores para la tabla con barra espejo -->
-<style>
-  /* Contenedor principal */
-  .table-container {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    padding-bottom: 8px; /* espacio para la barra espejo */
-  }
+  <style>
+    /* Contenedor principal */
+    .table-container {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+      padding-bottom: 8px;
+      /* espacio para la barra espejo */
+    }
 
-  /* Contenedor que hace scroll real para la tabla */
-  .table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    background: #fff;
-    border-radius: 6px;
-  }
+    /* Contenedor que hace scroll real para la tabla */
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      background: #fff;
+      border-radius: 6px;
+    }
 
-  /* Tu tabla - puedes mantener tus clases existentes */
-  table.mi-tabla {
-    width: 100%;
-    min-width: 900px; /* ajustar según tus columnas; si no usar 100% */
-    border-collapse: collapse;
-  }
+    /* Tu tabla - puedes mantener tus clases existentes */
+    table.mi-tabla {
+      width: 100%;
+      min-width: 900px;
+      /* ajustar según tus columnas; si no usar 100% */
+      border-collapse: collapse;
+    }
 
-  table.mi-tabla th,
-  table.mi-tabla td {
-    padding: 12px 10px;
-    border: 1px solid #eee;
-    text-align: left;
-    white-space: nowrap; /* evita quiebre de texto en columnas */
-  }
+    table.mi-tabla th,
+    table.mi-tabla td {
+      padding: 12px 10px;
+      border: 1px solid #eee;
+      text-align: left;
+      white-space: nowrap;
+      /* evita quiebre de texto en columnas */
+    }
 
-  /* Pie: barra espejo */
-  .mirror-scroll {
-    height: 14px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    margin-top: 8px;
-    display: none; /* visible sólo si la tabla necesita scroll */
-  }
-  .mirror-inner {
-    height: 1px;
-    background: transparent;
-  }
+    /* Pie: barra espejo */
+    .mirror-scroll {
+      height: 14px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      margin-top: 8px;
+      display: none;
+      /* visible sólo si la tabla necesita scroll */
+    }
 
-  /* Estilo de scrollbar (WebKit) */
-  .mirror-scroll::-webkit-scrollbar { height: 10px; }
-  .mirror-scroll::-webkit-scrollbar-track { background: #f3f3f3; border-radius: 8px; }
-  .mirror-scroll::-webkit-scrollbar-thumb { background: #cfcfcf; border-radius: 8px; }
-  .mirror-scroll::-webkit-scrollbar-thumb:hover { background: #b3b3b3; }
+    .mirror-inner {
+      height: 1px;
+      background: transparent;
+    }
 
-  /* Firefox */
-  .mirror-scroll { scrollbar-width: thin; scrollbar-color: #cfcfcf #f3f3f3; }
-</style>
+    /* Estilo de scrollbar (WebKit) */
+    .mirror-scroll::-webkit-scrollbar {
+      height: 10px;
+    }
+
+    .mirror-scroll::-webkit-scrollbar-track {
+      background: #f3f3f3;
+      border-radius: 8px;
+    }
+
+    .mirror-scroll::-webkit-scrollbar-thumb {
+      background: #cfcfcf;
+      border-radius: 8px;
+    }
+
+    .mirror-scroll::-webkit-scrollbar-thumb:hover {
+      background: #b3b3b3;
+    }
+
+    /* Firefox */
+    .mirror-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #cfcfcf #f3f3f3;
+    }
+  </style>
 
 
 </head>
@@ -192,150 +213,205 @@
       <div class="info-item"><strong>Turno:</strong> {{ $caja->id }}</div>
       <div class="info-item"><strong>Diferencia:</strong> ${{ number_format($caja->diferencia, 0) }}</div>
     </div>
+
     <!-- Tabla de Detalle de Facturas -->
-   <div class="table-container">
-  <!-- area con scroll real donde está la tabla -->
-  <div class="table-scroll" id="tableScroll">
-    <table class="mi-tabla" id="myTable">
-      <thead>
-        <tr>
-          <th>CLIENTE</th>
-          <th>#FACTURA</th>
-          <th>TOTAL FACTURA</th>
-          <th>EFECTIVO</th>
+    <div class="table-container">
+      <!-- area con scroll real donde está la tabla -->
+      <div class="table-scroll" id="tableScroll">
+        <table class="mi-tabla" id="myTable">
+          <thead>
+            <tr>
+              <th>CLIENTE</th>
+              <th>#FACTURA</th>
+              <th>TOTAL FACTURA</th>
+              <th>EFECTIVO</th>
 
-          {{-- Encabezados de TARJETA: solo tarjetas activas y solo posiciones con valores --}}
-          @if(!empty($activeTarjetas) && count($activeTarjetas))
-            @foreach($activeTarjetas as $tarjeta)
+              {{-- Encabezados de TARJETA: solo tarjetas activas y solo posiciones con valores --}}
+              @if(!empty($activeTarjetas) && count($activeTarjetas))
+              @foreach($activeTarjetas as $tarjeta)
               @foreach($tarjetaColumns[$tarjeta->id] ?? [] as $pos)
-                @php
-                  $label = $tarjeta->nombre;
-                  if($pos === 'tarjeta2') $label = $tarjeta->nombre . ' 2';
-                  if($pos === 'tarjeta3') $label = $tarjeta->nombre . ' 3';
-                @endphp
-                <th>{{ $label }}</th>
+              @php
+              $label = $tarjeta->nombre;
+              if($pos === 'tarjeta2') $label = $tarjeta->nombre . ' 2';
+              if($pos === 'tarjeta3') $label = $tarjeta->nombre . ' 3';
+              @endphp
+              <th>{{ $label }}</th>
               @endforeach
-            @endforeach
-          @endif
+              @endforeach
+              @endif
 
-          {{-- Crédito --}}
-          @if($showCredito)
-            <th>CREDITO</th>
-          @endif
+              {{-- Crédito --}}
+              @if($showCredito)
+              <th>CREDITO</th>
+              @endif
 
-          {{-- Encabezados dinámicos de DEV + siglas --}}
-          @foreach($creditForms as $fp)
-            <th>DEV {{ strtoupper($fp->nombre) }}</th>
-          @endforeach
-        </tr>
-      </thead>
+              {{-- Encabezados dinámicos de DEV + siglas --}}
+              @foreach($creditForms as $fp)
+              <th>DEV {{ strtoupper($fp->nombre ?? $fp->descripcion ?? 'FP'.$fp->id) }}</th>
+              @endforeach
+            </tr>
+          </thead>
 
-      <tbody>
-        @foreach($caja->sales as $sale)
-        <tr>
-          <td>{{ $sale->tercero->name ?? 'Sin Nombre' }}</td>
-          <td>{{ $sale->consecutivo }}</td>
-          <td>${{ number_format($sale->total_valor_a_pagar,0,',','.') }}</td>
-          <td>${{ number_format(($sale->valor_a_pagar_efectivo ?? 0) - ($sale->cambio ?? 0),0,',','.') }}</td>
+          <tbody>
+            @foreach($caja->sales as $sale)
+            <tr>
+              <td>{{ $sale->tercero->name ?? 'Sin Nombre' }}</td>
+              <td>{{ $sale->consecutivo }}</td>
+              <td>${{ number_format($sale->total_valor_a_pagar,0,',','.') }}</td>
+              <td>${{ number_format(($sale->valor_a_pagar_efectivo ?? 0) - ($sale->cambio ?? 0),0,',','.') }}</td>
 
-          {{-- Valores de TARJETA: iterar mismas tarjetas/posiciones que el encabezado --}}
-          @if(!empty($activeTarjetas) && count($activeTarjetas))
-            @foreach($activeTarjetas as $tarjeta)
+              {{-- Valores de TARJETA: iterar mismas tarjetas/posiciones que el encabezado --}}
+              @if(!empty($activeTarjetas) && count($activeTarjetas))
+              @foreach($activeTarjetas as $tarjeta)
               @foreach($tarjetaColumns[$tarjeta->id] ?? [] as $pos)
-                <td>
-                  @if($pos === 'tarjeta1')
-                    @if(optional($sale->formaPagoTarjeta)->id === $tarjeta->id)
-                      ${{ number_format($sale->valor_a_pagar_tarjeta ?? 0,0,',','.') }}
-                    @else
-                      $0
-                    @endif
-                  @elseif($pos === 'tarjeta2')
-                    @if(optional($sale->formaPagoTarjeta2)->id === $tarjeta->id)
-                      ${{ number_format($sale->valor_a_pagar_tarjeta2 ?? 0,0,',','.') }}
-                    @else
-                      $0
-                    @endif
-                  @elseif($pos === 'tarjeta3')
-                    @if(optional($sale->formaPagoTarjeta3)->id === $tarjeta->id)
-                      ${{ number_format($sale->valor_a_pagar_tarjeta3 ?? 0,0,',','.') }}
-                    @else
-                      $0
-                    @endif
-                  @else
-                    $0
-                  @endif
-                </td>
+              <td>
+                @if($pos === 'tarjeta1')
+                @if(optional($sale->formaPagoTarjeta)->id === $tarjeta->id)
+                ${{ number_format($sale->valor_a_pagar_tarjeta ?? 0,0,',','.') }}
+                @else
+                $0
+                @endif
+                @elseif($pos === 'tarjeta2')
+                @if(optional($sale->formaPagoTarjeta2)->id === $tarjeta->id)
+                ${{ number_format($sale->valor_a_pagar_tarjeta2 ?? 0,0,',','.') }}
+                @else
+                $0
+                @endif
+                @elseif($pos === 'tarjeta3')
+                @if(optional($sale->formaPagoTarjeta3)->id === $tarjeta->id)
+                ${{ number_format($sale->valor_a_pagar_tarjeta3 ?? 0,0,',','.') }}
+                @else
+                $0
+                @endif
+                @else
+                $0
+                @endif
+              </td>
               @endforeach
-            @endforeach
-          @endif
+              @endforeach
+              @endif
 
-          {{-- Valor de CRÉDITO --}}
-          @if($showCredito)
-            <td>
-              @if($sale->formaPagoCredito)
+              {{-- Valor de CRÉDITO --}}
+              @if($showCredito)
+              <td>
+                @if($sale->formaPagoCredito)
                 ${{ number_format($sale->valor_a_pagar_credito ?? 0,0,',','.') }}
-              @else
+                @else
                 $0
+                @endif
+              </td>
               @endif
-            </td>
-          @endif
 
-          {{-- Valor de DEV (nota de crédito) --}}
-          @foreach($creditForms as $fp)
-            <td>
-              @if($sale->notacredito && $sale->notacredito->formaPago->id === $fp->id)
-                ${{ number_format($sale->notacredito->total ?? 0,0,',','.') }}
-              @else
+              {{-- Valor de DEV (nota de crédito) --}}
+              @foreach($creditForms as $fp)
+              @php
+              // Inicializamos el total de devolución para esta venta y esta forma de pago
+              $devTotal = 0;
+
+              // Si existe la colección notacreditos (hasMany)
+              if (isset($sale->notacreditos) && $sale->notacreditos instanceof \Illuminate\Support\Collection) {
+              $devTotal = $sale->notacreditos
+              ->filter(function($n) use ($fp) {
+              return (optional($n->formaPago)->id === $fp->id)
+              || (isset($n->forma_pago_id) && $n->forma_pago_id == $fp->id);
+              })
+              ->sum('total');
+              }
+              // Compatibilidad si en algún lado todavía existe notacredito singular
+              elseif (isset($sale->notacredito) && $sale->notacredito) {
+              $devTotal = (optional($sale->notacredito->formaPago)->id === $fp->id)
+              ? ($sale->notacredito->total ?? 0)
+              : 0;
+              }
+              @endphp
+
+              <td>
+                @if($devTotal > 0)
+                ${{ number_format($devTotal, 0, ',', '.') }}
+                @else
                 $0
-              @endif
-            </td>
-          @endforeach
-        </tr>
-        @endforeach
-      </tbody>
-
-      <tfoot>
-        <tr>
-          <td colspan="2"><strong>TOTALES</strong></td>
-          <td>${{ number_format($totalFactura ?? 0,0,',','.') }}</td>
-          <td>${{ number_format($totalEfectivo ?? 0,0,',','.') }}</td>
-
-          {{-- Totales TARJETA por posiciones activas --}}
-          @if(!empty($activeTarjetas) && count($activeTarjetas))
-            @foreach($activeTarjetas as $tarjeta)
-              @foreach($tarjetaColumns[$tarjeta->id] ?? [] as $pos)
-                <td>
-                  @php
-                    $val = $totalesTarjeta[$tarjeta->id][$pos] ?? 0;
-                  @endphp
-                  ${{ number_format($val,0,',','.') }}
-                </td>
+                @endif
+              </td>
               @endforeach
+            </tr>
             @endforeach
-          @endif
+          </tbody>
 
-          {{-- Total CRÉDITO --}}
-          @if($showCredito)
-            <td>${{ number_format($totalCredito ?? 0,0,',','.') }}</td>
-          @endif
+          <tfoot>
+            <tr>
+              <td colspan="2"><strong>TOTALES</strong></td>
+              <td>${{ number_format($totalFactura ?? 0,0,',','.') }}</td>
+              <td>${{ number_format($totalEfectivo ?? 0,0,',','.') }}</td>
 
-          {{-- Totales DEV por forma de pago --}}
-          @foreach($creditForms as $fp)
-            <td>${{ number_format($totalesDevolucion[$fp->id] ?? 0,0,',','.') }}</td>
-          @endforeach
-        </tr>
-      </tfoot>
-    </table>
+              {{-- Totales TARJETA por posiciones activas --}}
+              @if(!empty($activeTarjetas) && count($activeTarjetas))
+              @foreach($activeTarjetas as $tarjeta)
+              @foreach($tarjetaColumns[$tarjeta->id] ?? [] as $pos)
+              <td>
+                @php
+                $val = $totalesTarjeta[$tarjeta->id][$pos] ?? 0;
+                @endphp
+                ${{ number_format($val,0,',','.') }}
+              </td>
+              @endforeach
+              @endforeach
+              @endif
+
+              {{-- Total CRÉDITO --}}
+              @if($showCredito)
+              <td>${{ number_format($totalCredito ?? 0,0,',','.') }}</td>
+              @endif
+
+              {{-- Totales DEV por forma de pago --}}
+              @foreach($creditForms as $fp)
+              @php
+              $fpTotal = 0;
+
+              // Si totalesDevolucion es una colección (la que te devolví en el controller)
+              if (isset($totalesDevolucion) && $totalesDevolucion instanceof \Illuminate\Support\Collection) {
+              $item = $totalesDevolucion->first(function($it) use ($fp) {
+              return isset($it['forma']->id) && $it['forma']->id === $fp->id;
+              });
+              $fpTotal = $item['total'] ?? 0;
+              }
+              // Compatibilidad si totalesDevolucion viene como array asociativo [$formaId => $total]
+              elseif (is_array($totalesDevolucion)) {
+              $fpTotal = $totalesDevolucion[$fp->id] ?? 0;
+              }
+              @endphp
+
+              <td>${{ number_format($fpTotal, 0, ',', '.') }}</td>
+              @endforeach
+            </tr>
+
+            {{-- Opcional: fila con total general de devoluciones --}}
+            <tr>
+              <th>Total DEV General</th>
+              @php
+              $totalDevoluciones = 0;
+              if (isset($totalesDevolucion) && $totalesDevolucion instanceof \Illuminate\Support\Collection) {
+              $totalDevoluciones = $totalesDevolucion->sum('total');
+              } elseif (is_array($totalesDevolucion)) {
+              $totalDevoluciones = array_sum($totalesDevolucion);
+              }
+              @endphp
+              <th colspan="{{ max(1, $creditForms->count()) }}">${{ number_format($totalDevoluciones, 0, ',', '.') }}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Barra espejo sincronizada -->
+      <div class="mirror-scroll" id="mirrorScroll" aria-hidden="true">
+        <div class="mirror-inner" id="mirrorInner"></div>
+      </div>
+    </div>
   </div>
+</body>
 
-  <!-- Barra espejo sincronizada -->
-  <div class="mirror-scroll" id="mirrorScroll" aria-hidden="true">
-    <div class="mirror-inner" id="mirrorInner"></div>
-  </div>
-</div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const tableScroll = document.getElementById('tableScroll');
     const mirrorScroll = document.getElementById('mirrorScroll');
     const mirrorInner = document.getElementById('mirrorInner');
@@ -359,14 +435,14 @@
     // sincronización bidireccional sin bucles
     let syncingFrom = null;
 
-    tableScroll.addEventListener('scroll', function () {
+    tableScroll.addEventListener('scroll', function() {
       if (syncingFrom === 'mirror') return;
       syncingFrom = 'table';
       mirrorScroll.scrollLeft = tableScroll.scrollLeft;
       window.requestAnimationFrame(() => syncingFrom = null);
     });
 
-    mirrorScroll.addEventListener('scroll', function () {
+    mirrorScroll.addEventListener('scroll', function() {
       if (syncingFrom === 'table') return;
       syncingFrom = 'mirror';
       tableScroll.scrollLeft = mirrorScroll.scrollLeft;
@@ -381,7 +457,7 @@
     // Ejemplo con Livewire: Livewire.on('tablaActualizada', () => updateMirrorWidth());
   });
 </script>
-  </div>
+</div>
 </body>
 
 </html>

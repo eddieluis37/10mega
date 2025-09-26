@@ -62,7 +62,7 @@ class ReporteCierreCajaController extends Controller
 
     public function show($id)
     {
-        // 1. Traer caja + ventas (status 1 y 3) + relaciones de cobros + notas de crédito
+        // 1. Traer caja + ventas (status 1 y 3) + relaciones (ahora con notacreditos -> hasMany)
         $caja = Caja::with([
             'sales' => fn($q) => $q->whereIn('status', ['1', '3']),
             'sales.tercero',
@@ -70,31 +70,46 @@ class ReporteCierreCajaController extends Controller
             'sales.formaPagoTarjeta2',
             'sales.formaPagoTarjeta3',
             'sales.formaPagoCredito',
-            'sales.notacredito.formaPago',
+            'sales.notacreditos.formaPago', // <- plural: cargamos todas las notas de crédito por venta
         ])->findOrFail($id);
 
-        // 2. Determinar todas las formas de pago usadas en las notas de crédito de estas ventas
-        $creditForms = $caja->sales
-            ->pluck('notacredito')             // colección de Notacredito|null
-            ->filter()                         // quita null
-            ->pluck('formaPago')               // colección de Formapago
-            ->unique('id')
+        // 2. Aplanar todas las notas de crédito de todas las ventas (compatibilidad: maneja tanto collection como modelo)
+        $allNotas = $caja->sales->flatMap(function ($s) {
+            // preferimos la colección notacreditos (hasMany), pero soportamos también notacredito por compatibilidad
+            if ($s->notacreditos instanceof \Illuminate\Support\Collection) {
+                return $s->notacreditos;
+            }
+            if ($s->notacredito) {
+                return collect([$s->notacredito]);
+            }
+            return collect();
+        });
+
+        // 3. Formas de pago únicas usadas en las notas de crédito
+        $creditForms = $allNotas
+            ->pluck('formaPago')   // colección de Formapago (puede contener null)
+            ->filter()             // quitar nulls
+            ->unique('id')         // formas únicas
             ->values();
 
-        // 3. Totales por cada forma de pago de nota de crédito
-        $totalesDevolucion = [];
-        foreach ($creditForms as $fp) {
-            $totalesDevolucion[$fp->id] = $caja->sales
-                ->filter(fn($s) => $s->notacredito && $s->notacredito->formaPago->id === $fp->id)
-                ->sum(fn($s) => $s->notacredito->total);
-        }
+        // 4. Totales por cada forma de pago de nota de crédito (colección lista para Blade)
+        $totalesDevolucion = $creditForms->map(function ($fp) use ($allNotas) {
+            $total = $allNotas
+                ->filter(fn($nota) => $nota->formaPago && $nota->formaPago->id === $fp->id)
+                ->sum('total'); // suma el campo 'total' de cada nota
 
-        // 4. Totales generales
+            return [
+                'forma' => $fp,
+                'total' => $total,
+            ];
+        })->values();
+
+        // 5. Totales generales
         $totalFactura  = $caja->sales->sum('total_valor_a_pagar');
         $totalEfectivo = $caja->sales->sum('valor_a_pagar_efectivo') - $caja->sales->sum('cambio');
         $totalCambio   = $caja->sales->sum('cambio');
 
-        // 5. Reconstruir totales por tarjeta por posición (más fiable que groupBy mixto)
+        // 6. Reconstruir totales por tarjeta por posición (más fiable que groupBy mixto)
         $totalesTarjeta = []; // estructura: [tarjeta_id => ['tarjeta1' => x,'tarjeta2'=>y,'tarjeta3'=>z]]
         foreach ($caja->sales as $s) {
             if ($s->formaPagoTarjeta) {
@@ -111,7 +126,7 @@ class ReporteCierreCajaController extends Controller
             }
         }
 
-        // 6. Obtener sólo las tarjetas que realmente tienen totales > 0 y además saber qué posiciones mostrar
+        // 7. Obtener sólo las tarjetas que realmente tienen totales > 0 y además saber qué posiciones mostrar
         $activeTarjetasIds = [];
         $tarjetaColumns = []; // [tarjeta_id => ['tarjeta1','tarjeta2',...]]
         foreach ($totalesTarjeta as $tid => $positions) {
@@ -126,7 +141,7 @@ class ReporteCierreCajaController extends Controller
         }
 
         // traer modelos Formapago sólo de los ids activos, manteniendo orden y datos
-        $activeTarjetas = Formapago::whereIn('id', $activeTarjetasIds)
+        $activeTarjetas = \App\Models\Formapago::whereIn('id', $activeTarjetasIds)
             ->where('tipoformapago', 'TARJETA')
             ->get()
             ->keyBy('id');
@@ -134,11 +149,11 @@ class ReporteCierreCajaController extends Controller
         $totalCredito   = $caja->sales->sum('valor_a_pagar_credito');
         $showCredito    = $totalCredito > 0;
 
-        // 7. Pasar todo a la vista
+        // 8. Pasar todo a la vista (totalesDevolucion es una colección ['forma'=>..., 'total'=>...])
         return view('reportes.cierre_caja', compact(
             'caja',
-            'activeTarjetas',   // collection keyed by id
-            'tarjetaColumns',   // array con posiciones por tarjeta
+            'activeTarjetas',
+            'tarjetaColumns',
             'totalFactura',
             'totalEfectivo',
             'totalCambio',

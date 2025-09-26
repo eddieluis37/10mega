@@ -2383,7 +2383,6 @@ class saleController extends Controller
 
     public function partialreturnsaledetails(Request $request)
     {
-        // Deshabilitar Debugbar (y verificar que no inyecte salida extra)
         if (app()->bound('debugbar')) {
             app('debugbar')->disable();
         }
@@ -2393,345 +2392,514 @@ class saleController extends Controller
         DB::beginTransaction();
         try {
             $saleId = $request->input('ventaId');
-            $returns = $request->input('returns'); // Arreglo: [ sale_detail_id => cantidad_a_devolver, ... ]
-            Log::info("Processing sale ID: {$saleId}", ['returns' => $returns]);
+            $returns = $request->input('returns'); // [ sale_detail_id => cantidad_a_devolver, ... ]
+            $storeId = $request->input('store_id'); // asumido enviado
 
             if (empty($returns)) {
-                Log::error('No returns provided.');
-                if (ob_get_length()) {
-                    ob_end_clean();
-                }
                 return response()->json(['error' => 'No se ha indicado ninguna cantidad a devolver.'], 422);
             }
 
-            $totalNota = 0;
+            $totalNota = 0.0;
+            $notaDetalles = [];
+
+            // Primero validamos y calculamos importe por cada devolución (incluye impuestos y descuentos)
             foreach ($returns as $saleDetailId => $returnQuantity) {
-                if ($returnQuantity > 0) {
-                    $detail = SaleDetail::findOrFail($saleDetailId);
-                    Log::info("Processing detail ID: {$saleDetailId}", [
-                        'returnQuantity'   => $returnQuantity,
-                        'availableQuantity' => $detail->quantity
-                    ]);
+                if ($returnQuantity <= 0) continue;
 
-                    if ($returnQuantity > $detail->quantity) {
-                        throw new \Exception("La cantidad a devolver para el producto {$detail->nameprod} supera la cantidad vendida.");
-                    }
-                    $totalNota += $detail->price * $returnQuantity;
+                $detail = SaleDetail::findOrFail($saleDetailId);
+
+                // validación básica
+                if ($returnQuantity > $detail->quantity) {
+                    throw new \Exception("La cantidad a devolver para el producto {$detail->nameprod} supera la cantidad vendida.");
                 }
-            }
-            Log::info("Total Nota Calculated", ['totalNota' => $totalNota]);
 
-            // Crear la cabecera de la Nota de Crédito
+                // Guardamos la cantidad original (antes de modificarla) para prorratear descuentos fijos
+                $originalQty = $detail->quantity > 0 ? $detail->quantity : 1; // evitar división por cero
+
+                // 1) Bruto por las unidades que se devuelven
+                $lineBruto = round($detail->price * $returnQuantity, 2);
+
+                // 2) Descuento prorrateado
+                // - porcentaje sobre el bruto de las unidades devueltas
+                $descuentoPorcentaje = round($lineBruto * ($detail->porc_desc / 100), 2);
+                // - descuento fijo prorrateado (ej: $detail->descuento_cliente es para todo el detalle)
+                $prorrateoDescuentoFijo = 0.0;
+                if (!empty($detail->descuento_cliente)) {
+                    $prorrateoDescuentoFijo = round(($detail->descuento_cliente * ($returnQuantity / $originalQty)), 2);
+                }
+                $lineDescuento = round($descuentoPorcentaje + $prorrateoDescuentoFijo, 2);
+
+                // 3) Neto base sujeto a impuestos
+                $lineNeto = round($lineBruto - $lineDescuento, 2);
+                if ($lineNeto < 0) $lineNeto = 0.0;
+
+                // 4) Impuestos (cada uno calculado sobre el neto prorrateado)
+                $lineIva = round($lineNeto * ($detail->porc_iva / 100), 2);
+                $lineOtroImp = round($lineNeto * ($detail->porc_otro_impuesto / 100), 2);
+                $lineImpoconsumo = round($lineNeto * ($detail->porc_impoconsumo / 100), 2);
+
+                // 5) Total final por las unidades devueltas (neto + impuestos)
+                $lineTotal = round($lineNeto + $lineIva + $lineOtroImp + $lineImpoconsumo, 2);
+
+                // Acumular para la nota de crédito
+                $totalNota = round($totalNota + $lineTotal, 2);
+
+                // Guardamos los valores para crear detalles de nota más abajo
+                $notaDetalles[] = [
+                    'sale_detail'      => $detail,
+                    'returnQuantity'   => $returnQuantity,
+                    'lineBruto'        => $lineBruto,
+                    'lineDescuento'    => $lineDescuento,
+                    'lineNeto'         => $lineNeto,
+                    'lineIva'          => $lineIva,
+                    'lineOtroImp'      => $lineOtroImp,
+                    'lineImpoconsumo'  => $lineImpoconsumo,
+                    'lineTotal'        => $lineTotal,
+                    'originalQty'      => $originalQty,
+                ];
+            }
+
+            // Crear la cabecera de la Nota de Crédito con total considerando impuestos y descuentos
             $notaCredito = Notacredito::create([
                 'sale_id' => $saleId,
                 'user_id' => auth()->id(),
                 'total'   => $totalNota,
                 'status'  => 'active',
             ]);
-            Log::info("Nota de Crédito creada", ['notaCreditoId' => $notaCredito->id]);
 
-            foreach ($returns as $saleDetailId => $returnQuantity) {
-                if ($returnQuantity > 0) {
-                    $detail = SaleDetail::findOrFail($saleDetailId);
-
-                    // Crear el detalle de la Nota de Crédito
-                    NotaCreditoDetalle::create([
-                        'notacredito_id' => $notaCredito->id,
-                        'product_id'     => $detail->product_id,
-                        'quantity'       => $returnQuantity,
-                        'price'          => $detail->price,
-                    ]);
-
-                    // Registrar el movimiento en inventario (tipo 'notacredito')
-                    MovimientoInventario::create([
-                        'tipo'           => 'notacredito',
-                        'sale_id'        => $saleId,
-                        'lote_id'        => $detail->lote_id,
-                        'product_id'     => $detail->product_id,
-                        'cantidad'       => $returnQuantity,
-                        'costo_unitario' => $detail->price,
-                        'total'          => $detail->price * $returnQuantity,
-                        'fecha'          => now(),
-                    ]);
-
-                    // Actualizar el inventario: incrementar 'cantidad_notacredito'
-                    $inventario = Inventario::where('product_id', $detail->product_id)
-                        ->where('lote_id', $detail->lote_id)
-                        ->where('store_id', $request->input('store_id')) // Se asume que se envía store_id
-                        ->first();
-                    if ($inventario) {
-                        $inventario->cantidad_notacredito += $returnQuantity;
-                        $inventario->save();
-                    }
-
-                    // Actualizar el detalle de venta (restar la cantidad devuelta)
-                    $detail->quantity -= $returnQuantity;
-                    $detail->save();
-                    Log::info("Processed detail", ['saleDetailId' => $saleDetailId, 'newQuantity' => $detail->quantity]);
-                }
-            }
-
-            // Opcional: Actualizar el estado de la venta a "devuelta" (3)
-            $sale = Sale::findOrFail($saleId);
-            $sale->status = 3;
-            $sale->save();
-
-            DB::commit();
-            Log::info("partialReturnSaleDetails completed successfully for saleId " . $saleId);
-
-            if (ob_get_length()) {
-                ob_end_clean();
-            }
-            return response()->json(['message' => 'Devolución parcial procesada correctamente.']);
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error("Error in partialReturnSaleDetails", ['error' => $e->getMessage()]);
-            if (ob_get_length()) {
-                ob_end_clean();
-            }
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-
-    public function partialReturn(Request $request)
-    {
-        Log::info('Recibiendo datos para devolución parcial', $request->all());
-        // Validar que se reciba el arreglo "returns" y el ID de la venta
-        $validated = $request->validate([
-            'ventaId'   => 'required|integer|exists:sales,id',
-            'returns'   => 'required|array',
-            'returns.*' => 'numeric|min:0',
-        ]);
-        // Obtener la venta junto con sus detalles
-        $sale = Sale::with('details')->findOrFail($validated['ventaId']);
-        Log::info("Venta encontrada", ['sale_id' => $sale->id]);
-
-        // Verificar que la venta esté en un estado que permita la devolución parcial
-        if ($sale->status === '1') {
-            // '1' representa ventas elegibles para devolución; se continúa el proceso.
-        } elseif ($sale->status === '3') {
-            // Para ventas en estado '3' se debe tener exactamente 1 nota de crédito asociada
-            if ($sale->credit_notes_count !== 1) {
-                Log::warning("La venta ID {$sale->id} en estado '3' no tiene una única nota de crédito. Cantidad: {$sale->credit_notes_count}");
-                return redirect()->back()->with('error', 'La venta no puede ser devuelta parcialmente.');
-            }
-            // Continuar el proceso para ventas en estado '3' que cumplen la condición
-        } else {
-            Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status}).");
-            return redirect()->back()->with('error', 'La venta no puede ser devuelta parcialmente.');
-        }
-
-        // Preparar variables para calcular el total parcial a devolver y almacenar los detalles a procesar
-        $partialTotal = 0;
-        $returnedDetails = [];
-        // Recorrer cada retorno indicado en la solicitud
-        foreach ($validated['returns'] as $detailId => $returnQuantity) {
-            if ($returnQuantity > 0) {
-                // Buscar el detalle de venta correspondiente en la colección de detalles
-                $detail = $sale->details->where('id', $detailId)->first();
-                if (!$detail) {
-                    Log::warning("No se encontró el detalle de venta con ID: {$detailId}");
-                    continue;
-                }
-                // Validar que la cantidad a devolver no supere la cantidad vendida actual
-                if ($returnQuantity > $detail->quantity) {
-                    $msg = "La cantidad a devolver ({$returnQuantity}) supera la cantidad vendida para el producto ID {$detail->product_id}";
-                    Log::error($msg);
-                    return redirect()->back()->with('error', $msg);
-                }
-                // Acumular el total a devolver
-                $partialTotal += $returnQuantity * $detail->price;
-                $returnedDetails[] = [
-                    'detail' => $detail,
-                    'returnQuantity' => $returnQuantity,
-                ];
-            }
-        }
-        if (empty($returnedDetails)) {
-            Log::warning("No se especificó ninguna cantidad para devolución parcial en la venta ID {$sale->id}");
-            return redirect()->back()->with('error', 'No se especificaron devoluciones válidas.');
-        }
-        Log::info("Total parcial a devolver: {$partialTotal}");
-        // Procesar la devolución parcial mediante nota de crédito
-        DB::beginTransaction();
-        try {
-            // Incrementar el contador de notas de crédito
-            $sale->credit_notes_count += 1;
-
-            // Determinar el estado de las notas de crédito
-            // Si es la primera nota, establecer como 'partial'
-            // Si es la segunda nota, mantener como 'partial' a menos que sea una devolución total
-            $sale->credit_note_status = 'partial';
-
-            // Crear la cabecera de la nota de crédito
-            $notaCredito = Notacredito::create([
-                'sale_id' => $sale->id,
-                'user_id' => auth()->id(),
-                'total'   => $partialTotal,
-                'status'  => '1',
-                // Agregar el número de secuencia de la nota de crédito para esta venta
-                'credit_note_sequence' => $sale->credit_notes_count,
-                // Establecer el tipo de devolución como parcial
-                'return_type' => 'partial_return'
-            ]);
-            Log::info("Nota de crédito creada con ID: {$notaCredito->id}");
-            // Recorrer cada detalle a devolver
-            foreach ($returnedDetails as $returned) {
+            // Ahora procesamos cada devolución: detalle de nota, movimiento inventario, actualizar inventario y detalle venta
+            foreach ($notaDetalles as $nd) {
                 /** @var SaleDetail $detail */
-                $detail = $returned['detail'];
-                $returnQuantity = $returned['returnQuantity'];
-                // Insertar el detalle de la nota de crédito manualmente (lógica previamente en trigger)
+                $detail = $nd['sale_detail'];
+                $q = $nd['returnQuantity'];
+
+                // Crear detalle de la nota de crédito con desglose
                 NotaCreditoDetalle::create([
-                    'notacredito_id' => $notaCredito->id,
-                    'product_id'     => $detail->product_id,
-                    'sale_detail_id' => $detail->id,
-                    'store_id'       => $detail->store_id,
+                    'notacredito_id'       => $notaCredito->id,
+                    'product_id'           => $detail->product_id,
+                    'sale_detail_id'       => $detail->id,
+                    'store_id'             => $detail->store_id ?? $storeId,
+                    'lote_id'              => $detail->lote_id,
+                    'quantity'             => $q,
+                    'price'                => $detail->price,
+                    'total_bruto'          => $nd['lineBruto'],
+                    'descuento'            => $nd['lineDescuento'],
+                    'neto'                 => $nd['lineNeto'],
+                    'iva'                  => $nd['lineIva'],
+                    'otro_impuesto'        => $nd['lineOtroImp'],
+                    'impoconsumo'          => $nd['lineImpoconsumo'],
+                    'total'                => $nd['lineTotal'],
+                ]);
+
+                // Movimiento Inventario
+                MovimientoInventario::create([
+                    'tipo'           => 'notacredito',
+                    'sale_id'        => $saleId,
                     'lote_id'        => $detail->lote_id,
-                    'quantity'       => $returnQuantity,
-                    'price'          => $detail->price,
-                    'inventory_processed' => false
+                    'product_id'     => $detail->product_id,
+                    'cantidad'       => $q,
+                    'costo_unitario' => $detail->price,
+                    'total'          => $nd['lineTotal'], // puede usarse costo o total; aquí uso total con impuestos para trazabilidad
+                    'fecha'          => now(),
                 ]);
-                Log::info("Nota de crédito detalle creada para producto ID: {$detail->product_id}, cantidad: {$returnQuantity}");
-                // Registrar el movimiento en inventario para la devolución parcial
-                $movimiento = MovimientoInventario::create([
-                    'tipo'            => 'notacredito',
-                    'store_origen_id' => $detail->store_id,
-                    'sale_id'         => $sale->id,
-                    'lote_id'         => $detail->lote_id,
-                    'product_id'      => $detail->product_id,
-                    'cantidad'        => $returnQuantity,
-                    'costo_unitario'  => $detail->price,
-                    'total'           => $returnQuantity * $detail->price,
-                    'fecha'           => now(),
-                ]);
-                Log::info("Movimiento de inventario registrado para producto ID: {$detail->product_id}");
-                // Actualizar el inventario: incrementar el campo 'cantidad_notacredito'
+
+                // Actualizar inventario (incrementar cantidad_notacredito)
                 $inventario = Inventario::where('product_id', $detail->product_id)
                     ->where('lote_id', $detail->lote_id)
-                    ->where('store_id', $detail->store_id)
+                    ->where('store_id', $detail->store_id ?? $storeId)
                     ->first();
                 if ($inventario) {
-                    $inventario->cantidad_notacredito += $returnQuantity;
+                    $inventario->cantidad_notacredito += $q;
                     $inventario->save();
-                    Log::info("Inventario actualizado para producto ID: {$detail->product_id}");
                 }
 
-                // --- Funcionalidad 1: si tras restar queda cantidad = 0, marcamos status = '0' ---
-                $detail->quantity -= $returnQuantity;
+                // Actualizar el detalle de venta: restar la cantidad devuelta
+                $detail->quantity -= $q;
                 if ($detail->quantity <= 0) {
-                    // Si quedó en 0 (o negativo por seguridad), forzamos a 0 y desactivamos
                     $detail->quantity = 0;
                     $detail->status   = '0';
                 }
                 $detail->save();
-                Log::info("Detalle de venta actualizado para producto ID: {$detail->product_id}, cantidad restante: {$detail->quantity}");
-                // --- Fin de la funcionalidad 1 ---
-
             }
 
-            // —— Funcionalidad 2: recalcular y guardar cada detalle con status = '1'
+            // Opcional: actualizar venta a estado devuelta parcialmente (3) y recalcular totales
+            $sale = Sale::findOrFail($saleId);
+
+            // Recalcular todos los detalles activos (status = '1') — mismos pasos que en tu otro método,
+            // pero teniendo en cuenta que ahora los detalles ya fueron actualizados.
             $activeDetails = SaleDetail::where('sale_id', $sale->id)
-                ->where('status',    '1')
+                ->where('status', '1')
                 ->get();
 
             foreach ($activeDetails as $d) {
-                // 1) Recalcular bruto
-                $d->total_bruto       = round($d->quantity * $d->price, 2);
+                $d->total_bruto = round($d->quantity * $d->price, 2);
 
-                // 2) Recalcular descuento (por % + fijo)
-                $calcDescuento        = ($d->total_bruto * ($d->porc_desc / 100))
-                    + $d->descuento_cliente;
-                $d->descuento         = round($calcDescuento, 2);
+                $calcDescuento = ($d->total_bruto * ($d->porc_desc / 100))
+                    + (!empty($d->descuento_cliente) ? round($d->descuento_cliente, 2) : 0.0);
 
-                // 3) Neto base para impuestos
-                $neto                 = $d->total_bruto - $d->descuento;
+                $d->descuento = round($calcDescuento, 2);
 
-                // 4) Recalcular cada impuesto
-                $d->iva               = round($neto * ($d->porc_iva           / 100), 2);
-                $d->otro_impuesto     = round($neto * ($d->porc_otro_impuesto / 100), 2);
-                $d->impoconsumo       = round($neto * ($d->porc_impoconsumo   / 100), 2);
+                $neto = round($d->total_bruto - $d->descuento, 2);
+                if ($neto < 0) $neto = 0.0;
 
-                // 5) Total final del detalle
-                $d->total             = round(
-                    $neto
-                        + $d->iva
-                        + $d->otro_impuesto
-                        + $d->impoconsumo,
-                    2
-                );
+                $d->iva = round($neto * ($d->porc_iva / 100), 2);
+                $d->otro_impuesto = round($neto * ($d->porc_otro_impuesto / 100), 2);
+                $d->impoconsumo = round($neto * ($d->porc_impoconsumo / 100), 2);
 
-                // 6) Forzar timestamp de actualización
-                $d->updated_at        = now();
+                $d->total = round($neto + $d->iva + $d->otro_impuesto + $d->impoconsumo, 2);
 
-                // 7) Guardar cambios
+                $d->updated_at = now();
                 $d->save();
             }
 
-            // 8) Ahora, recalcular y guardar los totales de la venta
-            $TotalBruto        = (float) SaleDetail::where('sale_id', $sale->id)
-                ->where('status',    '1')
-                ->sum('total_bruto');
-            $TotalIva          = (float) SaleDetail::where('sale_id', $sale->id)
-                ->where('status',    '1')
-                ->sum('iva');
-            $TotalOtroImp      = (float) SaleDetail::where('sale_id', $sale->id)
-                ->where('status',    '1')
-                ->sum('otro_impuesto');
-            $TotalImpConsumo   = (float) SaleDetail::where('sale_id', $sale->id)
-                ->where('status',    '1')
-                ->sum('impoconsumo');
-            $TotalAPagar       = (float) SaleDetail::where('sale_id', $sale->id)
-                ->where('status',    '1')
-                ->sum('total');
+            // Recalcular totales de la venta desde detalles activos
+            $TotalBruto = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('total_bruto');
+            $TotalIva = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('iva');
+            $TotalOtroImp = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('otro_impuesto');
+            $TotalImpConsumo = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('impoconsumo');
+            $TotalAPagar = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('total');
 
-            // 9) Mantener descuentos globales
-            $TotalDescuentos   = (float) $sale->descuentos + $sale->descuento_cliente;
+            // Mantener descuentos globales como venían
+            $TotalDescuentos = (float) ($sale->descuentos ?? 0) + ($sale->descuento_cliente ?? 0);
 
-            $sale->total_bruto           = $TotalBruto;
-            $sale->subtotal              = $TotalBruto - $TotalDescuentos;
-            $sale->total_iva             = $TotalIva;
+            $sale->total_bruto = $TotalBruto;
+            $sale->subtotal = round($TotalBruto - $TotalDescuentos, 2);
+            $sale->total_iva = $TotalIva;
             $sale->total_otros_impuestos = $TotalOtroImp + $TotalImpConsumo;
-
-            $sale->total                 = $TotalAPagar;
+            $sale->total = $TotalAPagar;
             $sale->total_valor_a_pagar = $TotalAPagar;
 
             if ($sale->valor_a_pagar_credito > 0) {
                 $sale->valor_a_pagar_credito = $TotalAPagar;
             }
 
-            // — recalculo de totales de Sale ya hecho aquí —
+            // Calcular valor a devolver comparando pagos originales y el nuevo total.
+            // Uso efectivo + tarjeta + credito como "pagos" originales (ajusta si no corresponde)
+            $pagosOriginales = (float)($sale->valor_a_pagar_efectivo ?? 0) + (float)($sale->valor_a_pagar_tarjeta ?? 0) + (float)($sale->valor_a_pagar_credito ?? 0);
 
-            // 10) Calcular el valor de devolución usando los pagos en efectivo y tarjeta de la venta
-            $calculatedValor = round(
-                ($sale->valor_a_pagar_efectivo + $sale->valor_a_pagar_tarjeta)
-                    - $sale->total,
-                2
-            );
+            // El valor a devolver es la diferencia entre pagos originales y nuevo total (si positivo)
+            $calculatedValor = round($pagosOriginales - $sale->total, 2);
+            if ($calculatedValor < 0) $calculatedValor = 0.00;
 
-            // Asignar en la NotaCredito tanto el ID de la forma de pago (global)
-            // como el valor que acabamos de calcular
-            $notaCredito->forma_pago_id    = $request->input('forma_pago');   // tu campo oculto o select global
+            $notaCredito->forma_pago_id = $request->input('forma_pago');
             $notaCredito->valor_devolucion = $calculatedValor;
-
-            // Persistimos los cambios en la cabecera de la nota
+            $notaCredito->total = $totalNota; // asegurar consistencia
             $notaCredito->save();
 
-            $sale->status                = '3';
-
-            // Forzar timestamp de la venta
-            $sale->updated_at            = now();
-
-            // Guardar venta
+            $sale->status = '3';
+            $sale->updated_at = now();
             $sale->save();
 
             DB::commit();
-            return redirect()->route('sale.index_autoservicio')
-                ->with('success', 'Devolución parcial y recalculo de totales.');
+
+            return response()->json(['message' => 'Devolución parcial procesada correctamente.', 'nota_credito_id' => $notaCredito->id]);
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error("Error en devolución parcial para venta ID {$sale->id}: " . $e->getMessage());
-            return redirect()->back()->with('error', $e->getMessage());
+            Log::error("Error in partialReturnSaleDetails", ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+
+    /**
+     * Método público para procesar devolución parcial (crea Notacredito con impuestos y descuentos correctos).
+     */
+    public function partialReturn(Request $request)
+    {
+        Log::info('Recibiendo datos para devolución parcial', $request->all());
+
+        $validated = $request->validate([
+            'ventaId'   => 'required|integer|exists:sales,id',
+            'returns'   => 'required|array',
+            'returns.*' => 'numeric|min:0',
+            'store_id'  => 'sometimes|integer', // opcional si lo envías
+            'forma_pago' => 'sometimes|nullable|integer',
+            'prorratear_globales' => 'sometimes|boolean' // si quieres controlar prorrateo desde frontend
+        ]);
+
+        $sale = Sale::with('details')->findOrFail($validated['ventaId']);
+        $returns = $validated['returns'];
+        $storeId = $request->input('store_id', null);
+        $prorratearGlobales = $request->input('prorratear_globales', true);
+
+        // Verificar estado de la venta si aplica (código original del usuario)
+        if ($sale->status !== '1' && $sale->status !== 1 && $sale->status !== '3' && $sale->status !== 3) {
+            Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status}).");
+            return response()->json(['error' => 'La venta no puede ser devuelta parcialmente.'], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1) Calcular totales de la nota (desglose por línea)
+            $calculo = $this->calcularTotalesDevolucion($sale, $returns, $prorratearGlobales);
+
+            if (empty($calculo['lines'])) {
+                return response()->json(['error' => 'No se encontraron líneas válidas para devolución.'], 422);
+            }
+
+            $totalNota = $calculo['totalNota'];
+
+            // 2) Crear cabecera de la nota de crédito
+            $notaCredito = Notacredito::create([
+                'sale_id' => $sale->id,
+                'user_id' => auth()->id(),
+                'total'   => $totalNota,
+                'status'  => '1', // o 'active' según tu convención
+                'credit_note_sequence' => ($sale->credit_notes_count ?? 0) + 1,
+                'return_type' => 'partial_return',
+            ]);
+
+            // 3) Crear detalles de nota y movimientos/inventario y actualizar detalles de venta
+            foreach ($calculo['lines'] as $line) {
+                /** @var SaleDetail $detail */
+                $detail = $line['detail'];
+                $q = $line['quantity'];
+
+                // Crear detalle de nota con desglose para trazabilidad
+                NotaCreditoDetalle::create([
+                    'notacredito_id' => $notaCredito->id,
+                    'product_id'     => $detail->product_id,
+                    'sale_detail_id' => $detail->id,
+                    'store_id'       => $detail->store_id ?? $storeId,
+                    'lote_id'        => $detail->lote_id,
+                    'quantity'       => $q,
+                    'price'          => $detail->price,
+                    'total_bruto'    => $line['bruto'],
+                    'descuento'      => $line['descuento'],
+                    'neto'           => $line['neto'],
+                    'iva'            => $line['iva'],
+                    'otro_impuesto'  => $line['otro_impuesto'],
+                    'impoconsumo'    => $line['impoconsumo'],
+                    'total'          => $line['total'],
+                ]);
+
+                // Registrar movimiento de inventario (tipo 'notacredito')
+                MovimientoInventario::create([
+                    'tipo'           => 'notacredito',
+                    'sale_id'        => $sale->id,
+                    'lote_id'        => $detail->lote_id,
+                    'product_id'     => $detail->product_id,
+                    'cantidad'       => $q,
+                    'costo_unitario' => $detail->price,
+                    // aquí el campo total lo guardo con el bruto - descuentos (costo contabilizado) o con total?: 
+                    // guardamos el total con impuestos para auditoría
+                    'total'          => $line['total'],
+                    'fecha'          => now(),
+                ]);
+
+                // Actualizar inventario: incrementar 'cantidad_notacredito' (si existe el registro)
+                $inventario = Inventario::where('product_id', $detail->product_id)
+                    ->where('lote_id', $detail->lote_id)
+                    ->where('store_id', $detail->store_id ?? $storeId)
+                    ->first();
+                if ($inventario) {
+                    $inventario->cantidad_notacredito += $q;
+                    $inventario->save();
+                }
+
+                // Actualizar detalle de venta restando la cantidad devuelta
+                $detail->quantity -= $q;
+                if ($detail->quantity <= 0) {
+                    $detail->quantity = 0;
+                    $detail->status = '0';
+                }
+                $detail->save();
+            }
+
+            // 4) Actualizar contador de notas en la venta y estado parcial
+            $sale->credit_notes_count = ($sale->credit_notes_count ?? 0) + 1;
+            $sale->credit_note_status = 'partial';
+
+            // 5) Recalcular y guardar todos los detalles activos (status = '1')
+            $activeDetails = SaleDetail::where('sale_id', $sale->id)->where('status', '1')->get();
+            foreach ($activeDetails as $d) {
+                $d->total_bruto = round($d->quantity * $d->price, 2);
+
+                $calcDescuento = ($d->total_bruto * ($d->porc_desc / 100))
+                    + (!empty($d->descuento_cliente) ? round($d->descuento_cliente, 2) : 0.0);
+
+                $d->descuento = round($calcDescuento, 2);
+
+                $neto = round($d->total_bruto - $d->descuento, 2);
+                if ($neto < 0) $neto = 0.0;
+
+                $d->iva = round($neto * (($d->porc_iva ?? 0) / 100), 2);
+                $d->otro_impuesto = round($neto * (($d->porc_otro_impuesto ?? 0) / 100), 2);
+                $d->impoconsumo = round($neto * (($d->porc_impoconsumo ?? 0) / 100), 2);
+
+                $d->total = round($neto + $d->iva + $d->otro_impuesto + $d->impoconsumo, 2);
+
+                $d->updated_at = now();
+                $d->save();
+            }
+
+            // 6) Recalcular totales de la venta desde detalles activos
+            $TotalBruto = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('total_bruto');
+            $TotalIva = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('iva');
+            $TotalOtroImp = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('otro_impuesto');
+            $TotalImpConsumo = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('impoconsumo');
+            $TotalAPagar = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('total');
+
+            $TotalDescuentos = (float) ($sale->descuentos ?? 0) + ($sale->descuento_cliente ?? 0);
+
+            $sale->total_bruto = $TotalBruto;
+            $sale->subtotal = round($TotalBruto - $TotalDescuentos, 2);
+            $sale->total_iva = $TotalIva;
+            $sale->total_otros_impuestos = $TotalOtroImp + $TotalImpConsumo;
+            $sale->total = $TotalAPagar;
+            $sale->total_valor_a_pagar = $TotalAPagar;
+
+            if ($sale->valor_a_pagar_credito > 0) {
+                $sale->valor_a_pagar_credito = $TotalAPagar;
+            }
+
+            // 7) Calcular valor a devolver: diferencia entre pagos originales y el nuevo total
+            $pagosOriginales = (float)($sale->valor_a_pagar_efectivo ?? 0) + (float)($sale->valor_a_pagar_tarjeta ?? 0) + (float)($sale->valor_a_pagar_credito ?? 0);
+            $calculatedValor = round($pagosOriginales - $sale->total, 2);
+            if ($calculatedValor < 0) $calculatedValor = 0.00;
+
+            // Guardar forma de pago y valor_devolucion en la nota
+            $notaCredito->forma_pago_id = $request->input('forma_pago', null);
+            $notaCredito->valor_devolucion = $calculatedValor;
+            $notaCredito->total = $totalNota; // asegurar consistencia
+            $notaCredito->save();
+
+            // 8) Finalizar venta
+            $sale->status = '3';
+            $sale->updated_at = now();
+            $sale->save();
+
+            DB::commit();
+
+            return redirect()->route('sale.index_autoservicio')->with('success', 'Devolución parcial y recalculo de totales.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error("Error en devolución parcial para venta ID {$sale->id}: " . $e->getMessage(), [
+                'stack' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Calcula total de devolución (nota de crédito) considerando:
+     * - descuento % por detalle
+     * - descuento fijo por detalle (prorrateado por cantidad)
+     * - (opcional) prorrateo de descuentos globales de la venta
+     * - impuestos aplicados sobre la base neta (tras descuentos)
+     *
+     * @param Sale $sale
+     * @param array $returns [ sale_detail_id => cantidad_a_devolver, ... ]
+     * @param bool $prorratearGlobales
+     * @return array
+     */
+    protected function calcularTotalesDevolucion(Sale $sale, array $returns, bool $prorratearGlobales = true): array
+    {
+        $saleDetails = $sale->details->keyBy('id');
+
+        // Suma bruto original de la venta (para prorrateo global)
+        $saleTotalBrutoOriginal = 0.0;
+        foreach ($saleDetails as $d) {
+            $saleTotalBrutoOriginal += round(($d->quantity * $d->price), 2);
+        }
+        $saleTotalBrutoOriginal = max(0.0, $saleTotalBrutoOriginal);
+
+        $globalFixedDiscount = 0.0;
+        if ($prorratearGlobales) {
+            $globalFixedDiscount = (float)($sale->descuentos ?? 0) + (float)($sale->descuento_cliente ?? 0);
+        }
+
+        $totalNota = 0.0;
+        $lines = [];
+        $sums = [
+            'bruto' => 0.0,
+            'descuento' => 0.0,
+            'neto' => 0.0,
+            'iva' => 0.0,
+            'otro' => 0.0,
+            'impoconsumo' => 0.0,
+        ];
+
+        foreach ($returns as $saleDetailId => $returnQty) {
+            $returnQty = (float)$returnQty;
+            if ($returnQty <= 0) continue;
+
+            if (!isset($saleDetails[$saleDetailId])) {
+                // si no existe el detalle en la venta saltar
+                continue;
+            }
+            $detail = $saleDetails[$saleDetailId];
+
+            $originalQty = max(1, (float)$detail->quantity);
+
+            // 1) Bruto
+            $lineBruto = round($detail->price * $returnQty, 2);
+
+            // 2) Descuento % sobre la porción
+            $descuentoPct = round($lineBruto * ((float)($detail->porc_desc ?? 0) / 100.0), 2);
+
+            // 3) Descuento fijo prorrateado (porción del descuento_cliente del detalle)
+            $descuentoFijoProrrateado = 0.0;
+            if (!empty($detail->descuento_cliente)) {
+                $descuentoFijoProrrateado = round(((float)$detail->descuento_cliente) * ($returnQty / $originalQty), 2);
+            }
+
+            // 4) Prorrateo descuentos globales (si aplica)
+            $descuentoGlobalProrrateado = 0.0;
+            if ($prorratearGlobales && $saleTotalBrutoOriginal > 0) {
+                $proporcion = $lineBruto / $saleTotalBrutoOriginal;
+                $descuentoGlobalProrrateado = round($globalFixedDiscount * $proporcion, 2);
+            }
+
+            // 5) Total descuento por línea
+            $lineDescuento = round($descuentoPct + $descuentoFijoProrrateado + $descuentoGlobalProrrateado, 2);
+
+            // 6) Neto sujeto a impuestos
+            $lineNeto = round($lineBruto - $lineDescuento, 2);
+            if ($lineNeto < 0) $lineNeto = 0.0;
+
+            // 7) Impuestos sobre neto
+            $porcIva = (float)($detail->porc_iva ?? 0);
+            $porcOtro = (float)($detail->porc_otro_impuesto ?? 0);
+            $porcImpConsumo = (float)($detail->porc_impoconsumo ?? 0);
+
+            $lineIva = round($lineNeto * ($porcIva / 100.0), 2);
+            $lineOtro = round($lineNeto * ($porcOtro / 100.0), 2);
+            $lineImpConsumo = round($lineNeto * ($porcImpConsumo / 100.0), 2);
+
+            // 8) Total línea (neto + impuestos)
+            $lineTotal = round($lineNeto + $lineIva + $lineOtro + $lineImpConsumo, 2);
+
+            // 9) Acumular
+            $totalNota = round($totalNota + $lineTotal, 2);
+            $sums['bruto'] += $lineBruto;
+            $sums['descuento'] += $lineDescuento;
+            $sums['neto'] += $lineNeto;
+            $sums['iva'] += $lineIva;
+            $sums['otro'] += $lineOtro;
+            $sums['impoconsumo'] += $lineImpConsumo;
+
+            $lines[] = [
+                'detail' => $detail,
+                'quantity' => $returnQty,
+                'bruto' => $lineBruto,
+                'descuento' => $lineDescuento,
+                'neto' => $lineNeto,
+                'iva' => $lineIva,
+                'otro_impuesto' => $lineOtro,
+                'impoconsumo' => $lineImpConsumo,
+                'total' => $lineTotal,
+            ];
+        }
+
+        // redondear sumas
+        $sums = array_map(fn($v) => round($v, 2), $sums);
+        $totalNota = round($totalNota, 2);
+
+        return [
+            'totalNota' => $totalNota,
+            'lines' => $lines,
+            'sums' => $sums,
+        ];
     }
 }

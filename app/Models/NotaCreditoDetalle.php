@@ -14,6 +14,11 @@ class NotaCreditoDetalle extends Model
         'product_id',
         'quantity',
         'price',
+        'total_bruto',
+        'descuento',
+        'neto',
+        'iva'
+
         // Otros campos que requieras...
     ];
 
