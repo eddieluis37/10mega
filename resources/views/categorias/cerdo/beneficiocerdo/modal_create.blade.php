@@ -480,18 +480,7 @@
 											<span class="input-group-text" id="addon-wrapping">$</span>
 											<input type="text" name="totalcostos" id="totalcostos" class="form-control" aria-describedby="helpId" readonly step="0.01">
 										</div>
-									</div>
-
-									<!-- 		
-													<div class="col-md-4">
-														<div class="task-header">
-															<div class="form-group">
-																<label>Sacrificio</label>
-																<div class="form-control campo">{{number_format( $sacrificios[1]->sacrificio )}} </div>
-															</div>
-														</div>
-													</div>															
- 												-->
+									</div>									
 								</div>
 							</div>
 						</div>
