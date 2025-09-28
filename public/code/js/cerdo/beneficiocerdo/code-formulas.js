@@ -169,7 +169,7 @@
 
     //SACRIFICIO / FOMENTO / DEGUELLO / BASCULA / TRANSPORTE
     var sacrificio = formatMoneyNumber($('#sacrificio').val()); $('#tsacrificio').val(formatCantidadSinCero(cantidad * sacrificio)); var tsacrif = Number(cantidad * sacrificio);
-    var fomento = formatMoneyNumber($('#fomento').val()); $('#tfomento').val(formatCantidadSinCero(cantidad * fomento)); var tfomen = Number(cantidad);
+    var fomento = formatMoneyNumber($('#fomento').val()); $('#tfomento').val(formatCantidadSinCero(cantidad * fomento)); var tfomen = Number(cantidad * fomento);
     var deguello = formatMoneyNumber($('#deguello').val()); $('#tdeguello').val(formatCantidadSinCero(cantidad * deguello)); var tdgue = Number(cantidad * deguello);
     var bascula = formatMoneyNumber($('#bascula').val()); $('#tbascula').val(formatCantidadSinCero(cantidad * bascula * -1)); var tbascu = Number(cantidad * bascula * -1);
     var transporte = formatMoneyNumber($('#transporte').val()); $('#ttransporte').val(formatCantidadSinCero(cantidad * transporte)); var ttrans = Number(cantidad * transporte);
@@ -182,12 +182,12 @@
     //TOTALES 
     //var totalc = tpie1 + tpie2 + tpie3 + tsacrif + tfomen + tdgue + tbascu + ttrans + tpielc + tvisce;
     var totalc = tpie1 + tpie2 + tpie3;// + tsacrif + tfomen + tdgue + tbascu + ttrans;// - (tpielc + tvisce);
-    console.log("total c " + totalc)
-    var totalgastos = tsacrif + tfomen + tdgue + tbascu + ttrans;
-    console.log("Total gastos" + totalgastos)
-    var totalingresos = (pieleskg * pielescosto) + visceras;
-    console.log("Total ingresos" + totalingresos)
-    let totalCantidadCostos = (totalc + totalgastos) - totalingresos;
+    console.log("total c: " + totalc)
+    var totalgastos = tsacrif + tfomen + ttrans;
+    console.log("Total gastos: " + totalgastos)
+    var totalingresos = visceras;
+    console.log("Total ingresos: " + totalingresos)
+    let totalCantidadCostos = (totalc + totalgastos) - tvisce;
     $('#totalcostos').val(formatCantidadSinCero(totalCantidadCostos));
     //$('#totalcostos').val(formatCantidadSinCero(totalc));
     $('#valorfactura').val(formatCantidadSinCero(tpie1 + tpie2 + tpie3 + tfomen + tbascu));
