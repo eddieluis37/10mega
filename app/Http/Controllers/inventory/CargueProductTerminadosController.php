@@ -378,26 +378,43 @@ class CargueProductTerminadosController extends Controller
                             ]
                         );
 
-                        // Actualizar inventario (sobrescribir cantidad_prod_term y costo_unitario)
-                        $inventario->cantidad_prod_term = $detalle->quantity;
-                        $inventario->costo_unitario = $detalle->costo;
-                        $inventario->costo_total = $inventario->cantidad_prod_term * $detalle->product->cost;
+                        // --- NUEVA LÓGICA: sumar cantidad si ya existía la triada ---
+                        $oldQty  = $inventario->cantidad_prod_term ?? 0;      // cantidad existente (0 si se creó ahora)
+                        $oldCost = $inventario->costo_unitario ?? 0;         // costo unitario existente (0 si se creó ahora)
+                        $newQty  = $detalle->quantity;                       // cantidad nueva que llega
+                        $newCost = $detalle->costo;                          // costo unitario del detalle
+
+                        // Sumar cantidades
+                        $inventario->cantidad_prod_term = $oldQty + $newQty;
+
+                        // Recalcular costo_unitario como promedio ponderado si hay cantidades previas
+                        if (($oldQty + $newQty) > 0) {
+                            // Si prefieres NO hacer promedio ponderado y simplemente usar $newCost,
+                            // reemplaza la siguiente línea por: $inventario->costo_unitario = $newCost;
+                            $inventario->costo_unitario = (($oldQty * $oldCost) + ($newQty * $newCost)) / ($oldQty + $newQty);
+                        } else {
+                            $inventario->costo_unitario = $newCost;
+                        }
+
+                        // Actualizar costo_total con la nueva cantidad y costo unitario
+                        $inventario->costo_total = $inventario->cantidad_prod_term * $inventario->costo_unitario;
+
                         $inventario->save();
 
-                        // 3. Registrar movimiento de inventario
+                        // 3. Registrar movimiento de inventario (registrar la cantidad añadida: $newQty)
                         MovimientoInventario::create([
                             'tipo' => 'products_terminados',
                             'store_origen_id' => null,
                             'store_destino_id' => $detalle->store_id,
                             'lote_id' => $lote->id,
                             'product_id' => $detalle->product_id,
-                            'cantidad' => $detalle->quantity,
+                            'cantidad' => $newQty,
                             'costo_unitario' => $detalle->product->cost,
-                            'total' => $detalle->quantity * $detalle->product->cost,
+                            'total' => $newQty * $detalle->product->cost,
                             'fecha' => Carbon::now(),
                         ]);
 
-                        // 2) Ahora actualizamos el campo `cost` de la tabla products               
+                        // 4) Ahora actualizamos el campo `cost` de la tabla products
                         $productId    = $detalle->product_id;
                         $purchaseCost = $detalle->costo;
 
@@ -411,12 +428,38 @@ class CargueProductTerminadosController extends Controller
             }
 
             DB::commit();
-
-            return redirect()->back()->with('success', 'Sincronización completada con éxito.');
         } catch (\Exception $e) {
             DB::rollBack();
-
             return redirect()->back()->with('error', 'Error al sincronizar: ' . $e->getMessage());
         }
+
+        // --- Aquí truncamos la tabla product_lote fuera de la transacción ---
+        try {
+            $productLoteModel = new \App\Models\ProductLote; // o ajusta el namespace si es distinto
+            $table = $productLoteModel->getTable();
+
+            // Obtener driver (pdo)
+            $pdo = DB::getPdo();
+            $driver = $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+
+            if ($driver === 'mysql') {
+                // MySQL: desactivar FK checks temporalmente para poder truncar
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                DB::table($table)->truncate();
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            } elseif ($driver === 'pgsql') {
+                // Postgres: TRUNCATE con RESTART IDENTITY y CASCADE (resetea secuencia)
+                DB::statement("TRUNCATE TABLE {$table} RESTART IDENTITY CASCADE;");
+            } else {
+                // Fallback: delete (más lento y no reinicia autoincrement)
+                DB::table($table)->delete();
+            }
+        } catch (\Exception $e) {
+            \Log::error("Error al truncar la tabla {$table}: " . $e->getMessage());
+            // Retornamos con warning porque la sincronización ya se completó, pero la limpieza falló.
+            return redirect()->back()->with('warning', 'Cargue completad pero hubo un problema al truncar la tabla product_lote: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Cargue completo con éxito y Modulo blanqueado.');
     }
 }

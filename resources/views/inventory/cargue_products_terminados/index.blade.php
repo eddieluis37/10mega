@@ -102,19 +102,19 @@
           <form action="{{ route('sincronizar.product.lote') }}" method="GET">
             @csrf
             <div class="text-center mt-4">
-              <button type="submit" class="btn btn-success btn-lg">Sincronizar Inventario</button>
+              <button type="submit" class="btn btn-success btn-lg">Cargar al Inventario</button>
             </div>
           </form>
 
           <!-- Mensajes de éxito o error -->
           @if(session('success'))
-          <div class="alert alert-success mt-4">
+         <!--  <div class="alert alert-success mt-4">
             {{ session('success') }}
-          </div>
+          </div> -->
           @elseif(session('error'))
-          <div class="alert alert-danger mt-4">
+        <!--   <div class="alert alert-danger mt-4">
             {{ session('error') }}
-          </div>
+          </div> -->
           @endif
         </div>
 
