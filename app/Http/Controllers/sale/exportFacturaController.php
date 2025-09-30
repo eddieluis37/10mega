@@ -33,6 +33,7 @@ class exportFacturaController extends Controller
                 'sales.*',
                 'u.name as nameuser',
                 'third.name as namethird',
+                'third.celular as celularcliente',
                 'fp.nombre as formapago1',
                 'fpt2.nombre as formapagot2',
                 'fpt3.nombre as formapagot3',

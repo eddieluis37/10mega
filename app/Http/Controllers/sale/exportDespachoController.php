@@ -31,6 +31,7 @@ class exportDespachoController extends Controller
                 'sales.*',
                 'u.name as nameuser',
                 'third.name as namethird',
+                'third.celular as celularcliente',
                 'fp.nombre as formapago1',
                 'fp2.nombre as formapago2',
                 'fp3.nombre as formapago3',

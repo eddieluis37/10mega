@@ -47,6 +47,7 @@
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Fecha y hora:<strong> {{\Carbon\Carbon::now()->format('Y-m-d H:i')}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cajero:<strong> {{$sale->nameuser}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Cliente:<strong> {{$sale->namethird}}</strong></span>
+					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Celular:<strong> {{$sale->celularcliente}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Nit / C.C.:<strong> {{ number_format($sale->identification,0, ',', '.')}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Dirección envio:<strong> {{$sale->direccion_envio}}</strong></span>
 					<span style="font-size: 11px; font-weight: lighter; display: block; margin: 2;">Factura interna:<strong> {{$sale->consecutivo}}</strong></span>
