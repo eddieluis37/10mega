@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width">
 	<title>Traslado #{{ $transfer->id }}</title>
 	<link rel="stylesheet" href="{{ public_path('css/pos_custom_pdf.css') }}">
-	<link rel="stylesheet" href="{{ public_path('css/pos_custom_page.css') }}">
+	<link rel="stylesheet" href="{{ public_path('css/pos_custom_page_arial.css') }}">
 </head>
 
 <body>
