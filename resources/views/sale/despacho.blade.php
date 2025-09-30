@@ -86,10 +86,10 @@
 			@foreach($saleDetails as $item)
 			<tr>
 				<td align="left">
-					<strong>{{$item->nameprod}}</strong>
+					<strong>{{$item->nameprod}}
 					@if($item->lote_codigo)
 					Lt:{{$item->lote_codigo}}<br>
-					Fv:{{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}
+					Fv:{{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}</strong>
 					@endif
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
