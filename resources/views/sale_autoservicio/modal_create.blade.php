@@ -139,7 +139,13 @@
                             value.direccion6,
                             value.direccion7,
                             value.direccion8,
-                            value.direccion9
+                            value.direccion9,
+							value.direccion10,
+							value.direccion11,
+							value.direccion12,
+							value.direccion13,
+							value.direccion14,
+							value.direccion15
                         ];
                         // Recorremos cada campo y lo agregamos si tiene valor
                         $.each(campos, function(index, dir) {

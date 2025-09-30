@@ -95,9 +95,15 @@ class saleautoservicioController extends Controller
                 ->orWhereNotNull('direccion6')
                 ->orWhereNotNull('direccion7')
                 ->orWhereNotNull('direccion8')
-                ->orWhereNotNull('direccion9');
+                ->orWhereNotNull('direccion9')
+                ->orWhereNotNull('direccion10')
+                ->orWhereNotNull('direccion11')
+                ->orWhereNotNull('direccion12')
+                ->orWhereNotNull('direccion13')
+                ->orWhereNotNull('direccion14')
+                ->orWhereNotNull('direccion15');
         })
-            ->select('direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9')
+            ->select('direccion', 'direccion1', 'direccion2', 'direccion3', 'direccion4', 'direccion5', 'direccion6', 'direccion7', 'direccion8', 'direccion9', 'direccion10', 'direccion11', 'direccion12', 'direccion13', 'direccion14', 'direccion15')
             ->get();
 
         $ventas = Sale::get();
