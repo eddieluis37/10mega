@@ -16,7 +16,7 @@
 	-->
 	<!-- ruta física relativa OS -->
 	<link rel="stylesheet" href="{{ public_path('css/pos_custom_pdf.css') }}">
-	<link rel="stylesheet" href="{{ public_path('css/pos_custom_page_arial.css') }}">
+	<link rel="stylesheet" href="{{ public_path('css/pos_custom_page.css') }}">
 
 </head>
 

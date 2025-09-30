@@ -1,0 +1,36 @@
+@page {
+    size: 72.1mm 297mm;
+    margin-top: 15px;
+    margin-left: 9px;
+    margin-right: 9px; 
+}
+
+body { 
+    /* Arial principal + fallbacks */
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    /* tamaño recomendado para recibos: ajústalo si quieres más grande/pequeño */
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.1;
+    color: #111111;
+    -webkit-text-size-adjust: none; /* evita reescalados en WebKit */
+    -ms-text-size-adjust: none;
+}
+
+table {
+    font-size: 11px;
+    margin: 0 !important;
+}
+
+/* si necesitas forzar la tipografía al imprimir desde navegador */
+@media print {
+  body {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.1;
+  }
+}
+
+.pagenum:before {
+    content: counter(page);
+}
