@@ -44,13 +44,13 @@
 				@foreach($details as $item)
 				<tr>
 					<td>
-						<strong>{{ $item->product->name }}</strong><br>
+						<strong>{{ $item->product->name }}<br>
 						<small>Código: {{ $item->product->code }}</small><br>
 						@if($item->lote)
 						<small>
 							Lt: {{ $item->lote->codigo }}
 							Fv: {{ \Carbon\Carbon::parse($item->lote->fecha_vencimiento)->format('d/m/Y') }}
-						</small>
+						</small></strong>
 						@endif
 					</td>
 					<td align="center"><strong>{{ number_format($item->kgrequeridos, 2, '.', '.') }}</strong></td>
