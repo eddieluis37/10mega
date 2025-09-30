@@ -1092,7 +1092,8 @@ class transferController extends Controller
                         $insumoIdStr = (string) ($product->erp_id ?? $product->id ?? $productId);
                         $nombreInsumo = trim((string) ($product->name ?? $product->nombre ?? "Producto {$productId}"));
                         $loteCode = trim((string) ($lote->code ?? $lote->codigo ?? "Lote_{$loteId}"));
-                        $saldoActual = number_format($invDestino->stock_ideal ?? $quantity, 2, '.', '');
+                        // $saldoActual = number_format($invDestino->stock_ideal ?? $quantity, 2, '.', '');
+                        $saldoActual = number_format($quantity, 2, '.', '');
                         $unidadMedida = trim((string) 'KG');
                         $precioUnitario = number_format($product->cost ?? $product->precio ?? 0, 2, '.', '');
                         $nombreProveedor = trim((string) ($product->brand->name ?? $product->brand_name ?? ''));
