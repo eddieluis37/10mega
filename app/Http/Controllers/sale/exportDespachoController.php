@@ -36,7 +36,7 @@ class exportDespachoController extends Controller
                 'fp2.nombre as formapago2',
                 'fp3.nombre as formapago3',
                 'third.identification',
-                'third.direccion',
+                'sales.direccion_envio',
                 'c.name as namecentrocosto',
                 'third.porc_descuento',
                 'sales.total_iva',
