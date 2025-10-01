@@ -1088,11 +1088,10 @@ class transferController extends Controller
                             ? Lote::find($loteId)
                             : DB::table('lotes')->where('id', $loteId)->first();
 
-                        // Normalizamos valores y los casteamos a string (evita error 422 que pide "cadena")
+                        // Normalizamos valores y los casteamos a string
                         $insumoIdStr = (string) ($product->erp_id ?? $product->id ?? $productId);
                         $nombreInsumo = trim((string) ($product->name ?? $product->nombre ?? "Producto {$productId}"));
                         $loteCode = trim((string) ($lote->code ?? $lote->codigo ?? "Lote_{$loteId}"));
-                        // $saldoActual = number_format($invDestino->stock_ideal ?? $quantity, 2, '.', '');
                         $saldoActual = number_format($quantity, 2, '.', '');
                         $unidadMedida = trim((string) 'KG');
                         $precioUnitario = number_format($product->cost ?? $product->precio ?? 0, 2, '.', '');
@@ -1141,7 +1140,7 @@ class transferController extends Controller
                             $decoded = json_decode($body, true);
                         }
 
-                        // Si la API devolvió JSON y success === false (o status == 0), registramos como error de Traza
+                        // Si la API devolvió JSON y success === false (o status == 0), lo tratamos como error
                         $apiReportedError = false;
                         if (is_array($decoded)) {
                             if ((isset($decoded['success']) && $decoded['success'] === false)
@@ -1151,7 +1150,12 @@ class transferController extends Controller
                             }
                         }
 
-                        if ($apiReportedError) {
+                        // Si la API devolvió success=false O status 400 (ó decoded status = 400), abortamos la transacción
+                        if (
+                            $apiReportedError
+                            || $statusCode === 400
+                            || (is_array($decoded) && isset($decoded['status']) && (int)$decoded['status'] === 400)
+                        ) {
                             $trazaErrors[] = [
                                 'product_id' => $productId,
                                 'lote_id'    => $loteId,
@@ -1160,22 +1164,28 @@ class transferController extends Controller
                                 'response_json' => $decoded,
                             ];
 
-                            Log::warning('Traza API returned success=false', [
+                            Log::error('Traza API returned fatal error (will rollback)', [
                                 'product_id' => $productId,
                                 'lote_id' => $loteId,
                                 'status' => $statusCode,
                                 'response' => $decoded ?? $body,
                             ]);
+
+                            // Construimos una Request mínima para crear ClientException y re-lanzarlo
+                            $req = new \GuzzleHttp\Psr7\Request('POST', $trazaUrl);
+                            throw new \GuzzleHttp\Exception\ClientException(
+                                'Traza API returned success=false or status 400',
+                                $req,
+                                $response
+                            );
                         } else {
-                            // OK normal
                             Log::info('Traza sync OK', ['product' => $productId, 'lote' => $loteId, 'status' => $statusCode]);
                         }
-                    } catch (ClientException $e) {
-                        // 4xx: normalmente 422 con cuerpo JSON explicando errores de validación
+                    } catch (\GuzzleHttp\Exception\ClientException $e) {
+                        // 4xx: re-lanzamos para que el try exterior haga rollback
                         $resp = $e->getResponse();
                         $status = $resp ? $resp->getStatusCode() : null;
                         $body = $resp ? (string)$resp->getBody() : $e->getMessage();
-
                         $decoded = null;
                         try {
                             $decoded = json_decode($body, true);
@@ -1191,14 +1201,17 @@ class transferController extends Controller
                             'response_json' => $decoded,
                         ];
 
-                        Log::error('Error enviando a Traza (ClientException)', [
+                        Log::error('Error enviando a Traza (ClientException) - rethrowing to abort', [
                             'product_id' => $productId,
                             'lote_id' => $loteId,
                             'status' => $status,
                             'response' => $decoded ?? $body,
                         ]);
-                    } catch (RequestException $e) {
-                        // otros errores de request (timeout, DNS, etc.)
+
+                        // re-lanzar para que el catch exterior haga rollback
+                        throw $e;
+                    } catch (\GuzzleHttp\Exception\RequestException $e) {
+                        // otros errores de request (timeout, DNS, etc.) -> registramos y seguimos
                         $resp = $e->getResponse();
                         $body = $resp ? (string)$resp->getBody() : $e->getMessage();
 
@@ -1248,11 +1261,18 @@ class transferController extends Controller
             return response()->json($response);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
+
+            $payload = [
                 'status'  => 0,
                 'message' => 'Error al actualizar el inventario.',
                 'error'   => $e->getMessage(),
-            ], 500);
+            ];
+
+            if (! empty($trazaErrors)) {
+                $payload['traza_errors'] = $trazaErrors;
+            }
+
+            return response()->json($payload, 500);
         }
     }
 }
