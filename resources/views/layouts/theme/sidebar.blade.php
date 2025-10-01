@@ -370,7 +370,7 @@
                     </ul>
                 </li>
                 @endcan
-                
+
                 @can('ver_venta_parrilla')
                 <li class="sub-submenu">
                     <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenuparrilla" aria-expanded="false">
@@ -468,7 +468,7 @@
                         <li>
                             <a href="{{ url('reportes/ventas_por_productos_clientes') }}"> Por prod & cliente </a>
                         </li>
-                       <!--  <li>
+                        <!--  <li>
                             <a href="{{ url('excel-consolidado-ventas') }}"> Consolidado ventas </a>
                         </li> -->
                         <li>
@@ -517,19 +517,7 @@
         </div>
 
         <div class="submenu" id="app">
-            <ul class="submenu-list" data-parent-element="#app">
-               <!--  <li>
-                    <a href="{{ url('inventario/cierre') }}" style="display: flex; align-items: center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="feather feather-check-square">
-                            <polyline points="9 11 12 14 22 4"></polyline>
-                            <path d="M22 4v16H6"></path>
-                        </svg>
-                        Cierre de Inv KG
-                    </a>
-                </li> -->
+            <ul class="submenu-list" data-parent-element="#app">                
                 <li>
                     <a href="{{ url('inventario/por_centro_costo') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -542,7 +530,7 @@
                         Cierre de Inv KG
                     </a>
                 </li>
-                  @can('ver_inventario_si')
+                @can('ver_inventario_si')
                 <li>
                     <a href="{{ url('inventario/si_por_centro_costo') }}" style="display: flex; align-items: center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -552,7 +540,19 @@
                             <polyline points="9 11 12 14 22 4"></polyline>
                             <path d="M22 4v16H6"></path>
                         </svg>
-                         SI CentroCosto KG
+                        SI CentroCosto KG
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('inventario/cierre') }}" style="display: flex; align-items: center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="feather feather-check-square">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M22 4v16H6"></path>
+                        </svg>
+                        Bodega Lote
                     </a>
                 </li>
                 @endcan
@@ -934,17 +934,17 @@
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Recibo de caja </a>
                 </li>
-              <!--   <li>
+                <!--   <li>
                     <a href="{{ url('cuentasporcobrars') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Cuentas X cobrar </a>
                 </li> -->
 
-                    <li>
+                <li>
                     <a href="{{ url('cuentas_por_cobrar') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Cuentas Por cobrar </a>
-                </li> 
+                </li>
 
                 <li>
                     <a href="{{ url('caja-salida-efectivo') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
@@ -1034,7 +1034,7 @@
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Relacionar Marcas </a>
                 </li>
-               
+
                 @endcan
             </ul>
         </div>
@@ -1116,7 +1116,7 @@
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Productos </a>
                 </li>
-              <!--   <li>
+                <!--   <li>
                     <a href="{{ url('combos') }}"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle">
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg></span> Combos </a>
