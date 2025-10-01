@@ -109,8 +109,8 @@
 				<td align="left">
 					<strong>{{$item->nameprod}}</strong>
 					@if($item->lote_codigo)
-					Lt:{{$item->lote_codigo}}
-					@endif
+					Lt:{{$item->lote_codigo}}@endif
+					@if($sale->tipo <> 4) Fv:{{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}@endif					
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
 				<td align="center"><strong>{{ number_format($item->price, 0, ',', '.') }}</strong></td>
