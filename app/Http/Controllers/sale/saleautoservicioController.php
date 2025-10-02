@@ -606,6 +606,7 @@ class saleautoservicioController extends Controller
 
         $results = [];
 
+        // --- Resultados de productos que sí tienen inventario (como antes) ---
         foreach ($products as $prod) {
             $invItems = $inventarios->where('product_id', $prod->id);
             foreach ($invItems as $inv) {
@@ -657,8 +658,56 @@ class saleautoservicioController extends Controller
             }
         }
 
+        // --- Agregar productos tipo combo/receta que NO tengan inventarios ---
+        $comboRecetaQuery = Product::query()
+            ->whereIn('type', ['combo', 'receta'])
+            ->whereDoesntHave('inventarios'); // <-- aquí filtramos los que NO tienen inventario
+
+        // Aplicar mismo filtro de búsqueda al query de combo/receta
+        if ($term) {
+            if (preg_match('/^\d{13}$/', $term)) {
+                $comboRecetaQuery->where('barcode', $term);
+            } else {
+                $comboRecetaQuery->where(function ($q) use ($term) {
+                    $q->where('name', 'LIKE', "%{$term}%")
+                        ->orWhere('code', 'LIKE', "%{$term}%")
+                        ->orWhereHas('lotes', function ($q2) use ($term) {
+                            $q2->where('codigo', 'LIKE', "%{$term}%");
+                        });
+                });
+            }
+        }
+
+        $productosComboRecetaSinInventario = $comboRecetaQuery->get();
+
+        foreach ($productosComboRecetaSinInventario as $prod) {
+            // Construimos una entrada que indique que no hay inventario
+            $textoCR = strtoupper($prod->type) . ": " . $prod->name
+                . " (Código: " . $prod->code . ")"
+                . " – SIN INVENTARIO";
+
+            $results[] = [
+                // Usamos el id del producto (no hay inventario), el frontend debe manejar inventario_id = null
+                'id'               => 'CR-' . $prod->id, // opcional: prefijo para diferenciar de inventarios
+                'text'             => $textoCR,
+                'lote_id'          => null,
+                'inventario_id'    => null,
+                'stock_ideal'      => 0,
+                'store_id'         => null,
+                'store_name'       => null,
+                'barcode'          => $prod->barcode,
+                'product_id'       => $prod->id,
+                // productos sin inventario no se evalúan promociones basadas en inventario/store aquí
+                'promo_percent'    => 0,
+                'promo_min_quantity' => null,
+                'promo_applies'    => false,
+                'applied_promotion_id' => null,
+            ];
+        }
+
         return response()->json($results);
     }
+
 
 
     public function SaObtenerPreciosProducto(Request $request)
