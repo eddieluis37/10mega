@@ -798,7 +798,7 @@ const showData = (data) => {
     `;
 };
 
-/* ----------------- listeners price/quantity ----------------- */
+/* ----------------- listeners price/quantity -----------------
 price &&
     price.addEventListener("change", function () {
         const enteredValue = formatMoneyNumber(price.value);
@@ -819,3 +819,4 @@ quantity &&
 
 // fecha si la usas
 const date = new Date();
+ */
