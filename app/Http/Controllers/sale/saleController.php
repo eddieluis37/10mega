@@ -2494,6 +2494,7 @@ class saleController extends Controller
                 // Movimiento Inventario
                 MovimientoInventario::create([
                     'tipo'           => 'notacredito',
+                    'store_origen_id' => $detail->store_id ?? $storeId,
                     'sale_id'        => $saleId,
                     'lote_id'        => $detail->lote_id,
                     'product_id'     => $detail->product_id,
@@ -2606,7 +2607,7 @@ class saleController extends Controller
      */
     public function partialReturn(Request $request)
     {
-        Log::info('Recibiendo datos para devolución parcial', $request->all());
+        Log::info('Recibiendo datos para devolución parcial desde Sale', $request->all());
 
         $validated = $request->validate([
             'ventaId'   => 'required|integer|exists:sales,id',
@@ -2676,6 +2677,7 @@ class saleController extends Controller
                 // Registrar movimiento de inventario (tipo 'notacredito')
                 MovimientoInventario::create([
                     'tipo'           => 'notacredito',
+                    'store_origen_id'       => $detail->store_id ?? $storeId,
                     'sale_id'        => $sale->id,
                     'lote_id'        => $detail->lote_id,
                     'product_id'     => $detail->product_id,

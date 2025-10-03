@@ -1907,6 +1907,7 @@ class saleautoservicioController extends Controller
                     // Registrar el movimiento en inventario (tipo 'notacredito')
                     MovimientoInventario::create([
                         'tipo'           => 'notacredito',
+                        'store_origen_id' => $detail->store_id,
                         'sale_id'        => $saleId,
                         'lote_id'        => $detail->lote_id,
                         'product_id'     => $detail->product_id,
@@ -1957,7 +1958,7 @@ class saleautoservicioController extends Controller
 
     public function partialReturn(Request $request)
     {
-        Log::info('Recibiendo datos para devolución parcial', $request->all());
+        Log::info('Recibiendo datos para devolución parcial desde SaleAutoservicio', $request->all());
         // Validar que se reciba el arreglo "returns" y el ID de la venta
         $validated = $request->validate([
             'ventaId'   => 'required|integer|exists:sales,id',
