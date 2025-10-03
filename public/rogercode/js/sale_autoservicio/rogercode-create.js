@@ -805,11 +805,13 @@ price &&
         price.value = formatCantidadSinCero(enteredValue);
     });
 
+
+  */
 price_venta &&
     price_venta.addEventListener("change", function () {
         const enteredValue = formatMoneyNumber(price_venta.value);
         price_venta.value = formatCantidadSinCero(enteredValue);
-    });
+    });   
 
 quantity &&
     quantity.addEventListener("change", function () {
@@ -819,4 +821,3 @@ quantity &&
 
 // fecha si la usas
 const date = new Date();
- */
