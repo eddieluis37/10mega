@@ -113,7 +113,7 @@
 					@if($sale->tipo <> 4) Fv:{{ \Carbon\Carbon::parse($item->lote_fecha_vencimiento)->format('d/m/y') }}@endif					
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
-				<td align="center"><strong>{{ number_format($item->price, 0, ',', '.') }}</strong></td>
+				<td align="center"><strong>{{ number_format($item->price_venta, 0, ',', '.') }}</strong></td>
 				<td align="right"><strong>{{ number_format($item->total_bruto, 0, ',', '.') }}</strong></td>
 			</tr>
 			@endforeach
