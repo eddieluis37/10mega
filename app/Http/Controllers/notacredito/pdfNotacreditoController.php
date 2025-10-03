@@ -32,7 +32,7 @@ class pdfNotacreditoController extends Controller
 
         $saleDetails = NotaCreditoDetalle::where('notacredito_id', $id)
             ->join('products as pro', 'notacredito_details.product_id', '=', 'pro.id')
-            ->select('notacredito_details.*', 'pro.name as nameprod', 'pro.code', 'notacredito_details.porc_iva', 'notacredito_details.iva', 'notacredito_details.porc_otro_impuesto')
+            ->select('notacredito_details.*', 'pro.name as nameprod', 'pro.code', 'notacredito_details.iva', 'notacredito_details.porc_otro_impuesto')
             ->where([
                 ['notacredito_details.notacredito_id', $id],
                 /*   ['sale_details.status', 1] */
