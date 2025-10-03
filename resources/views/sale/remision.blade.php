@@ -92,7 +92,7 @@
 					@endif
 				</td>
 				<td align="center"><strong>{{$item->quantity}}</strong></td>
-				<td align="center"><strong>{{ number_format($item->price, 0, ',', '.') }}</strong></td>
+				<td align="center"><strong>{{ number_format($item->price_venta, 0, ',', '.') }}</strong></td>
 				<td align="left"><strong>{{ number_format($item->total, 0, ',', '.') }}</strong></td>
 			</tr>
 			@endforeach
