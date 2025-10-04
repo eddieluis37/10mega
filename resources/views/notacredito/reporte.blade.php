@@ -221,7 +221,7 @@
 					<p>No somos Autorretenedores - No somos Grandes contribuyentes</p>
 					<p>WWW.MEGACHORIZOS.CO &nbsp; contamegachorizos@gmail.com</p>
 					<p>
-					Habilitación con autorización de facturación N 18764078050070 de 27/08/2024 desde FEM 5.001 hasta FEM 10.000 con vigencia 24 meses
+						Habilitación con autorización de facturación N 18764078050070 de 27/08/2024 desde FEM 5.001 hasta FEM 10.000 con vigencia 24 meses
 					</p>
 				</div>
 				<!-- Columna derecha: Logo + Nota -->
@@ -352,7 +352,7 @@
 					<!-- Segunda columna (datos de la antigua central) -->
 					<td style="width: 50%;">
 						<table class="inner-table">
-							
+
 							<tr>
 								<td class="label">Zona :</td>
 								<td>[Opcional]</td>
@@ -389,33 +389,47 @@
 							</tr>
 						</thead>
 						<tbody>
+							@foreach($saleDetails as $d)
+							@php
+							// --- Ajusta nombres de campos si es necesario ---
+							$unitario = $d->price ?? $d->valor_unitario ?? 0; // precio unitario en notacredito_details
+							$cantidad = $d->quantity ?? $d->cantidad ?? 0;
+							// Porcentaje de descuento puede venir por detalle o por la cabecera sale (third.porc_descuento)
+							$porcDesc = $d->porc_desc ?? ($sale->porc_descuento ?? 0);
+							$porcIva = $d->iva ?? 0; // porcentaje IVA (ej: 5)
+							$porcRtf = $d->porc_otro_impuesto ?? 0; // porcentaje de retención/otro impuesto
+
+							// Cálculos
+							$subtotal = $unitario * $cantidad;
+							$descuento = $subtotal * ($porcDesc / 100);
+							$base = $subtotal - $descuento;
+							$iva = $base * ($porcIva / 100);
+							$rtf = $base * ($porcRtf / 100);
+
+							// Valor total por línea (puedes elegir sumar o restar impuestos según tu regla)
+							$valorTotal = $base + $iva - $rtf;
+
+							// Formateo para presentación (coma decimal y punto miles)
+							function fmt($n){ return number_format((float)$n, 0, ',', '.'); }
+							@endphp
+
 							<tr>
-								<td>87</td>
-								<td>MORTADELA 400G (2015)</td>
-								<td>PAQUET</td>
-								<td>4,951.61</td>
-								<td>411.00</td>
-								<td>5.00</td>
-								<td>5%</td>
-								<td>0</td>
-								<td>2,035,111.51</td>
+								<td>{{ $d->code ?? '' }}</td>
+								<td>{{ $d->nameprod ?? $d->descripcion ?? '' }}</td>
+								<td>{{ $d->unitofmeasure_id ?? '' }}</td>
+								<td style="text-align:right;">{{ fmt($unitario) }}</td>
+								<td style="text-align:right;">{{ fmt($cantidad) }}</td>
+								<td style="text-align:right;">{{ number_format($porcDesc, 2, ',', '.') }}%</td>
+								<td style="text-align:right;">{{ number_format($porcIva, 2, ',', '.') }}%</td>
+								<td style="text-align:right;">{{ number_format($porcRtf, 2, ',', '.') }}%</td>
+								<td style="text-align:right;">{{ fmt($valorTotal) }}</td>
 							</tr>
-							<tr>
-								<td>95</td>
-								<td>SALCHICHÓN CERVECERO 1000G (2023)</td>
-								<td>PAQUET</td>
-								<td>16,666.67</td>
-								<td>321.00</td>
-								<td>5.00</td>
-								<td>5%</td>
-								<td>0</td>
-								<td>5,350,000.00</td>
-							</tr>
-							<!-- Agrega más filas si lo requieres -->
+							@endforeach
 						</tbody>
 					</table>
 				</div>
 			</div>
+
 
 			<!-- TOTALES -->
 			<div class="row totales-block">
