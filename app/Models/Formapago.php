@@ -11,8 +11,10 @@ class Formapago extends Model
     protected $table = 'formapagos';
     protected $fillable = ['codigo', 'nombre', 'tipoformapago', 'diascredito', 'cuenta'];
 
-    public function scopeEfectivoTarjeta($query)
+    public function scopeEfectivoTarjeta($query, $direction = 'asc')
     {
-        return $query->whereIn('tipoformapago', ['EFECTIVO', 'TARJETA']);
+        $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+        return $query->whereIn('tipoformapago', ['EFECTIVO', 'TARJETA', 'CREDITO'])
+            ->orderBy('nombre', $direction);
     }
 }
