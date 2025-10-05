@@ -83,6 +83,15 @@ class reporteventaprodclientController extends Controller
                 }
             })
             ->select(
+                // NUEVAS PRIMERAS COLUMNAS (aliases coinciden con los keys usados en JS)
+                'sales.consecutivo as factura',
+                'sales.direccion_envio as direccion_envio',
+                'thirds.celular as telefono',
+                'sales.vendedor_id as vendedor_id',
+                'sales.user_id as cajero_id',
+                'sales.domiciliario_id as domiciliario_id',
+
+                // CAMPOS QUE YA TENÍAS
                 'thirds.identification as third_identification',
                 'thirds.name as third_name',
                 'products.code as product_code',
@@ -106,7 +115,21 @@ class reporteventaprodclientController extends Controller
             ->join('thirds', 'thirds.id', '=', 'sales.third_id')
             ->leftJoin('notacredito_details', 'notacredito_details.product_id', '=', 'sale_details.product_id')
             ->leftJoin('notadebito_details', 'notadebito_details.product_id', '=', 'sale_details.product_id')
-            ->groupBy('products.id', 'products.code', 'products.name', 'categories.name', 'thirds.name', 'thirds.identification')
+            ->groupBy(
+                // agrupar por todas las columnas no-aggregadas
+                'sales.consecutivo',
+                'sales.direccion_envio',
+                'thirds.celular',
+                'sales.vendedor_id',
+                'sales.user_id',
+                'sales.domiciliario_id',
+                'products.id',
+                'products.code',
+                'products.name',
+                'categories.name',
+                'thirds.name',
+                'thirds.identification'
+            )
             ->orderBy('products.name', 'ASC')
             ->get();
 

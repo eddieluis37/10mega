@@ -82,22 +82,20 @@
           </div>
         </div>
 
-        <!--   <div class="col-md-3 text-right ml-auto">
-          <div style="margin-top:28px;" clas="">
-            <button class="btn btn-success btn-lg" type="button" id="cargarInventarioBtn"></button>
-          </div>
-        </div>
-
-        @can('Cerrar_Inventario')
-
-
-        @endcan -->
-
 
         <div class="table-responsive mt-1" style="overflow-x: auto;">
           <table id="tableInventory" class="table table-success table-striped mt-1">
             <thead class="text-black" style="background: #3B3F5C">
               <tr>
+                <!-- NUEVAS PRIMERAS COLUMNAS -->
+                <th class="table-th text-white" style="text-align:center;">FACTURA</th>
+                <th class="table-th text-white" style="text-align:center;">DIRECCIÓN</th>
+                <th class="table-th text-white" style="text-align:center;">TELÉFONO</th>
+                <th class="table-th text-white" style="text-align:center;">VENDEDOR</th>
+                <th class="table-th text-white" style="text-align:center;">CAJERO</th>
+                <th class="table-th text-white" style="text-align:center;">DOMICILIARIO</th>
+
+                <!-- COLUMNAS EXISTENTES (ajustadas tras el añadido) -->
                 <th class="table-th text-white" title="Identificación cliente" style="text-align: center;">ID_CLIENTE</th>
                 <th class="table-th" title="Nombre del cliente" style="text-align: center;">NOM_CLIENTES</th>
                 <th class="table-th text-white" title="Categoria" style="text-align: center;">COD</th>
@@ -116,11 +114,15 @@
                 <th class="table-th text-white" title="" style="text-align: center;">TOTAL</th>
               </tr>
             </thead>
+
             <tbody>
             </tbody>
             <tfoot>
               <tr>
                 <th>Totales</th>
+                <td></td>
+                <td></td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -140,7 +142,6 @@
             </tfoot>
           </table>
         </div>
-
 
       </div>
     </div>

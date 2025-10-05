@@ -19,9 +19,9 @@ var dataTable;
 function initializeDataTable({
     centroId = "",
     vendedorId = "",
-    domiciliarioId = "",    
+    domiciliarioId = "",
     startDateId = "",
-    endDateId = "",   
+    endDateId = "",
 } = {}) {
     dataTable = $("#tableInventory").DataTable({
         paging: false,
@@ -41,6 +41,77 @@ function initializeDataTable({
             },
         },
         columns: [
+            // NUEVAS PRIMERAS COLUMNAS (orden y render similar al resto)
+            {
+                data: "factura",
+                name: "factura",
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        (data ? data : "") +
+                        "</div>"
+                    );
+                },
+            },
+            {
+                data: "direccion_envio",
+                name: "direccion_envio",
+                render: function (data) {
+                    if (!data)
+                        return "<span style='font-size:smaller;'>-</span>";
+                    let sub = data.substring(0, 25).toLowerCase();
+                    let cap = sub.charAt(0).toUpperCase() + sub.slice(1);
+                    return data.length > 25
+                        ? `<span style="font-size: smaller;" title="${data}">${cap}.</span>`
+                        : `<span style="font-size: smaller; display:block; text-align:center;">${cap}</span>`;
+                },
+            },
+            {
+                data: "telefono",
+                name: "telefono",
+                render: function (data) {
+                    return (
+                        "<div style='text-align: center;'>" +
+                        (data ? data : "") +
+                        "</div>"
+                    );
+                },
+            },
+            {
+                data: "vendedor_id",
+                name: "vendedor_id",
+                render: function (data) {
+                    return (
+                        "<div style='text-align: center;'>" +
+                        (data ? data : "") +
+                        "</div>"
+                    );
+                },
+            },
+            {
+                data: "cajero_id",
+                name: "cajero_id",
+                render: function (data) {
+                    return (
+                        "<div style='text-align: center;'>" +
+                        (data ? data : "") +
+                        "</div>"
+                    );
+                },
+            },
+            {
+                data: "domiciliario_id",
+                name: "domiciliario_id",
+                render: function (data) {
+                    return (
+                        "<div style='text-align: center;'>" +
+                        (data ? data : "") +
+                        "</div>"
+                    );
+                },
+            },
+
+            // COLUMNAS EXISTENTES (idénticas a las tuyas, sólo que desplazadas)
             {
                 data: "third_identification",
                 name: "third_identification",
@@ -63,11 +134,11 @@ function initializeDataTable({
                     if (data.length > 19) {
                         return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
                     } else {
-                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
                         return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
                     }
                 },
             },
+            // ... luego sigue product_code, product_name, category_name, etc. (copia exactamente las definiciones que ya tenías)
             {
                 data: "product_code",
                 name: "product_code",
@@ -86,7 +157,6 @@ function initializeDataTable({
                     if (data.length > 25) {
                         return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
                     } else {
-                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
                         return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
                     }
                 },
@@ -102,11 +172,11 @@ function initializeDataTable({
                     if (data.length > 10) {
                         return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
                     } else {
-                        /*   return `<span style="font-size: smaller;">${data.toLowerCase()}</span>`; */
                         return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
                     }
                 },
             },
+            // y continúa con las columnas numéricas que ya tenías (cantidad_venta, notacredito_quantity, ...)
             {
                 data: "cantidad_venta",
                 name: "cantidad_venta",
@@ -229,7 +299,9 @@ function initializeDataTable({
                 },
             },
         ],
-        order: [[1, "ASC"]],
+        // IMPORTANTE: como añadimos 6 columnas al inicio, cambié el order para ordenar por 'third_name' que ahora está en la posición 7
+        order: [[7, "ASC"]],
+
         language: {
             processing: "Procesando...",
             lengthMenu: "Mostrar _MENU_ registros",
@@ -429,13 +501,12 @@ function initializeDataTable({
 }
 
 $(document).ready(function () {
-     $(".select2").select2({
+    $(".select2").select2({
         theme: "bootstrap-5",
         width: "100%",
         allowClear: true,
     });
     initializeDataTable("-1");
-    
 
     // 2) Cada vez que cambie cualquier filtro, destruimos y recreamos la tabla
     $("#centrocosto, #vendedor, #domiciliario, #startDate, #endDate").on(
@@ -444,13 +515,12 @@ $(document).ready(function () {
             const filtros = {
                 centroId: $("#centrocosto").val(),
                 vendedorId: $("#vendedor").val(),
-                domiciliarioId: $("#domiciliario").val(),                
+                domiciliarioId: $("#domiciliario").val(),
                 startDateId: $("#startDate").val(),
-                endDateId: $("#endDate").val(),                
+                endDateId: $("#endDate").val(),
             };
             dataTable.destroy();
             initializeDataTable(filtros);
         }
     );
-
 });
