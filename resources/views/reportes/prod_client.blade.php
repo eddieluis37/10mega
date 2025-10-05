@@ -27,13 +27,55 @@
         </div>
       </div>
       <div class="row g-3 mt-3">
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-12 col-md-4">
+          <div class="form-group">
+            <label for="centrocosto" class="form-label">Centro costo</label>
+            <select class="form-control form-control-sm select2" name="centrocosto" id="centrocosto" required>
+              <option value="">Seleccione la categoría</option>
+              @foreach($centros as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-4">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Vendedor</label>
+            <select class="form-control form-control-sm select2" name="vendedor" id="vendedor" required>
+              <option value="">Seleccione vendedor</option>
+              @foreach($vendedores as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-4">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Domiciliario</label>
+            <select class="form-control form-control-sm select2" name="domiciliario" id="domiciliario" required>
+              <option value="">Seleccione domiciliario</option>
+              @foreach($domiciliarios as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4">
+
+        </div>
+
+        <div class="col-sm-6 col-md-4">
           <h6>Fecha y hora inicial</h6>
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $startDate ?? date('Y-m-d') }}T00:00" name="startDate" id="startDate" required>
           </div>
         </div>
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-6 col-md-4">
           <h6>Fecha y hora final</h6>
           <div class="form-group">
             <input type="datetime-local" class="form-control" value="{{ $endDate ?? date('Y-m-d') }}T23:00" name="endDate" id="endDate" required>

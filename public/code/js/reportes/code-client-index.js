@@ -16,7 +16,13 @@ const token = document
 
 var dataTable;
 
-function initializeDataTable(startDateId = "-1", endDateId = "-1") {
+function initializeDataTable({
+    centroId = "",
+    vendedorId = "",
+    domiciliarioId = "",    
+    startDateId = "",
+    endDateId = "",   
+} = {}) {
     dataTable = $("#tableInventory").DataTable({
         paging: false,
         pageLength: 150,
@@ -27,6 +33,9 @@ function initializeDataTable(startDateId = "-1", endDateId = "-1") {
             url: "/reportVentasPorProdClient",
             type: "GET",
             data: {
+                centrocosto: centroId,
+                vendedor: vendedorId,
+                domiciliario: domiciliarioId,
                 startDateId: startDateId,
                 endDateId: endDateId,
             },
@@ -420,76 +429,28 @@ function initializeDataTable(startDateId = "-1", endDateId = "-1") {
 }
 
 $(document).ready(function () {
+     $(".select2").select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        allowClear: true,
+    });
     initializeDataTable("-1");
+    
 
-    $("#startDate, #endDate").on("change", function () {
-        var startDateId = $("#startDate").val();
-        var endDateId = $("#endDate").val();
+    // 2) Cada vez que cambie cualquier filtro, destruimos y recreamos la tabla
+    $("#centrocosto, #vendedor, #domiciliario, #startDate, #endDate").on(
+        "change",
+        function () {
+            const filtros = {
+                centroId: $("#centrocosto").val(),
+                vendedorId: $("#vendedor").val(),
+                domiciliarioId: $("#domiciliario").val(),                
+                startDateId: $("#startDate").val(),
+                endDateId: $("#endDate").val(),                
+            };
+            dataTable.destroy();
+            initializeDataTable(filtros);
+        }
+    );
 
-        dataTable.destroy();
-        initializeDataTable(startDateId, endDateId);
-        cargarTotales(startDateId, endDateId);
-    });
 });
-
-document
-    .getElementById("cargarInventarioBtn")
-    .addEventListener("click", (e) => {
-        e.preventDefault();
-        let element = e.target;
-        showConfirmationAlert(element)
-            .then((result) => {
-                if (result && result.value) {
-                    loadingStart(element);
-                    const dataform = new FormData();
-
-                    const var_startDateId =
-                        document.querySelector("#startDate");
-                    const var_endDateId = document.querySelector("#endDate");
-
-                    dataform.append(
-                        "startDateId",
-                        Number(var_startDateId.value)
-                    );
-                    dataform.append("endDateId", Number(var_endDateId.value));
-
-                    return sendData("/cargarInventariohist", dataform, token);
-                }
-            })
-            .then((result) => {
-                console.log(result);
-                if (result && result.status == 1) {
-                    loadingEnd(element, "success", "Cargando al inventorio");
-                    element.disabled = true;
-                    return swal(
-                        "EXITO",
-                        "Inventario Cargado Exitosamente",
-                        "success"
-                    );
-                }
-                if (result && result.status == 0) {
-                    loadingEnd(element, "success", "Cargando al inventorio");
-                    errorMessage(result.message);
-                }
-            })
-            .then(() => {
-                window.location.href = "/inventory/consolidado";
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    });
-
-function showConfirmationAlert(element) {
-    return swal.fire({
-        title: "CONFIRMAR",
-        text: "Estas seguro que desea cargar el inventario ?",
-        icon: "warning",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Acpetar",
-        denyButtonText: `Cancelar`,
-    });
-}

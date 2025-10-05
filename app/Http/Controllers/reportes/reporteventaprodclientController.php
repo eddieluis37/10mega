@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\centros\Centrocosto;
 use App\Models\SaleDetail;
+use App\Models\Third;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -20,38 +21,73 @@ class reporteventaprodclientController extends Controller
      */
     public function index()
     {
+        $centros = Centrocosto::Where('status', 1)->get();
+        $vendedores = Third::Where('vendedor', 1)->get();
+        $domiciliarios = Third::Where('domiciliario', 1)->get();
+
         $startDate = Carbon::parse(Carbon::now())->format('Y-m-d');
         $endDate = Carbon::parse(Carbon::now())->format('Y-m-d');
 
         /*  $category = Category::whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9])->orderBy('name', 'asc')->get();
  */
         $category = Category::orderBy('name', 'asc')->get();
-        $centros = Centrocosto::Where('status', 1)->get();
 
         // llama al metodo para calcular el stock
         //   $this->totales(request());
         $response = $this->totales(request()); // Call the totales method
         $totalStock = $response->getData()->totalStock; // Retrieve the totalStock value from the response
 
-        return view('reportes.prod_client', compact('category', 'centros', 'startDate', 'endDate', 'totalStock'));
+        return view('reportes.prod_client', compact('centros', 'vendedores', 'domiciliarios', 'category',  'startDate', 'endDate', 'totalStock'));
     }
 
     public function show(Request $request)
     {
+        // 1) Capturamos los filtros del request
+        $centroId   =  $request->input('centrocosto');
+        $vendedorId      = $request->input('vendedor');      // id o null
+        $domiciliarioId  = $request->input('domiciliario');  // id o null
         $startDateId = $request->input('startDateId');
         $endDateId = $request->input('endDateId');
 
         $data = SaleDetail::with(['sale', 'sale.third', 'product.category', 'product.notacredito_details', 'product.notadebito_details'])
-            ->whereHas('sale', function ($query) use ($startDateId, $endDateId) {
+            ->whereHas('sale', function ($query) use ($startDateId, $endDateId, $centroId, $vendedorId, $domiciliarioId) {
+                // filtro por rango de fechas y status
                 $query->whereBetween('created_at', [$startDateId, $endDateId])
                     ->where('status', '1');
+
+                // filtro por centro de costo (soporta array o valor único)
+                if (!is_null($centroId) && $centroId !== '') {
+                    if (is_array($centroId)) {
+                        $query->whereIn('centrocosto_id', $centroId);
+                    } else {
+                        $query->where('centrocosto_id', $centroId);
+                    }
+                }
+
+                // filtro por vendedor (soporta array o valor único)
+                if (!is_null($vendedorId) && $vendedorId !== '') {
+                    if (is_array($vendedorId)) {
+                        $query->whereIn('vendedor_id', $vendedorId);
+                    } else {
+                        $query->where('vendedor_id', $vendedorId);
+                    }
+                }
+
+                // filtro por domiciliario (soporta array o valor único)
+                if (!is_null($domiciliarioId) && $domiciliarioId !== '') {
+                    if (is_array($domiciliarioId)) {
+                        $query->whereIn('domiciliario_id', $domiciliarioId);
+                    } else {
+                        $query->where('domiciliario_id', $domiciliarioId);
+                    }
+                }
             })
-            ->select(               
+            ->select(
                 'thirds.identification as third_identification',
                 'thirds.name as third_name',
                 'products.code as product_code',
                 'products.name as product_name',
-                'categories.name as category_name',               
+                'categories.name as category_name',
                 DB::raw('SUM(sale_details.quantity) as cantidad_venta'),
                 'notacredito_details.quantity as notacredito_quantity',
                 'notadebito_details.quantity as notadebito_quantity',
@@ -62,47 +98,28 @@ class reporteventaprodclientController extends Controller
                 DB::raw('(SUM(sale_details.total_bruto) + COALESCE(notadebito_details.total_bruto, 0)) - COALESCE(notacredito_details.total_bruto, 0) - SUM(sale_details.descuento) - SUM(sale_details.descuento_cliente) as sub_total'),
                 DB::raw('SUM(sale_details.otro_impuesto) as impuesto_salud'),
                 DB::raw('SUM(sale_details.iva) as iva'),
-                DB::raw('(SUM(sale_details.total_bruto) + COALESCE(notadebito_details.total_bruto, 0)) - COALESCE(notacredito_details.total_bruto, 0) - SUM(sale_details.descuento) - SUM(sale_details.descuento_cliente) + SUM(sale_details.otro_impuesto) + SUM(sale_details.iva) as total'),
+                DB::raw('(SUM(sale_details.total_bruto) + COALESCE(notadebito_details.total_bruto, 0)) - COALESCE(notacredito_details.total_bruto, 0) - SUM(sale_details.descuento) - SUM(sale_details.descuento_cliente) + SUM(sale_details.otro_impuesto) + SUM(sale_details.iva) as total')
             )
             ->join('products', 'products.id', '=', 'sale_details.product_id')
             ->join('categories', 'categories.id', '=', 'products.category_id')
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->join('thirds', 'thirds.id', '=', 'sales.third_id')
-            ->leftjoin('notacredito_details', 'notacredito_details.product_id', '=', 'sale_details.product_id')
-            ->leftjoin('notadebito_details', 'notadebito_details.product_id', '=', 'sale_details.product_id')
-            ->groupBy('products.id', 'products.name', 'categories.name', 'thirds.name', 'thirds.identification')
+            ->leftJoin('notacredito_details', 'notacredito_details.product_id', '=', 'sale_details.product_id')
+            ->leftJoin('notadebito_details', 'notadebito_details.product_id', '=', 'sale_details.product_id')
+            ->groupBy('products.id', 'products.code', 'products.name', 'categories.name', 'thirds.name', 'thirds.identification')
             ->orderBy('products.name', 'ASC')
             ->get();
 
-    //   dd($data);
-
-        /*   // Calculo de la stock ideal y venta_real
-        foreach ($data as $item) {
-
-            $venta_real = (($item->venta - $item->notacredito) + $item->notadebito);
-            $item->venta_real = round($venta_real, 2);
-
-            $stock = ($item->invinicial + $item->compraLote + $item->alistamiento + $item->compensados + $item->trasladoing) - (($item->venta_real) + $item->trasladosal);
-            $item->stock = round($stock, 2);
-            // Actualizar el stock 
-            DB::table('centro_costo_products')
-                ->where('centrocosto_id', $centrocostoId)
-                ->where('products_id', $item->products_id)
-                ->update([
-                    'stock' => $item->stock,
-                    'venta_real' => $item->venta_real
-                ]);
-        }
-        */
         return datatables()->of($data)
             ->addIndexColumn()
             ->make(true);
     }
 
 
+
     public function totales(Request $request)
     {
-        $centrocostoId = $request->input('centrocostoId');
+        $centroId = $request->input('centroId');
         $categoriaId = $request->input('categoriaId');
 
         $data = DB::table('centro_costo_products as ccp')
@@ -124,7 +141,7 @@ class reporteventaprodclientController extends Controller
                 'ccp.stock as stock',
                 'ccp.fisico as fisico'
             )
-            ->where('ccp.centrocosto_id', $centrocostoId)
+            ->where('ccp.centrocosto_id', $centroId)
             ->where(function ($query) {
                 $query->where('ccp.tipoinventario', 'cerrado')
                     ->orWhere('ccp.tipoinventario', 'inicial');
@@ -225,7 +242,7 @@ class reporteventaprodclientController extends Controller
 
     public function cargarInventariohist(Request $request)
     {
-        $v_centrocostoId = $request->input('centrocostoId');
+        $v_centroId = $request->input('centroId');
         $v_categoriaId = $request->input('categoriaId');
 
         // PASO 1 COPIAR DATOS DESDE LA TABLA CENTRO COSTO PRODUCTS HASTA TABLA DE HISTORICO 
@@ -316,11 +333,11 @@ class reporteventaprodclientController extends Controller
           c.precioventa_min
         FROM centro_costo_products c 
         INNER JOIN products p ON p.id = c.products_id
-        WHERE c.centrocosto_id = :centrocostoId        
+        WHERE c.centrocosto_id = :centroId        
         AND c.tipoinventario = 'cerrado' 
         OR c.tipoinventario = 'inicial' ",
             [
-                'centrocostoId' => $v_centrocostoId,
+                'centroId' => $v_centroId,
             ]
         );
 
@@ -331,11 +348,11 @@ class reporteventaprodclientController extends Controller
          UPDATE centro_costo_products c INNER JOIN products p ON p.id = c.products_id
          SET c.invinicial = c.fisico,
              c.cto_invinicial_total = c.cto_invfinal_total  
-         WHERE c.centrocosto_id = :centrocostoId       
+         WHERE c.centrocosto_id = :centroId       
          AND c.tipoinventario = 'cerrado'
          OR c.tipoinventario = 'inicial' ",
             [
-                'centrocostoId' => $v_centrocostoId,
+                'centroId' => $v_centroId,
 
             ]
         );
@@ -379,11 +396,11 @@ class reporteventaprodclientController extends Controller
          ,c.total_venta = 0
          ,c.utilidad = 0
          ,c.precioventa_min = 0       
-         WHERE c.centrocosto_id = :centrocostoId        
+         WHERE c.centrocosto_id = :centroId        
          AND tipoinventario = 'cerrado'
          OR tipoinventario = 'inicial' ",
             [
-                'centrocostoId' => $v_centrocostoId,
+                'centroId' => $v_centroId,
 
             ]
         );
@@ -415,7 +432,7 @@ class reporteventaprodclientController extends Controller
 
     public function showhistorico(Request $request)
     {
-        $centrocostoId = $request->input('centrocostoId');
+        $centroId = $request->input('centroId');
         $categoriaId = $request->input('categoriaId');
         $fechai = $request->input('fechai');
         $fechaf = $request->input('fechaf');
@@ -438,7 +455,7 @@ class reporteventaprodclientController extends Controller
                 'ccp.stock as stock',
                 'ccp.fisico as fisico'
             )
-            ->where('ccp.centrocosto_id', $centrocostoId)
+            ->where('ccp.centrocosto_id', $centroId)
             ->where('pro.category_id', $categoriaId)
             ->where('pro.status', 1)
             ->whereBetween('fecha', [$fechai, $fechaf])
@@ -458,7 +475,7 @@ class reporteventaprodclientController extends Controller
 
     public function totaleshist(Request $request)
     {
-        $centrocostoId = $request->input('centrocostoId');
+        $centroId = $request->input('centroId');
         $categoriaId = $request->input('categoriaId');
         $fechai = $request->input('fechai');
         $fechaf = $request->input('fechaf');
@@ -481,7 +498,7 @@ class reporteventaprodclientController extends Controller
                 'ccp.stock as stock',
                 'ccp.fisico as fisico'
             )
-            ->where('ccp.centrocosto_id', $centrocostoId)
+            ->where('ccp.centrocosto_id', $centroId)
             ->where('pro.category_id', $categoriaId)
             ->where('pro.status', 1)
             ->whereBetween('fecha', [$fechai, $fechaf])
