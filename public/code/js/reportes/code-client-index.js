@@ -41,7 +41,6 @@ function initializeDataTable({
             },
         },
         columns: [
-            // NUEVAS PRIMERAS COLUMNAS (orden y render similar al resto)
             {
                 data: "factura",
                 name: "factura",
@@ -78,8 +77,34 @@ function initializeDataTable({
                 },
             },
             {
-                data: "vendedor_id",
-                name: "vendedor_id",
+                data: "vendedor_name",
+                name: "vendedor_name",
+                render: function (data) {
+                    if (!data)
+                        return "<span style='font-size:smaller;'>-</span>";
+                    let sub = data.substring(0, 18).toLowerCase();
+                    let cap = sub.charAt(0).toUpperCase() + sub.slice(1);
+                    return data.length > 18
+                        ? `<span title="${data}">${cap}.</span>`
+                        : `<span style="font-size:smaller; display:block; text-align:center;">${cap}</span>`;
+                },
+            },
+            {
+                data: "vendedor_name",
+                name: "vendedor_name",
+                render: function (data) {
+                    if (!data)
+                        return "<span style='font-size:smaller;'>-</span>";
+                    let sub = data.substring(0, 18).toLowerCase();
+                    let cap = sub.charAt(0).toUpperCase() + sub.slice(1);
+                    return data.length > 18
+                        ? `<span title="${data}">${cap}.</span>`
+                        : `<span style="font-size:smaller; display:block; text-align:center;">${cap}</span>`;
+                },
+            },
+            {
+                data: "cajero_name",
+                name: "cajero_name",
                 render: function (data) {
                     return (
                         "<div style='text-align: center;'>" +
@@ -89,36 +114,12 @@ function initializeDataTable({
                 },
             },
             {
-                data: "cajero_id",
-                name: "cajero_id",
+                data: "domiciliario_name",
+                name: "domiciliario_name",
                 render: function (data) {
                     return (
                         "<div style='text-align: center;'>" +
                         (data ? data : "") +
-                        "</div>"
-                    );
-                },
-            },
-            {
-                data: "domiciliario_id",
-                name: "domiciliario_id",
-                render: function (data) {
-                    return (
-                        "<div style='text-align: center;'>" +
-                        (data ? data : "") +
-                        "</div>"
-                    );
-                },
-            },
-
-            // COLUMNAS EXISTENTES (idénticas a las tuyas, sólo que desplazadas)
-            {
-                data: "third_identification",
-                name: "third_identification",
-                render: function (data, type, row) {
-                    return (
-                        "<div style='text-align: right;'>" +
-                        formatCantidadSinCero(data) +
                         "</div>"
                     );
                 },
@@ -138,7 +139,6 @@ function initializeDataTable({
                     }
                 },
             },
-            // ... luego sigue product_code, product_name, category_name, etc. (copia exactamente las definiciones que ya tenías)
             {
                 data: "product_code",
                 name: "product_code",
@@ -176,7 +176,6 @@ function initializeDataTable({
                     }
                 },
             },
-            // y continúa con las columnas numéricas que ya tenías (cantidad_venta, notacredito_quantity, ...)
             {
                 data: "cantidad_venta",
                 name: "cantidad_venta",
@@ -299,7 +298,7 @@ function initializeDataTable({
                 },
             },
         ],
-        // IMPORTANTE: como añadimos 6 columnas al inicio, cambié el order para ordenar por 'third_name' que ahora está en la posición 7
+        // El order para ordenar por 'third_name' en la posición 7
         order: [[7, "ASC"]],
 
         language: {

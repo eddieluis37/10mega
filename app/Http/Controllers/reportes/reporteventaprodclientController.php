@@ -83,13 +83,15 @@ class reporteventaprodclientController extends Controller
                 }
             })
             ->select(
-                // NUEVAS PRIMERAS COLUMNAS (aliases coinciden con los keys usados en JS)
+                // NUEVAS PRIMERAS COLUMNAS (aliases usados por el JS)
                 'sales.consecutivo as factura',
                 'sales.direccion_envio as direccion_envio',
-                'thirds.celular as telefono',
-                'sales.vendedor_id as vendedor_id',
-                'sales.user_id as cajero_id',
-                'sales.domiciliario_id as domiciliario_id',
+                'thirds.celular as telefono',          // teléfono del cliente (thirds = cliente)
+
+                // nombres del vendedor / cajero / domiciliario desde thirds (aliases distintos)
+                't_vendedor.name as vendedor_name',
+                't_cajero.name as cajero_name',
+                't_domiciliario.name as domiciliario_name',
 
                 // CAMPOS QUE YA TENÍAS
                 'thirds.identification as third_identification',
@@ -112,17 +114,25 @@ class reporteventaprodclientController extends Controller
             ->join('products', 'products.id', '=', 'sale_details.product_id')
             ->join('categories', 'categories.id', '=', 'products.category_id')
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
+
+            // cliente (thirds) ya existía
             ->join('thirds', 'thirds.id', '=', 'sales.third_id')
+
+            // JOINs para obtener nombre del vendedor / cajero / domiciliario desde la tabla thirds (LEFT para permitir nulos)
+            ->leftJoin('thirds as t_vendedor', 't_vendedor.id', '=', 'sales.vendedor_id')
+            ->leftJoin('thirds as t_cajero', 't_cajero.id', '=', 'sales.user_id')
+            ->leftJoin('thirds as t_domiciliario', 't_domiciliario.id', '=', 'sales.domiciliario_id')
+
             ->leftJoin('notacredito_details', 'notacredito_details.product_id', '=', 'sale_details.product_id')
             ->leftJoin('notadebito_details', 'notadebito_details.product_id', '=', 'sale_details.product_id')
             ->groupBy(
-                // agrupar por todas las columnas no-aggregadas
+                // agrupar por las columnas no-aggregadas
                 'sales.consecutivo',
                 'sales.direccion_envio',
                 'thirds.celular',
-                'sales.vendedor_id',
-                'sales.user_id',
-                'sales.domiciliario_id',
+                't_vendedor.name',
+                't_cajero.name',
+                't_domiciliario.name',
                 'products.id',
                 'products.code',
                 'products.name',
