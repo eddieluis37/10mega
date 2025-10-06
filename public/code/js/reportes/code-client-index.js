@@ -117,7 +117,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -224,7 +224,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -235,7 +235,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -246,7 +246,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -257,7 +257,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -268,7 +268,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -279,7 +279,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -290,7 +290,7 @@ function initializeDataTable({
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -301,7 +301,7 @@ function initializeDataTable({
                 render: function (data) {
                     return (
                         "<div style='text-align: right;'>$" +
-                        formatCantidadSinCero(data) +
+                        formatCantidad(data) +
                         "</div>"
                     );
                 },
@@ -386,7 +386,7 @@ function initializeDataTable({
                 .toFixed(2);
 
             var totalDineroVRFormatted =
-                "$" + formatCantidadSinCero(totalDineroVR);
+                "$" + formatCantidad(totalDineroVR);
 
             var totalDescProd = api
                 .column("descuento_producto:name", { search: "applied" })
@@ -396,7 +396,7 @@ function initializeDataTable({
                 }, 0)
                 .toFixed(2);
             var totalDescProdVRFormatted =
-                "$" + formatCantidadSinCero(totalDescProd);
+                "$" + formatCantidad(totalDescProd);
 
             var totalDescCliente = api
                 .column("descuento_cliente:name", { search: "applied" })
@@ -406,7 +406,7 @@ function initializeDataTable({
                 }, 0)
                 .toFixed(2);
             var totalDescClienteFormatted =
-                "$" + formatCantidadSinCero(totalDescCliente);
+                "$" + formatCantidad(totalDescCliente);
 
             var totalSubTotal = api
                 .column("sub_total:name", { search: "applied" })
@@ -416,7 +416,7 @@ function initializeDataTable({
                 }, 0)
                 .toFixed(2);
             var totalSubTotalFormatted =
-                "$" + formatCantidadSinCero(totalSubTotal);
+                "$" + formatCantidad(totalSubTotal);
 
             var totalImpSalud = api
                 .column("impuesto_salud:name", { search: "applied" })
@@ -426,7 +426,7 @@ function initializeDataTable({
                 }, 0)
                 .toFixed(2);
             var totalImpSaludFormatted =
-                "$" + formatCantidadSinCero(totalImpSalud);
+                "$" + formatCantidad(totalImpSalud);
 
             var totalIva = api
                 .column("iva:name", { search: "applied" })
@@ -436,7 +436,18 @@ function initializeDataTable({
                     return isNaN(value) ? a : a + value;
                 }, 0)
                 .toFixed(2);
-            var totalIvaFormatted = "$" + formatCantidadSinCero(totalIva);
+            var totalIvaFormatted = "$" + formatCantidad(totalIva);
+
+             var totalImpoconsumo = api
+                .column("impoconsumo:name", { search: "applied" })
+                .data()
+                .reduce(function (a, b) {
+                    var value = parseFloat(b);
+                    return isNaN(value) ? a : a + value;
+                }, 0)
+                .toFixed(2);
+
+            var totalImpoconsumoFormatted = "$" + formatCantidad(totalImpoconsumo);
 
             var totalTotal = api
                 .column("total:name", { search: "applied" })
@@ -447,7 +458,7 @@ function initializeDataTable({
                 }, 0)
                 .toFixed(2);
 
-            var totalTotalFormatted = "$" + formatCantidadSinCero(totalTotal);
+            var totalTotalFormatted = "$" + formatCantidad(totalTotal);
 
             // Agregar los valores totales en el footer
             $(api.column("cantidad_venta:name").footer())
@@ -479,6 +490,9 @@ function initializeDataTable({
                 .css("text-align", "right");
             $(api.column("iva:name").footer())
                 .html(totalIvaFormatted)
+                .css("text-align", "right");
+            $(api.column("impoconsumo:name").footer())
+                .html(totalImpoconsumoFormatted)
                 .css("text-align", "right");
             $(api.column("total:name").footer())
                 .html(totalTotalFormatted)
