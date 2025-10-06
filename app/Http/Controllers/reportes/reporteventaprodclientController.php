@@ -24,6 +24,7 @@ class reporteventaprodclientController extends Controller
         $centros = Centrocosto::Where('status', 1)->get();
         $vendedores = Third::Where('vendedor', 1)->get();
         $domiciliarios = Third::Where('domiciliario', 1)->get();
+        $clientes = Third::Where('cliente', 1)->get();
 
         $startDate = Carbon::parse(Carbon::now())->format('Y-m-d');
         $endDate = Carbon::parse(Carbon::now())->format('Y-m-d');
@@ -37,7 +38,7 @@ class reporteventaprodclientController extends Controller
         $response = $this->totales(request()); // Call the totales method
         $totalStock = $response->getData()->totalStock; // Retrieve the totalStock value from the response
 
-        return view('reportes.prod_client', compact('centros', 'vendedores', 'domiciliarios', 'category',  'startDate', 'endDate', 'totalStock'));
+        return view('reportes.prod_client', compact('centros', 'vendedores', 'domiciliarios', 'clientes', 'category',  'startDate', 'endDate', 'totalStock'));
     }
 
     public function show(Request $request)
@@ -46,11 +47,12 @@ class reporteventaprodclientController extends Controller
         $centroId   =  $request->input('centrocosto');
         $vendedorId      = $request->input('vendedor');      // id o null
         $domiciliarioId  = $request->input('domiciliario');  // id o null
+        $clienteId  = $request->input('cliente');
         $startDateId = $request->input('startDateId');
         $endDateId = $request->input('endDateId');
 
         $data = SaleDetail::with(['sale', 'sale.third', 'product.category', 'product.notacredito_details', 'product.notadebito_details'])
-            ->whereHas('sale', function ($query) use ($startDateId, $endDateId, $centroId, $vendedorId, $domiciliarioId) {
+            ->whereHas('sale', function ($query) use ($startDateId, $endDateId, $centroId, $vendedorId, $domiciliarioId, $clienteId) {
                 // filtro por rango de fechas y status
                 $query->whereBetween('created_at', [$startDateId, $endDateId])
                     ->where('status', '1');
@@ -79,6 +81,14 @@ class reporteventaprodclientController extends Controller
                         $query->whereIn('domiciliario_id', $domiciliarioId);
                     } else {
                         $query->where('domiciliario_id', $domiciliarioId);
+                    }
+                }
+
+                if (!is_null($clienteId) && $clienteId !== '') {
+                    if (is_array($clienteId)) {
+                        $query->whereIn('third_id', $clienteId);
+                    } else {
+                        $query->where('third_id', $clienteId);
                     }
                 }
             })
@@ -120,7 +130,7 @@ class reporteventaprodclientController extends Controller
             ->join('thirds', 'thirds.id', '=', 'sales.third_id')
 
             // JOINs para obtener nombre del vendedor / cajero / domiciliario desde la tabla thirds (LEFT para permitir nulos)
-            ->leftJoin('thirds as t_vendedor', 't_vendedor.id', '=', 'sales.vendedor_id')           
+            ->leftJoin('thirds as t_vendedor', 't_vendedor.id', '=', 'sales.vendedor_id')
             ->leftJoin('users as u_cajero', 'u_cajero.id', '=', 'sales.user_id')
             ->leftJoin('thirds as t_domiciliario', 't_domiciliario.id', '=', 'sales.domiciliario_id')
 

@@ -31,7 +31,7 @@
           <div class="form-group">
             <label for="centrocosto" class="form-label">Centro costo</label>
             <select class="form-control form-control-sm select2" name="centrocosto" id="centrocosto" required>
-              <option value="">Seleccione la categoría</option>
+              <option value="">Seleccione centroCosto</option>
               @foreach($centros as $option)
               <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
               @endforeach
@@ -65,8 +65,17 @@
           </div>
         </div>
 
-        <div class="col-sm-6 col-md-4">
-
+        <div class="col-sm-12 col-md-4">
+          <div class="form-group">
+            <label for="categoria" class="form-label">Cliente</label>
+            <select class="form-control form-control-sm select2" name="cliente" id="cliente" required>
+              <option value="">Seleccione cliente</option>
+              @foreach($clientes as $option)
+              <option value="{{ $option['id'] }}" data-name="{{ $option['name'] }}">{{ $option['name'] }}</option>
+              @endforeach
+            </select>
+            <span class="text-danger error-message"></span>
+          </div>
         </div>
 
         <div class="col-sm-6 col-md-4">
@@ -97,9 +106,9 @@
 
                 <!-- COLUMNAS EXISTENTES (ajustadas tras el añadido) -->
                 <th class="table-th text-white" title="Identificación cliente" style="text-align: center;">ID_CLIENTE</th>
-                <th class="table-th" title="Nombre del cliente" style="text-align: center;">NOM_CLIENTES</th>
+                <th class="table-th text-white" title="Nombre del cliente" style="text-align: center;">NOM_CLIENTES</th>
                 <th class="table-th text-white" title="Categoria" style="text-align: center;">COD</th>
-                <th class="table-th" title="Productos" style="text-align: center;">PRODUCTO</th>
+                <th class="table-th text-white" title="Productos" style="text-align: center;">PRODUCTO</th>
                 <th class="table-th text-white" title="Categoria" style="text-align: center;">CAT</th>
                 <th class="table-th text-white" title="Cantidades vendidas" style="text-align: center;">CV</th>
                 <th class="table-th text-white" title="Cantidades acreditadas" style="text-align: center;">CN</th>

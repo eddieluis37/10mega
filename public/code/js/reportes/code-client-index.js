@@ -20,6 +20,7 @@ function initializeDataTable({
     centroId = "",
     vendedorId = "",
     domiciliarioId = "",
+    clienteId = "",
     startDateId = "",
     endDateId = "",
 } = {}) {
@@ -36,6 +37,7 @@ function initializeDataTable({
                 centrocosto: centroId,
                 vendedor: vendedorId,
                 domiciliario: domiciliarioId,
+                cliente: clienteId,
                 startDateId: startDateId,
                 endDateId: endDateId,
             },
@@ -499,21 +501,45 @@ function initializeDataTable({
                 .css("text-align", "right");
         },
     });
-    // Agregar campos de búsqueda para la primera y cuarta columna de la tabla
-    $("#tableInventory thead th").each(function (index) {
-        if (index === 1 || index === 3) {
-            var title = $(this).text();
+     $("#tableInventory thead th").each(function (index) {
+        var originalTitle = $(this).text().trim();
+
+        if (index === 0) {
             $(this).html(
-                '<input type="text" placeholder="Buscar ' + title + '" />'
+                '<div style="display:flex;flex-direction:column;align-items:center;">' +
+                    '<span style="font-weight:600;">FACTURA</span>' +
+                    '<input type="text" placeholder="Buscar FACTURA" style="margin-top:4px;" />' +
+                "</div>"
+            );
+        } else if (index === 3) {
+            $(this).html(
+                '<div style="display:flex;flex-direction:column;align-items:center;">' +
+                    `<span style="font-weight:600;">${originalTitle}</span>` +
+                    '<input type="text" placeholder="Buscar ' + originalTitle + '" style="margin-top:4px;" />' +
+                "</div>"
+            );
+        } else if (index === 7) {
+            $(this).html(
+                '<div style="display:flex;flex-direction:column;align-items:center;">' +
+                    '<span style="font-weight:600;">NOM_CLIENTES</span>' +
+                    '<input type="text" placeholder="Buscar NOM_CLIENTES" style="margin-top:4px;" />' +
+                "</div>"
+            );
+        } else if (index === 9) {
+            $(this).html(
+                '<div style="display:flex;flex-direction:column;align-items:center;">' +
+                    '<span style="font-weight:600;">PRODUCTO</span>' +
+                    '<input type="text" placeholder="Buscar PRODUCTO" style="margin-top:4px;" />' +
+                "</div>"
             );
         }
     });
 
-    // Aplicar el filtro de búsqueda solo para la primera y cuarta columna
+    // Aplicar el filtro de búsqueda para las columnas: 0 (FACTURA), 3, 7 (NOM_CLIENTES) y 9 (PRODUCTO)
     dataTable.columns().every(function (index) {
-        if (index === 1 || index === 3) {
+        if (index === 0 || index === 3 || index === 7 || index === 9) {
             var that = this;
-            $("input", this.header()).on("keyup change", function () {
+            $("input", $(that.header())).on("keyup change clear", function () {
                 if (that.search() !== this.value) {
                     that.search(this.value).draw();
                 }
@@ -531,13 +557,14 @@ $(document).ready(function () {
     initializeDataTable("-1");
 
     // 2) Cada vez que cambie cualquier filtro, destruimos y recreamos la tabla
-    $("#centrocosto, #vendedor, #domiciliario, #startDate, #endDate").on(
+    $("#centrocosto, #vendedor, #domiciliario, #cliente, #startDate, #endDate").on(
         "change",
         function () {
             const filtros = {
                 centroId: $("#centrocosto").val(),
                 vendedorId: $("#vendedor").val(),
                 domiciliarioId: $("#domiciliario").val(),
+                clienteId: $("#cliente").val(),
                 startDateId: $("#startDate").val(),
                 endDateId: $("#endDate").val(),
             };
