@@ -148,7 +148,11 @@ class saleautoservicioController extends Controller
                     AND p.type IN ('combo','receta')
                 ) > 0 as has_comanda")
             ])
-            ->where('sa.user_id', $userId)
+            //->where('sa.user_id', $userId)
+            // Si NO tiene el permiso 'ver_InfoDeTodos' aplicar el filtro por user_id
+            ->when(! Auth::user()->can('ver_InfoDeTodos'), function ($query) {
+                return $query->where('sa.user_id', Auth::id());
+            })
             ->whereIn('c.id', $userCentrocostos)
             ->whereIn('sa.tipo', ['4', '5'])
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
