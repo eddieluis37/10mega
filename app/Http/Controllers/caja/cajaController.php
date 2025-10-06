@@ -455,7 +455,7 @@ class cajaController extends Controller
             ->select('c.*', 's.name as namecentrocosto', 'u.name as namecajero')
             ->whereIn('c.centrocosto_id', $centroIds)
             // Filtro: solo las cajas creadas por el usuario autenticado
-            ->where('c.user_id', Auth::id())
+           // ->where('c.user_id', Auth::id())
             ->orderBy('c.id', 'desc')
             ->get();
 
