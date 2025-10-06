@@ -128,11 +128,11 @@ function initializeDataTable({
                 data: "third_name",
                 name: "third_name",
                 render: function (data) {
-                    let subStringData = data.substring(0, 19).toLowerCase();
+                    let subStringData = data.substring(0, 30).toLowerCase();
                     let capitalizedSubString =
                         subStringData.charAt(0).toUpperCase() +
                         subStringData.slice(1);
-                    if (data.length > 19) {
+                    if (data.length > 30) {
                         return `<span style="font-size: smaller;" title="${data}">${capitalizedSubString}.</span>`;
                     } else {
                         return `<span style="font-size: smaller; display: block; text-align: center;">${capitalizedSubString}</span>`;
