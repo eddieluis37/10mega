@@ -65,16 +65,16 @@ class StoreUserSeeder extends Seeder
 
             'AdminSuba' => [
                 'users' => [19],
-                'stores' => Store::whereIn('id', [18, 19])->pluck('id')->toArray(), // Bodegas específicas
+                'stores' => Store::whereIn('id', [18, 19, 39])->pluck('id')->toArray(), // Bodegas específicas
             ],
             'BarSuba' => [
                 'users' => [35],
-                'stores' => Store::whereIn('id', [20])->pluck('id')->toArray(), // Bodegas específicas
+                'stores' => Store::whereIn('id', [20, 39])->pluck('id')->toArray(), // Bodegas específicas
             ],
 
             'AdminSoacha' => [
                 'users' => [20],
-                'stores' => Store::whereIn('id', [27, 28, 29])->pluck('id')->toArray(), // Bodegas específicas
+                'stores' => Store::whereIn('id', [27, 28, 29, 39])->pluck('id')->toArray(), // Bodegas específicas
             ],                      
             'CajeroSoacha1' => [
                 'users' => [26],
