@@ -11,6 +11,7 @@ use App\Models\Store;
 use App\Models\Third;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class cuentasporcobrarController extends Controller
 {
@@ -72,7 +73,13 @@ class cuentasporcobrarController extends Controller
             // Opcional: si necesitas traer info de pagos parciales
             ->leftJoin('recibodecajas as rc',         'rc.third_id',              '=', 'cc.id')
             ->leftJoin('caja_recibo_dinero_details as crdd', 'crdd.recibodecaja_id', '=', 'rc.id')
-            // Filtros dinámicos
+           
+             // Si NO tiene el permiso 'ver_InfoDeTodos' aplicar el filtro por user_id
+            ->when(! Auth::user()->can('ver_InfoDeTodos'), function ($query) {
+                return $query->where('sa.user_id', Auth::id());
+            })
+           
+            // Filtros dinámicos     
             ->when(
                 $clienteId,
                 fn($q) =>

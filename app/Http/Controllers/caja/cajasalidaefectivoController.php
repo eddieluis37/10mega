@@ -79,10 +79,14 @@ class cajasalidaefectivoController extends Controller
                 't.name as recibe',
                 'csd.status',
             ])
+              // Si NO tiene el permiso 'ver_InfoDeTodos' aplicar el filtro por user_id
+            ->when(! Auth::user()->can('ver_InfoDeTodos'), function ($query) {
+                return $query->where('c.user_id', Auth::id());
+            })
             // 3) FILTRO: que el centro de costo de la caja esté en los autorizados para el usuario
-            ->whereIn('c.centrocosto_id', $centroIds)
+          //  ->whereIn('c.centrocosto_id', $centroIds)
             // Filtro: solo las cajas creadas por el usuario autenticado
-            ->where('c.user_id', Auth::id())
+           // ->where('c.user_id', Auth::id())
             ->orderBy('csd.fecha_hora_salida', 'desc')
             ->get();
 

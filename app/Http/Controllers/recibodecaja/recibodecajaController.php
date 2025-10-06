@@ -122,6 +122,10 @@ class recibodecajaController extends Controller
             /* ->join('subcentrocostos as centro', 'rc.subcentrocostos_id', '=', 'centro.id') */
             ->select('rc.*', 'tird.name as resolucion_factura', 'tird.name as namethird')
             /*  ->where('rc.status', 1) */
+             // Si NO tiene el permiso 'ver_InfoDeTodos' aplicar el filtro por user_id
+            ->when(! Auth::user()->can('ver_InfoDeTodos'), function ($query) {
+                return $query->where('rc.user_id', Auth::id());
+            })
             ->get();
 
         //  $data = Sale::orderBy('id','desc');

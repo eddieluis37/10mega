@@ -426,11 +426,17 @@ class notacreditoController extends Controller
      */
     public function show()
     {
+        
+        
         $data = DB::table('notacreditos as nc')
             ->join('sales as sa', 'nc.sale_id', '=', 'sa.id')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as centro', 'sa.centrocosto_id', '=', 'centro.id')
             ->select('sa.*', 'nc.id as ncid', 'nc.tipo', 'sa.resolucion as saresolucion', 'nc.valor_total as nctotal',  'nc.resolucion as ncresolucion', 'nc.status as ncstatus', 'nc.fecha_notacredito', 'nc.fecha_cierre as ncfecha_cierre', 'tird.name as namethird', 'centro.name as namecentrocosto')
+            // Si NO tiene el permiso 'ver_InfoDeTodos' aplicar el filtro por user_id
+            ->when(! Auth::user()->can('ver_InfoDeTodos'), function ($query) {
+                return $query->where('sa.user_id', Auth::id());
+            })
             /*  ->where('nc.status', '1') */
             ->get();
 
