@@ -664,8 +664,8 @@ class saleautoservicioController extends Controller
 
         // --- Agregar productos tipo combo/receta que NO tengan inventarios ---
         $comboRecetaQuery = Product::query()
-            ->whereIn('type', ['combo', 'receta'])
-            ->whereDoesntHave('inventarios'); // <-- aquí filtramos los que NO tienen inventario
+            ->whereIn('type', ['combo', 'receta']);
+           // ->whereDoesntHave('inventarios'); // <-- aquí filtramos los que NO tienen inventario
 
         // Aplicar mismo filtro de búsqueda al query de combo/receta
         if ($term) {
@@ -683,7 +683,7 @@ class saleautoservicioController extends Controller
         }
 
         $productosComboRecetaSinInventario = $comboRecetaQuery->get();
-        // 5.b) RECORRER PRODUCTOS combo/receta SIN INVENTARIOS
+// 5.b) RECORRER PRODUCTOS combo/receta SIN INVENTARIOS
         foreach ($productosComboRecetaSinInventario as $prodCR) {
             // Como no existen inventarios, montamos un mensaje “genérico”
             $textoCR = strtoupper($prodCR->type) . ": " . $prodCR->name
