@@ -111,6 +111,7 @@
                 <th class="table-th text-white" title="" style="text-align: center;">SUBTOTAL</th>
                 <th class="table-th text-white" title="" style="text-align: center;">IS</th>
                 <th class="table-th text-white" title="Impuesto IVA" style="text-align: center;">IVA</th>
+                <th class="table-th text-white" title="Impuesto al consumo" style="text-align: center;">IC</th>
                 <th class="table-th text-white" title="" style="text-align: center;">TOTAL</th>
               </tr>
             </thead>
@@ -127,6 +128,10 @@
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>0.00</td>
                 <td>0.00</td>
                 <td>0.00</td>
                 <td>0.00</td>

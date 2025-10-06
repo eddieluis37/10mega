@@ -90,7 +90,7 @@ class reporteventaprodclientController extends Controller
 
                 // nombres del vendedor / cajero / domiciliario desde thirds (aliases distintos)
                 't_vendedor.name as vendedor_name',
-                't_cajero.name as cajero_name',
+                'u_cajero.name as cajero_name',
                 't_domiciliario.name as domiciliario_name',
 
                 // CAMPOS QUE YA TENÍAS
@@ -109,7 +109,8 @@ class reporteventaprodclientController extends Controller
                 DB::raw('(SUM(sale_details.total_bruto) + COALESCE(notadebito_details.total_bruto, 0)) - COALESCE(notacredito_details.total_bruto, 0) - SUM(sale_details.descuento) - SUM(sale_details.descuento_cliente) as sub_total'),
                 DB::raw('SUM(sale_details.otro_impuesto) as impuesto_salud'),
                 DB::raw('SUM(sale_details.iva) as iva'),
-                DB::raw('(SUM(sale_details.total_bruto) + COALESCE(notadebito_details.total_bruto, 0)) - COALESCE(notacredito_details.total_bruto, 0) - SUM(sale_details.descuento) - SUM(sale_details.descuento_cliente) + SUM(sale_details.otro_impuesto) + SUM(sale_details.iva) as total')
+                DB::raw('SUM(sale_details.impoconsumo) as impoconsumo'),
+                DB::raw('(SUM(sale_details.total_bruto) + COALESCE(notadebito_details.total_bruto, 0)) - COALESCE(notacredito_details.total_bruto, 0) - SUM(sale_details.descuento) - SUM(sale_details.descuento_cliente) + SUM(sale_details.otro_impuesto) + SUM(sale_details.iva) + SUM(sale_details.impoconsumo) as total')
             )
             ->join('products', 'products.id', '=', 'sale_details.product_id')
             ->join('categories', 'categories.id', '=', 'products.category_id')
@@ -119,8 +120,8 @@ class reporteventaprodclientController extends Controller
             ->join('thirds', 'thirds.id', '=', 'sales.third_id')
 
             // JOINs para obtener nombre del vendedor / cajero / domiciliario desde la tabla thirds (LEFT para permitir nulos)
-            ->leftJoin('thirds as t_vendedor', 't_vendedor.id', '=', 'sales.vendedor_id')
-            ->leftJoin('thirds as t_cajero', 't_cajero.id', '=', 'sales.user_id')
+            ->leftJoin('thirds as t_vendedor', 't_vendedor.id', '=', 'sales.vendedor_id')           
+            ->leftJoin('users as u_cajero', 'u_cajero.id', '=', 'sales.user_id')
             ->leftJoin('thirds as t_domiciliario', 't_domiciliario.id', '=', 'sales.domiciliario_id')
 
             ->leftJoin('notacredito_details', 'notacredito_details.product_id', '=', 'sale_details.product_id')
@@ -131,7 +132,7 @@ class reporteventaprodclientController extends Controller
                 'sales.direccion_envio',
                 'thirds.celular',
                 't_vendedor.name',
-                't_cajero.name',
+                'u_cajero.name',
                 't_domiciliario.name',
                 'products.id',
                 'products.code',

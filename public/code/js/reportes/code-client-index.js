@@ -90,19 +90,6 @@ function initializeDataTable({
                 },
             },
             {
-                data: "vendedor_name",
-                name: "vendedor_name",
-                render: function (data) {
-                    if (!data)
-                        return "<span style='font-size:smaller;'>-</span>";
-                    let sub = data.substring(0, 18).toLowerCase();
-                    let cap = sub.charAt(0).toUpperCase() + sub.slice(1);
-                    return data.length > 18
-                        ? `<span title="${data}">${cap}.</span>`
-                        : `<span style="font-size:smaller; display:block; text-align:center;">${cap}</span>`;
-                },
-            },
-            {
                 data: "cajero_name",
                 name: "cajero_name",
                 render: function (data) {
@@ -120,6 +107,17 @@ function initializeDataTable({
                     return (
                         "<div style='text-align: center;'>" +
                         (data ? data : "") +
+                        "</div>"
+                    );
+                },
+            },
+            {
+                data: "third_identification",
+                name: "third_identification",
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>" +
+                        formatCantidadSinCero(data) +
                         "</div>"
                     );
                 },
@@ -278,6 +276,17 @@ function initializeDataTable({
             {
                 data: "iva",
                 name: "iva",
+                render: function (data, type, row) {
+                    return (
+                        "<div style='text-align: right;'>$" +
+                        formatCantidadSinCero(data) +
+                        "</div>"
+                    );
+                },
+            },
+            {
+                data: "impoconsumo",
+                name: "impoconsumo",
                 render: function (data, type, row) {
                     return (
                         "<div style='text-align: right;'>$" +
