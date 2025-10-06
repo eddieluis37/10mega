@@ -683,29 +683,25 @@ class saleautoservicioController extends Controller
         }
 
         $productosComboRecetaSinInventario = $comboRecetaQuery->get();
-
-        foreach ($productosComboRecetaSinInventario as $prod) {
-            // Construimos una entrada que indique que no hay inventario
-            $textoCR = strtoupper($prod->type) . ": " . $prod->name
-                . " (Código: " . $prod->code . ")"
+        // 5.b) RECORRER PRODUCTOS combo/receta SIN INVENTARIOS
+        foreach ($productosComboRecetaSinInventario as $prodCR) {
+            // Como no existen inventarios, montamos un mensaje “genérico”
+            $textoCR = strtoupper($prodCR->type) . ": " . $prodCR->name
+                . " (Código: " . $prodCR->code . ")"
                 . " – SIN INVENTARIO";
 
             $results[] = [
-                // Usamos el id del producto (no hay inventario), el frontend debe manejar inventario_id = null
-                'id'               => 'CR-' . $prod->id, // opcional: prefijo para diferenciar de inventarios
-                'text'             => $textoCR,
-                'lote_id'          => null,
-                'inventario_id'    => null,
-                'stock_ideal'      => 0,
-                'store_id'         => null,
-                'store_name'       => null,
-                'barcode'          => $prod->barcode,
-                'product_id'       => $prod->id,
-                // productos sin inventario no se evalúan promociones basadas en inventario/store aquí
-                'promo_percent'    => 0,
-                'promo_min_quantity' => null,
-                'promo_applies'    => false,
-                'applied_promotion_id' => null,
+                // Podemos usar el mismo ID del producto, o un prefijo para evitar colisiones
+                'id'            => 'CR-' . $prodCR->id,
+                'text'          => $textoCR,
+                'lote_id'       => null,
+                'inventario_id' => null,
+                'stock_ideal'   => 0,
+                'store_id'      => null,
+                'store_name'    => null,
+                'barcode'       => $prodCR->barcode,
+                'product_id'    => $prodCR->id,
+                'type'          => $prodCR->type,
             ];
         }
 
