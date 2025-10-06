@@ -454,8 +454,10 @@ class cajaController extends Controller
             ->join('centro_costo as s', 'c.centrocosto_id', '=', 's.id')
             ->select('c.*', 's.name as namecentrocosto', 'u.name as namecajero')
             ->whereIn('c.centrocosto_id', $centroIds)
-            // Filtro: solo las cajas creadas por el usuario autenticado
-            ->where('c.user_id', Auth::id())
+            // Si NO tiene el permiso 'ver_InfoDeTodos' aplicar el filtro por user_id
+            ->when(! Auth::user()->can('ver_InfoDeTodos'), function ($query) {
+                return $query->where('c.user_id', Auth::id());
+            })
             ->orderBy('c.id', 'desc')
             ->get();
 
