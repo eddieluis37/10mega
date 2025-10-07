@@ -410,7 +410,8 @@
 							$valorTotal = $base + $iva - $rtf;
 
 							// Formateo para presentación (coma decimal y punto miles)
-							function fmt($n){ return number_format((float)$n, 0, ',', '.'); }
+						//	function fmt($n){ return number_format((float)$n, 0, ',', '.'); }
+						 	function fmt($n){ return number_format((float)$n, 2, ',', '.'); }
 							@endphp
 
 							<tr>
