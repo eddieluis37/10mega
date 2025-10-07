@@ -417,7 +417,7 @@
 								<td>{{ $d->code ?? '' }}</td>
 								<td>{{ $d->nameprod ?? $d->descripcion ?? '' }}</td>
 								<td>{{ $d->unitofmeasure_id ?? '' }}</td>
-								<td style="text-align:right;">{{ number_format((float)$unitario, 2, ',', '.') }}</td>
+								<td style="text-align:right;">{{ number_format((float)$unitario, 0, ',', '.') }}</td>
 								<td style="text-align:right;">{{ number_format((float)$cantidad, 2, ',', '.') }}</td>
 								<td style="text-align:right;">{{ number_format($porcDesc, 2, ',', '.') }}%</td>
 								<td style="text-align:right;">{{ number_format($porcIva, 2, ',', '.') }}%</td>
