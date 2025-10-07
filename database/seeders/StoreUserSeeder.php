@@ -52,7 +52,7 @@ class StoreUserSeeder extends Seeder
 
             'AdminGalan' => [
                 'users' => [18],
-                'stores' => Store::whereIn('id', [14, 15])->pluck('id')->toArray(), // Bodegas específicas
+                'stores' => Store::whereIn('id', [39, 14, 15])->pluck('id')->toArray(), // Bodegas específicas
             ],
             'BarGalan' => [
                 'users' => [34],

@@ -124,6 +124,10 @@ class saleController extends Controller
         // Obtiene los IDs de los centros de costo asociados a las tiendas del usuario autenticado.
         $userCentrocostos = Auth::user()->stores->pluck('centrocosto_id')->unique()->toArray();
 
+        // Rango: inicio del mes pasado -> fin del mes actual
+        $start = Carbon::now()->subMonth()->startOfMonth(); // ejemplo: 2025-09-01 00:00:00
+        $end   = Carbon::now()->endOfMonth();               // ejemplo: 2025-10-31 23:59:59
+
         $data = DB::table('sales as sa')
             ->join('thirds as tird', 'sa.third_id', '=', 'tird.id')
             ->join('centro_costo as c', 'sa.centrocosto_id', '=', 'c.id')
@@ -141,7 +145,9 @@ class saleController extends Controller
             ])
             ->whereIn('c.id', $userCentrocostos)
             ->whereYear('sa.fecha_venta', Carbon::now()->year)
-            ->whereMonth('sa.fecha_venta', Carbon::now()->month)
+            //->whereMonth('sa.fecha_venta', Carbon::now()->month)
+            ->whereBetween('sa.fecha_venta', [$start, $end])
+            ->orderBy('sa.id', 'asc')
             ->get();
 
 

@@ -6,12 +6,13 @@
 		<div class="widget widget-chart-one">
 			<div class="widget-heading">
 				<h4 class="card-title">
-					<b>Ventas</b>
+					<b>Historico de Ventas</b>
 				</h4>
 				<ul class="tabs tab-pills">
 					<!-- <li>
 						<a href="{{ route('cargar.inventario.masivo') }}" class="btn btn-primary">Cargar Inventario Masivo</a>
 					</li> -->
+					<!-- 
 					<li>
 						<a href="javascript:void(0)" onclick="showModalcreate()" class="tabmenu bg-dark" data-toggle="modal" data-target="#modal-create-sale" title="Nueva venta por domicilio">Domicilio</a>
 					</li>
@@ -32,6 +33,8 @@
 						</a>
 					</li>
 					@endif
+ -->
+
 				</ul>
 			</div>
 

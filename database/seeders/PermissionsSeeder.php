@@ -1084,7 +1084,7 @@ class PermissionsSeeder extends Seeder
             [
                 'name' => 'AUX CARTERA',
                 'phone' => '3004154625',
-                'profile' => 'Tesoreria',
+                'profile' => 'Comercial',
                 'status' => 'Active',
                 'password' => bcrypt('AuxLi@rCart3r@2025*')
             ]

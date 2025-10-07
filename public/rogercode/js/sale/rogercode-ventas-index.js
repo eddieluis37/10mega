@@ -68,7 +68,7 @@ $(document).ready(function () {
                 { data: "resolucion", name: "resolucion" },
                 { data: "action", name: "action" },
             ],
-            order: [[0, "DESC"]],
+            order: [[0, "ASC"]],
             language: {
                 processing: "Procesando...",
                 lengthMenu: "Mostrar _MENU_ registros",
