@@ -370,7 +370,7 @@
                     </ul>
                 </li>
                 @endcan
-
+<!-- 
                 @can('ver_venta_parrilla')
                 <li class="sub-submenu">
                     <a role="menu" class="collapsed" data-toggle="collapse" data-target="#submenuparrilla" aria-expanded="false">
@@ -401,7 +401,8 @@
                         </li>
                     </ul>
                 </li>
-                @endcan
+                @endcan -->
+                
         </div>
 
 

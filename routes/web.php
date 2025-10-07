@@ -513,7 +513,7 @@ Route::middleware(['auth', 'can:acceder_ventas'])->group(function () {
 
 });
 
-/* VENTAS PARRILLA Tipo 2 = POS MOSTRADOR, Tpo 3 = DOMICILIO */
+/* VENTAS PARRILLA Tipo 2 = POS MOSTRADOR, Tpo 3 = DOMICILIO 
 Route::middleware(['auth', 'can:acceder_venta_parrilla'])->group(function () {
     Route::get('sales_parrilla', [saleController::class, 'index_parrilla'])->name('sale.index_parrilla');
     Route::get('showParrillaVentas', [saleparrillaController::class, 'showParrilla'])->name('sale.showParrilla');
@@ -523,8 +523,9 @@ Route::middleware(['auth', 'can:acceder_venta_parrilla'])->group(function () {
     Route::get('/products/search/parrilla', [saleparrillaController::class, 'search'])->name('products.search_parrilla');
     Route::get('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'create_reg_pago'])->name('sale.registrar_pago');
     Route::post('sale_parrilla/create/registrar_pago/{id}', [saleController::class, 'storeRegistroPago'])->name('pago.save');
-    Route::get('sale/showComanda/{id}', [exportComandaController::class, 'showComanda'])->name('sale.showComanda');
+   
 });
+*/
 
 /* VENTAS AUTOSERVICIO Tipo 4 = POS MOSTRADOR, Tipo 5 = DOMICILIO */
 Route::middleware(['auth', 'can:acceder_venta_autoservicio'])->group(function () {
@@ -536,6 +537,8 @@ Route::middleware(['auth', 'can:acceder_venta_autoservicio'])->group(function ()
     Route::get('sale_autoservicio/create/registrar_pago/{id}', [saleautoservicioController::class, 'create_reg_pago'])->name('sale.registrar_pago');
     Route::post('sale_autoservicio/create/registrar_pago/{id}', [saleautoservicioController::class, 'storeRegistroPago'])->name('pago.save');
     Route::post('store-autoservicio-mostrador', [saleautoservicioController::class, 'storeAutoservicioMostrador'])->name('sale.storeAutoservicioMostrador');
+    
+    Route::get('sale/showComanda/{id}', [exportComandaController::class, 'showComanda'])->name('sale.showComanda');
 });
 
 
