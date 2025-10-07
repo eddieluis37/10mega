@@ -409,21 +409,20 @@
 							// Valor total por línea (puedes elegir sumar o restar impuestos según tu regla)
 							$valorTotal = $base + $iva - $rtf;
 
-							// Formateo para presentación (coma decimal y punto miles)
-						//	function fmt($n){ return number_format((float)$n, 0, ',', '.'); }
-						 	function fmt($n){ return number_format((float)$n, 2, ',', '.'); }
+							// Formateo para presentación (coma decimal y punto miles)						
+						 	 $fmt = function($n) { return number_format((float)$n, 2, ',', '.'); };
 							@endphp
 
 							<tr>
 								<td>{{ $d->code ?? '' }}</td>
 								<td>{{ $d->nameprod ?? $d->descripcion ?? '' }}</td>
 								<td>{{ $d->unitofmeasure_id ?? '' }}</td>
-								<td style="text-align:right;">{{ fmt($unitario) }}</td>
-								<td style="text-align:right;">{{ fmt($cantidad) }}</td>
+								<td style="text-align:right;">{{ number_format((float)$unitario, 2, ',', '.') }}</td>
+								<td style="text-align:right;">{{ number_format((float)$cantidad, 2, ',', '.') }}</td>
 								<td style="text-align:right;">{{ number_format($porcDesc, 2, ',', '.') }}%</td>
 								<td style="text-align:right;">{{ number_format($porcIva, 2, ',', '.') }}%</td>
 								<td style="text-align:right;">{{ number_format($porcRtf, 2, ',', '.') }}%</td>
-								<td style="text-align:right;">{{ fmt($valorTotal) }}</td>
+								<td style="text-align:right;">{{ number_format((float)$valorTotal, 2, ',', '.') }}</td>					
 							</tr>
 							@endforeach
 						</tbody>
