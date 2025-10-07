@@ -380,12 +380,12 @@
 								<th>CÓDIGO</th>
 								<th>DESCRIPCIÓN</th>
 								<th>UND</th>
-								<th>Vr_UNITARIO</th>
+								<th>$UNITARIO</th>
 								<th>CANTIDAD</th>
-								<th>%DSC</th>
-								<th>%IVA</th>
-								<th>%RTF</th>
-								<th>VALOR_TOTAL</th>
+								<th>$DSC</th>
+								<th>$IVA</th>
+								<th>$RTF</th>
+								<th>$TOTAL</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -398,6 +398,8 @@
 							$porcDesc = $d->porc_desc ?? ($sale->porc_descuento ?? 0);
 							$porcIva = $d->iva ?? 0; // porcentaje IVA (ej: 5)
 							$porcRtf = $d->porc_otro_impuesto ?? 0; // porcentaje de retención/otro impuesto
+
+							$totalBruto = $d->total_bruto ?? 0;
 
 							// Cálculos
 							$subtotal = $unitario * $cantidad;
@@ -420,9 +422,9 @@
 								<td style="text-align:right;">{{ number_format((float)$unitario, 0, ',', '.') }}</td>
 								<td style="text-align:right;">{{ number_format((float)$cantidad, 2, ',', '.') }}</td>
 								<td style="text-align:right;">{{ number_format($porcDesc, 2, ',', '.') }}%</td>
-								<td style="text-align:right;">{{ number_format($porcIva, 2, ',', '.') }}%</td>
+								<td style="text-align:right;">{{ number_format($porcIva, 0, ',', '.') }}</td>
 								<td style="text-align:right;">{{ number_format($porcRtf, 2, ',', '.') }}%</td>
-								<td style="text-align:right;">{{ number_format((float)$valorTotal, 2, ',', '.') }}</td>					
+								<td style="text-align:right;">{{ number_format((float)$totalBruto, 0, ',', '.') }}</td>					
 							</tr>
 							@endforeach
 						</tbody>
