@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\caja\Caja;
 use App\Models\centros\Centrocosto;
 use App\Models\centros\Subcentrocosto;
+use App\Models\Subcentrocosto as ModelsSubcentrocosto;
 use App\Services\TurnoDiarioService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -80,7 +81,7 @@ class Sale extends Model
 
     public function subcentrocosto(): BelongsTo
     {
-        return $this->belongsTo(Subcentrocosto::class, 'subcentrocostos_id', 'id');
+        return $this->belongsTo(\App\Models\Subcentrocosto::class, 'subcentrocostos_id', 'id');
     }
 
     // tercero / cliente (mantengo nombre english y español)
