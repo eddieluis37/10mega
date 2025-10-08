@@ -120,17 +120,17 @@
 
 		/* Ajusta anchos si necesitas precisión */
 		.items-table th:nth-child(1) {
-			width: 8%;
+			width: 5%;
 		}
 
 		/* CÓDIGO */
 		.items-table th:nth-child(2) {
-			width: 28%;
+			width: 41%;
 		}
 
 		/* DESCRIPCIÓN */
 		.items-table th:nth-child(3) {
-			width: 8%;
+			width: 6%;
 		}
 
 		/* UND */
@@ -160,7 +160,7 @@
 
 		/* %RTF */
 		.items-table th:nth-child(9) {
-			width: 20%;
+			width: 12%;
 		}
 
 		/* VALOR TOTAL */
@@ -377,14 +377,15 @@
 					<table class="items-table">
 						<thead>
 							<tr>
-								<th>CÓDIGO</th>
+								<th>CODE</th>
 								<th>DESCRIPCIÓN</th>
-								<th>CANTIDAD</th>								
+								<th style="text-align:center;">CANT</th>								
 								<th>$UNIT.BASE</th>								
-								<th>$DSC</th>
-								<th>$IVA</th>
-								<th>$RTF</th>
-								<th>$TOTAL</th>
+								<th style="text-align:center;">$DSC</th>
+								<th style="text-align:center;">$IVA</th>
+								<th style="text-align:center;">$UP</th>
+								<th style="text-align:center;">$IC</th>
+								<th style="text-align:center;">$TOTAL</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -398,7 +399,9 @@
 							$porcIva = $d->iva ?? 0; // porcentaje IVA (ej: 5)
 							$porcRtf = $d->porc_otro_impuesto ?? 0; // porcentaje de retención/otro impuesto
 
-							$totalBruto = $d->total_bruto ?? 0;
+							$Bruto = $d->total_bruto ?? 0;
+
+							$Descuento = ($d->descuento + $d->descuento_cliente) ?? 0;
 
 							// Cálculos
 							$subtotal = $unitario * $cantidad;
@@ -418,13 +421,14 @@
 								<td>{{ $d->code ?? '' }}</td>
 								<td>{{ $d->nameprod ?? $d->descripcion ?? '' }}</td>
 								<td style="text-align:right;">{{ number_format((float)$cantidad, 2, ',', '.') }}</td>
-															
+
 								<td style="text-align:right;">{{ number_format((float)$unitario, 0, ',', '.') }}</td>
 								
-								<td style="text-align:right;">{{ number_format($porcDesc, 2, ',', '.') }}%</td>
+								<td style="text-align:right;">{{ number_format($Descuento, 0, ',', '.') }}</td>
 								<td style="text-align:right;">{{ number_format($porcIva, 0, ',', '.') }}</td>
-								<td style="text-align:right;">{{ number_format($porcRtf, 2, ',', '.') }}%</td>
-								<td style="text-align:right;">{{ number_format((float)$totalBruto, 0, ',', '.') }}</td>					
+								<td style="text-align:right;">{{ number_format($porcIva, 0, ',', '.') }}</td>
+								<td style="text-align:right;">{{ number_format($porcRtf, 0, ',', '.') }}</td>
+								<td style="text-align:right;">{{ number_format((float)$Bruto, 0, ',', '.') }}</td>					
 							</tr>
 							@endforeach
 						</tbody>
