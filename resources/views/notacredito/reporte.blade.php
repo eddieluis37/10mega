@@ -290,15 +290,15 @@
 						<table class="inner-table">
 							<tr>
 								<td class="label">Cliente :</td>
-								<td>{{$sale[0]->namethird}}</td>
+								<td>{{$sale->namethird}}</td>
 							</tr>
 							<tr>
 								<td class="label">Nit :</td>
-								<td>{{$sale[0]->identification}}</td>
+								<td>{{$sale->identification}}</td>
 							</tr>
 							<tr>
 								<td class="label">Dirección :</td>
-								<td>{{$sale[0]->direccion}}d</td>
+								<td>{{$sale->direccion}}d</td>
 							</tr>
 						</table>
 					</td>
@@ -309,7 +309,7 @@
 							</tr>
 							<tr>
 								<td class="label">Nro. :</td>
-								<td>{{$sale[0]->consecutivo}}</td>
+								<td>{{$sale->consecutivo}}</td>
 							</tr>
 							<tr>
 								<td class="label">Fecha :</td>
@@ -345,7 +345,7 @@
 							</tr>
 							<tr>
 								<td class="label">Vendedor :</td>
-								<td>{{$sale[0]->nameuser}}</td>
+								<td>{{$sale->nameuser}}</td>
 							</tr>
 						</table>
 					</td>
@@ -363,7 +363,7 @@
 							</tr>
 							<tr>
 								<td class="label">E-mail :</td>
-								<td>{{$sale[0]->email}}</td>
+								<td>{{$sale->email}}</td>
 							</tr>
 						</table>
 					</td>
@@ -379,8 +379,8 @@
 							<tr>
 								<th>CODE</th>
 								<th>DESCRIPCIÓN</th>
-								<th style="text-align:center;">CANT</th>								
-								<th>$UNIT.BASE</th>								
+								<th style="text-align:center;">CANT</th>
+								<th>$UNIT.BASE</th>
 								<th style="text-align:center;">$DSC</th>
 								<th style="text-align:center;">$IVA</th>
 								<th style="text-align:center;">$UP</th>
@@ -389,46 +389,22 @@
 							</tr>
 						</thead>
 						<tbody>
-							@foreach($saleDetails as $d)
-							@php
-							// --- Ajusta nombres de campos si es necesario ---
-							$unitario = $d->price ?? $d->valor_unitario ?? 0; // precio unitario en notacredito_details
-							$cantidad = $d->quantity ?? $d->cantidad ?? 0;
-							// Porcentaje de descuento puede venir por detalle o por la cabecera sale (third.porc_descuento)
-							$porcDesc = $d->porc_desc ?? ($sale->porc_descuento ?? 0);
-							$porcIva = $d->iva ?? 0; // porcentaje IVA (ej: 5)
-							$porcRtf = $d->porc_otro_impuesto ?? 0; // porcentaje de retención/otro impuesto
-
-							$Bruto = $d->total_bruto ?? 0;
-
-							$Descuento = ($d->descuento + $d->descuento_cliente) ?? 0;
-
-							// Cálculos
-							$subtotal = $unitario * $cantidad;
-							$descuento = $subtotal * ($porcDesc / 100);
-							$base = $subtotal - $descuento;
-							$iva = $base * ($porcIva / 100);
-							$rtf = $base * ($porcRtf / 100);
-
-							// Valor total por línea (puedes elegir sumar o restar impuestos según tu regla)
-							$valorTotal = $base + $iva - $rtf;
-
-							// Formateo para presentación (coma decimal y punto miles)						
-						 	 $fmt = function($n) { return number_format((float)$n, 2, ',', '.'); };
-							@endphp
-
+							@foreach($detalleItems as $d)
 							<tr>
-								<td>{{ $d->code ?? '' }}</td>
-								<td>{{ $d->nameprod ?? $d->descripcion ?? '' }}</td>
-								<td style="text-align:right;">{{ number_format((float)$cantidad, 2, ',', '.') }}</td>
+								<td>{{ $d->code }}</td>
+								<td>{{ $d->name }}</td>
+								<td style="text-align:right;">{{ number_format($d->cantidad, 2, ',', '.') }}</td>
 
-								<td style="text-align:right;">{{ number_format((float)$unitario, 0, ',', '.') }}</td>
-								
-								<td style="text-align:right;">{{ number_format($Descuento, 0, ',', '.') }}</td>
-								<td style="text-align:right;">{{ number_format($porcIva, 0, ',', '.') }}</td>
-								<td style="text-align:right;">{{ number_format($porcIva, 0, ',', '.') }}</td>
-								<td style="text-align:right;">{{ number_format($porcRtf, 0, ',', '.') }}</td>
-								<td style="text-align:right;">{{ number_format((float)$Bruto, 0, ',', '.') }}</td>					
+								<!-- unitario: mostrar sin decimales o con según tu formato -->
+								<td style="text-align:right;">{{ number_format($d->unitario, 0, ',', '.') }}</td>
+
+								<!-- descuento total por línea -->
+								<td style="text-align:right;">{{ number_format($d->line_descuento, 0, ',', '.') }}</td>
+
+								<td style="text-align:right;">{{ number_format($d->line_iva, 0, ',', '.') }}</td>
+								<td style="text-align:right;">{{ number_format($d->line_up, 0, ',', '.') }}</td>
+								<td style="text-align:right;">{{ number_format($d->line_ic, 0, ',', '.') }}</td>
+								<td style="text-align:right;">{{ number_format($d->line_total, 0, ',', '.') }}</td>
 							</tr>
 							@endforeach
 						</tbody>
@@ -436,22 +412,21 @@
 				</div>
 			</div>
 
-
 			<!-- TOTALES -->
-			<div class="row totales-block">
+			<div class="row totales-block" style="margin-top:1rem;">
 				<div class="col-6 totales-left">
-					<p><strong>Subtotal:</strong> $7,385,111.51</p>
-					<p><strong>Imp. Ultraprocesados:</strong> $0.00</p>
-					<p><strong>Imp. al consumo:</strong> $0.00</p>
-					<p><strong>Retefuente:</strong> $0.00</p>
-					<p><strong>ICA Retenido:</strong> $0.00</p>
+					<p><strong>SUB TOTAL BASE:</strong> ${{ number_format($totales['subtotal_base'], 0, ',', '.') }}</p>
+					<p><strong>IMPUESTO IVA:</strong> ${{ number_format($totales['iva'], 0, ',', '.') }}</p>
+					<p><strong>IMPUESTO ULTRAPROCESADOS (UP):</strong> ${{ number_format($totales['ultra'], 0, ',', '.') }}</p>
+					<p><strong>IMPUESTO AL CONSUMO:</strong> ${{ number_format($totales['impoconsumo'], 0, ',', '.') }}</p>
+					<p><strong>DESCUENTO:</strong> ${{ number_format($totales['descuento'], 0, ',', '.') }}</p>
 				</div>
 				<div class="col-6 totales-right">
-					<p><strong>I.V.A. (19%):</strong> $369,256.00</p>
-					<p><strong>IVA Retenido:</strong> $184,627.79</p>
-					<p><strong>Descuento:</strong> $30,574.36</p>
-					<p><strong>Total Neto:</strong> $7,385,112.00</p>
-					<p><strong>Total a Pagar:</strong> $7,539,165.00</p>
+					<p><strong>Total Neto:</strong> ${{ number_format($totales['subtotal_base'] ?? 0.0, 0, ',', '.') }}</p>
+					<p><strong>TOTAL A DEVOLVER:</strong> ${{ number_format($totales['total_devolver'] ?? 0.0, 0, ',', '.') }}</p>
+					<!-- Formas de pago -->
+					<p><strong>FORMA DE PAGO FACTURA:</strong> {{ $salePaymentName ?? 'N/A' }}</p>
+					<p><strong>FORMA DE PAGO DEVOLUCIÓN (NC):</strong> {{ $ncPaymentName ?? 'N/A' }}</p>
 				</div>
 			</div>
 
