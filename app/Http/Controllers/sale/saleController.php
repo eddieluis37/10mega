@@ -2387,7 +2387,7 @@ class saleController extends Controller
         return view('sale.partial_return', compact('sale', 'saleDetails'));
     }
 
-    public function partialreturnsaledetails(Request $request)
+    /*   public function partialreturnsaledetails(Request $request)
     {
         if (app()->bound('debugbar')) {
             app('debugbar')->disable();
@@ -2474,8 +2474,7 @@ class saleController extends Controller
             ]);
 
             // Ahora procesamos cada devolución: detalle de nota, movimiento inventario, actualizar inventario y detalle venta
-            foreach ($notaDetalles as $nd) {
-                /** @var SaleDetail $detail */
+            foreach ($notaDetalles as $nd) {               
                 $detail = $nd['sale_detail'];
                 $q = $nd['returnQuantity'];
 
@@ -2606,10 +2605,13 @@ class saleController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
+ */
 
     /**
-     * Método público para procesar devolución parcial (crea Notacredito con impuestos y descuentos correctos).
+     * Realiza una devolución parcial creando la nota de crédito y guardando
+     * en cada detalle el desglose prorrateado de descuentos e impuestos.
+     * En esta versión, los impuestos se calculan sobre el BRUTO (antes de descuentos)
+     * y NO se ven afectados por los descuentos prorrateados.
      */
     public function partialReturn(Request $request)
     {
@@ -2619,9 +2621,9 @@ class saleController extends Controller
             'ventaId'   => 'required|integer|exists:sales,id',
             'returns'   => 'required|array',
             'returns.*' => 'numeric|min:0',
-            'store_id'  => 'sometimes|integer', // opcional si lo envías
+            'store_id'  => 'sometimes|integer',
             'forma_pago' => 'sometimes|nullable|integer',
-            'prorratear_globales' => 'sometimes|boolean' // si quieres controlar prorrateo desde frontend
+            'prorratear_globales' => 'sometimes|boolean'
         ]);
 
         $sale = Sale::with('details')->findOrFail($validated['ventaId']);
@@ -2629,16 +2631,16 @@ class saleController extends Controller
         $storeId = $request->input('store_id', null);
         $prorratearGlobales = $request->input('prorratear_globales', true);
 
-        // Verificar estado de la venta si aplica (código original del usuario)
-        if ($sale->status !== '1' && $sale->status !== 1 && $sale->status !== '3' && $sale->status !== 3) {
+        if (!in_array((string)$sale->status, ['1', '3'], true)) {
             Log::warning("La venta ID {$sale->id} no se puede devolver parcialmente por su estado ({$sale->status}).");
             return response()->json(['error' => 'La venta no puede ser devuelta parcialmente.'], 422);
         }
 
         DB::beginTransaction();
         try {
-            // 1) Calcular totales de la nota (desglose por línea)
-            $calculo = $this->calcularTotalesDevolucion($sale, $returns, $prorratearGlobales);
+            // Forzamos false para no aplicar prorrateos/proporciones globales
+            $calculo = $this->calcularTotalesDevolucion($sale, $returns, false);
+
 
             if (empty($calculo['lines'])) {
                 return response()->json(['error' => 'No se encontraron líneas válidas para devolución.'], 422);
@@ -2646,56 +2648,128 @@ class saleController extends Controller
 
             $totalNota = $calculo['totalNota'];
 
-            // 2) Crear cabecera de la nota de crédito
             $notaCredito = Notacredito::create([
                 'sale_id' => $sale->id,
                 'user_id' => auth()->id(),
                 'total'   => $totalNota,
-                'status'  => '1', // o 'active' según tu convención
+                'status'  => '1',
                 'credit_note_sequence' => ($sale->credit_notes_count ?? 0) + 1,
                 'return_type' => 'partial_return',
             ]);
 
-            // 3) Crear detalles de nota y movimientos/inventario y actualizar detalles de venta
             foreach ($calculo['lines'] as $line) {
                 /** @var SaleDetail $detail */
                 $detail = $line['detail'];
-                $q = $line['quantity'];
+                $q = (float)$line['quantity'];
 
-                // Crear detalle de nota con desglose para trazabilidad
+                // Totales (2 decimales)
+                $lineBruto = round($line['bruto'], 2);
+                $lineDescuento = round($line['descuento_total'], 2); // monto de descuentos aplicados
+                $lineNeto = round($line['neto_total'], 2); // bruto - descuentos
+                // Impuestos ya calculados SOBRE BRUTO y no se modifican por los descuentos
+                $lineIva = round($line['iva_total'], 2);
+                $lineOtro = round($line['otro_impuesto_total'], 2);
+                $lineImpConsumo = round($line['impoconsumo_total'], 2);
+                $lineTotal = round($line['total'], 2);
+
+                // Unitarios (4 decimales)
+                $unit_price = round((float)$detail->price, 4);
+                $unit_bruto = $q > 0 ? round($line['bruto'] / $q, 4) : 0.0;
+
+                // Distribuir descuentos a unitarios
+                $unit_descuento = $q > 0 ? round($lineDescuento / $q, 4) : 0.0;
+                $unit_neto = round(max(0, $unit_bruto - $unit_descuento), 4);
+
+                // *** Impuestos unitarios calculados SOBRE unit_neto según la petición ***
+                $porcIva = (float)($detail->porc_iva ?? 0);
+                $porcOtro = (float)($detail->porc_otro_impuesto ?? 0);
+                $porcImpConsumo = (float)($detail->porc_impoconsumo ?? 0);
+
+                $unit_iva = $q > 0 ? round($unit_neto * ($porcIva / 100.0), 4) : 0.0;
+                $unit_otro = $q > 0 ? round($unit_neto * ($porcOtro / 100.0), 4) : 0.0;
+                $unit_impoconsumo = $q > 0 ? round($unit_neto * ($porcImpConsumo / 100.0), 4) : 0.0;
+
+                $unit_total = round($unit_neto + $unit_iva + $unit_otro + $unit_impoconsumo, 4);
+
+
                 NotaCreditoDetalle::create([
                     'notacredito_id' => $notaCredito->id,
-                    'product_id'     => $detail->product_id,
+                    'sale_id' => $sale->id,
                     'sale_detail_id' => $detail->id,
-                    'store_id'       => $detail->store_id ?? $storeId,
-                    'lote_id'        => $detail->lote_id,
-                    'quantity'       => $q,
-                    'price'          => $detail->price,
-                    'total_bruto'    => $line['bruto'],
-                    'descuento'      => $line['descuento'],
-                    'neto'           => $line['neto'],
-                    'iva'            => $line['iva'],
-                    'otro_impuesto'  => $line['otro_impuesto'],
-                    'impoconsumo'    => $line['impoconsumo'],
-                    'total'          => $line['total'],
+                    'product_id' => $detail->product_id,
+                    'store_id' => $detail->store_id ?? $storeId,
+                    'lote_id' => $detail->lote_id,
+                    'quantity' => $q,
+
+                    // unitarios (precision 4)
+                    'unit_price' => $unit_price,
+                    'unit_bruto' => $unit_bruto,
+                    'unit_descuento' => $unit_descuento,
+                    'unit_neto' => $unit_neto,
+                    'unit_iva' => $unit_iva,
+                    'unit_otro_impuesto' => $unit_otro,
+                    'unit_impoconsumo' => $unit_impoconsumo,
+                    'unit_total' => $unit_total,
+
+                    // totales (moneda 2 decimales)
+                    'total_bruto' => $lineBruto,
+                    'descuento_total' => $lineDescuento,
+                    'neto_total' => $lineNeto,
+                    'iva_total' => $lineIva,
+                    'otro_impuesto_total' => $lineOtro,
+                    'impoconsumo_total' => $lineImpConsumo,
+                    'total' => $lineTotal,
+
+                    // desglose
+                    'descuento_pct_amount' => round($line['descuento_pct_amount'] ?? 0.0, 2),
+                    'descuento_fijo_prorrateado' => round($line['descuento_fijo_prorrateado'] ?? 0.0, 2),
+                    'descuento_global_prorrateado' => round($line['descuento_global_prorrateado'] ?? 0.0, 2),
+
+                    // snapshot tasas
+                    'descuento_pct' => (float)($detail->porc_desc ?? 0),
+                    'porc_iva' => (float)($detail->porc_iva ?? 0),
+                    'porc_otro_impuesto' => (float)($detail->porc_otro_impuesto ?? 0),
+                    'porc_impoconsumo' => (float)($detail->porc_impoconsumo ?? 0),
+
+                    // breakdown
+                    'breakdown' => json_encode([
+                        'calculated_at' => now()->toDateTimeString(),
+                        'line_bruto' => $line['bruto'],
+                        'line_descuento' => $line['descuento_total'],
+                        'line_neto' => $line['neto_total'],
+                        'line_iva' => $line['iva_total'],
+                        'line_otro_impuesto' => $line['otro_impuesto_total'],
+                        'line_impoconsumo' => $line['impoconsumo_total'],
+                        'unit_precise' => [
+                            'unit_bruto' => $unit_bruto,
+                            'unit_descuento' => $unit_descuento,
+                            'unit_neto' => $unit_neto,
+                            'unit_iva' => $unit_iva,
+                            'unit_total' => $unit_total,
+                        ],
+                        'prorrateo' => [
+                            'descuento_pct_amount' => $line['descuento_pct_amount'] ?? 0.0,
+                            'descuento_fijo_prorrateado' => $line['descuento_fijo_prorrateado'] ?? 0.0,
+                            'descuento_global_prorrateado' => $line['descuento_global_prorrateado'] ?? 0.0,
+                            'rounding_adjustment' => $line['rounding_adjustment'] ?? 0.0,
+                        ]
+                    ]),
                 ]);
 
-                // Registrar movimiento de inventario (tipo 'notacredito')
+                // Movimiento inventario
                 MovimientoInventario::create([
                     'tipo'           => 'notacredito',
-                    'store_origen_id'       => $detail->store_id ?? $storeId,
+                    'store_origen_id' => $detail->store_id ?? $storeId,
                     'sale_id'        => $sale->id,
                     'lote_id'        => $detail->lote_id,
                     'product_id'     => $detail->product_id,
                     'cantidad'       => $q,
                     'costo_unitario' => $detail->price,
-                    // aquí el campo total lo guardo con el bruto - descuentos (costo contabilizado) o con total?: 
-                    // guardamos el total con impuestos para auditoría
-                    'total'          => $line['total'],
+                    'total'          => $lineTotal,
                     'fecha'          => now(),
                 ]);
 
-                // Actualizar inventario: incrementar 'cantidad_notacredito' (si existe el registro)
+                // Actualizar inventario
                 $inventario = Inventario::where('product_id', $detail->product_id)
                     ->where('lote_id', $detail->lote_id)
                     ->where('store_id', $detail->store_id ?? $storeId)
@@ -2705,7 +2779,7 @@ class saleController extends Controller
                     $inventario->save();
                 }
 
-                // Actualizar detalle de venta restando la cantidad devuelta
+                // Actualizar detalle venta
                 $detail->quantity -= $q;
                 if ($detail->quantity <= 0) {
                     $detail->quantity = 0;
@@ -2714,11 +2788,10 @@ class saleController extends Controller
                 $detail->save();
             }
 
-            // 4) Actualizar contador de notas en la venta y estado parcial
+            // Actualizar venta (contador, recalculo detalles activos, totales, etc.)
             $sale->credit_notes_count = ($sale->credit_notes_count ?? 0) + 1;
             $sale->credit_note_status = 'partial';
 
-            // 5) Recalcular y guardar todos los detalles activos (status = '1')
             $activeDetails = SaleDetail::where('sale_id', $sale->id)->where('status', '1')->get();
             foreach ($activeDetails as $d) {
                 $d->total_bruto = round($d->quantity * $d->price, 2);
@@ -2741,7 +2814,6 @@ class saleController extends Controller
                 $d->save();
             }
 
-            // 6) Recalcular totales de la venta desde detalles activos
             $TotalBruto = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('total_bruto');
             $TotalIva = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('iva');
             $TotalOtroImp = (float) SaleDetail::where('sale_id', $sale->id)->where('status', '1')->sum('otro_impuesto');
@@ -2761,18 +2833,15 @@ class saleController extends Controller
                 $sale->valor_a_pagar_credito = $TotalAPagar;
             }
 
-            // 7) Calcular valor a devolver: diferencia entre pagos originales y el nuevo total
             $pagosOriginales = (float)($sale->valor_a_pagar_efectivo ?? 0) + (float)($sale->valor_a_pagar_tarjeta ?? 0) + (float)($sale->valor_a_pagar_credito ?? 0);
             $calculatedValor = round($pagosOriginales - $sale->total, 2);
             if ($calculatedValor < 0) $calculatedValor = 0.00;
 
-            // Guardar forma de pago y valor_devolucion en la nota
             $notaCredito->forma_pago_id = $request->input('forma_pago', null);
             $notaCredito->valor_devolucion = $calculatedValor;
-            $notaCredito->total = $totalNota; // asegurar consistencia
+            $notaCredito->total = $totalNota;
             $notaCredito->save();
 
-            // 8) Finalizar venta
             $sale->status = '3';
             $sale->updated_at = now();
             $sale->save();
@@ -2789,33 +2858,20 @@ class saleController extends Controller
         }
     }
 
-    /**
-     * Calcula total de devolución (nota de crédito) considerando:
-     * - descuento % por detalle
-     * - descuento fijo por detalle (prorrateado por cantidad)
-     * - (opcional) prorrateo de descuentos globales de la venta
-     * - impuestos aplicados sobre la base neta (tras descuentos)
-     *
-     * @param Sale $sale
-     * @param array $returns [ sale_detail_id => cantidad_a_devolver, ... ]
-     * @param bool $prorratearGlobales
-     * @return array
-     */
     protected function calcularTotalesDevolucion(Sale $sale, array $returns, bool $prorratearGlobales = true): array
     {
         $saleDetails = $sale->details->keyBy('id');
 
-        // Suma bruto original de la venta (para prorrateo global)
+        // Suma bruto original (se conserva por compatibilidad, pero NO se usará para prorrateo)
         $saleTotalBrutoOriginal = 0.0;
         foreach ($saleDetails as $d) {
             $saleTotalBrutoOriginal += round(($d->quantity * $d->price), 2);
         }
         $saleTotalBrutoOriginal = max(0.0, $saleTotalBrutoOriginal);
 
-        $globalFixedDiscount = 0.0;
-        if ($prorratearGlobales) {
-            $globalFixedDiscount = (float)($sale->descuentos ?? 0) + (float)($sale->descuento_cliente ?? 0);
-        }
+        // NOTA: No vamos a prorratear los descuentos globales por línea.
+        // Conservamos la variable por compatibilidad, pero NO la aplicamos.
+        $globalFixedDiscount = 0.0; // <-- ignorado en el cálculo de líneas
 
         $totalNota = 0.0;
         $lines = [];
@@ -2828,85 +2884,125 @@ class saleController extends Controller
             'impoconsumo' => 0.0,
         ];
 
+        $index = 0;
         foreach ($returns as $saleDetailId => $returnQty) {
             $returnQty = (float)$returnQty;
             if ($returnQty <= 0) continue;
 
-            if (!isset($saleDetails[$saleDetailId])) {
-                // si no existe el detalle en la venta saltar
-                continue;
-            }
+            if (!isset($saleDetails[$saleDetailId])) continue;
             $detail = $saleDetails[$saleDetailId];
 
             $originalQty = max(1, (float)$detail->quantity);
 
-            // 1) Bruto
+            // Bruto de la porción
             $lineBruto = round($detail->price * $returnQty, 2);
 
-            // 2) Descuento % sobre la porción
-            $descuentoPct = round($lineBruto * ((float)($detail->porc_desc ?? 0) / 100.0), 2);
-
-            // 3) Descuento fijo prorrateado (porción del descuento_cliente del detalle)
-            $descuentoFijoProrrateado = 0.0;
-            if (!empty($detail->descuento_cliente)) {
-                $descuentoFijoProrrateado = round(((float)$detail->descuento_cliente) * ($returnQty / $originalQty), 2);
-            }
-
-            // 4) Prorrateo descuentos globales (si aplica)
-            $descuentoGlobalProrrateado = 0.0;
-            if ($prorratearGlobales && $saleTotalBrutoOriginal > 0) {
-                $proporcion = $lineBruto / $saleTotalBrutoOriginal;
-                $descuentoGlobalProrrateado = round($globalFixedDiscount * $proporcion, 2);
-            }
-
-            // 5) Total descuento por línea
-            $lineDescuento = round($descuentoPct + $descuentoFijoProrrateado + $descuentoGlobalProrrateado, 2);
-
-            // 6) Neto sujeto a impuestos
-            $lineNeto = round($lineBruto - $lineDescuento, 2);
-            if ($lineNeto < 0) $lineNeto = 0.0;
-
-            // 7) Impuestos sobre neto
+            // Tasas (porcentajes)
             $porcIva = (float)($detail->porc_iva ?? 0);
             $porcOtro = (float)($detail->porc_otro_impuesto ?? 0);
             $porcImpConsumo = (float)($detail->porc_impoconsumo ?? 0);
 
+            // Descuento porcentual sobre la porción (porc_desc)
+            $descuentoPctAmount = round($lineBruto * ((float)($detail->porc_desc ?? 0) / 100.0), 2);
+
+            // Descuento fijo del detalle (si existe) prorrateado por cantidad del detalle
+            $descuentoFijoProrrateado = 0.0;
+            if (!empty($detail->descuento_cliente)) {
+                // Mantengo prorrateo interno por detalle (proporcional a unidades del detalle),
+                // pero **NO** vamos a aplicar ningún descuento global/prorrateado.
+                $descuentoFijoProrrateado = round(((float)$detail->descuento_cliente) * ($returnQty / $originalQty), 2);
+            }
+
+            // **NO** se aplica descuento_global_prorrateado ni prorrateo por proporción del total de la venta:
+            $descuentoGlobalProrrateado = 0.0;
+
+            // Total descuento por línea = solo pct del detalle + descuento fijo prorrateado del detalle
+            $lineDescuento = round($descuentoPctAmount + $descuentoFijoProrrateado, 2);
+
+            // Neto = bruto - descuentos (sin descuentos globales)
+            $lineNeto = round($lineBruto - $lineDescuento, 2);
+            if ($lineNeto < 0) $lineNeto = 0.0;
+
+            // Impuestos calculados SOBRE NETO (si mantienes esa lógica previa)
             $lineIva = round($lineNeto * ($porcIva / 100.0), 2);
             $lineOtro = round($lineNeto * ($porcOtro / 100.0), 2);
             $lineImpConsumo = round($lineNeto * ($porcImpConsumo / 100.0), 2);
 
-            // 8) Total línea (neto + impuestos)
+            // Total línea: neto + impuestos
             $lineTotal = round($lineNeto + $lineIva + $lineOtro + $lineImpConsumo, 2);
 
-            // 9) Acumular
-            $totalNota = round($totalNota + $lineTotal, 2);
+            $lines[] = [
+                'original_index' => $index,
+                'detail' => $detail,
+                'quantity' => $returnQty,
+                'bruto' => $lineBruto,
+                'descuento_pct_amount' => $descuentoPctAmount,
+                'descuento_fijo_prorrateado' => $descuentoFijoProrrateado,
+                'descuento_global_prorrateado' => 0.0, // explícitamente cero
+                'descuento_total' => $lineDescuento,
+                'neto_total' => $lineNeto,
+                'iva_total' => $lineIva,
+                'otro_impuesto_total' => $lineOtro,
+                'impoconsumo_total' => $lineImpConsumo,
+                'total' => $lineTotal,
+                'porc_iva' => $porcIva,
+                'porc_otro_impuesto' => $porcOtro,
+                'porc_impoconsumo' => $porcImpConsumo,
+            ];
+
+            // acumular sumas
             $sums['bruto'] += $lineBruto;
             $sums['descuento'] += $lineDescuento;
             $sums['neto'] += $lineNeto;
             $sums['iva'] += $lineIva;
             $sums['otro'] += $lineOtro;
             $sums['impoconsumo'] += $lineImpConsumo;
+            $totalNota += $lineTotal;
 
-            $lines[] = [
-                'detail' => $detail,
-                'quantity' => $returnQty,
-                'bruto' => $lineBruto,
-                'descuento' => $lineDescuento,
-                'neto' => $lineNeto,
-                'iva' => $lineIva,
-                'otro_impuesto' => $lineOtro,
-                'impoconsumo' => $lineImpConsumo,
-                'total' => $lineTotal,
-            ];
+            $index++;
         }
 
-        // redondear sumas
+        // Ya NO hay bloque de ajuste por residuo de prorrateo global (lo removemos intencionalmente).
+
+        // redondear sumas y totalNota a 2 decimales
         $sums = array_map(fn($v) => round($v, 2), $sums);
         $totalNota = round($totalNota, 2);
 
+        // normalizar claves (compatibilidad con partialReturn)
+        $normalizedLines = [];
+        foreach ($lines as $l) {
+            $normalizedLines[] = [
+                'detail' => $l['detail'],
+                'quantity' => $l['quantity'],
+                'bruto' => round($l['bruto'], 2),
+
+                'descuento' => round($l['descuento_pct_amount'], 2),
+                'descuento_total' => round($l['descuento_total'], 2),
+
+                'descuento_pct_amount' => round($l['descuento_pct_amount'] ?? 0.0, 2),
+                'descuento_fijo_prorrateado' => round($l['descuento_fijo_prorrateado'] ?? 0.0, 2),
+                'descuento_global_prorrateado' => 0.0, // siempre cero
+
+                'neto' => round($l['neto_total'], 2),
+                'neto_total' => round($l['neto_total'], 2),
+
+                'iva' => round($l['iva_total'], 2),
+                'iva_total' => round($l['iva_total'], 2),
+
+                'otro_impuesto' => round($l['otro_impuesto_total'], 2),
+                'otro_impuesto_total' => round($l['otro_impuesto_total'], 2),
+
+                'impoconsumo' => round($l['impoconsumo_total'], 2),
+                'impoconsumo_total' => round($l['impoconsumo_total'], 2),
+
+                'total' => round($l['total'], 2),
+                'rounding_adjustment' => round($l['rounding_adjustment'] ?? 0.0, 2),
+            ];
+        }
+
         return [
             'totalNota' => $totalNota,
-            'lines' => $lines,
+            'lines' => $normalizedLines,
             'sums' => $sums,
         ];
     }
