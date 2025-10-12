@@ -492,6 +492,10 @@ class notacreditoController extends Controller
                          <a href="notacredito/showNotacredito/' . $data->ncid . '" class="btn btn-dark" title="VerNotacredito" target="_blank">
                         <i class="far fa-file-pdf"></i>
 					    </a>
+                         </a>
+                         <a href="notacredito/showposNotacredito/' . $data->ncid . '" class="btn btn-red" title="VerNotacreditoPOS" target="_blank">
+                        <i class="far fa-file-pdf"></i>
+					    </a>
 					  
                         </div>
                         ';

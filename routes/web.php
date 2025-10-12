@@ -110,6 +110,7 @@ use App\Http\Controllers\inventory\inventoryUtilidadHistoricoController;
 use App\Http\Controllers\LossController;
 use App\Http\Controllers\notacredito\notacreditoController;
 use App\Http\Controllers\notacredito\pdfNotacreditoController;
+use App\Http\Controllers\notacredito\pdfposNotacreditoController;
 use App\Http\Controllers\notadebito\notadebitoController;
 use App\Http\Controllers\notadebito\pdfNotadebitoController;
 use App\Http\Controllers\order\orderController;
@@ -856,6 +857,7 @@ Route::group(['middleware' => [('auth')]], function () {
     Route::post('notacreditoById', [notacreditoController::class, 'editNotacredito'])->name('notacredito.editNotacredito');
     Route::post('notacredito/create/registrar_notacredito/{id}', [notacreditoController::class, 'storeNotacredito'])->name('notacredito2.save');
     Route::get('notacredito/showNotacredito/{id}', [pdfNotacreditoController::class, 'showNotacredito']);
+    Route::get('notacredito/showposNotacredito/{id}', [pdfposNotacreditoController::class, 'showposNotacredito']);
     Route::post('downnotacredito', [notacreditoController::class, 'destroy'])->name('notacredito.down');
 
     Route::get('/getFacturasByCliente/{cliente_id}', [notacreditoController::class, 'getFacturasByCliente'])->name('notacredito.getFacturasByCliente');
