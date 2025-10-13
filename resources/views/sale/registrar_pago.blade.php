@@ -301,15 +301,7 @@
                             </fieldset>
                         </tbody>
                         <tfoot>
-                            <tr>
-                                <!--   <th class="text-center">
-                                   <form method="GET" action="">
-                                        @csrf
-                                        <div class="text-center mt-1">
-                                            <button type="submit" class="btn btn-success">Pagar</button>
-                                        </div>
-                                    </form> 
-                                </th>-->
+                            <tr>                                
                                 <th colspan="2">
                                     <div class="form-group">
 
