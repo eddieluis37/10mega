@@ -11,7 +11,7 @@ const token = document
 $(document).ready(function () {
     var dataTable;
 
-   /*  function initializeDataTable(listaprecioId = "-1", categoriaId = "-1") {
+    function initializeDataTable(listaprecioId = "-1", categoriaId = "-1") {
         dataTable = $("#tableInventory").DataTable({
             paging: true,
             pageLength: 15,
@@ -86,7 +86,7 @@ $(document).ready(function () {
                 },
             },
         });
-    } */
+    }
 
     function getStatusCheckbox(status, productId) {
         var checkboxChecked = status ? "checked" : "";
@@ -111,7 +111,7 @@ $(document).ready(function () {
         );
     }
 
-   /*  function updateAPPSwitch(productId, precio, listaprecioId, status) {
+    function updateAPPSwitch(productId, precio, listaprecioId, status) {
         console.log("productId:", productId);
         console.log("precio", precio);
         console.log("listaprecioId:", listaprecioId);
@@ -134,7 +134,7 @@ $(document).ready(function () {
                 console.error("Error updating");
             },
         });
-    } */
+    }
 
     function handlePriceFamaInput(event) {
         if (event.which === 13 || event.which === 9) {
